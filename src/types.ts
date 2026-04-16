@@ -3,6 +3,10 @@ export type Placement = {
   place: number;
 };
 
+export type TournamentStatus = "draft" | "upcoming" | "ongoing" | "completed";
+
+export type MatchStatus = "scheduled" | "ongoing" | "completed" | "cancelled";
+
 export type Team = {
   id: number;
   name: string;
@@ -35,11 +39,16 @@ export type Tournament = {
   title: string;
   game: string;
   type: string;
+  format: string;
+  status: TournamentStatus;
   date: string;
   prize: string;
+  description: string;
+  participantIds: number[];
   winnerId: number;
   mvpId: number;
   placements: Placement[];
+  isPublished: boolean;
 };
 
 export type Match = {
@@ -51,6 +60,10 @@ export type Match = {
   winnerId: number;
   tournamentId: number;
   date: string;
+  status: MatchStatus;
+  round: string;
+  bestOf: number;
+  notes: string;
   eloApplied: boolean;
 };
 

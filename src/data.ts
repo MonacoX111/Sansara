@@ -95,8 +95,12 @@ export const initialTournaments: Tournament[] = [
     title: "LDC Season 2",
     game: "FC 26",
     type: "Online + Offline",
+    format: "Single Elimination",
+    status: "upcoming",
     date: "2026-05-11",
     prize: "Cup",
+    description: "Основний сезонний турнір LDC з фінальним розіграшем кубка.",
+    participantIds: [1, 2, 3],
     winnerId: 1,
     mvpId: 1,
     placements: [
@@ -104,14 +108,19 @@ export const initialTournaments: Tournament[] = [
       { playerId: 2, place: 2 },
       { playerId: 3, place: 3 },
     ],
+    isPublished: true,
   },
   {
     id: 2,
     title: "Royal Friends Cup",
     game: "Clash Royale",
     type: "Online",
+    format: "Swiss",
+    status: "completed",
     date: "2026-03-20",
     prize: "1200 UAH",
+    description: "Дружній онлайн-турнір із швейцарською системою.",
+    participantIds: [1, 2, 3],
     winnerId: 2,
     mvpId: 2,
     placements: [
@@ -119,6 +128,7 @@ export const initialTournaments: Tournament[] = [
       { playerId: 3, place: 2 },
       { playerId: 1, place: 3 },
     ],
+    isPublished: true,
   },
 ];
 
@@ -132,6 +142,10 @@ export const initialMatches: Match[] = [
     winnerId: 1,
     tournamentId: 1,
     date: "2026-04-01",
+    status: "completed",
+    round: "Semi-final",
+    bestOf: 3,
+    notes: "Перший матч плей-оф.",
     eloApplied: true,
   },
   {
@@ -143,6 +157,10 @@ export const initialMatches: Match[] = [
     winnerId: 1,
     tournamentId: 1,
     date: "2026-04-04",
+    status: "completed",
+    round: "Final",
+    bestOf: 3,
+    notes: "Фінальний матч сезону.",
     eloApplied: true,
   },
   {
@@ -154,6 +172,10 @@ export const initialMatches: Match[] = [
     winnerId: 2,
     tournamentId: 2,
     date: "2026-03-20",
+    status: "completed",
+    round: "Swiss Round 3",
+    bestOf: 3,
+    notes: "Ключовий матч за перше місце.",
     eloApplied: true,
   },
 ];
