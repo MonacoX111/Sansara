@@ -161,6 +161,9 @@ export default function App() {
   const selectedMatch =
     matches.find((match) => match.id === selectedMatchId) || null;
 
+  const getSafeTeamId = (teamId: number) =>
+    teams.some((team) => team.id === teamId) ? teamId : 0;
+
   useEffect(() => writeStorage("tm_players", players), [players]);
   useEffect(() => writeStorage("tm_teams", teams), [teams]);
   useEffect(() => writeStorage("tm_tournaments", tournaments), [tournaments]);
@@ -198,6 +201,7 @@ export default function App() {
       setSelectedPlayerId(0);
       return;
     }
+
     if (!players.some((player) => player.id === selectedPlayerId)) {
       setSelectedPlayerId(players[0].id);
     }
@@ -208,6 +212,7 @@ export default function App() {
       setSelectedTeamId(0);
       return;
     }
+
     if (!teams.some((team) => team.id === selectedTeamId)) {
       setSelectedTeamId(teams[0].id);
     }
@@ -218,6 +223,7 @@ export default function App() {
       setSelectedTournamentId(0);
       return;
     }
+
     if (
       !tournaments.some((tournament) => tournament.id === selectedTournamentId)
     ) {
@@ -230,17 +236,22 @@ export default function App() {
       setSelectedMatchId(0);
       return;
     }
+
     if (!matches.some((match) => match.id === selectedMatchId)) {
       setSelectedMatchId(matches[0].id);
     }
   }, [matches, selectedMatchId]);
 
   useEffect(() => {
-    if (!selectedPlayer) return;
+    if (!selectedPlayer) {
+      setPlayerForm(createEmptyPlayerForm(players.length + 1));
+      return;
+    }
+
     setPlayerForm({
       nickname: selectedPlayer.nickname,
       fullName: selectedPlayer.fullName,
-      teamId: selectedPlayer.teamId,
+      teamId: getSafeTeamId(selectedPlayer.teamId),
       games: selectedPlayer.games.join(", "),
       wins: selectedPlayer.wins,
       losses: selectedPlayer.losses,
@@ -250,10 +261,14 @@ export default function App() {
       elo: selectedPlayer.elo,
       bio: selectedPlayer.bio,
     });
-  }, [selectedPlayerId, selectedPlayer]);
+  }, [selectedPlayer, teams, players.length]);
 
   useEffect(() => {
-    if (!selectedTeam) return;
+    if (!selectedTeam) {
+      setTeamForm(createEmptyTeamForm());
+      return;
+    }
+
     setTeamForm({
       name: selectedTeam.name,
       games: selectedTeam.games.join(", "),
@@ -261,10 +276,14 @@ export default function App() {
       earnings: selectedTeam.earnings,
       description: selectedTeam.description,
     });
-  }, [selectedTeamId, selectedTeam]);
+  }, [selectedTeam]);
 
   useEffect(() => {
-    if (!selectedTournament) return;
+    if (!selectedTournament) {
+      setTournamentForm(createEmptyTournamentForm());
+      return;
+    }
+
     setTournamentForm({
       title: selectedTournament.title,
       game: selectedTournament.game,
@@ -272,10 +291,14 @@ export default function App() {
       date: selectedTournament.date,
       prize: selectedTournament.prize,
     });
-  }, [selectedTournamentId, selectedTournament]);
+  }, [selectedTournament]);
 
   useEffect(() => {
-    if (!selectedMatch) return;
+    if (!selectedMatch) {
+      setMatchForm(createEmptyMatchForm());
+      return;
+    }
+
     setMatchForm({
       game: selectedMatch.game,
       player1: selectedMatch.player1,
@@ -286,7 +309,7 @@ export default function App() {
       date: selectedMatch.date,
       eloApplied: selectedMatch.eloApplied,
     });
-  }, [selectedMatchId, selectedMatch]);
+  }, [selectedMatch]);
 
   const handleAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
@@ -328,6 +351,7 @@ export default function App() {
         )
       );
     };
+
     reader.readAsDataURL(file);
     event.target.value = "";
   };
@@ -347,6 +371,7 @@ export default function App() {
         )
       );
     };
+
     reader.readAsDataURL(file);
     event.target.value = "";
   };
@@ -354,13 +379,15 @@ export default function App() {
   const savePlayer = () => {
     if (!selectedPlayer) return;
 
+    const normalizedTeamId = getSafeTeamId(Number(playerForm.teamId));
+
     const nextPlayers = players.map((player) =>
       player.id === selectedPlayer.id
         ? {
             ...player,
             nickname: playerForm.nickname,
             fullName: playerForm.fullName,
-            teamId: Number(playerForm.teamId),
+            teamId: normalizedTeamId,
             games: parseList(playerForm.games),
             wins: Number(playerForm.wins),
             losses: Number(playerForm.losses),
@@ -472,14 +499,16 @@ export default function App() {
     if (!selectedTeam) return;
 
     const deletedId = selectedTeam.id;
-    const nextTeams = teams.filter((team) => team.id !== deletedId);
-
-    setTeams(nextTeams);
-    setPlayers((prev) =>
-      prev.map((player) =>
-        player.teamId === deletedId ? { ...player, teamId: 0 } : player
-      )
+    const nextPlayers = players.map((player) =>
+      player.teamId === deletedId ? { ...player, teamId: 0 } : player
     );
+    const nextTeams = syncTeamPlayers(
+      nextPlayers,
+      teams.filter((team) => team.id !== deletedId)
+    );
+
+    setPlayers(nextPlayers);
+    setTeams(nextTeams);
   };
 
   const saveTournament = () => {
@@ -576,16 +605,7 @@ export default function App() {
 
     setMatches((prev) => [...prev, newMatch]);
     setSelectedMatchId(newMatch.id);
-    setMatchForm({
-      game: "",
-      player1: 0,
-      player2: 0,
-      score: "",
-      winnerId: 0,
-      tournamentId: 0,
-      date: "",
-      eloApplied: false,
-    });
+    setMatchForm(createEmptyMatchForm());
   };
 
   const deleteMatch = () => {
