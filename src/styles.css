@@ -357,6 +357,11 @@ button {
   width: 48px;
   height: 48px;
   border-radius: 12px;
+  display: block;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
 }
 
 .picker-icon {
@@ -422,18 +427,40 @@ button {
   font-size: 18px;
 }
 
+.achievement-grid {
+  grid-template-columns: 1fr;
+}
+
 .achievement-card {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   align-items: center;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0.02)
+  );
+  min-width: 0;
+}
+
+.achievement-card > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.achievement-card .achievement-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
 }
 
 .achievement-title {
   font-weight: 700;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .right-block {
@@ -773,49 +800,8 @@ button {
   max-width: 100%;
 }
 
-@media (max-width: 980px) {
-  .hero,
-  .two-col,
-  .two-col.reverse,
-  .toolbar,
-  .player-grid,
-  .form-grid,
-  .form-grid.two,
-  .hero-stats,
-  .stats-grid,
-  .leader-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .leader-row,
-  .row-between,
-  .profile-head,
-  .player-info-row,
-  .profile-info-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .leader-stats {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .hero-title {
-    font-size: 34px;
-  }
-
-  .container {
-    padding: 16px;
-  }
-}
-ونډ
-/* === ACHIEVEMENTS ADMIN PREP === */
-.achievement-admin-note {
-  color: var(--muted);
-  font-size: 13px;
-}
 /* === ACHIEVEMENTS ADMIN === */
+
 .achievement-admin-card {
   display: grid;
   gap: 12px;
@@ -823,6 +809,13 @@ button {
   border-radius: 16px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.02);
+}
+
+.achievement-admin-card .achievement-img {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  margin-top: 6px;
 }
 
 .achievement-admin-meta {
@@ -837,6 +830,7 @@ button {
   font-size: 13px;
   line-height: 1.6;
 }
+
 .topbar-actions {
   display: flex;
   align-items: center;
@@ -872,4 +866,60 @@ button {
   color: #ff7b91;
   font-size: 14px;
   font-weight: 600;
+}
+
+@media (max-width: 980px) {
+  .hero,
+  .two-col,
+  .two-col.reverse,
+  .toolbar,
+  .player-grid,
+  .form-grid,
+  .form-grid.two,
+  .hero-stats,
+  .stats-grid,
+  .leader-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .leader-row,
+  .row-between,
+  .profile-head,
+  .player-info-row,
+  .profile-info-row,
+  .achievement-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .leader-stats {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .hero-title {
+    font-size: 34px;
+  }
+
+  .container {
+    padding: 16px;
+  }
+
+  .achievement-card .achievement-img,
+  .achievement-admin-card .achievement-img {
+    width: 72px;
+    height: 72px;
+  }
+}
+.leaderboard-clickable {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.leaderboard-clickable:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 59, 95, 0.28);
+  box-shadow: var(--shadow-red);
 }

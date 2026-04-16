@@ -334,6 +334,11 @@ export default function App() {
     }
   };
 
+  const openPlayerProfile = (playerId: number) => {
+    setSelectedPlayerId(playerId);
+    setActiveTab("players");
+  };
+
   const handlePlayerAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !selectedPlayer) return;
@@ -717,7 +722,12 @@ export default function App() {
         )}
 
         {activeTab === "leaderboard" && (
-          <LeaderboardTab players={players} teams={teams} />
+          <LeaderboardTab
+            players={players}
+            teams={teams}
+            achievements={achievements}
+            onOpenPlayer={openPlayerProfile}
+          />
         )}
 
         {activeTab === "admin" && isAdmin && (

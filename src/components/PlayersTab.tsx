@@ -44,6 +44,11 @@ export default function PlayersTab({
   const getPlayerName = (playerId: number) =>
     players.find((p) => p.id === playerId)?.nickname || "Unknown";
 
+  const getPlayerAchievements = (playerId: number) =>
+    achievements.filter((achievement) =>
+      achievement.playerIds.includes(playerId)
+    );
+
   const selectedPlayer =
     players.find((player) => player.id === selectedPlayerId) || null;
 
@@ -74,9 +79,7 @@ export default function PlayersTab({
       match.player1 === selectedPlayerId || match.player2 === selectedPlayerId
   );
 
-  const playerAchievements = achievements.filter((achievement) =>
-    achievement.playerIds.includes(selectedPlayerId)
-  );
+  const playerAchievements = getPlayerAchievements(selectedPlayerId);
 
   const playerTournamentHistory = tournaments
     .map((tournament) => {
@@ -158,6 +161,12 @@ export default function PlayersTab({
           <div className="player-grid">
             {filteredPlayers.map((player) => {
               const teamName = getTeamName(player.teamId);
+              const cardAchievements = getPlayerAchievements(player.id);
+              const previewAchievements = cardAchievements.slice(0, 3);
+              const hiddenAchievementsCount = Math.max(
+                cardAchievements.length - previewAchievements.length,
+                0
+              );
 
               return (
                 <button
@@ -203,6 +212,32 @@ export default function PlayersTab({
                           <span className="muted small">Немає ігор</span>
                         )}
                       </div>
+                    </div>
+
+                    <div className="player-info-row column">
+                      <span className="info-label">Achievements</span>
+
+                      {previewAchievements.length > 0 ? (
+                        <div className="tag-row compact">
+                          {previewAchievements.map((achievement) => (
+                            <img
+                              key={achievement.id}
+                              src={achievement.image}
+                              alt={achievement.title}
+                              title={achievement.title}
+                              className="achievement-img"
+                            />
+                          ))}
+
+                          {hiddenAchievementsCount > 0 ? (
+                            <span className="pill">
+                              +{hiddenAchievementsCount}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="muted small">Немає досягнень</span>
+                      )}
                     </div>
                   </div>
 
@@ -254,6 +289,13 @@ export default function PlayersTab({
                         <span className="muted small">Немає ігор</span>
                       )}
                     </div>
+                  </div>
+
+                  <div className="profile-info-row">
+                    <span className="info-label">Achievements</span>
+                    <span className="info-value">
+                      {playerAchievements.length}
+                    </span>
                   </div>
                 </div>
               </div>

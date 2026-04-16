@@ -181,6 +181,46 @@ export default function AdminTab({
     tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
     "No tournament";
 
+  const selectedWinnerOptions = [matchForm.player1, matchForm.player2]
+    .filter(
+      (playerId, index, arr) =>
+        playerId !== 0 && arr.indexOf(playerId) === index
+    )
+    .map((playerId) => ({
+      id: playerId,
+      name: getPlayerName(playerId),
+    }));
+
+  const toggleAchievementPlayer = (
+    achievement: Achievement,
+    playerId: number
+  ) => {
+    const isSelected = achievement.playerIds.includes(playerId);
+
+    const nextPlayerIds = isSelected
+      ? achievement.playerIds.filter((id) => id !== playerId)
+      : [...achievement.playerIds, playerId];
+
+    saveAchievement(achievement.id, { playerIds: nextPlayerIds });
+  };
+
+  const handleAchievementImageUpload =
+    (achievementId: number) => (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = typeof reader.result === "string" ? reader.result : "";
+        if (!result) return;
+
+        saveAchievement(achievementId, { image: result });
+      };
+
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    };
+
   return (
     <div className="admin-wrap">
       <div className="two-col reverse">
@@ -658,6 +698,11 @@ export default function AdminTab({
                   setMatchForm({
                     ...matchForm,
                     player1: Number(e.target.value),
+                    winnerId:
+                      matchForm.winnerId === Number(e.target.value) ||
+                      matchForm.winnerId === matchForm.player2
+                        ? matchForm.winnerId
+                        : 0,
                   })
                 }
               >
@@ -679,6 +724,11 @@ export default function AdminTab({
                   setMatchForm({
                     ...matchForm,
                     player2: Number(e.target.value),
+                    winnerId:
+                      matchForm.winnerId === Number(e.target.value) ||
+                      matchForm.winnerId === matchForm.player1
+                        ? matchForm.winnerId
+                        : 0,
                   })
                 }
               >
@@ -707,7 +757,13 @@ export default function AdminTab({
               <label className="field-label">Winner</label>
               <select
                 className="input"
-                value={matchForm.winnerId}
+                value={
+                  selectedWinnerOptions.some(
+                    (player) => player.id === matchForm.winnerId
+                  )
+                    ? matchForm.winnerId
+                    : 0
+                }
                 onChange={(e) =>
                   setMatchForm({
                     ...matchForm,
@@ -716,9 +772,9 @@ export default function AdminTab({
                 }
               >
                 <option value={0}>Select winner</option>
-                {players.map((player) => (
+                {selectedWinnerOptions.map((player) => (
                   <option key={player.id} value={player.id}>
-                    {player.nickname}
+                    {player.name}
                   </option>
                 ))}
               </select>
@@ -830,6 +886,53 @@ export default function AdminTab({
                   />
                 </div>
 
+                <div className="field-block">
+                  <label className="field-label">Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAchievementImageUpload(achievement.id)}
+                  />
+                  {achievement.image ? (
+                    <img
+                      src={achievement.image}
+                      alt={achievement.title}
+                      className="achievement-img"
+                    />
+                  ) : null}
+                </div>
+
+                <div className="field-block">
+                  <label className="field-label">Linked players</label>
+                  <div className="picker-grid">
+                    {players.map((player) => {
+                      const isSelected = achievement.playerIds.includes(
+                        player.id
+                      );
+
+                      return (
+                        <button
+                          key={player.id}
+                          type="button"
+                          className={`picker-btn ${
+                            isSelected ? "picker-btn-active" : ""
+                          }`}
+                          onClick={() =>
+                            toggleAchievementPlayer(achievement, player.id)
+                          }
+                        >
+                          <img
+                            src={player.avatar}
+                            alt={player.nickname}
+                            className="picker-icon"
+                          />
+                          <span>{player.nickname}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="achievement-admin-meta">
                   <span className="muted small">
                     Players linked: {achievement.playerIds.length}
@@ -859,8 +962,8 @@ export default function AdminTab({
         <div className="panel">
           <h2 className="panel-title">Achievements info</h2>
           <p className="achievement-admin-note">
-            Here you can edit achievement title and description. Player linking
-            and image upload can be added next.
+            Тут уже можна редагувати назву, опис, картинку та прив’язувати
+            досягнення до гравців напряму з адмінки.
           </p>
         </div>
       </div>
