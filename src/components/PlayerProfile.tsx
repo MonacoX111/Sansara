@@ -1,13 +1,16 @@
-import { Player } from "../types";
+import { Player, Team } from "../types";
 
 type Props = {
   player: Player | null;
+  teams: Team[];
 };
 
-export default function PlayerProfile({ player }: Props) {
+export default function PlayerProfile({ player, teams }: Props) {
   if (!player) {
     return <div className="card">Select player</div>;
   }
+
+  const teamName = teams.find((team) => team.id === player.teamId)?.name || "—";
 
   return (
     <div className="card player-profile">
@@ -16,16 +19,16 @@ export default function PlayerProfile({ player }: Props) {
       <div className="player-profile-meta">
         <div className="player-profile-line">
           <span className="player-profile-label">Команда:</span>
-          {player.team ? (
-            <span className="player-profile-team">{player.team}</span>
-          ) : (
-            <span className="player-profile-empty">—</span>
-          )}
+          <span className="player-profile-team">{teamName}</span>
         </div>
 
         <div className="player-profile-line">
           <span className="player-profile-label">Ігри:</span>
-          <span className="player-profile-empty">не брав участі</span>
+          {player.games.length > 0 ? (
+            <span>{player.games.join(", ")}</span>
+          ) : (
+            <span className="player-profile-empty">не брав участі</span>
+          )}
         </div>
       </div>
 
