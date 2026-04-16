@@ -1,0 +1,176 @@
+import {
+  Achievement,
+  GameItem,
+  Match,
+  Player,
+  Team,
+  Tournament,
+} from "./types";
+import { makeIcon } from "./utils";
+
+export const gamesList: GameItem[] = [
+  { id: "cs2", name: "CS 2", icon: makeIcon("CS2") },
+  { id: "dota2", name: "Dota 2", icon: makeIcon("D2") },
+  { id: "fc26", name: "FC 26", icon: makeIcon("FC") },
+  { id: "clash", name: "Clash Royale", icon: makeIcon("CR") },
+];
+
+export const achievementPlaceholder = (label: string) =>
+  makeIcon(label, "#27272a", "#f4f4f5");
+
+export const initialTeams: Team[] = [
+  {
+    id: 1,
+    name: "Sansara LDC",
+    logo: makeIcon("LDC", "#111827"),
+    games: ["FC 26", "Clash Royale"],
+    earnings: 3200,
+    wins: 11,
+    players: [1, 2],
+    description: "Основний склад для онлайн-турнірів.",
+  },
+  {
+    id: 2,
+    name: "Monaco Squad",
+    logo: makeIcon("MS", "#1f2937"),
+    games: ["CS 2", "FC 26"],
+    earnings: 2100,
+    wins: 8,
+    players: [3],
+    description: "Команда для дружніх ліг і шоу-матчів.",
+  },
+];
+
+export const initialPlayers: Player[] = [
+  {
+    id: 1,
+    nickname: "Monaco",
+    fullName: "Monaco",
+    avatar: makeIcon("M", "#0f172a"),
+    teamId: 1,
+    games: ["FC 26", "Clash Royale"],
+    wins: 18,
+    losses: 7,
+    earnings: 1800,
+    tournamentsWon: 4,
+    rank: 1,
+    elo: 1245,
+    bio: "Організатор і гравець.",
+  },
+  {
+    id: 2,
+    nickname: "Wexapeq",
+    fullName: "Wexapeq",
+    avatar: makeIcon("W", "#172554"),
+    teamId: 1,
+    games: ["FC 26"],
+    wins: 13,
+    losses: 9,
+    earnings: 900,
+    tournamentsWon: 2,
+    rank: 2,
+    elo: 1160,
+    bio: "Стабільно виходить у плей-оф.",
+  },
+  {
+    id: 3,
+    nickname: "Pahlawa",
+    fullName: "Pahlawa",
+    avatar: makeIcon("P", "#3f3f46"),
+    teamId: 2,
+    games: ["CS 2", "FC 26"],
+    wins: 10,
+    losses: 10,
+    earnings: 700,
+    tournamentsWon: 1,
+    rank: 3,
+    elo: 1085,
+    bio: "Любить мікс-турніри.",
+  },
+];
+
+export const initialTournaments: Tournament[] = [
+  {
+    id: 1,
+    title: "LDC Season 2",
+    game: "FC 26",
+    type: "Online + Offline",
+    date: "2026-05-11",
+    prize: "Cup",
+    winnerId: 1,
+    mvpId: 1,
+    placements: [
+      { playerId: 1, place: 1 },
+      { playerId: 2, place: 2 },
+      { playerId: 3, place: 3 },
+    ],
+  },
+  {
+    id: 2,
+    title: "Royal Friends Cup",
+    game: "Clash Royale",
+    type: "Online",
+    date: "2026-03-20",
+    prize: "1200 UAH",
+    winnerId: 2,
+    mvpId: 2,
+    placements: [
+      { playerId: 2, place: 1 },
+      { playerId: 3, place: 2 },
+      { playerId: 1, place: 3 },
+    ],
+  },
+];
+
+export const initialMatches: Match[] = [
+  {
+    id: 1,
+    game: "FC 26",
+    player1: 1,
+    player2: 2,
+    score: "3:1",
+    winnerId: 1,
+    tournamentId: 1,
+    date: "2026-04-01",
+    eloApplied: true,
+  },
+  {
+    id: 2,
+    game: "FC 26",
+    player1: 1,
+    player2: 3,
+    score: "2:0",
+    winnerId: 1,
+    tournamentId: 1,
+    date: "2026-04-04",
+    eloApplied: true,
+  },
+  {
+    id: 3,
+    game: "Clash Royale",
+    player1: 2,
+    player2: 3,
+    score: "2:1",
+    winnerId: 2,
+    tournamentId: 2,
+    date: "2026-03-20",
+    eloApplied: true,
+  },
+];
+
+export const initialAchievements: Achievement[] = [
+  {
+    id: 1,
+    title: "Season Champion",
+    description: "Переможець сезону LDC.",
+    image: achievementPlaceholder("WIN"),
+    playerIds: [1],
+  },
+  {
+    id: 2,
+    title: "Royal MVP",
+    description: "Найкращий гравець Clash Royale турніру.",
+    image: achievementPlaceholder("MVP"),
+    playerIds: [2],
+  },
+];
