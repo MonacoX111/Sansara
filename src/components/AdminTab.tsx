@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import { Achievement, Match, Player, Team, Tournament } from "../types";
+import { Achievement, Player, Team, Tournament, Match } from "../types";
 import { gamesList } from "../data";
 import { parseList } from "../utils";
 
@@ -180,6 +180,14 @@ export default function AdminTab({
   const getTournamentName = (tournamentId: number) =>
     tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
     "No tournament";
+
+  const availablePlayer1Options = players.filter(
+    (player) => player.id !== matchForm.player2
+  );
+
+  const availablePlayer2Options = players.filter(
+    (player) => player.id !== matchForm.player1
+  );
 
   const selectedWinnerOptions = [matchForm.player1, matchForm.player2]
     .filter(
@@ -411,7 +419,11 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Avatar</label>
-              <input type="file" onChange={handlePlayerAvatarUpload} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePlayerAvatarUpload}
+              />
             </div>
 
             <div className="btn-row">
@@ -516,7 +528,11 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Logo</label>
-              <input type="file" onChange={handleTeamLogoUpload} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleTeamLogoUpload}
+              />
             </div>
 
             <div className="btn-row">
@@ -694,20 +710,23 @@ export default function AdminTab({
               <select
                 className="input"
                 value={matchForm.player1}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const nextPlayer1 = Number(e.target.value);
+                  const nextWinnerId =
+                    matchForm.winnerId === nextPlayer1 ||
+                    matchForm.winnerId === matchForm.player2
+                      ? matchForm.winnerId
+                      : 0;
+
                   setMatchForm({
                     ...matchForm,
-                    player1: Number(e.target.value),
-                    winnerId:
-                      matchForm.winnerId === Number(e.target.value) ||
-                      matchForm.winnerId === matchForm.player2
-                        ? matchForm.winnerId
-                        : 0,
-                  })
-                }
+                    player1: nextPlayer1,
+                    winnerId: nextWinnerId,
+                  });
+                }}
               >
                 <option value={0}>Select player</option>
-                {players.map((player) => (
+                {availablePlayer1Options.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.nickname}
                   </option>
@@ -720,20 +739,23 @@ export default function AdminTab({
               <select
                 className="input"
                 value={matchForm.player2}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const nextPlayer2 = Number(e.target.value);
+                  const nextWinnerId =
+                    matchForm.winnerId === nextPlayer2 ||
+                    matchForm.winnerId === matchForm.player1
+                      ? matchForm.winnerId
+                      : 0;
+
                   setMatchForm({
                     ...matchForm,
-                    player2: Number(e.target.value),
-                    winnerId:
-                      matchForm.winnerId === Number(e.target.value) ||
-                      matchForm.winnerId === matchForm.player1
-                        ? matchForm.winnerId
-                        : 0,
-                  })
-                }
+                    player2: nextPlayer2,
+                    winnerId: nextWinnerId,
+                  });
+                }}
               >
                 <option value={0}>Select player</option>
-                {players.map((player) => (
+                {availablePlayer2Options.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.nickname}
                   </option>
@@ -856,99 +878,112 @@ export default function AdminTab({
           <h2 className="panel-title">Achievements (admin)</h2>
 
           <div className="list-col">
-            {achievements.map((achievement) => (
-              <div key={achievement.id} className="achievement-admin-card">
-                <div className="field-block">
-                  <label className="field-label">Title</label>
-                  <input
-                    className="input"
-                    value={achievement.title}
-                    onChange={(e) =>
-                      saveAchievement(achievement.id, {
-                        title: e.target.value,
-                      })
-                    }
-                    placeholder="Achievement title"
-                  />
-                </div>
+            {achievements.map((achievement) => {
+              const linkedPlayers = players.filter((player) =>
+                achievement.playerIds.includes(player.id)
+              );
 
-                <div className="field-block">
-                  <label className="field-label">Description</label>
-                  <textarea
-                    className="input textarea"
-                    value={achievement.description}
-                    onChange={(e) =>
-                      saveAchievement(achievement.id, {
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Achievement description"
-                  />
-                </div>
-
-                <div className="field-block">
-                  <label className="field-label">Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAchievementImageUpload(achievement.id)}
-                  />
-                  {achievement.image ? (
-                    <img
-                      src={achievement.image}
-                      alt={achievement.title}
-                      className="achievement-img"
+              return (
+                <div key={achievement.id} className="achievement-admin-card">
+                  <div className="field-block">
+                    <label className="field-label">Title</label>
+                    <input
+                      className="input"
+                      value={achievement.title}
+                      onChange={(e) =>
+                        saveAchievement(achievement.id, {
+                          title: e.target.value,
+                        })
+                      }
+                      placeholder="Achievement title"
                     />
-                  ) : null}
-                </div>
+                  </div>
 
-                <div className="field-block">
-                  <label className="field-label">Linked players</label>
-                  <div className="picker-grid">
-                    {players.map((player) => {
-                      const isSelected = achievement.playerIds.includes(
-                        player.id
-                      );
+                  <div className="field-block">
+                    <label className="field-label">Description</label>
+                    <textarea
+                      className="input textarea"
+                      value={achievement.description}
+                      onChange={(e) =>
+                        saveAchievement(achievement.id, {
+                          description: e.target.value,
+                        })
+                      }
+                      placeholder="Achievement description"
+                    />
+                  </div>
 
-                      return (
-                        <button
-                          key={player.id}
-                          type="button"
-                          className={`picker-btn ${
-                            isSelected ? "picker-btn-active" : ""
-                          }`}
-                          onClick={() =>
-                            toggleAchievementPlayer(achievement, player.id)
-                          }
-                        >
-                          <img
-                            src={player.avatar}
-                            alt={player.nickname}
-                            className="picker-icon"
-                          />
-                          <span>{player.nickname}</span>
-                        </button>
-                      );
-                    })}
+                  <div className="field-block">
+                    <label className="field-label">Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAchievementImageUpload(achievement.id)}
+                    />
+                    {achievement.image ? (
+                      <img
+                        src={achievement.image}
+                        alt={achievement.title}
+                        className="achievement-img"
+                      />
+                    ) : null}
+                  </div>
+
+                  <div className="field-block">
+                    <label className="field-label">Linked players</label>
+                    <div className="picker-grid">
+                      {players.map((player) => {
+                        const isSelected = achievement.playerIds.includes(
+                          player.id
+                        );
+
+                        return (
+                          <button
+                            key={player.id}
+                            type="button"
+                            className={`picker-btn ${
+                              isSelected ? "picker-btn-active" : ""
+                            }`}
+                            onClick={() =>
+                              toggleAchievementPlayer(achievement, player.id)
+                            }
+                          >
+                            <img
+                              src={player.avatar}
+                              alt={player.nickname}
+                              className="picker-icon"
+                            />
+                            <span>{player.nickname}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="achievement-admin-meta">
+                    <span className="muted small">
+                      Players linked: {achievement.playerIds.length}
+                    </span>
+                    <span className="muted small">
+                      {linkedPlayers.length > 0
+                        ? linkedPlayers
+                            .map((player) => player.nickname)
+                            .join(", ")
+                        : "Нікого не прив’язано"}
+                    </span>
+                  </div>
+
+                  <div className="btn-row">
+                    <button
+                      className="danger-btn"
+                      onClick={() => deleteAchievement(achievement.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-
-                <div className="achievement-admin-meta">
-                  <span className="muted small">
-                    Players linked: {achievement.playerIds.length}
-                  </span>
-                </div>
-
-                <div className="btn-row">
-                  <button
-                    className="danger-btn"
-                    onClick={() => deleteAchievement(achievement.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             <button
               className="secondary-btn add-list-btn"

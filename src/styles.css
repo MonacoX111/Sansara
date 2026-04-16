@@ -487,6 +487,19 @@ button {
   background: rgba(255, 255, 255, 0.025);
 }
 
+.leaderboard-clickable {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.leaderboard-clickable:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 59, 95, 0.28);
+  box-shadow: var(--shadow-red);
+}
+
 .rank-box {
   width: 46px;
   height: 46px;
@@ -910,16 +923,4 @@ button {
     width: 72px;
     height: 72px;
   }
-}
-.leaderboard-clickable {
-  width: 100%;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.leaderboard-clickable:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 59, 95, 0.28);
-  box-shadow: var(--shadow-red);
 }
