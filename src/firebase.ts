@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "",
+  apiKey: "AIzaSyQcF...",
+  authDomain: "sansara-history.firebaseapp.com",
+  projectId: "sansara-history",
+  storageBucket: "sansara-history.firebasestorage.app",
+  messagingSenderId: "494545798089",
+  appId: "1:494545798089:web:6758168056a37b2575de18",
 };
 
 export const isFirebaseConfigured =
