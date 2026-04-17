@@ -15,7 +15,16 @@ import {
   initialTeams,
   initialTournaments,
 } from "./data";
-import { Achievement, Match, Player, TabKey, Team, Tournament } from "./types";
+import {
+  Achievement,
+  Match,
+  MatchStatus,
+  Player,
+  TabKey,
+  Team,
+  Tournament,
+  TournamentStatus,
+} from "./types";
 import {
   getNextId,
   parseList,
@@ -51,8 +60,13 @@ type TournamentForm = {
   title: string;
   game: string;
   type: string;
+  format: string;
+  status: TournamentStatus;
   date: string;
   prize: string;
+  description: string;
+  participantIds: number[];
+  isPublished: boolean;
 };
 
 type MatchForm = {
@@ -63,6 +77,10 @@ type MatchForm = {
   winnerId: number;
   tournamentId: number;
   date: string;
+  status: MatchStatus;
+  round: string;
+  bestOf: number;
+  notes: string;
   eloApplied: boolean;
 };
 
@@ -92,8 +110,13 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   title: "",
   game: "",
   type: "",
+  format: "",
+  status: "draft",
   date: "",
   prize: "",
+  description: "",
+  participantIds: [],
+  isPublished: false,
 });
 
 const createEmptyMatchForm = (): MatchForm => ({
@@ -104,6 +127,10 @@ const createEmptyMatchForm = (): MatchForm => ({
   winnerId: 0,
   tournamentId: 0,
   date: "",
+  status: "scheduled",
+  round: "",
+  bestOf: 1,
+  notes: "",
   eloApplied: false,
 });
 
@@ -288,8 +315,13 @@ export default function App() {
       title: selectedTournament.title,
       game: selectedTournament.game,
       type: selectedTournament.type,
+      format: selectedTournament.format,
+      status: selectedTournament.status,
       date: selectedTournament.date,
       prize: selectedTournament.prize,
+      description: selectedTournament.description,
+      participantIds: selectedTournament.participantIds,
+      isPublished: selectedTournament.isPublished,
     });
   }, [selectedTournament]);
 
@@ -307,6 +339,10 @@ export default function App() {
       winnerId: selectedMatch.winnerId,
       tournamentId: selectedMatch.tournamentId,
       date: selectedMatch.date,
+      status: selectedMatch.status,
+      round: selectedMatch.round,
+      bestOf: selectedMatch.bestOf,
+      notes: selectedMatch.notes,
       eloApplied: selectedMatch.eloApplied,
     });
   }, [selectedMatch]);
@@ -457,6 +493,9 @@ export default function App() {
         ...tournament,
         winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
         mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
+        participantIds: tournament.participantIds.filter(
+          (id) => id !== deletedId
+        ),
         placements: tournament.placements.filter(
           (item) => item.playerId !== deletedId
         ),
@@ -527,8 +566,13 @@ export default function App() {
               title: tournamentForm.title,
               game: tournamentForm.game,
               type: tournamentForm.type,
+              format: tournamentForm.format,
+              status: tournamentForm.status,
               date: tournamentForm.date,
               prize: tournamentForm.prize,
+              description: tournamentForm.description,
+              participantIds: tournamentForm.participantIds,
+              isPublished: tournamentForm.isPublished,
             }
           : tournament
       )
@@ -541,11 +585,16 @@ export default function App() {
       title: "New Tournament",
       game: "",
       type: "",
+      format: "",
+      status: "draft",
       date: "",
       prize: "",
+      description: "",
+      participantIds: [],
       winnerId: 0,
       mvpId: 0,
       placements: [],
+      isPublished: false,
     };
 
     setTournaments((prev) => [...prev, newTournament]);
@@ -554,8 +603,13 @@ export default function App() {
       title: newTournament.title,
       game: "",
       type: "",
+      format: "",
+      status: "draft",
       date: "",
       prize: "",
+      description: "",
+      participantIds: [],
+      isPublished: false,
     });
   };
 
@@ -588,6 +642,10 @@ export default function App() {
               winnerId: Number(matchForm.winnerId),
               tournamentId: Number(matchForm.tournamentId),
               date: matchForm.date,
+              status: matchForm.status,
+              round: matchForm.round,
+              bestOf: Number(matchForm.bestOf),
+              notes: matchForm.notes,
               eloApplied: Boolean(matchForm.eloApplied),
             }
           : match
@@ -605,6 +663,10 @@ export default function App() {
       winnerId: 0,
       tournamentId: 0,
       date: "",
+      status: "scheduled",
+      round: "",
+      bestOf: 1,
+      notes: "",
       eloApplied: false,
     };
 
