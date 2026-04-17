@@ -23,21 +23,49 @@ export default function TournamentsTab({ tournaments, players }: Props) {
                   {tournament.game} • {tournament.type}
                 </div>
               </div>
-              <span className="pill light">{tournament.prize}</span>
+
+              <div className="tag-row">
+                <span className="pill light">{tournament.prize}</span>
+                <span className="pill">{tournament.status}</span>
+              </div>
             </div>
 
             <div className="tour-meta">
               <div>
-                <span className="muted">Date:</span> {tournament.date}
+                <span className="muted">Format:</span>{" "}
+                {tournament.format || "—"}
               </div>
+
+              <div>
+                <span className="muted">Date:</span> {tournament.date || "—"}
+              </div>
+
+              <div>
+                <span className="muted">Participants:</span>{" "}
+                {tournament.participantIds?.length ?? 0}
+              </div>
+
+              <div>
+                <span className="muted">Published:</span>{" "}
+                {tournament.isPublished ? "Yes" : "No"}
+              </div>
+
               <div>
                 <span className="muted">Winner:</span>{" "}
-                {getPlayerName(tournament.winnerId)}
+                {tournament.winnerId ? getPlayerName(tournament.winnerId) : "—"}
               </div>
+
               <div>
                 <span className="muted">MVP:</span>{" "}
-                {getPlayerName(tournament.mvpId)}
+                {tournament.mvpId ? getPlayerName(tournament.mvpId) : "—"}
               </div>
+
+              {tournament.description ? (
+                <div>
+                  <span className="muted">Description:</span>{" "}
+                  {tournament.description}
+                </div>
+              ) : null}
             </div>
           </div>
         ))}

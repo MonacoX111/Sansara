@@ -406,6 +406,26 @@ export default function PlayersTab({
                           <div className="muted small">{match.date}</div>
                         </div>
                       </div>
+
+                      <div className="tour-meta">
+                        <div>
+                          <span className="muted">Status:</span>{" "}
+                          {match.status || "—"}
+                        </div>
+                        <div>
+                          <span className="muted">Round:</span>{" "}
+                          {match.round || "—"}
+                        </div>
+                        <div>
+                          <span className="muted">Format:</span> BO
+                          {match.bestOf || 1}
+                        </div>
+                        {match.notes ? (
+                          <div>
+                            <span className="muted">Notes:</span> {match.notes}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>
