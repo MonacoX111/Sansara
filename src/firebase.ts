@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyQcF...",
+  apiKey: "AIzaSyQcF7RvpL3xchZpJAnzgCrDbR1Z0f11U8",
   authDomain: "sansara-history.firebaseapp.com",
   projectId: "sansara-history",
   storageBucket: "sansara-history.firebasestorage.app",
