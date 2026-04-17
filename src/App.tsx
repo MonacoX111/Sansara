@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
 import TeamsTab from "./components/TeamsTab";
@@ -33,6 +33,15 @@ import {
   writeStorage,
 } from "./utils";
 import StatCard from "./components/StatCard";
+import { isFirebaseConfigured } from "./firebase";
+import {
+  deleteItem,
+  deleteItemsBatch,
+  saveItem,
+  saveItemsBatch,
+  seedCollectionIfEmpty,
+  subscribeCollection,
+} from "./firebaseDb";
 
 type PlayerForm = {
   nickname: string;
@@ -134,23 +143,111 @@ const createEmptyMatchForm = (): MatchForm => ({
   eloApplied: false,
 });
 
+const normalizePlayers = (items: Player[]): Player[] =>
+  items.map((player) => ({
+    ...player,
+    games: Array.isArray(player.games) ? player.games : [],
+    avatar: player.avatar || achievementPlaceholder("P"),
+    bio: player.bio || "",
+    teamId: typeof player.teamId === "number" ? player.teamId : 0,
+    wins: Number(player.wins || 0),
+    losses: Number(player.losses || 0),
+    earnings: Number(player.earnings || 0),
+    tournamentsWon: Number(player.tournamentsWon || 0),
+    rank: Number(player.rank || 0),
+    elo: Number(player.elo || 1000),
+  }));
+
+const normalizeTeams = (items: Team[]): Team[] =>
+  items.map((team) => ({
+    ...team,
+    games: Array.isArray(team.games) ? team.games : [],
+    players: Array.isArray(team.players) ? team.players : [],
+    logo: team.logo || achievementPlaceholder("T"),
+    description: team.description || "",
+    earnings: Number(team.earnings || 0),
+    wins: Number(team.wins || 0),
+  }));
+
+const normalizeTournaments = (items: Tournament[]): Tournament[] =>
+  items.map((tournament) => ({
+    ...tournament,
+    format: tournament.format || "",
+    status: tournament.status || "draft",
+    description: tournament.description || "",
+    participantIds: Array.isArray(tournament.participantIds)
+      ? tournament.participantIds
+      : [],
+    winnerId: Number(tournament.winnerId || 0),
+    mvpId: Number(tournament.mvpId || 0),
+    placements: Array.isArray(tournament.placements)
+      ? tournament.placements
+      : [],
+    isPublished: Boolean(tournament.isPublished),
+  }));
+
+const normalizeMatches = (items: Match[]): Match[] =>
+  items.map((match) => ({
+    ...match,
+    score: match.score || "",
+    winnerId: Number(match.winnerId || 0),
+    tournamentId: Number(match.tournamentId || 0),
+    status: match.status || "scheduled",
+    round: match.round || "",
+    bestOf: Number(match.bestOf || 1),
+    notes: match.notes || "",
+    eloApplied: Boolean(match.eloApplied),
+  }));
+
+const normalizeAchievements = (items: Achievement[]): Achievement[] =>
+  items.map((achievement) => ({
+    ...achievement,
+    title: achievement.title || "Achievement",
+    description: achievement.description || "",
+    image: achievement.image || achievementPlaceholder("A"),
+    playerIds: Array.isArray(achievement.playerIds)
+      ? achievement.playerIds
+      : [],
+  }));
+
 export default function App() {
   const ADMIN_PASSWORD = "monaco123";
 
+  const fallbackPlayers = useMemo(
+    () => readStorage("tm_players", initialPlayers),
+    []
+  );
+  const fallbackTeams = useMemo(
+    () => readStorage("tm_teams", initialTeams),
+    []
+  );
+  const fallbackTournaments = useMemo(
+    () => readStorage("tm_tournaments", initialTournaments),
+    []
+  );
+  const fallbackMatches = useMemo(
+    () => readStorage("tm_matches", initialMatches),
+    []
+  );
+  const fallbackAchievements = useMemo(
+    () => readStorage("tm_achievements", initialAchievements),
+    []
+  );
+
   const [players, setPlayers] = useState<Player[]>(() =>
-    readStorage("tm_players", initialPlayers)
+    normalizePlayers(fallbackPlayers)
   );
   const [teams, setTeams] = useState<Team[]>(() =>
-    readStorage("tm_teams", initialTeams)
+    normalizeTeams(fallbackTeams)
   );
   const [tournaments, setTournaments] = useState<Tournament[]>(() =>
-    readStorage("tm_tournaments", initialTournaments)
+    normalizeTournaments(fallbackTournaments)
   );
   const [matches, setMatches] = useState<Match[]>(() =>
-    readStorage("tm_matches", initialMatches)
+    normalizeMatches(fallbackMatches)
   );
   const [achievements, setAchievements] = useState<Achievement[]>(() =>
-    readStorage("tm_achievements", initialAchievements)
+    normalizeAchievements(fallbackAchievements)
   );
 
   const [activeTab, setActiveTab] = useState<TabKey>("players");
@@ -166,7 +263,7 @@ export default function App() {
   const [sortMode, setSortMode] = useState("elo");
 
   const [playerForm, setPlayerForm] = useState<PlayerForm>(
-    createEmptyPlayerForm(initialPlayers.length + 1)
+    createEmptyPlayerForm(fallbackPlayers.length + 1)
   );
   const [teamForm, setTeamForm] = useState<TeamForm>(createEmptyTeamForm());
   const [tournamentForm, setTournamentForm] = useState<TournamentForm>(
@@ -178,6 +275,9 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
+
+  const [firebaseReady, setFirebaseReady] = useState(false);
+  const [firebaseStatus, setFirebaseStatus] = useState("");
 
   const selectedPlayer =
     players.find((player) => player.id === selectedPlayerId) || null;
@@ -199,6 +299,91 @@ export default function App() {
     () => writeStorage("tm_achievements", achievements),
     [achievements]
   );
+
+  useEffect(() => {
+    let unsubPlayers = () => {};
+    let unsubTeams = () => {};
+    let unsubTournaments = () => {};
+    let unsubMatches = () => {};
+    let unsubAchievements = () => {};
+    let isMounted = true;
+
+    const initFirebase = async () => {
+      if (!isFirebaseConfigured) {
+        setFirebaseStatus(
+          "Firebase env variables are not configured yet. The app is using localStorage."
+        );
+        setFirebaseReady(true);
+        return;
+      }
+
+      try {
+        await Promise.all([
+          seedCollectionIfEmpty("players", fallbackPlayers),
+          seedCollectionIfEmpty("teams", fallbackTeams),
+          seedCollectionIfEmpty("tournaments", fallbackTournaments),
+          seedCollectionIfEmpty("matches", fallbackMatches),
+          seedCollectionIfEmpty("achievements", fallbackAchievements),
+        ]);
+
+        if (!isMounted) return;
+
+        unsubPlayers = subscribeCollection<Player>("players", (items) => {
+          setPlayers(normalizePlayers(items));
+        });
+
+        unsubTeams = subscribeCollection<Team>("teams", (items) => {
+          setTeams(normalizeTeams(items));
+        });
+
+        unsubTournaments = subscribeCollection<Tournament>(
+          "tournaments",
+          (items) => {
+            setTournaments(normalizeTournaments(items));
+          }
+        );
+
+        unsubMatches = subscribeCollection<Match>("matches", (items) => {
+          setMatches(normalizeMatches(items));
+        });
+
+        unsubAchievements = subscribeCollection<Achievement>(
+          "achievements",
+          (items) => {
+            setAchievements(normalizeAchievements(items));
+          }
+        );
+
+        setFirebaseStatus("Firestore sync is active.");
+      } catch (error) {
+        console.error("Firebase init error:", error);
+        setFirebaseStatus(
+          "Firebase connection failed. The app is still using localStorage backup."
+        );
+      } finally {
+        if (isMounted) {
+          setFirebaseReady(true);
+        }
+      }
+    };
+
+    initFirebase();
+
+    return () => {
+      isMounted = false;
+      unsubPlayers();
+      unsubTeams();
+      unsubTournaments();
+      unsubMatches();
+      unsubAchievements();
+    };
+  }, [
+    fallbackAchievements,
+    fallbackMatches,
+    fallbackPlayers,
+    fallbackTeams,
+    fallbackTournaments,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -320,7 +505,9 @@ export default function App() {
       date: selectedTournament.date,
       prize: selectedTournament.prize,
       description: selectedTournament.description,
-      participantIds: selectedTournament.participantIds,
+      participantIds: Array.isArray(selectedTournament.participantIds)
+        ? selectedTournament.participantIds
+        : [],
       isPublished: selectedTournament.isPublished,
     });
   }, [selectedTournament]);
@@ -380,17 +567,28 @@ export default function App() {
     if (!file || !selectedPlayer) return;
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const result = typeof reader.result === "string" ? reader.result : "";
       if (!result) return;
 
+      const updatedPlayer: Player = {
+        ...selectedPlayer,
+        avatar: result,
+      };
+
       setPlayers((prev) =>
         prev.map((player) =>
-          player.id === selectedPlayer.id
-            ? { ...player, avatar: result }
-            : player
+          player.id === selectedPlayer.id ? updatedPlayer : player
         )
       );
+
+      try {
+        if (isFirebaseConfigured) {
+          await saveItem("players", updatedPlayer);
+        }
+      } catch (error) {
+        console.error("Failed to save player avatar:", error);
+      }
     };
 
     reader.readAsDataURL(file);
@@ -402,50 +600,73 @@ export default function App() {
     if (!file || !selectedTeam) return;
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const result = typeof reader.result === "string" ? reader.result : "";
       if (!result) return;
 
+      const updatedTeam: Team = {
+        ...selectedTeam,
+        logo: result,
+      };
+
       setTeams((prev) =>
-        prev.map((team) =>
-          team.id === selectedTeam.id ? { ...team, logo: result } : team
-        )
+        prev.map((team) => (team.id === selectedTeam.id ? updatedTeam : team))
       );
+
+      try {
+        if (isFirebaseConfigured) {
+          await saveItem("teams", updatedTeam);
+        }
+      } catch (error) {
+        console.error("Failed to save team logo:", error);
+      }
     };
 
     reader.readAsDataURL(file);
     event.target.value = "";
   };
 
-  const savePlayer = () => {
+  const savePlayer = async () => {
     if (!selectedPlayer) return;
 
     const normalizedTeamId = getSafeTeamId(Number(playerForm.teamId));
 
+    const updatedPlayer: Player = {
+      ...selectedPlayer,
+      nickname: playerForm.nickname,
+      fullName: playerForm.fullName,
+      teamId: normalizedTeamId,
+      games: parseList(playerForm.games),
+      wins: Number(playerForm.wins),
+      losses: Number(playerForm.losses),
+      earnings: Number(playerForm.earnings),
+      tournamentsWon: Number(playerForm.tournamentsWon),
+      rank: Number(playerForm.rank),
+      elo: Number(playerForm.elo),
+      bio: playerForm.bio,
+    };
+
     const nextPlayers = players.map((player) =>
-      player.id === selectedPlayer.id
-        ? {
-            ...player,
-            nickname: playerForm.nickname,
-            fullName: playerForm.fullName,
-            teamId: normalizedTeamId,
-            games: parseList(playerForm.games),
-            wins: Number(playerForm.wins),
-            losses: Number(playerForm.losses),
-            earnings: Number(playerForm.earnings),
-            tournamentsWon: Number(playerForm.tournamentsWon),
-            rank: Number(playerForm.rank),
-            elo: Number(playerForm.elo),
-            bio: playerForm.bio,
-          }
-        : player
+      player.id === selectedPlayer.id ? updatedPlayer : player
     );
+    const nextTeams = syncTeamPlayers(nextPlayers, teams);
 
     setPlayers(nextPlayers);
-    setTeams((prev) => syncTeamPlayers(nextPlayers, prev));
+    setTeams(nextTeams);
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          saveItem("players", updatedPlayer),
+          saveItemsBatch("teams", nextTeams),
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to save player:", error);
+    }
   };
 
-  const addPlayer = () => {
+  const addPlayer = async () => {
     const newPlayer: Player = {
       id: getNextId(players),
       nickname: "",
@@ -463,66 +684,106 @@ export default function App() {
     };
 
     const nextPlayers = [...players, newPlayer];
+    const nextTeams = syncTeamPlayers(nextPlayers, teams);
+
     setPlayers(nextPlayers);
-    setTeams((prev) => syncTeamPlayers(nextPlayers, prev));
+    setTeams(nextTeams);
     setSelectedPlayerId(newPlayer.id);
     setPlayerForm(createEmptyPlayerForm(nextPlayers.length + 1));
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          saveItem("players", newPlayer),
+          saveItemsBatch("teams", nextTeams),
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to add player:", error);
+    }
   };
 
-  const deletePlayer = () => {
+  const deletePlayer = async () => {
     if (!selectedPlayer) return;
 
     const deletedId = selectedPlayer.id;
     const nextPlayers = players.filter((player) => player.id !== deletedId);
+    const nextTeams = syncTeamPlayers(nextPlayers, teams);
+
+    const nextMatches = matches.filter(
+      (match) => match.player1 !== deletedId && match.player2 !== deletedId
+    );
+
+    const nextAchievements = achievements.map((achievement) => ({
+      ...achievement,
+      playerIds: achievement.playerIds.filter((id) => id !== deletedId),
+    }));
+
+    const nextTournaments = tournaments.map((tournament) => ({
+      ...tournament,
+      winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
+      mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
+      participantIds: tournament.participantIds.filter(
+        (id) => id !== deletedId
+      ),
+      placements: tournament.placements.filter(
+        (item) => item.playerId !== deletedId
+      ),
+    }));
+
+    const deletedMatchIds = matches
+      .filter(
+        (match) => match.player1 === deletedId || match.player2 === deletedId
+      )
+      .map((match) => match.id);
 
     setPlayers(nextPlayers);
-    setTeams((prev) => syncTeamPlayers(nextPlayers, prev));
-    setMatches((prev) =>
-      prev.filter(
-        (match) => match.player1 !== deletedId && match.player2 !== deletedId
-      )
-    );
-    setAchievements((prev) =>
-      prev.map((achievement) => ({
-        ...achievement,
-        playerIds: achievement.playerIds.filter((id) => id !== deletedId),
-      }))
-    );
-    setTournaments((prev) =>
-      prev.map((tournament) => ({
-        ...tournament,
-        winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
-        mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
-        participantIds: tournament.participantIds.filter(
-          (id) => id !== deletedId
-        ),
-        placements: tournament.placements.filter(
-          (item) => item.playerId !== deletedId
-        ),
-      }))
-    );
+    setTeams(nextTeams);
+    setMatches(nextMatches);
+    setAchievements(nextAchievements);
+    setTournaments(nextTournaments);
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          deleteItem("players", deletedId),
+          saveItemsBatch("teams", nextTeams),
+          saveItemsBatch("tournaments", nextTournaments),
+          saveItemsBatch("achievements", nextAchievements),
+          deleteItemsBatch("matches", deletedMatchIds),
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to delete player:", error);
+    }
   };
 
-  const saveTeam = () => {
+  const saveTeam = async () => {
     if (!selectedTeam) return;
 
+    const updatedTeam: Team = {
+      ...selectedTeam,
+      name: teamForm.name,
+      games: parseList(teamForm.games),
+      wins: Number(teamForm.wins),
+      earnings: Number(teamForm.earnings),
+      description: teamForm.description,
+    };
+
     setTeams((prev) =>
-      prev.map((team) =>
-        team.id === selectedTeam.id
-          ? {
-              ...team,
-              name: teamForm.name,
-              games: parseList(teamForm.games),
-              wins: Number(teamForm.wins),
-              earnings: Number(teamForm.earnings),
-              description: teamForm.description,
-            }
-          : team
-      )
+      prev.map((team) => (team.id === selectedTeam.id ? updatedTeam : team))
     );
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("teams", updatedTeam);
+      }
+    } catch (error) {
+      console.error("Failed to save team:", error);
+    }
   };
 
-  const addTeam = () => {
+  const addTeam = async () => {
     const newTeam: Team = {
       id: getNextId(teams),
       name: "",
@@ -537,9 +798,17 @@ export default function App() {
     setTeams((prev) => [...prev, newTeam]);
     setSelectedTeamId(newTeam.id);
     setTeamForm(createEmptyTeamForm());
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("teams", newTeam);
+      }
+    } catch (error) {
+      console.error("Failed to add team:", error);
+    }
   };
 
-  const deleteTeam = () => {
+  const deleteTeam = async () => {
     if (!selectedTeam) return;
 
     const deletedId = selectedTeam.id;
@@ -553,36 +822,58 @@ export default function App() {
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          deleteItem("teams", deletedId),
+          saveItemsBatch("players", nextPlayers),
+          saveItemsBatch("teams", nextTeams),
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to delete team:", error);
+    }
   };
 
-  const saveTournament = () => {
+  const saveTournament = async () => {
     if (!selectedTournament) return;
+
+    const updatedTournament: Tournament = {
+      ...selectedTournament,
+      title: tournamentForm.title,
+      game: tournamentForm.game,
+      type: tournamentForm.type,
+      format: tournamentForm.format,
+      status: tournamentForm.status,
+      date: tournamentForm.date,
+      prize: tournamentForm.prize,
+      description: tournamentForm.description,
+      participantIds: Array.isArray(tournamentForm.participantIds)
+        ? tournamentForm.participantIds
+        : [],
+      isPublished: Boolean(tournamentForm.isPublished),
+    };
 
     setTournaments((prev) =>
       prev.map((tournament) =>
-        tournament.id === selectedTournament.id
-          ? {
-              ...tournament,
-              title: tournamentForm.title,
-              game: tournamentForm.game,
-              type: tournamentForm.type,
-              format: tournamentForm.format,
-              status: tournamentForm.status,
-              date: tournamentForm.date,
-              prize: tournamentForm.prize,
-              description: tournamentForm.description,
-              participantIds: tournamentForm.participantIds,
-              isPublished: tournamentForm.isPublished,
-            }
-          : tournament
+        tournament.id === selectedTournament.id ? updatedTournament : tournament
       )
     );
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("tournaments", updatedTournament);
+      }
+    } catch (error) {
+      console.error("Failed to save tournament:", error);
+    }
   };
 
-  const addTournament = () => {
+  const addTournament = async () => {
     const newTournament: Tournament = {
       id: getNextId(tournaments),
-      title: "New Tournament",
+      title: "",
       game: "",
       type: "",
       format: "",
@@ -599,61 +890,81 @@ export default function App() {
 
     setTournaments((prev) => [...prev, newTournament]);
     setSelectedTournamentId(newTournament.id);
-    setTournamentForm({
-      title: newTournament.title,
-      game: "",
-      type: "",
-      format: "",
-      status: "draft",
-      date: "",
-      prize: "",
-      description: "",
-      participantIds: [],
-      isPublished: false,
-    });
+    setTournamentForm(createEmptyTournamentForm());
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("tournaments", newTournament);
+      }
+    } catch (error) {
+      console.error("Failed to add tournament:", error);
+    }
   };
 
-  const deleteTournament = () => {
+  const deleteTournament = async () => {
     if (!selectedTournament) return;
 
     const deletedId = selectedTournament.id;
-
-    setTournaments((prev) =>
-      prev.filter((tournament) => tournament.id !== deletedId)
+    const nextTournaments = tournaments.filter(
+      (tournament) => tournament.id !== deletedId
     );
-
-    setMatches((prev) =>
-      prev.filter((match) => match.tournamentId !== deletedId)
+    const nextMatches = matches.filter(
+      (match) => match.tournamentId !== deletedId
     );
+    const deletedMatchIds = matches
+      .filter((match) => match.tournamentId === deletedId)
+      .map((match) => match.id);
+
+    setTournaments(nextTournaments);
+    setMatches(nextMatches);
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          deleteItem("tournaments", deletedId),
+          deleteItemsBatch("matches", deletedMatchIds),
+        ]);
+      }
+    } catch (error) {
+      console.error("Failed to delete tournament:", error);
+    }
   };
 
-  const saveMatch = () => {
+  const saveMatch = async () => {
     if (!selectedMatch) return;
+
+    const updatedMatch: Match = {
+      ...selectedMatch,
+      game: matchForm.game,
+      player1: Number(matchForm.player1),
+      player2: Number(matchForm.player2),
+      score: matchForm.score,
+      winnerId: Number(matchForm.winnerId),
+      tournamentId: Number(matchForm.tournamentId),
+      date: matchForm.date,
+      status: matchForm.status,
+      round: matchForm.round,
+      bestOf: Number(matchForm.bestOf),
+      notes: matchForm.notes,
+      eloApplied: Boolean(matchForm.eloApplied),
+    };
 
     setMatches((prev) =>
       prev.map((match) =>
-        match.id === selectedMatch.id
-          ? {
-              ...match,
-              game: matchForm.game,
-              player1: Number(matchForm.player1),
-              player2: Number(matchForm.player2),
-              score: matchForm.score,
-              winnerId: Number(matchForm.winnerId),
-              tournamentId: Number(matchForm.tournamentId),
-              date: matchForm.date,
-              status: matchForm.status,
-              round: matchForm.round,
-              bestOf: Number(matchForm.bestOf),
-              notes: matchForm.notes,
-              eloApplied: Boolean(matchForm.eloApplied),
-            }
-          : match
+        match.id === selectedMatch.id ? updatedMatch : match
       )
     );
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("matches", updatedMatch);
+      }
+    } catch (error) {
+      console.error("Failed to save match:", error);
+    }
   };
 
-  const addMatch = () => {
+  const addMatch = async () => {
     const newMatch: Match = {
       id: getNextId(matches),
       game: "",
@@ -673,29 +984,64 @@ export default function App() {
     setMatches((prev) => [...prev, newMatch]);
     setSelectedMatchId(newMatch.id);
     setMatchForm(createEmptyMatchForm());
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("matches", newMatch);
+      }
+    } catch (error) {
+      console.error("Failed to add match:", error);
+    }
   };
 
-  const deleteMatch = () => {
+  const deleteMatch = async () => {
     if (!selectedMatch) return;
 
     const deletedId = selectedMatch.id;
     setMatches((prev) => prev.filter((match) => match.id !== deletedId));
+
+    try {
+      if (isFirebaseConfigured) {
+        await deleteItem("matches", deletedId);
+      }
+    } catch (error) {
+      console.error("Failed to delete match:", error);
+    }
   };
 
-  const saveAchievement = (
+  const saveAchievement = async (
     achievementId: number,
     updates: Partial<Achievement>
   ) => {
+    const currentAchievement = achievements.find(
+      (achievement) => achievement.id === achievementId
+    );
+    if (!currentAchievement) return;
+
+    const updatedAchievement: Achievement = {
+      ...currentAchievement,
+      ...updates,
+      playerIds: Array.isArray(updates.playerIds)
+        ? updates.playerIds
+        : currentAchievement.playerIds,
+    };
+
     setAchievements((prev) =>
       prev.map((achievement) =>
-        achievement.id === achievementId
-          ? { ...achievement, ...updates }
-          : achievement
+        achievement.id === achievementId ? updatedAchievement : achievement
       )
     );
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("achievements", updatedAchievement);
+      }
+    } catch (error) {
+      console.error("Failed to save achievement:", error);
+    }
   };
 
-  const addAchievement = () => {
+  const addAchievement = async () => {
     const newAchievement: Achievement = {
       id: getNextId(achievements),
       title: "New Achievement",
@@ -705,12 +1051,28 @@ export default function App() {
     };
 
     setAchievements((prev) => [...prev, newAchievement]);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("achievements", newAchievement);
+      }
+    } catch (error) {
+      console.error("Failed to add achievement:", error);
+    }
   };
 
-  const deleteAchievement = (achievementId: number) => {
+  const deleteAchievement = async (achievementId: number) => {
     setAchievements((prev) =>
       prev.filter((achievement) => achievement.id !== achievementId)
     );
+
+    try {
+      if (isFirebaseConfigured) {
+        await deleteItem("achievements", achievementId);
+      }
+    } catch (error) {
+      console.error("Failed to delete achievement:", error);
+    }
   };
 
   return (
@@ -722,6 +1084,9 @@ export default function App() {
             <h1 className="hero-title">Mini site for friends tournaments</h1>
             <h1 className="hero-title">Sansara Tournament Control Center</h1>
             <p className="hero-text">Admin login: Ctrl + Shift + A</p>
+            <p className="muted small">
+              {firebaseReady ? firebaseStatus : "Connecting data layer..."}
+            </p>
           </div>
 
           <div className="hero-stats">
