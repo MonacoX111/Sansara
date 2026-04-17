@@ -43,6 +43,8 @@ type TournamentForm = {
   prize: string;
   description: string;
   participantIds: number[];
+  winnerId?: number;
+  mvpId?: number;
   isPublished: boolean;
 };
 
@@ -103,7 +105,7 @@ type Props = {
   addTeam: () => void;
   deleteTeam: () => void;
 
-  saveTournament: (formOverride?: TournamentForm) => void;
+  saveTournament: () => void;
   addTournament: () => void;
   deleteTournament: () => void;
 
@@ -208,7 +210,7 @@ export default function AdminTab({
   const safeTournamentParticipantIds = Array.isArray(
     tournamentForm.participantIds
   )
-    ? tournamentForm.participantIds
+    ? tournamentForm.participantIds.map(Number)
     : [];
 
   const safeAchievementPlayerIds = (achievement: Achievement) =>
@@ -228,6 +230,18 @@ export default function AdminTab({
   const selectedTournamentParticipants = players.filter((player) =>
     safeTournamentParticipantIds.includes(player.id)
   );
+
+  const selectedTournamentWinnerId =
+    typeof tournamentForm.winnerId === "number" &&
+    safeTournamentParticipantIds.includes(Number(tournamentForm.winnerId))
+      ? Number(tournamentForm.winnerId)
+      : "";
+
+  const selectedTournamentMvpId =
+    typeof tournamentForm.mvpId === "number" &&
+    safeTournamentParticipantIds.includes(Number(tournamentForm.mvpId))
+      ? Number(tournamentForm.mvpId)
+      : "";
 
   const tournamentPlayerPool =
     matchForm.tournamentId && selectedTournament?.participantIds?.length
@@ -257,7 +271,7 @@ export default function AdminTab({
   const toggleTournamentParticipant = (playerId: number) => {
     setTournamentForm((prev) => {
       const currentIds = Array.isArray(prev.participantIds)
-        ? prev.participantIds
+        ? prev.participantIds.map(Number)
         : [];
 
       const isSelected = currentIds.includes(playerId);
@@ -266,9 +280,23 @@ export default function AdminTab({
         ? currentIds.filter((id) => id !== playerId)
         : [...currentIds, playerId];
 
+      const nextWinnerId =
+        typeof prev.winnerId === "number" &&
+        nextParticipantIds.includes(Number(prev.winnerId))
+          ? Number(prev.winnerId)
+          : undefined;
+
+      const nextMvpId =
+        typeof prev.mvpId === "number" &&
+        nextParticipantIds.includes(Number(prev.mvpId))
+          ? Number(prev.mvpId)
+          : undefined;
+
       return {
         ...prev,
         participantIds: nextParticipantIds,
+        winnerId: nextWinnerId,
+        mvpId: nextMvpId,
       };
     });
   };
@@ -542,6 +570,7 @@ export default function AdminTab({
             <div className="field-block">
               <label className="field-label">Avatar</label>
               <input
+                className="input"
                 type="file"
                 accept="image/*"
                 onChange={handlePlayerAvatarUpload}
@@ -588,27 +617,15 @@ export default function AdminTab({
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Team Name</label>
+              <label className="field-label">Name</label>
               <input
                 className="input"
                 placeholder="Team name"
                 value={teamForm.name}
                 onChange={(e) =>
-                  setTeamForm((prev) => ({ ...prev, name: e.target.value }))
-                }
-              />
-            </div>
-
-            <div className="field-block">
-              <label className="field-label">Description</label>
-              <textarea
-                className="input textarea"
-                placeholder="Description"
-                value={teamForm.description}
-                onChange={(e) =>
                   setTeamForm((prev) => ({
                     ...prev,
-                    description: e.target.value,
+                    name: e.target.value,
                   }))
                 }
               />
@@ -624,7 +641,7 @@ export default function AdminTab({
               />
             </div>
 
-            <div className="form-grid two">
+            <div className="form-grid">
               <div className="field-block">
                 <label className="field-label">Wins</label>
                 <input
@@ -657,8 +674,24 @@ export default function AdminTab({
             </div>
 
             <div className="field-block">
+              <label className="field-label">Description</label>
+              <textarea
+                className="input textarea"
+                placeholder="Team description"
+                value={teamForm.description}
+                onChange={(e) =>
+                  setTeamForm((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="field-block">
               <label className="field-label">Logo</label>
               <input
+                className="input"
                 type="file"
                 accept="image/*"
                 onChange={handleTeamLogoUpload}
@@ -812,7 +845,7 @@ export default function AdminTab({
               <label className="field-label">Prize</label>
               <input
                 className="input"
-                placeholder="Prize"
+                placeholder="Prize pool or reward"
                 value={tournamentForm.prize}
                 onChange={(e) =>
                   setTournamentForm((prev) => ({
@@ -840,7 +873,8 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Participants</label>
-              <div className="picker-grid">
+
+              <div className="picker-grid compact-grid">
                 {players.map((player) => {
                   const isSelected = safeTournamentParticipantIds.includes(
                     player.id
@@ -850,16 +884,11 @@ export default function AdminTab({
                     <button
                       key={player.id}
                       type="button"
-                      className={`picker-btn ${
+                      className={`picker-btn compact ${
                         isSelected ? "picker-btn-active" : ""
                       }`}
                       onClick={() => toggleTournamentParticipant(player.id)}
                     >
-                      <img
-                        src={player.avatar}
-                        alt={player.nickname}
-                        className="picker-icon"
-                      />
                       <span>{player.nickname}</span>
                     </button>
                   );
@@ -881,6 +910,50 @@ export default function AdminTab({
             </div>
 
             <div className="field-block">
+              <label className="field-label">Winner</label>
+              <select
+                className="input"
+                value={selectedTournamentWinnerId}
+                onChange={(e) =>
+                  setTournamentForm((prev) => ({
+                    ...prev,
+                    winnerId: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  }))
+                }
+              >
+                <option value="">Select winner</option>
+                {selectedTournamentParticipants.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.nickname}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">MVP</label>
+              <select
+                className="input"
+                value={selectedTournamentMvpId}
+                onChange={(e) =>
+                  setTournamentForm((prev) => ({
+                    ...prev,
+                    mvpId: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+              >
+                <option value="">Select MVP</option>
+                {selectedTournamentParticipants.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.nickname}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="field-block">
               <label className="field-label checkbox-label">
                 <input
                   type="checkbox"
@@ -897,17 +970,7 @@ export default function AdminTab({
             </div>
 
             <div className="btn-row">
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  saveTournament({
-                    ...tournamentForm,
-                    participantIds: Array.isArray(tournamentForm.participantIds)
-                      ? tournamentForm.participantIds.map(Number)
-                      : [],
-                  })
-                }
-              >
+              <button className="primary-btn" onClick={saveTournament}>
                 Save
               </button>
               <button className="danger-btn" onClick={deleteTournament}>
@@ -992,22 +1055,42 @@ export default function AdminTab({
                 <option value={0}>No tournament</option>
                 {tournaments.map((tournament) => (
                   <option key={tournament.id} value={tournament.id}>
-                    {tournament.title}
+                    {getTournamentName(tournament.id)}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="field-block">
-              <label className="field-label">Game</label>
-              <input
-                className="input"
-                placeholder="Game"
-                value={matchForm.game}
-                onChange={(e) =>
-                  setMatchForm((prev) => ({ ...prev, game: e.target.value }))
-                }
-              />
+            <div className="form-grid two">
+              <div className="field-block">
+                <label className="field-label">Game</label>
+                <input
+                  className="input"
+                  placeholder="Game"
+                  value={matchForm.game}
+                  onChange={(e) =>
+                    setMatchForm((prev) => ({
+                      ...prev,
+                      game: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="field-block">
+                <label className="field-label">Date</label>
+                <input
+                  className="input"
+                  type="date"
+                  value={matchForm.date}
+                  onChange={(e) =>
+                    setMatchForm((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
+                />
+              </div>
             </div>
 
             <div className="form-grid two">
@@ -1070,45 +1153,46 @@ export default function AdminTab({
               </div>
             </div>
 
-            <div className="form-grid two">
-              <div className="field-block">
-                <label className="field-label">Score</label>
-                <input
-                  className="input"
-                  placeholder="3:1"
-                  value={matchForm.score}
-                  onChange={(e) =>
-                    setMatchForm((prev) => ({ ...prev, score: e.target.value }))
-                  }
-                />
-              </div>
+            <div className="field-block">
+              <label className="field-label">Score</label>
+              <input
+                className="input"
+                placeholder="2:1"
+                value={matchForm.score}
+                onChange={(e) =>
+                  setMatchForm((prev) => ({
+                    ...prev,
+                    score: e.target.value,
+                  }))
+                }
+              />
+            </div>
 
-              <div className="field-block">
-                <label className="field-label">Winner</label>
-                <select
-                  className="input"
-                  value={
-                    selectedWinnerOptions.some(
-                      (player) => player.id === matchForm.winnerId
-                    )
-                      ? matchForm.winnerId
-                      : 0
-                  }
-                  onChange={(e) =>
-                    setMatchForm((prev) => ({
-                      ...prev,
-                      winnerId: Number(e.target.value),
-                    }))
-                  }
-                >
-                  <option value={0}>Select winner</option>
-                  {selectedWinnerOptions.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="field-block">
+              <label className="field-label">Winner</label>
+              <select
+                className="input"
+                value={
+                  selectedWinnerOptions.some(
+                    (player) => player.id === matchForm.winnerId
+                  )
+                    ? matchForm.winnerId
+                    : 0
+                }
+                onChange={(e) =>
+                  setMatchForm((prev) => ({
+                    ...prev,
+                    winnerId: Number(e.target.value),
+                  }))
+                }
+              >
+                <option value={0}>Select winner</option>
+                {selectedWinnerOptions.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-grid two">
@@ -1133,31 +1217,22 @@ export default function AdminTab({
               </div>
 
               <div className="field-block">
-                <label className="field-label">Date</label>
+                <label className="field-label">Round</label>
                 <input
                   className="input"
-                  type="date"
-                  value={matchForm.date}
+                  placeholder="Quarterfinal / Swiss 1"
+                  value={matchForm.round}
                   onChange={(e) =>
-                    setMatchForm((prev) => ({ ...prev, date: e.target.value }))
+                    setMatchForm((prev) => ({
+                      ...prev,
+                      round: e.target.value,
+                    }))
                   }
                 />
               </div>
             </div>
 
             <div className="form-grid two">
-              <div className="field-block">
-                <label className="field-label">Round</label>
-                <input
-                  className="input"
-                  placeholder="Final / Semi-final / Group A / Swiss Round 3"
-                  value={matchForm.round}
-                  onChange={(e) =>
-                    setMatchForm((prev) => ({ ...prev, round: e.target.value }))
-                  }
-                />
-              </div>
-
               <div className="field-block">
                 <label className="field-label">Best Of</label>
                 <input
@@ -1168,10 +1243,26 @@ export default function AdminTab({
                   onChange={(e) =>
                     setMatchForm((prev) => ({
                       ...prev,
-                      bestOf: Math.max(1, Number(e.target.value) || 1),
+                      bestOf: Number(e.target.value),
                     }))
                   }
                 />
+              </div>
+
+              <div className="field-block">
+                <label className="field-label checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={matchForm.eloApplied}
+                    onChange={(e) =>
+                      setMatchForm((prev) => ({
+                        ...prev,
+                        eloApplied: e.target.checked,
+                      }))
+                    }
+                  />
+                  <span>ELO applied</span>
+                </label>
               </div>
             </div>
 
@@ -1179,42 +1270,15 @@ export default function AdminTab({
               <label className="field-label">Notes</label>
               <textarea
                 className="input textarea"
-                placeholder="Match notes"
+                placeholder="Notes"
                 value={matchForm.notes}
                 onChange={(e) =>
-                  setMatchForm((prev) => ({ ...prev, notes: e.target.value }))
+                  setMatchForm((prev) => ({
+                    ...prev,
+                    notes: e.target.value,
+                  }))
                 }
               />
-            </div>
-
-            <div className="field-block">
-              <label className="field-label checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={matchForm.eloApplied}
-                  onChange={(e) =>
-                    setMatchForm((prev) => ({
-                      ...prev,
-                      eloApplied: e.target.checked,
-                    }))
-                  }
-                />
-                <span>ELO applied</span>
-              </label>
-            </div>
-
-            <div className="match-preview">
-              <div className="muted small">
-                {getPlayerName(matchForm.player1)} vs{" "}
-                {getPlayerName(matchForm.player2)}
-              </div>
-              <div className="muted small">
-                {getTournamentName(matchForm.tournamentId)}
-              </div>
-              <div className="muted small">
-                {matchForm.status} • {matchForm.round || "No round"} • BO
-                {matchForm.bestOf || 1}
-              </div>
             </div>
 
             <div className="btn-row">
@@ -1234,111 +1298,15 @@ export default function AdminTab({
           <h2 className="panel-title">Achievements (admin)</h2>
 
           <div className="list-col">
-            {achievements.map((achievement) => {
-              const currentIds = safeAchievementPlayerIds(achievement);
-              const linkedPlayers = players.filter((player) =>
-                currentIds.includes(player.id)
-              );
-
-              return (
-                <div key={achievement.id} className="achievement-admin-card">
-                  <div className="field-block">
-                    <label className="field-label">Title</label>
-                    <input
-                      className="input"
-                      value={achievement.title}
-                      onChange={(e) =>
-                        saveAchievement(achievement.id, {
-                          title: e.target.value,
-                        })
-                      }
-                      placeholder="Achievement title"
-                    />
-                  </div>
-
-                  <div className="field-block">
-                    <label className="field-label">Description</label>
-                    <textarea
-                      className="input textarea"
-                      value={achievement.description}
-                      onChange={(e) =>
-                        saveAchievement(achievement.id, {
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Achievement description"
-                    />
-                  </div>
-
-                  <div className="field-block">
-                    <label className="field-label">Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAchievementImageUpload(achievement.id)}
-                    />
-                    {achievement.image ? (
-                      <img
-                        src={achievement.image}
-                        alt={achievement.title}
-                        className="achievement-img"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className="field-block">
-                    <label className="field-label">Linked players</label>
-                    <div className="picker-grid">
-                      {players.map((player) => {
-                        const isSelected = currentIds.includes(player.id);
-
-                        return (
-                          <button
-                            key={player.id}
-                            type="button"
-                            className={`picker-btn ${
-                              isSelected ? "picker-btn-active" : ""
-                            }`}
-                            onClick={() =>
-                              toggleAchievementPlayer(achievement, player.id)
-                            }
-                          >
-                            <img
-                              src={player.avatar}
-                              alt={player.nickname}
-                              className="picker-icon"
-                            />
-                            <span>{player.nickname}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="achievement-admin-meta">
-                    <span className="muted small">
-                      Players linked: {currentIds.length}
-                    </span>
-                    <span className="muted small">
-                      {linkedPlayers.length > 0
-                        ? linkedPlayers
-                            .map((player) => player.nickname)
-                            .join(", ")
-                        : "Нікого не прив’язано"}
-                    </span>
-                  </div>
-
-                  <div className="btn-row">
-                    <button
-                      className="danger-btn"
-                      onClick={() => deleteAchievement(achievement.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {achievements.map((achievement) => (
+              <button
+                key={achievement.id}
+                onClick={() => deleteAchievement(achievement.id)}
+                className="admin-list-btn"
+              >
+                {achievement.title || "Achievement"}
+              </button>
+            ))}
 
             <button
               className="secondary-btn add-list-btn"
@@ -1350,11 +1318,76 @@ export default function AdminTab({
         </div>
 
         <div className="panel">
-          <h2 className="panel-title">Achievements info</h2>
-          <p className="achievement-admin-note">
-            Тут уже можна редагувати назву, опис, картинку та прив’язувати
-            досягнення до гравців напряму з адмінки.
-          </p>
+          <h2 className="panel-title">Edit achievements</h2>
+
+          <div className="list-col">
+            {achievements.map((achievement) => (
+              <div key={achievement.id} className="simple-card">
+                <div className="form-col">
+                  <input
+                    className="input"
+                    value={achievement.title}
+                    onChange={(e) =>
+                      saveAchievement(achievement.id, {
+                        title: e.target.value,
+                      })
+                    }
+                    placeholder="Achievement title"
+                  />
+
+                  <textarea
+                    className="input textarea"
+                    value={achievement.description}
+                    onChange={(e) =>
+                      saveAchievement(achievement.id, {
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="Achievement description"
+                  />
+
+                  <input
+                    className="input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAchievementImageUpload(achievement.id)}
+                  />
+
+                  <div className="picker-grid compact-grid">
+                    {players.map((player) => {
+                      const isSelected = safeAchievementPlayerIds(
+                        achievement
+                      ).includes(player.id);
+
+                      return (
+                        <button
+                          key={`${achievement.id}-${player.id}`}
+                          type="button"
+                          className={`picker-btn compact ${
+                            isSelected ? "picker-btn-active" : ""
+                          }`}
+                          onClick={() =>
+                            toggleAchievementPlayer(achievement, player.id)
+                          }
+                        >
+                          <span>{player.nickname}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="btn-row">
+                    <button
+                      className="danger-btn"
+                      onClick={() => deleteAchievement(achievement.id)}
+                    >
+                      Delete achievement
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

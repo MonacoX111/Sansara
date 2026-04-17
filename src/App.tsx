@@ -74,6 +74,8 @@ type TournamentForm = {
   prize: string;
   description: string;
   participantIds: number[];
+  winnerId?: number;
+  mvpId?: number;
   isPublished: boolean;
 };
 
@@ -124,6 +126,8 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   prize: "",
   description: "",
   participantIds: [],
+  winnerId: undefined,
+  mvpId: undefined,
   isPublished: false,
 });
 
@@ -491,8 +495,18 @@ export default function App() {
       prize: selectedTournament.prize,
       description: selectedTournament.description || "",
       participantIds: Array.isArray(selectedTournament.participantIds)
-        ? selectedTournament.participantIds
+        ? selectedTournament.participantIds.map(Number)
         : [],
+      winnerId:
+        typeof selectedTournament.winnerId === "number" &&
+        selectedTournament.winnerId > 0
+          ? Number(selectedTournament.winnerId)
+          : undefined,
+      mvpId:
+        typeof selectedTournament.mvpId === "number" &&
+        selectedTournament.mvpId > 0
+          ? Number(selectedTournament.mvpId)
+          : undefined,
       isPublished: Boolean(selectedTournament.isPublished),
     });
   }, [selectedTournament]);
@@ -511,35 +525,30 @@ export default function App() {
       winnerId: selectedMatch.winnerId,
       tournamentId: selectedMatch.tournamentId,
       date: selectedMatch.date,
-      status: selectedMatch.status || "scheduled",
-      round: selectedMatch.round || "",
-      bestOf: selectedMatch.bestOf || 1,
-      notes: selectedMatch.notes || "",
-      eloApplied: selectedMatch.eloApplied,
+      status: selectedMatch.status,
+      round: selectedMatch.round,
+      bestOf: selectedMatch.bestOf,
+      notes: selectedMatch.notes,
+      eloApplied: Boolean(selectedMatch.eloApplied),
     });
   }, [selectedMatch]);
 
   const handleAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
+      setActiveTab("admin");
       setShowAdminLogin(false);
       setAdminPassword("");
       setAdminError("");
-      setActiveTab("admin");
       return;
     }
 
-    setAdminError("Неправильний пароль");
+    setAdminError("Wrong password");
   };
 
   const handleAdminLogout = () => {
     setIsAdmin(false);
-    setAdminPassword("");
-    setAdminError("");
-
-    if (activeTab === "admin") {
-      setActiveTab("players");
-    }
+    setActiveTab("players");
   };
 
   const openPlayerProfile = (playerId: number) => {
@@ -614,13 +623,11 @@ export default function App() {
   const savePlayer = async () => {
     if (!selectedPlayer) return;
 
-    const normalizedTeamId = getSafeTeamId(Number(playerForm.teamId));
-
     const updatedPlayer: Player = {
       ...selectedPlayer,
       nickname: playerForm.nickname,
       fullName: playerForm.fullName,
-      teamId: normalizedTeamId,
+      teamId: getSafeTeamId(Number(playerForm.teamId)),
       games: parseList(playerForm.games),
       wins: Number(playerForm.wins),
       losses: Number(playerForm.losses),
@@ -654,7 +661,7 @@ export default function App() {
   const addPlayer = async () => {
     const newPlayer: Player = {
       id: getNextId(players),
-      nickname: "",
+      nickname: "New Player",
       fullName: "",
       avatar: achievementPlaceholder("P"),
       teamId: 0,
@@ -692,30 +699,41 @@ export default function App() {
     if (!selectedPlayer) return;
 
     const deletedId = selectedPlayer.id;
+
     const nextPlayers = players.filter((player) => player.id !== deletedId);
-    const nextTeams = syncTeamPlayers(nextPlayers, teams);
+
+    const nextTeams = syncTeamPlayers(
+      nextPlayers,
+      teams.map((team) => ({
+        ...team,
+        players: Array.isArray(team.players)
+          ? team.players.filter((playerId) => playerId !== deletedId)
+          : [],
+      }))
+    );
+
+    const nextTournaments = tournaments.map((tournament) => ({
+      ...tournament,
+      participantIds: Array.isArray(tournament.participantIds)
+        ? tournament.participantIds.filter((playerId) => playerId !== deletedId)
+        : [],
+      winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
+      mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
+      placements: Array.isArray(tournament.placements)
+        ? tournament.placements.filter((item) => item.playerId !== deletedId)
+        : [],
+    }));
+
+    const nextAchievements = achievements.map((achievement) => ({
+      ...achievement,
+      playerIds: Array.isArray(achievement.playerIds)
+        ? achievement.playerIds.filter((playerId) => playerId !== deletedId)
+        : [],
+    }));
 
     const nextMatches = matches.filter(
       (match) => match.player1 !== deletedId && match.player2 !== deletedId
     );
-
-    const nextAchievements = achievements.map((achievement) => ({
-      ...achievement,
-      playerIds: achievement.playerIds.filter((id) => id !== deletedId),
-    }));
-
-    const nextTournaments = tournaments.map((tournament) => ({
-      ...tournament,
-      winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
-      mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
-      participantIds: tournament.participantIds.filter(
-        (id) => id !== deletedId
-      ),
-      placements: tournament.placements.filter(
-        (item) => item.playerId !== deletedId
-      ),
-    }));
-
     const deletedMatchIds = matches
       .filter(
         (match) => match.player1 === deletedId || match.player2 === deletedId
@@ -724,9 +742,9 @@ export default function App() {
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
-    setMatches(nextMatches);
-    setAchievements(nextAchievements);
     setTournaments(nextTournaments);
+    setAchievements(nextAchievements);
+    setMatches(nextMatches);
 
     try {
       if (isFirebaseConfigured) {
@@ -821,36 +839,42 @@ export default function App() {
     }
   };
 
-  const saveTournament = async (formOverride?: TournamentForm) => {
+  const saveTournament = async () => {
     if (!selectedTournament) return;
 
-    const source = formOverride ?? tournamentForm;
+    const safeParticipantIds = Array.isArray(tournamentForm.participantIds)
+      ? tournamentForm.participantIds.map(Number)
+      : [];
+
+    const safeWinnerId =
+      typeof tournamentForm.winnerId === "number" &&
+      safeParticipantIds.includes(Number(tournamentForm.winnerId))
+        ? Number(tournamentForm.winnerId)
+        : 0;
+
+    const safeMvpId =
+      typeof tournamentForm.mvpId === "number" &&
+      safeParticipantIds.includes(Number(tournamentForm.mvpId))
+        ? Number(tournamentForm.mvpId)
+        : 0;
 
     const updatedTournament: Tournament = {
       ...selectedTournament,
-      title: source.title,
-      game: source.game,
-      type: source.type,
-      format: source.format,
-      status: source.status,
-      date: source.date,
-      prize: source.prize,
-      description: source.description,
-      participantIds: Array.isArray(source.participantIds)
-        ? source.participantIds.map(Number)
-        : [],
-      winnerId:
-        typeof selectedTournament.winnerId === "number"
-          ? selectedTournament.winnerId
-          : 0,
-      mvpId:
-        typeof selectedTournament.mvpId === "number"
-          ? selectedTournament.mvpId
-          : 0,
+      title: tournamentForm.title,
+      game: tournamentForm.game,
+      type: tournamentForm.type,
+      format: tournamentForm.format,
+      status: tournamentForm.status,
+      date: tournamentForm.date,
+      prize: tournamentForm.prize,
+      description: tournamentForm.description,
+      participantIds: safeParticipantIds,
+      winnerId: safeWinnerId,
+      mvpId: safeMvpId,
       placements: Array.isArray(selectedTournament.placements)
         ? selectedTournament.placements
         : [],
-      isPublished: Boolean(source.isPublished),
+      isPublished: Boolean(tournamentForm.isPublished),
     };
 
     setTournaments((prev) =>
@@ -867,6 +891,7 @@ export default function App() {
       console.error("Failed to save tournament:", error);
     }
   };
+
   const addTournament = async () => {
     const newTournament: Tournament = {
       id: getNextId(tournaments),
@@ -897,6 +922,8 @@ export default function App() {
       prize: "",
       description: "",
       participantIds: [],
+      winnerId: undefined,
+      mvpId: undefined,
       isPublished: false,
     });
 
