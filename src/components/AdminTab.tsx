@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import {
   Achievement,
   Match,
@@ -81,16 +81,16 @@ type Props = {
   setSelectedMatchId: (id: number) => void;
 
   playerForm: PlayerForm;
-  setPlayerForm: (form: PlayerForm) => void;
+  setPlayerForm: Dispatch<SetStateAction<PlayerForm>>;
 
   teamForm: TeamForm;
-  setTeamForm: (form: TeamForm) => void;
+  setTeamForm: Dispatch<SetStateAction<TeamForm>>;
 
   tournamentForm: TournamentForm;
-  setTournamentForm: (form: TournamentForm) => void;
+  setTournamentForm: Dispatch<SetStateAction<TournamentForm>>;
 
   matchForm: MatchForm;
-  setMatchForm: (form: MatchForm) => void;
+  setMatchForm: Dispatch<SetStateAction<MatchForm>>;
 
   handlePlayerAvatarUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   handleTeamLogoUpload: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -103,7 +103,7 @@ type Props = {
   addTeam: () => void;
   deleteTeam: () => void;
 
-  saveTournament: () => void;
+  saveTournament: (formOverride?: TournamentForm) => void;
   addTournament: () => void;
   deleteTournament: () => void;
 
@@ -255,15 +255,21 @@ export default function AdminTab({
     }));
 
   const toggleTournamentParticipant = (playerId: number) => {
-    const isSelected = safeTournamentParticipantIds.includes(playerId);
+    setTournamentForm((prev) => {
+      const currentIds = Array.isArray(prev.participantIds)
+        ? prev.participantIds
+        : [];
 
-    const nextParticipantIds = isSelected
-      ? safeTournamentParticipantIds.filter((id) => id !== playerId)
-      : [...safeTournamentParticipantIds, playerId];
+      const isSelected = currentIds.includes(playerId);
 
-    setTournamentForm({
-      ...tournamentForm,
-      participantIds: nextParticipantIds,
+      const nextParticipantIds = isSelected
+        ? currentIds.filter((id) => id !== playerId)
+        : [...currentIds, playerId];
+
+      return {
+        ...prev,
+        participantIds: nextParticipantIds,
+      };
     });
   };
 
@@ -290,13 +296,13 @@ export default function AdminTab({
       tournaments.find((tournament) => tournament.id === tournamentId) || null;
 
     if (!nextTournament) {
-      setMatchForm({
-        ...matchForm,
+      setMatchForm((prev) => ({
+        ...prev,
         tournamentId,
         player1: 0,
         player2: 0,
         winnerId: 0,
-      });
+      }));
       return;
     }
 
@@ -310,13 +316,13 @@ export default function AdminTab({
       matchForm.winnerId === matchForm.player1 ||
       matchForm.winnerId === matchForm.player2;
 
-    setMatchForm({
-      ...matchForm,
+    setMatchForm((prev) => ({
+      ...prev,
       tournamentId,
-      player1: player1IsValid ? matchForm.player1 : 0,
-      player2: player2IsValid ? matchForm.player2 : 0,
-      winnerId: winnerIsValid ? matchForm.winnerId : 0,
-    });
+      player1: player1IsValid ? prev.player1 : 0,
+      player2: player2IsValid ? prev.player2 : 0,
+      winnerId: winnerIsValid ? prev.winnerId : 0,
+    }));
   };
 
   const handleAchievementImageUpload =
@@ -372,7 +378,10 @@ export default function AdminTab({
                 placeholder="Nickname"
                 value={playerForm.nickname}
                 onChange={(e) =>
-                  setPlayerForm({ ...playerForm, nickname: e.target.value })
+                  setPlayerForm((prev) => ({
+                    ...prev,
+                    nickname: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -384,7 +393,10 @@ export default function AdminTab({
                 placeholder="Full name"
                 value={playerForm.fullName}
                 onChange={(e) =>
-                  setPlayerForm({ ...playerForm, fullName: e.target.value })
+                  setPlayerForm((prev) => ({
+                    ...prev,
+                    fullName: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -396,7 +408,10 @@ export default function AdminTab({
                 placeholder="Bio"
                 value={playerForm.bio}
                 onChange={(e) =>
-                  setPlayerForm({ ...playerForm, bio: e.target.value })
+                  setPlayerForm((prev) => ({
+                    ...prev,
+                    bio: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -407,10 +422,10 @@ export default function AdminTab({
                 className="input"
                 value={playerForm.teamId}
                 onChange={(e) =>
-                  setPlayerForm({
-                    ...playerForm,
+                  setPlayerForm((prev) => ({
+                    ...prev,
                     teamId: Number(e.target.value),
-                  })
+                  }))
                 }
               >
                 <option value={0}>Без команди</option>
@@ -427,7 +442,7 @@ export default function AdminTab({
               <MultiGamePicker
                 value={playerForm.games}
                 onChange={(value) =>
-                  setPlayerForm({ ...playerForm, games: value })
+                  setPlayerForm((prev) => ({ ...prev, games: value }))
                 }
               />
             </div>
@@ -440,10 +455,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.wins}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       wins: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -455,10 +470,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.losses}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       losses: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -470,10 +485,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.earnings}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       earnings: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -485,10 +500,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.tournamentsWon}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       tournamentsWon: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -500,10 +515,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.rank}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       rank: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -515,10 +530,10 @@ export default function AdminTab({
                   type="number"
                   value={playerForm.elo}
                   onChange={(e) =>
-                    setPlayerForm({
-                      ...playerForm,
+                    setPlayerForm((prev) => ({
+                      ...prev,
                       elo: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -579,7 +594,7 @@ export default function AdminTab({
                 placeholder="Team name"
                 value={teamForm.name}
                 onChange={(e) =>
-                  setTeamForm({ ...teamForm, name: e.target.value })
+                  setTeamForm((prev) => ({ ...prev, name: e.target.value }))
                 }
               />
             </div>
@@ -591,7 +606,10 @@ export default function AdminTab({
                 placeholder="Description"
                 value={teamForm.description}
                 onChange={(e) =>
-                  setTeamForm({ ...teamForm, description: e.target.value })
+                  setTeamForm((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -600,7 +618,9 @@ export default function AdminTab({
               <label className="field-label">Games</label>
               <MultiGamePicker
                 value={teamForm.games}
-                onChange={(value) => setTeamForm({ ...teamForm, games: value })}
+                onChange={(value) =>
+                  setTeamForm((prev) => ({ ...prev, games: value }))
+                }
               />
             </div>
 
@@ -612,7 +632,10 @@ export default function AdminTab({
                   type="number"
                   value={teamForm.wins}
                   onChange={(e) =>
-                    setTeamForm({ ...teamForm, wins: Number(e.target.value) })
+                    setTeamForm((prev) => ({
+                      ...prev,
+                      wins: Number(e.target.value),
+                    }))
                   }
                 />
               </div>
@@ -624,10 +647,10 @@ export default function AdminTab({
                   type="number"
                   value={teamForm.earnings}
                   onChange={(e) =>
-                    setTeamForm({
-                      ...teamForm,
+                    setTeamForm((prev) => ({
+                      ...prev,
                       earnings: Number(e.target.value),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -693,10 +716,10 @@ export default function AdminTab({
                 placeholder="Tournament title"
                 value={tournamentForm.title}
                 onChange={(e) =>
-                  setTournamentForm({
-                    ...tournamentForm,
+                  setTournamentForm((prev) => ({
+                    ...prev,
                     title: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
@@ -709,10 +732,10 @@ export default function AdminTab({
                   placeholder="Game"
                   value={tournamentForm.game}
                   onChange={(e) =>
-                    setTournamentForm({
-                      ...tournamentForm,
+                    setTournamentForm((prev) => ({
+                      ...prev,
                       game: e.target.value,
-                    })
+                    }))
                   }
                 />
               </div>
@@ -724,10 +747,10 @@ export default function AdminTab({
                   placeholder="Type"
                   value={tournamentForm.type}
                   onChange={(e) =>
-                    setTournamentForm({
-                      ...tournamentForm,
+                    setTournamentForm((prev) => ({
+                      ...prev,
                       type: e.target.value,
-                    })
+                    }))
                   }
                 />
               </div>
@@ -741,10 +764,10 @@ export default function AdminTab({
                   placeholder="Single Elimination / Swiss / Groups + Playoff"
                   value={tournamentForm.format}
                   onChange={(e) =>
-                    setTournamentForm({
-                      ...tournamentForm,
+                    setTournamentForm((prev) => ({
+                      ...prev,
                       format: e.target.value,
-                    })
+                    }))
                   }
                 />
               </div>
@@ -755,10 +778,10 @@ export default function AdminTab({
                   className="input"
                   value={tournamentForm.status}
                   onChange={(e) =>
-                    setTournamentForm({
-                      ...tournamentForm,
+                    setTournamentForm((prev) => ({
+                      ...prev,
                       status: e.target.value as TournamentStatus,
-                    })
+                    }))
                   }
                 >
                   {tournamentStatusOptions.map((status) => (
@@ -777,10 +800,10 @@ export default function AdminTab({
                 type="date"
                 value={tournamentForm.date}
                 onChange={(e) =>
-                  setTournamentForm({
-                    ...tournamentForm,
+                  setTournamentForm((prev) => ({
+                    ...prev,
                     date: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
@@ -792,10 +815,10 @@ export default function AdminTab({
                 placeholder="Prize"
                 value={tournamentForm.prize}
                 onChange={(e) =>
-                  setTournamentForm({
-                    ...tournamentForm,
+                  setTournamentForm((prev) => ({
+                    ...prev,
                     prize: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
@@ -807,10 +830,10 @@ export default function AdminTab({
                 placeholder="Tournament description"
                 value={tournamentForm.description}
                 onChange={(e) =>
-                  setTournamentForm({
-                    ...tournamentForm,
+                  setTournamentForm((prev) => ({
+                    ...prev,
                     description: e.target.value,
-                  })
+                  }))
                 }
               />
             </div>
@@ -863,10 +886,10 @@ export default function AdminTab({
                   type="checkbox"
                   checked={tournamentForm.isPublished}
                   onChange={(e) =>
-                    setTournamentForm({
-                      ...tournamentForm,
+                    setTournamentForm((prev) => ({
+                      ...prev,
                       isPublished: e.target.checked,
-                    })
+                    }))
                   }
                 />
                 <span>Published</span>
@@ -874,7 +897,17 @@ export default function AdminTab({
             </div>
 
             <div className="btn-row">
-              <button className="primary-btn" onClick={saveTournament}>
+              <button
+                className="primary-btn"
+                onClick={() =>
+                  saveTournament({
+                    ...tournamentForm,
+                    participantIds: Array.isArray(tournamentForm.participantIds)
+                      ? tournamentForm.participantIds.map(Number)
+                      : [],
+                  })
+                }
+              >
                 Save
               </button>
               <button className="danger-btn" onClick={deleteTournament}>
@@ -924,17 +957,17 @@ export default function AdminTab({
                       (tournament) => tournament.id === nextTournamentId
                     ) || null;
 
-                  const nextParticipantIds = Array.isArray(
-                    nextTournament?.participantIds
-                  )
-                    ? nextTournament!.participantIds
-                    : [];
-
+                  const nextParticipantIds =
+                    nextTournament &&
+                    Array.isArray(nextTournament.participantIds)
+                      ? nextTournament.participantIds
+                      : [];
                   const nextPlayer1 = nextParticipantIds.includes(
                     matchForm.player1
                   )
                     ? matchForm.player1
                     : 0;
+
                   const nextPlayer2 = nextParticipantIds.includes(
                     matchForm.player2
                   )
@@ -947,13 +980,13 @@ export default function AdminTab({
                       ? matchForm.winnerId
                       : 0;
 
-                  setMatchForm({
-                    ...matchForm,
+                  setMatchForm((prev) => ({
+                    ...prev,
                     tournamentId: nextTournamentId,
                     player1: nextPlayer1,
                     player2: nextPlayer2,
                     winnerId: nextWinnerId,
-                  });
+                  }));
                 }}
               >
                 <option value={0}>No tournament</option>
@@ -972,7 +1005,7 @@ export default function AdminTab({
                 placeholder="Game"
                 value={matchForm.game}
                 onChange={(e) =>
-                  setMatchForm({ ...matchForm, game: e.target.value })
+                  setMatchForm((prev) => ({ ...prev, game: e.target.value }))
                 }
               />
             </div>
@@ -991,11 +1024,11 @@ export default function AdminTab({
                         ? matchForm.winnerId
                         : 0;
 
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       player1: nextPlayer1,
                       winnerId: nextWinnerId,
-                    });
+                    }));
                   }}
                 >
                   <option value={0}>Select player</option>
@@ -1020,11 +1053,11 @@ export default function AdminTab({
                         ? matchForm.winnerId
                         : 0;
 
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       player2: nextPlayer2,
                       winnerId: nextWinnerId,
-                    });
+                    }));
                   }}
                 >
                   <option value={0}>Select player</option>
@@ -1045,7 +1078,7 @@ export default function AdminTab({
                   placeholder="3:1"
                   value={matchForm.score}
                   onChange={(e) =>
-                    setMatchForm({ ...matchForm, score: e.target.value })
+                    setMatchForm((prev) => ({ ...prev, score: e.target.value }))
                   }
                 />
               </div>
@@ -1062,10 +1095,10 @@ export default function AdminTab({
                       : 0
                   }
                   onChange={(e) =>
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       winnerId: Number(e.target.value),
-                    })
+                    }))
                   }
                 >
                   <option value={0}>Select winner</option>
@@ -1085,10 +1118,10 @@ export default function AdminTab({
                   className="input"
                   value={matchForm.status}
                   onChange={(e) =>
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       status: e.target.value as MatchStatus,
-                    })
+                    }))
                   }
                 >
                   {matchStatusOptions.map((status) => (
@@ -1106,7 +1139,7 @@ export default function AdminTab({
                   type="date"
                   value={matchForm.date}
                   onChange={(e) =>
-                    setMatchForm({ ...matchForm, date: e.target.value })
+                    setMatchForm((prev) => ({ ...prev, date: e.target.value }))
                   }
                 />
               </div>
@@ -1120,7 +1153,7 @@ export default function AdminTab({
                   placeholder="Final / Semi-final / Group A / Swiss Round 3"
                   value={matchForm.round}
                   onChange={(e) =>
-                    setMatchForm({ ...matchForm, round: e.target.value })
+                    setMatchForm((prev) => ({ ...prev, round: e.target.value }))
                   }
                 />
               </div>
@@ -1133,10 +1166,10 @@ export default function AdminTab({
                   min={1}
                   value={matchForm.bestOf}
                   onChange={(e) =>
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       bestOf: Math.max(1, Number(e.target.value) || 1),
-                    })
+                    }))
                   }
                 />
               </div>
@@ -1149,7 +1182,7 @@ export default function AdminTab({
                 placeholder="Match notes"
                 value={matchForm.notes}
                 onChange={(e) =>
-                  setMatchForm({ ...matchForm, notes: e.target.value })
+                  setMatchForm((prev) => ({ ...prev, notes: e.target.value }))
                 }
               />
             </div>
@@ -1160,10 +1193,10 @@ export default function AdminTab({
                   type="checkbox"
                   checked={matchForm.eloApplied}
                   onChange={(e) =>
-                    setMatchForm({
-                      ...matchForm,
+                    setMatchForm((prev) => ({
+                      ...prev,
                       eloApplied: e.target.checked,
-                    })
+                    }))
                   }
                 />
                 <span>ELO applied</span>

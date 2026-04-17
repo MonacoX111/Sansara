@@ -6,8 +6,10 @@ type Props = {
 };
 
 export default function TournamentsTab({ tournaments, players }: Props) {
-  const getPlayerName = (playerId: number) =>
-    players.find((p) => p.id === playerId)?.nickname || "Unknown";
+  const getPlayerName = (playerId?: number) =>
+    playerId
+      ? players.find((p) => p.id === playerId)?.nickname || "Unknown"
+      : "—";
 
   return (
     <div className="panel">
@@ -23,49 +25,21 @@ export default function TournamentsTab({ tournaments, players }: Props) {
                   {tournament.game} • {tournament.type}
                 </div>
               </div>
-
-              <div className="tag-row">
-                <span className="pill light">{tournament.prize}</span>
-                <span className="pill">{tournament.status}</span>
-              </div>
+              <span className="pill light">{tournament.prize}</span>
             </div>
 
             <div className="tour-meta">
               <div>
-                <span className="muted">Format:</span>{" "}
-                {tournament.format || "—"}
+                <span className="muted">Date:</span> {tournament.date}
               </div>
-
-              <div>
-                <span className="muted">Date:</span> {tournament.date || "—"}
-              </div>
-
-              <div>
-                <span className="muted">Participants:</span>{" "}
-                {tournament.participantIds?.length ?? 0}
-              </div>
-
-              <div>
-                <span className="muted">Published:</span>{" "}
-                {tournament.isPublished ? "Yes" : "No"}
-              </div>
-
               <div>
                 <span className="muted">Winner:</span>{" "}
-                {tournament.winnerId ? getPlayerName(tournament.winnerId) : "—"}
+                {getPlayerName(tournament.winnerId)}
               </div>
-
               <div>
                 <span className="muted">MVP:</span>{" "}
-                {tournament.mvpId ? getPlayerName(tournament.mvpId) : "—"}
+                {getPlayerName(tournament.mvpId)}
               </div>
-
-              {tournament.description ? (
-                <div>
-                  <span className="muted">Description:</span>{" "}
-                  {tournament.description}
-                </div>
-              ) : null}
             </div>
           </div>
         ))}

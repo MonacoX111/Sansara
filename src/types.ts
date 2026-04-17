@@ -45,8 +45,8 @@ export type Tournament = {
   prize: string;
   description: string;
   participantIds: number[];
-  winnerId: number;
-  mvpId: number;
+  winnerId?: number;
+  mvpId?: number;
   placements: Placement[];
   isPublished: boolean;
 };

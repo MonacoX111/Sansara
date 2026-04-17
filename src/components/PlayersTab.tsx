@@ -52,6 +52,16 @@ export default function PlayersTab({
   const selectedPlayer =
     players.find((player) => player.id === selectedPlayerId) || null;
 
+  const playerTournaments = selectedPlayer
+    ? tournaments.filter((tournament) => {
+        if (!Array.isArray(tournament.participantIds)) return false;
+
+        return tournament.participantIds
+          .map((id) => Number(id))
+          .includes(Number(selectedPlayer.id));
+      })
+    : [];
+
   const filteredPlayers = [...players]
     .filter((player) => {
       const q = search.toLowerCase().trim();
@@ -83,21 +93,36 @@ export default function PlayersTab({
 
   const playerTournamentHistory = tournaments
     .map((tournament) => {
-      const placement = tournament.placements.find(
-        (item) => item.playerId === selectedPlayerId
+      const placement = Array.isArray(tournament.placements)
+        ? tournament.placements.find(
+            (item) => Number(item.playerId) === Number(selectedPlayerId)
+          )
+        : undefined;
+
+      const participantIds = Array.isArray(tournament.participantIds)
+        ? tournament.participantIds.map((id) => Number(id))
+        : [];
+
+      const participatedByParticipantIds = participantIds.includes(
+        Number(selectedPlayerId)
+      );
+
+      const participatedByMatches = playerMatches.some(
+        (match) => match.tournamentId === tournament.id
       );
 
       const participated =
-        placement ||
-        playerMatches.some((match) => match.tournamentId === tournament.id);
+        participatedByParticipantIds ||
+        Boolean(placement) ||
+        participatedByMatches;
 
       if (!participated) return null;
 
       return {
         ...tournament,
         place: placement?.place || "—",
-        isWinner: tournament.winnerId === selectedPlayerId,
-        isMvp: tournament.mvpId === selectedPlayerId,
+        isWinner: Number(tournament.winnerId) === Number(selectedPlayerId),
+        isMvp: Number(tournament.mvpId) === Number(selectedPlayerId),
       };
     })
     .filter(Boolean) as (Tournament & {
@@ -297,6 +322,13 @@ export default function PlayersTab({
                       {playerAchievements.length}
                     </span>
                   </div>
+
+                  <div className="profile-info-row">
+                    <span className="info-label">Tournaments</span>
+                    <span className="info-value">
+                      {playerTournaments.length}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -356,7 +388,8 @@ export default function PlayersTab({
                             {tournament.title}
                           </div>
                           <div className="muted small">
-                            {tournament.game} • {tournament.type}
+                            {tournament.game} •{" "}
+                            {tournament.format || tournament.type}
                           </div>
                         </div>
 

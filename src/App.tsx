@@ -177,8 +177,8 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     participantIds: Array.isArray(tournament.participantIds)
       ? tournament.participantIds
       : [],
-    winnerId: Number(tournament.winnerId || 0),
-    mvpId: Number(tournament.mvpId || 0),
+    winnerId: typeof tournament.winnerId === "number" ? tournament.winnerId : 0,
+    mvpId: typeof tournament.mvpId === "number" ? tournament.mvpId : 0,
     placements: Array.isArray(tournament.placements)
       ? tournament.placements
       : [],
@@ -368,13 +368,7 @@ export default function App() {
       unsubMatches();
       unsubAchievements();
     };
-  }, [
-    fallbackAchievements,
-    fallbackMatches,
-    fallbackPlayers,
-    fallbackTeams,
-    fallbackTournaments,
-  ]);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -491,15 +485,15 @@ export default function App() {
       title: selectedTournament.title,
       game: selectedTournament.game,
       type: selectedTournament.type,
-      format: selectedTournament.format,
-      status: selectedTournament.status,
+      format: selectedTournament.format || "",
+      status: selectedTournament.status || "draft",
       date: selectedTournament.date,
       prize: selectedTournament.prize,
-      description: selectedTournament.description,
+      description: selectedTournament.description || "",
       participantIds: Array.isArray(selectedTournament.participantIds)
         ? selectedTournament.participantIds
         : [],
-      isPublished: selectedTournament.isPublished,
+      isPublished: Boolean(selectedTournament.isPublished),
     });
   }, [selectedTournament]);
 
@@ -517,10 +511,10 @@ export default function App() {
       winnerId: selectedMatch.winnerId,
       tournamentId: selectedMatch.tournamentId,
       date: selectedMatch.date,
-      status: selectedMatch.status,
-      round: selectedMatch.round,
-      bestOf: selectedMatch.bestOf,
-      notes: selectedMatch.notes,
+      status: selectedMatch.status || "scheduled",
+      round: selectedMatch.round || "",
+      bestOf: selectedMatch.bestOf || 1,
+      notes: selectedMatch.notes || "",
       eloApplied: selectedMatch.eloApplied,
     });
   }, [selectedMatch]);
@@ -827,23 +821,36 @@ export default function App() {
     }
   };
 
-  const saveTournament = async () => {
+  const saveTournament = async (formOverride?: TournamentForm) => {
     if (!selectedTournament) return;
+
+    const source = formOverride ?? tournamentForm;
 
     const updatedTournament: Tournament = {
       ...selectedTournament,
-      title: tournamentForm.title,
-      game: tournamentForm.game,
-      type: tournamentForm.type,
-      format: tournamentForm.format,
-      status: tournamentForm.status,
-      date: tournamentForm.date,
-      prize: tournamentForm.prize,
-      description: tournamentForm.description,
-      participantIds: Array.isArray(tournamentForm.participantIds)
-        ? tournamentForm.participantIds
+      title: source.title,
+      game: source.game,
+      type: source.type,
+      format: source.format,
+      status: source.status,
+      date: source.date,
+      prize: source.prize,
+      description: source.description,
+      participantIds: Array.isArray(source.participantIds)
+        ? source.participantIds.map(Number)
         : [],
-      isPublished: Boolean(tournamentForm.isPublished),
+      winnerId:
+        typeof selectedTournament.winnerId === "number"
+          ? selectedTournament.winnerId
+          : 0,
+      mvpId:
+        typeof selectedTournament.mvpId === "number"
+          ? selectedTournament.mvpId
+          : 0,
+      placements: Array.isArray(selectedTournament.placements)
+        ? selectedTournament.placements
+        : [],
+      isPublished: Boolean(source.isPublished),
     };
 
     setTournaments((prev) =>
@@ -860,11 +867,10 @@ export default function App() {
       console.error("Failed to save tournament:", error);
     }
   };
-
   const addTournament = async () => {
     const newTournament: Tournament = {
       id: getNextId(tournaments),
-      title: "",
+      title: "New Tournament",
       game: "",
       type: "",
       format: "",
@@ -881,7 +887,18 @@ export default function App() {
 
     setTournaments((prev) => [...prev, newTournament]);
     setSelectedTournamentId(newTournament.id);
-    setTournamentForm(createEmptyTournamentForm());
+    setTournamentForm({
+      title: newTournament.title,
+      game: "",
+      type: "",
+      format: "",
+      status: "draft",
+      date: "",
+      prize: "",
+      description: "",
+      participantIds: [],
+      isPublished: false,
+    });
 
     try {
       if (isFirebaseConfigured) {
