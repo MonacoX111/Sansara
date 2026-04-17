@@ -39,7 +39,6 @@ import {
   deleteItemsBatch,
   saveItem,
   saveItemsBatch,
-  seedCollectionIfEmpty,
   subscribeCollection,
 } from "./firebaseDb";
 
@@ -318,14 +317,6 @@ export default function App() {
       }
 
       try {
-        await Promise.all([
-          seedCollectionIfEmpty("players", fallbackPlayers),
-          seedCollectionIfEmpty("teams", fallbackTeams),
-          seedCollectionIfEmpty("tournaments", fallbackTournaments),
-          seedCollectionIfEmpty("matches", fallbackMatches),
-          seedCollectionIfEmpty("achievements", fallbackAchievements),
-        ]);
-
         if (!isMounted) return;
 
         unsubPlayers = subscribeCollection<Player>("players", (items) => {
