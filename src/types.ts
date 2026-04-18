@@ -46,6 +46,7 @@ export type Tournament = {
   description: string;
   participantIds: number[];
   winnerId?: number;
+  winnerTeamId?: number;
   mvpId?: number;
   placements: Placement[];
   isPublished: boolean;

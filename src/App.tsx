@@ -75,6 +75,7 @@ type TournamentForm = {
   description: string;
   participantIds: number[];
   winnerId?: number;
+  winnerTeamId?: number;
   mvpId?: number;
   isPublished: boolean;
 };
@@ -127,6 +128,7 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   description: "",
   participantIds: [],
   winnerId: undefined,
+  winnerTeamId: undefined,
   mvpId: undefined,
   isPublished: false,
 });
@@ -182,6 +184,8 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
       ? tournament.participantIds
       : [],
     winnerId: typeof tournament.winnerId === "number" ? tournament.winnerId : 0,
+    winnerTeamId:
+      typeof tournament.winnerTeamId === "number" ? tournament.winnerTeamId : 0,
     mvpId: typeof tournament.mvpId === "number" ? tournament.mvpId : 0,
     placements: Array.isArray(tournament.placements)
       ? tournament.placements
@@ -501,6 +505,11 @@ export default function App() {
         typeof selectedTournament.winnerId === "number" &&
         selectedTournament.winnerId > 0
           ? Number(selectedTournament.winnerId)
+          : undefined,
+      winnerTeamId:
+        typeof selectedTournament.winnerTeamId === "number" &&
+        selectedTournament.winnerTeamId > 0
+          ? Number(selectedTournament.winnerTeamId)
           : undefined,
       mvpId:
         typeof selectedTournament.mvpId === "number" &&
@@ -822,9 +831,15 @@ export default function App() {
       nextPlayers,
       teams.filter((team) => team.id !== deletedId)
     );
+    const nextTournaments = tournaments.map((tournament) => ({
+      ...tournament,
+      winnerTeamId:
+        tournament.winnerTeamId === deletedId ? 0 : tournament.winnerTeamId,
+    }));
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
+    setTournaments(nextTournaments);
 
     try {
       if (isFirebaseConfigured) {
@@ -832,6 +847,7 @@ export default function App() {
           deleteItem("teams", deletedId),
           saveItemsBatch("players", nextPlayers),
           saveItemsBatch("teams", nextTeams),
+          saveItemsBatch("tournaments", nextTournaments),
         ]);
       }
     } catch (error) {
@@ -846,10 +862,25 @@ export default function App() {
       ? tournamentForm.participantIds.map(Number)
       : [];
 
+    const participantTeamIds = Array.from(
+      new Set(
+        players
+          .filter((player) => safeParticipantIds.includes(player.id))
+          .map((player) => Number(player.teamId))
+          .filter((teamId) => teamId > 0)
+      )
+    );
+
     const safeWinnerId =
       typeof tournamentForm.winnerId === "number" &&
       safeParticipantIds.includes(Number(tournamentForm.winnerId))
         ? Number(tournamentForm.winnerId)
+        : 0;
+
+    const safeWinnerTeamId =
+      typeof tournamentForm.winnerTeamId === "number" &&
+      participantTeamIds.includes(Number(tournamentForm.winnerTeamId))
+        ? Number(tournamentForm.winnerTeamId)
         : 0;
 
     const safeMvpId =
@@ -870,6 +901,7 @@ export default function App() {
       description: tournamentForm.description,
       participantIds: safeParticipantIds,
       winnerId: safeWinnerId,
+      winnerTeamId: safeWinnerTeamId,
       mvpId: safeMvpId,
       placements: Array.isArray(selectedTournament.placements)
         ? selectedTournament.placements
@@ -905,6 +937,7 @@ export default function App() {
       description: "",
       participantIds: [],
       winnerId: 0,
+      winnerTeamId: 0,
       mvpId: 0,
       placements: [],
       isPublished: false,
@@ -923,6 +956,7 @@ export default function App() {
       description: "",
       participantIds: [],
       winnerId: undefined,
+      winnerTeamId: undefined,
       mvpId: undefined,
       isPublished: false,
     });
