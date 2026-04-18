@@ -923,3 +923,15 @@ button {
   border-color: rgba(255, 59, 95, 0.28);
   box-shadow: var(--shadow-red);
 }
+.placement-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.placement-row span {
+  font-size: 14px;
+  opacity: 0.9;
+}

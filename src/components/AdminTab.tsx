@@ -3,6 +3,7 @@ import {
   Achievement,
   Match,
   MatchStatus,
+  Placement,
   Player,
   Team,
   Tournament,
@@ -46,9 +47,9 @@ type TournamentForm = {
   winnerId?: number;
   winnerTeamId?: number;
   mvpId?: number;
+  placements: Placement[];
   isPublished: boolean;
 };
-
 type MatchForm = {
   game: string;
   player1: number;
@@ -1007,6 +1008,77 @@ export default function AdminTab({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Placements</label>
+
+              <div className="form-col">
+                {selectedTournamentParticipants.map((player) => {
+                  const placement = Array.isArray(tournamentForm.placements)
+                    ? tournamentForm.placements.find(
+                        (item) => item.playerId === player.id
+                      )
+                    : undefined;
+
+                  return (
+                    <div key={player.id} className="form-grid two">
+                      <div className="field-block">
+                        <label className="field-label">{player.nickname}</label>
+                        <input
+                          className="input"
+                          type="number"
+                          min={1}
+                          placeholder="Place"
+                          value={placement ? placement.place : ""}
+                          onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const nextPlace = Number(rawValue);
+
+                            setTournamentForm((prev) => {
+                              const safePlacements = Array.isArray(
+                                prev.placements
+                              )
+                                ? prev.placements
+                                : [];
+
+                              if (!rawValue || nextPlace <= 0) {
+                                return {
+                                  ...prev,
+                                  placements: safePlacements.filter(
+                                    (item) => item.playerId !== player.id
+                                  ),
+                                };
+                              }
+
+                              const exists = safePlacements.some(
+                                (item) => item.playerId === player.id
+                              );
+
+                              return {
+                                ...prev,
+                                placements: exists
+                                  ? safePlacements.map((item) =>
+                                      item.playerId === player.id
+                                        ? { ...item, place: nextPlace }
+                                        : item
+                                    )
+                                  : [
+                                      ...safePlacements,
+                                      {
+                                        playerId: player.id,
+                                        place: nextPlace,
+                                      },
+                                    ],
+                              };
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="field-block">

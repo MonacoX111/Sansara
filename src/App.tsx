@@ -19,6 +19,7 @@ import {
   Achievement,
   Match,
   MatchStatus,
+  Placement,
   Player,
   TabKey,
   Team,
@@ -77,6 +78,7 @@ type TournamentForm = {
   winnerId?: number;
   winnerTeamId?: number;
   mvpId?: number;
+  placements: Placement[];
   isPublished: boolean;
 };
 
@@ -130,6 +132,7 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   winnerId: undefined,
   winnerTeamId: undefined,
   mvpId: undefined,
+  placements: [],
   isPublished: false,
 });
 
@@ -181,7 +184,7 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     status: tournament.status || "draft",
     description: tournament.description || "",
     participantIds: Array.isArray(tournament.participantIds)
-      ? tournament.participantIds
+      ? tournament.participantIds.map(Number)
       : [],
     winnerId: typeof tournament.winnerId === "number" ? tournament.winnerId : 0,
     winnerTeamId:
@@ -189,6 +192,16 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     mvpId: typeof tournament.mvpId === "number" ? tournament.mvpId : 0,
     placements: Array.isArray(tournament.placements)
       ? tournament.placements
+          .filter(
+            (item) =>
+              item &&
+              typeof item.playerId === "number" &&
+              typeof item.place === "number"
+          )
+          .map((item) => ({
+            playerId: Number(item.playerId),
+            place: Number(item.place),
+          }))
       : [],
     isPublished: Boolean(tournament.isPublished),
   }));
@@ -516,6 +529,19 @@ export default function App() {
         selectedTournament.mvpId > 0
           ? Number(selectedTournament.mvpId)
           : undefined,
+      placements: Array.isArray(selectedTournament.placements)
+        ? selectedTournament.placements
+            .filter(
+              (item) =>
+                item &&
+                typeof item.playerId === "number" &&
+                typeof item.place === "number"
+            )
+            .map((item) => ({
+              playerId: Number(item.playerId),
+              place: Number(item.place),
+            }))
+        : [],
       isPublished: Boolean(selectedTournament.isPublished),
     });
   }, [selectedTournament]);
@@ -889,6 +915,22 @@ export default function App() {
         ? Number(tournamentForm.mvpId)
         : 0;
 
+    const safePlacements = Array.isArray(tournamentForm.placements)
+      ? tournamentForm.placements
+          .filter(
+            (item) =>
+              item &&
+              typeof item.playerId === "number" &&
+              typeof item.place === "number" &&
+              safeParticipantIds.includes(Number(item.playerId)) &&
+              Number(item.place) > 0
+          )
+          .map((item) => ({
+            playerId: Number(item.playerId),
+            place: Number(item.place),
+          }))
+      : [];
+
     const updatedTournament: Tournament = {
       ...selectedTournament,
       title: tournamentForm.title,
@@ -903,9 +945,7 @@ export default function App() {
       winnerId: safeWinnerId,
       winnerTeamId: safeWinnerTeamId,
       mvpId: safeMvpId,
-      placements: Array.isArray(selectedTournament.placements)
-        ? selectedTournament.placements
-        : [],
+      placements: safePlacements,
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
@@ -958,6 +998,7 @@ export default function App() {
       winnerId: undefined,
       winnerTeamId: undefined,
       mvpId: undefined,
+      placements: [],
       isPublished: false,
     });
 
