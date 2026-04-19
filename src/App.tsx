@@ -55,6 +55,7 @@ type PlayerForm = {
   rank: number;
   elo: number;
   bio: string;
+  isFeatured: boolean;
 };
 
 type TeamForm = {
@@ -109,6 +110,7 @@ const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
   rank: nextRank,
   elo: 1000,
   bio: "",
+  isFeatured: false,
 });
 
 const createEmptyTeamForm = (): TeamForm => ({
@@ -164,6 +166,7 @@ const normalizePlayers = (items: Player[]): Player[] =>
     tournamentsWon: Number(player.tournamentsWon || 0),
     rank: Number(player.rank || 0),
     elo: Number(player.elo || 1000),
+    isFeatured: Boolean(player.isFeatured),
   }));
 
 const normalizeTeams = (items: Team[]): Team[] =>
@@ -478,6 +481,7 @@ export default function App() {
       rank: selectedPlayer.rank,
       elo: selectedPlayer.elo,
       bio: selectedPlayer.bio,
+      isFeatured: Boolean(selectedPlayer.isFeatured),
     });
   }, [selectedPlayer, teams, players.length]);
 
@@ -671,6 +675,7 @@ export default function App() {
       rank: Number(playerForm.rank),
       elo: Number(playerForm.elo),
       bio: playerForm.bio,
+      isFeatured: Boolean(playerForm.isFeatured),
     };
 
     const nextPlayers = players.map((player) =>
@@ -708,6 +713,7 @@ export default function App() {
       rank: players.length + 1,
       elo: 1000,
       bio: "",
+      isFeatured: false,
     };
 
     const nextPlayers = [...players, newPlayer];

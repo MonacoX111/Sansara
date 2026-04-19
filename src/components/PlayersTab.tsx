@@ -78,6 +78,12 @@ export default function PlayersTab({
       teamFilter === "all" ? true : String(player.teamId) === teamFilter
     )
     .sort((a, b) => {
+      const aFeatured = Boolean(a.isFeatured);
+      const bFeatured = Boolean(b.isFeatured);
+
+      if (aFeatured && !bFeatured) return -1;
+      if (!aFeatured && bFeatured) return 1;
+
       if (sortMode === "elo") return b.elo - a.elo;
       if (sortMode === "wins") return b.wins - a.wins;
       if (sortMode === "earnings") return b.earnings - a.earnings;
@@ -209,7 +215,12 @@ export default function PlayersTab({
                     />
                     <div className="player-head-info">
                       <div className="player-name-row">
-                        <div className="player-name">{player.nickname}</div>
+                        <div className="player-name">
+                          {player.nickname}{" "}
+                          {player.isFeatured ? (
+                            <span className="pill gold">Featured</span>
+                          ) : null}
+                        </div>
                         <span className="pill light">#{player.rank}</span>
                       </div>
                     </div>

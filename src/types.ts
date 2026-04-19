@@ -32,6 +32,7 @@ export type Player = {
   rank: number;
   elo: number;
   bio: string;
+  isFeatured?: boolean;
 };
 
 export type Tournament = {

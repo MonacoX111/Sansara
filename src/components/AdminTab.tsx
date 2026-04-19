@@ -24,6 +24,7 @@ type PlayerForm = {
   rank: number;
   elo: number;
   bio: string;
+  isFeatured: boolean;
 };
 
 type TeamForm = {
@@ -476,6 +477,22 @@ export default function AdminTab({
                   }))
                 }
               />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={Boolean(playerForm.isFeatured)}
+                  onChange={(e) =>
+                    setPlayerForm((prev) => ({
+                      ...prev,
+                      isFeatured: e.target.checked,
+                    }))
+                  }
+                />
+                Featured player
+              </label>
             </div>
 
             <div className="field-block">
