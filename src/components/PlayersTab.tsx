@@ -90,10 +90,12 @@ export default function PlayersTab({
       return a.nickname.localeCompare(b.nickname);
     });
 
-  const playerMatches = matches.filter(
-    (match) =>
-      match.player1 === selectedPlayerId || match.player2 === selectedPlayerId
-  );
+  const playerMatches = matches
+    .filter(
+      (match) =>
+        match.player1 === selectedPlayerId || match.player2 === selectedPlayerId
+    )
+    .sort((a, b) => b.id - a.id);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
 
