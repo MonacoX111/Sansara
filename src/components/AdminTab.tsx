@@ -85,6 +85,9 @@ type Props = {
   selectedMatchId: number;
   setSelectedMatchId: (id: number) => void;
 
+  selectedAchievementId: number;
+  setSelectedAchievementId: (id: number) => void;
+
   playerForm: PlayerForm;
   setPlayerForm: Dispatch<SetStateAction<PlayerForm>>;
 
@@ -119,6 +122,7 @@ type Props = {
   saveAchievement: (id: number, updates: Partial<Achievement>) => void;
   addAchievement: () => void;
   deleteAchievement: (id: number) => void;
+  selectedAchievement: Achievement | null;
 };
 
 const tournamentStatusOptions: TournamentStatus[] = [
@@ -184,6 +188,8 @@ export default function AdminTab({
   setSelectedTournamentId,
   selectedMatchId,
   setSelectedMatchId,
+  selectedAchievementId,
+  setSelectedAchievementId,
   playerForm,
   setPlayerForm,
   teamForm,
@@ -209,6 +215,7 @@ export default function AdminTab({
   saveAchievement,
   addAchievement,
   deleteAchievement,
+  selectedAchievement,
 }: Props) {
   const safeTournamentParticipantIds = Array.isArray(
     tournamentForm.participantIds
@@ -1446,8 +1453,13 @@ export default function AdminTab({
             {achievements.map((achievement) => (
               <button
                 key={achievement.id}
-                onClick={() => deleteAchievement(achievement.id)}
-                className="admin-list-btn"
+                type="button"
+                onClick={() => setSelectedAchievementId(achievement.id)}
+                className={`admin-list-btn ${
+                  selectedAchievementId === achievement.id
+                    ? "admin-list-btn-active"
+                    : ""
+                }`}
               >
                 {achievement.title || "Achievement"}
               </button>
@@ -1466,14 +1478,14 @@ export default function AdminTab({
           <h2 className="panel-title">Edit achievements</h2>
 
           <div className="list-col">
-            {achievements.map((achievement) => (
-              <div key={achievement.id} className="simple-card">
+            {selectedAchievement ? (
+              <div key={selectedAchievement.id} className="simple-card">
                 <div className="form-col">
                   <input
                     className="input"
-                    value={achievement.title}
+                    value={selectedAchievement.title}
                     onChange={(e) =>
-                      saveAchievement(achievement.id, {
+                      saveAchievement(selectedAchievement.id, {
                         title: e.target.value,
                       })
                     }
@@ -1482,9 +1494,9 @@ export default function AdminTab({
 
                   <textarea
                     className="input textarea"
-                    value={achievement.description}
+                    value={selectedAchievement.description}
                     onChange={(e) =>
-                      saveAchievement(achievement.id, {
+                      saveAchievement(selectedAchievement.id, {
                         description: e.target.value,
                       })
                     }
@@ -1495,24 +1507,29 @@ export default function AdminTab({
                     className="input"
                     type="file"
                     accept="image/*"
-                    onChange={handleAchievementImageUpload(achievement.id)}
+                    onChange={handleAchievementImageUpload(
+                      selectedAchievement.id
+                    )}
                   />
 
                   <div className="picker-grid compact-grid">
                     {players.map((player) => {
                       const isSelected = safeAchievementPlayerIds(
-                        achievement
+                        selectedAchievement
                       ).includes(player.id);
 
                       return (
                         <button
-                          key={`${achievement.id}-${player.id}`}
+                          key={`${selectedAchievement.id}-${player.id}`}
                           type="button"
                           className={`picker-btn compact ${
                             isSelected ? "picker-btn-active" : ""
                           }`}
                           onClick={() =>
-                            toggleAchievementPlayer(achievement, player.id)
+                            toggleAchievementPlayer(
+                              selectedAchievement,
+                              player.id
+                            )
                           }
                         >
                           <span>{player.nickname}</span>
@@ -1524,14 +1541,20 @@ export default function AdminTab({
                   <div className="btn-row">
                     <button
                       className="danger-btn"
-                      onClick={() => deleteAchievement(achievement.id)}
+                      onClick={() => deleteAchievement(selectedAchievement.id)}
                     >
                       Delete achievement
                     </button>
                   </div>
                 </div>
               </div>
-            ))}
+            ) : (
+              <div className="simple-card">
+                <div className="form-col">
+                  <div className="muted">No achievement selected</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

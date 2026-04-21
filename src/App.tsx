@@ -279,6 +279,7 @@ export default function App() {
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
   const [selectedTournamentId, setSelectedTournamentId] = useState<number>(1);
   const [selectedMatchId, setSelectedMatchId] = useState<number>(1);
+  const [selectedAchievementId, setSelectedAchievementId] = useState<number>(1);
 
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("all");
@@ -310,6 +311,10 @@ export default function App() {
     null;
   const selectedMatch =
     matches.find((match) => match.id === selectedMatchId) || null;
+  const selectedAchievement =
+    achievements.find(
+      (achievement) => achievement.id === selectedAchievementId
+    ) || null;
 
   const getSafeTeamId = (teamId: number) =>
     teams.some((team) => team.id === teamId) ? teamId : 0;
@@ -462,6 +467,21 @@ export default function App() {
       setSelectedMatchId(matches[0].id);
     }
   }, [matches, selectedMatchId]);
+
+  useEffect(() => {
+    if (achievements.length === 0) {
+      setSelectedAchievementId(0);
+      return;
+    }
+
+    if (
+      !achievements.some(
+        (achievement) => achievement.id === selectedAchievementId
+      )
+    ) {
+      setSelectedAchievementId(achievements[0].id);
+    }
+  }, [achievements, selectedAchievementId]);
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -1167,6 +1187,7 @@ export default function App() {
     };
 
     setAchievements((prev) => [...prev, newAchievement]);
+    setSelectedAchievementId(newAchievement.id);
 
     try {
       if (isFirebaseConfigured) {
@@ -1178,9 +1199,15 @@ export default function App() {
   };
 
   const deleteAchievement = async (achievementId: number) => {
-    setAchievements((prev) =>
-      prev.filter((achievement) => achievement.id !== achievementId)
+    const nextAchievements = achievements.filter(
+      (achievement) => achievement.id !== achievementId
     );
+
+    setAchievements(nextAchievements);
+
+    if (selectedAchievementId === achievementId) {
+      setSelectedAchievementId(nextAchievements[0]?.id || 0);
+    }
 
     try {
       if (isFirebaseConfigured) {
@@ -1288,6 +1315,8 @@ export default function App() {
             setSelectedTournamentId={setSelectedTournamentId}
             selectedMatchId={selectedMatchId}
             setSelectedMatchId={setSelectedMatchId}
+            selectedAchievementId={selectedAchievementId}
+            setSelectedAchievementId={setSelectedAchievementId}
             playerForm={playerForm}
             setPlayerForm={setPlayerForm}
             teamForm={teamForm}
@@ -1313,6 +1342,7 @@ export default function App() {
             saveAchievement={saveAchievement}
             addAchievement={addAchievement}
             deleteAchievement={deleteAchievement}
+            selectedAchievement={selectedAchievement}
           />
         )}
 
