@@ -1484,7 +1484,7 @@ export default function AdminTab({
               .filter((match) =>
                 matchTournamentFilterId
                   ? match.tournamentId === matchTournamentFilterId
-                  : false
+                  : match.tournamentId === 0
               )
               .map((match) => (
                 <button
