@@ -305,6 +305,7 @@ export default function AdminTab({
     }));
 
   const [playerAdminSearch, setPlayerAdminSearch] = useState("");
+  const [matchTournamentFilterId, setMatchTournamentFilterId] = useState(0);
 
   const filteredAdminPlayers = players.filter((player) => {
     const q = playerAdminSearch.toLowerCase().trim();
@@ -1419,22 +1420,52 @@ export default function AdminTab({
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="two-col">
         <div className="panel">
           <h2 className="panel-title">Matches (admin)</h2>
 
+          <div className="field-block">
+            <label className="field-label">Select tournament</label>
+            <select
+              className="input"
+              value={matchTournamentFilterId}
+              onChange={(e) =>
+                setMatchTournamentFilterId(Number(e.target.value))
+              }
+            >
+              <option value={0}>Select tournament</option>
+              {tournaments.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="list-col">
-            {matches.map((match) => (
-              <button
-                key={match.id}
-                onClick={() => setSelectedMatchId(match.id)}
-                className={`admin-list-btn ${
-                  selectedMatchId === match.id ? "admin-list-btn-active" : ""
-                }`}
-              >
-                {getPlayerName(match.player1)} vs {getPlayerName(match.player2)}
-              </button>
-            ))}
+            {matches
+              .filter((match) =>
+                matchTournamentFilterId
+                  ? match.tournamentId === matchTournamentFilterId
+                  : false
+              )
+              .map((match) => (
+                <button
+                  key={match.id}
+                  onClick={() => {
+                    setSelectedMatchId(match.id);
+                    setMatchTournamentFilterId(match.tournamentId);
+                  }}
+                  className={`admin-list-btn ${
+                    selectedMatchId === match.id ? "admin-list-btn-active" : ""
+                  }`}
+                >
+                  {getPlayerName(match.player1)} vs{" "}
+                  {getPlayerName(match.player2)}
+                </button>
+              ))}
 
             <button className="secondary-btn add-list-btn" onClick={addMatch}>
               + Add match
@@ -1463,6 +1494,7 @@ export default function AdminTab({
                     Array.isArray(nextTournament.participantIds)
                       ? nextTournament.participantIds
                       : [];
+
                   const nextPlayer1 = nextParticipantIds.includes(
                     matchForm.player1
                   )
@@ -1730,118 +1762,115 @@ export default function AdminTab({
           </div>
         </div>
       </div>
+      <div className="panel">
+        <h2 className="panel-title">Achievements (admin)</h2>
 
-      <div className="two-col reverse">
-        <div className="panel">
-          <h2 className="panel-title">Achievements (admin)</h2>
-
-          <div className="list-col">
-            {achievements.map((achievement) => (
-              <button
-                key={achievement.id}
-                type="button"
-                onClick={() => setSelectedAchievementId(achievement.id)}
-                className={`admin-list-btn ${
-                  selectedAchievementId === achievement.id
-                    ? "admin-list-btn-active"
-                    : ""
-                }`}
-              >
-                {achievement.title || "Achievement"}
-              </button>
-            ))}
-
+        <div className="list-col">
+          {achievements.map((achievement) => (
             <button
-              className="secondary-btn add-list-btn"
-              onClick={addAchievement}
+              key={achievement.id}
+              type="button"
+              onClick={() => setSelectedAchievementId(achievement.id)}
+              className={`admin-list-btn ${
+                selectedAchievementId === achievement.id
+                  ? "admin-list-btn-active"
+                  : ""
+              }`}
             >
-              + Add achievement
+              {achievement.title || "Achievement"}
             </button>
-          </div>
+          ))}
+
+          <button
+            className="secondary-btn add-list-btn"
+            onClick={addAchievement}
+          >
+            + Add achievement
+          </button>
         </div>
+      </div>
 
-        <div className="panel">
-          <h2 className="panel-title">Edit achievements</h2>
+      <div className="panel">
+        <h2 className="panel-title">Edit achievements</h2>
 
-          <div className="list-col">
-            {selectedAchievement ? (
-              <div key={selectedAchievement.id} className="simple-card">
-                <div className="form-col">
-                  <input
-                    className="input"
-                    value={selectedAchievement.title}
-                    onChange={(e) =>
-                      saveAchievement(selectedAchievement.id, {
-                        title: e.target.value,
-                      })
-                    }
-                    placeholder="Achievement title"
-                  />
+        <div className="list-col">
+          {selectedAchievement ? (
+            <div key={selectedAchievement.id} className="simple-card">
+              <div className="form-col">
+                <input
+                  className="input"
+                  value={selectedAchievement.title}
+                  onChange={(e) =>
+                    saveAchievement(selectedAchievement.id, {
+                      title: e.target.value,
+                    })
+                  }
+                  placeholder="Achievement title"
+                />
 
-                  <textarea
-                    className="input textarea"
-                    value={selectedAchievement.description}
-                    onChange={(e) =>
-                      saveAchievement(selectedAchievement.id, {
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Achievement description"
-                  />
+                <textarea
+                  className="input textarea"
+                  value={selectedAchievement.description}
+                  onChange={(e) =>
+                    saveAchievement(selectedAchievement.id, {
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Achievement description"
+                />
 
-                  <input
-                    className="input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAchievementImageUpload(
-                      selectedAchievement.id
-                    )}
-                  />
+                <input
+                  className="input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAchievementImageUpload(
+                    selectedAchievement.id
+                  )}
+                />
 
-                  <div className="picker-grid compact-grid">
-                    {players.map((player) => {
-                      const isSelected = safeAchievementPlayerIds(
-                        selectedAchievement
-                      ).includes(player.id);
+                <div className="picker-grid compact-grid">
+                  {players.map((player) => {
+                    const isSelected = safeAchievementPlayerIds(
+                      selectedAchievement
+                    ).includes(player.id);
 
-                      return (
-                        <button
-                          key={`${selectedAchievement.id}-${player.id}`}
-                          type="button"
-                          className={`picker-btn compact ${
-                            isSelected ? "picker-btn-active" : ""
-                          }`}
-                          onClick={() =>
-                            toggleAchievementPlayer(
-                              selectedAchievement,
-                              player.id
-                            )
-                          }
-                        >
-                          <span>{player.nickname}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                    return (
+                      <button
+                        key={`${selectedAchievement.id}-${player.id}`}
+                        type="button"
+                        className={`picker-btn compact ${
+                          isSelected ? "picker-btn-active" : ""
+                        }`}
+                        onClick={() =>
+                          toggleAchievementPlayer(
+                            selectedAchievement,
+                            player.id
+                          )
+                        }
+                      >
+                        <span>{player.nickname}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  <div className="btn-row">
-                    <button
-                      className="danger-btn"
-                      onClick={() => deleteAchievement(selectedAchievement.id)}
-                    >
-                      Delete achievement
-                    </button>
-                  </div>
+                <div className="btn-row">
+                  <button
+                    className="danger-btn"
+                    onClick={() => deleteAchievement(selectedAchievement.id)}
+                  >
+                    Delete achievement
+                  </button>
                 </div>
               </div>
-            ) : (
-              <div className="simple-card">
-                <div className="form-col">
-                  <div className="muted">No achievement selected</div>
-                </div>
+            </div>
+          ) : (
+            <div className="simple-card">
+              <div className="form-col">
+                <div className="muted">No achievement selected</div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

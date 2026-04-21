@@ -1331,6 +1331,13 @@ export default function App() {
       playerIds: [],
     };
 
+    const upcomingMatches = matches
+      .filter((m) => m.status !== "completed")
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5);
+
+    const topPlayers = [...players].sort((a, b) => b.elo - a.elo).slice(0, 5);
+
     setAchievements((prev) => [...prev, newAchievement]);
     setSelectedAchievementId(newAchievement.id);
 
@@ -1412,79 +1419,145 @@ export default function App() {
                 </p>
               </div>
             ) : (
-              <div
-                className="home-featured-banner"
-                style={{
-                  backgroundImage: homeAnnouncement.imageUrl
-                    ? `linear-gradient(90deg, rgba(5, 7, 14, 0.92) 0%, rgba(5, 7, 14, 0.72) 38%, rgba(5, 7, 14, 0.44) 62%, rgba(5, 7, 14, 0.88) 100%), url(${homeAnnouncement.imageUrl})`
-                    : "linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(76,29,149,0.9) 45%, rgba(190,24,93,0.82) 100%)",
-                }}
-              >
-                <div className="home-featured-overlay">
-                  <div className="home-featured-content">
-                    <p className="home-featured-kicker">Next tournament</p>
-                    <h2 className="home-featured-title">
-                      {homeAnnouncement.title || "Tournament announcement"}
-                    </h2>
+              <>
+                <div
+                  className="home-featured-banner"
+                  style={{
+                    backgroundImage: homeAnnouncement.imageUrl
+                      ? `linear-gradient(90deg, rgba(5, 7, 14, 0.92) 0%, rgba(5, 7, 14, 0.72) 38%, rgba(5, 7, 14, 0.44) 62%, rgba(5, 7, 14, 0.88) 100%), url(${homeAnnouncement.imageUrl})`
+                      : "linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(76,29,149,0.9) 45%, rgba(190,24,93,0.82) 100%)",
+                  }}
+                >
+                  <div className="home-featured-overlay">
+                    <div className="home-featured-content">
+                      <p className="home-featured-kicker">Next tournament</p>
+                      <h2 className="home-featured-title">
+                        {homeAnnouncement.title || "Tournament announcement"}
+                      </h2>
 
-                    {homeAnnouncement.subtitle ? (
-                      <p className="home-featured-subtitle">
-                        {homeAnnouncement.subtitle}
-                      </p>
-                    ) : null}
+                      {homeAnnouncement.subtitle ? (
+                        <p className="home-featured-subtitle">
+                          {homeAnnouncement.subtitle}
+                        </p>
+                      ) : null}
 
-                    <div className="home-featured-meta">
-                      {homeAnnouncement.date ? (
-                        <span className="home-meta-pill">
-                          Date: {homeAnnouncement.date}
-                        </span>
+                      <div className="home-featured-meta">
+                        {homeAnnouncement.date ? (
+                          <span className="home-meta-pill">
+                            Date: {homeAnnouncement.date}
+                          </span>
+                        ) : null}
+                        {homeAnnouncement.format ? (
+                          <span className="home-meta-pill">
+                            Format: {homeAnnouncement.format}
+                          </span>
+                        ) : null}
+                        {homeAnnouncement.status ? (
+                          <span className="home-meta-pill">
+                            Status: {homeAnnouncement.status}
+                          </span>
+                        ) : null}
+                        {homeAnnouncement.prize ? (
+                          <span className="home-meta-pill">
+                            Prize: {homeAnnouncement.prize}
+                          </span>
+                        ) : null}
+                        {homeAnnouncement.participantCount > 0 ? (
+                          <span className="home-meta-pill">
+                            Players: {homeAnnouncement.participantCount}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {homeAnnouncement.description ? (
+                        <p className="home-featured-description">
+                          {homeAnnouncement.description}
+                        </p>
                       ) : null}
-                      {homeAnnouncement.format ? (
-                        <span className="home-meta-pill">
-                          Format: {homeAnnouncement.format}
-                        </span>
-                      ) : null}
-                      {homeAnnouncement.status ? (
-                        <span className="home-meta-pill">
-                          Status: {homeAnnouncement.status}
-                        </span>
-                      ) : null}
-                      {homeAnnouncement.prize ? (
-                        <span className="home-meta-pill">
-                          Prize: {homeAnnouncement.prize}
-                        </span>
-                      ) : null}
-                      {homeAnnouncement.participantCount > 0 ? (
-                        <span className="home-meta-pill">
-                          Players: {homeAnnouncement.participantCount}
-                        </span>
+
+                      {homeAnnouncement.tournamentId ? (
+                        <div className="btn-row">
+                          <button
+                            className="primary-btn"
+                            onClick={() => {
+                              setSelectedTournamentId(
+                                Number(homeAnnouncement.tournamentId)
+                              );
+                              setActiveTab("tournaments");
+                            }}
+                          >
+                            Open tournament
+                          </button>
+                        </div>
                       ) : null}
                     </div>
-
-                    {homeAnnouncement.description ? (
-                      <p className="home-featured-description">
-                        {homeAnnouncement.description}
-                      </p>
-                    ) : null}
-
-                    {homeAnnouncement.tournamentId ? (
-                      <div className="btn-row">
-                        <button
-                          className="primary-btn"
-                          onClick={() => {
-                            setSelectedTournamentId(
-                              Number(homeAnnouncement.tournamentId)
-                            );
-                            setActiveTab("tournaments");
-                          }}
-                        >
-                          Open tournament
-                        </button>
-                      </div>
-                    ) : null}
                   </div>
                 </div>
-              </div>
+
+                <div className="home-grid">
+                  <div className="panel">
+                    <h2 className="panel-title">Upcoming Matches</h2>
+
+                    {matches.filter((m) => m.status !== "completed").length ===
+                    0 ? (
+                      <p className="muted">No upcoming matches</p>
+                    ) : (
+                      <div className="list-col">
+                        {matches
+                          .filter((m) => m.status !== "completed")
+                          .sort(
+                            (a, b) =>
+                              new Date(a.date).getTime() -
+                              new Date(b.date).getTime()
+                          )
+                          .slice(0, 5)
+                          .map((match: Match) => {
+                            const p1 = players.find(
+                              (p) => p.id === match.player1
+                            );
+                            const p2 = players.find(
+                              (p) => p.id === match.player2
+                            );
+
+                            return (
+                              <div key={match.id} className="match-card">
+                                <div className="match-players">
+                                  <span>{p1?.nickname || "Player 1"}</span>
+                                  <span className="vs">vs</span>
+                                  <span>{p2?.nickname || "Player 2"}</span>
+                                </div>
+
+                                <div className="match-meta">
+                                  <span>{match.round}</span>
+                                  <span>
+                                    {match.bestOf ? `BO${match.bestOf}` : ""}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="panel">
+                    <h2 className="panel-title">Top Players</h2>
+
+                    <div className="list-col">
+                      {[...players]
+                        .sort((a, b) => b.elo - a.elo)
+                        .slice(0, 5)
+                        .map((player: Player, index: number) => (
+                          <div key={player.id} className="player-row">
+                            <span className="rank">#{index + 1}</span>
+                            <span>{player.nickname}</span>
+                            <span className="elo">{player.elo}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </section>
         )}
