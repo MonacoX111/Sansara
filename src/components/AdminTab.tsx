@@ -1,6 +1,7 @@
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 import {
   Achievement,
+  HomeAnnouncement,
   Match,
   MatchStatus,
   Placement,
@@ -67,12 +68,17 @@ type MatchForm = {
   eloApplied: boolean;
 };
 
+type HomeAnnouncementForm = HomeAnnouncement;
+
 type Props = {
   players: Player[];
   teams: Team[];
   tournaments: Tournament[];
   matches: Match[];
   achievements: Achievement[];
+  homeAnnouncementForm: HomeAnnouncementForm;
+  setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
+  saveHomeAnnouncement: () => void;
 
   selectedPlayerId: number;
   setSelectedPlayerId: (id: number) => void;
@@ -181,6 +187,9 @@ export default function AdminTab({
   tournaments,
   matches,
   achievements,
+  homeAnnouncementForm,
+  setHomeAnnouncementForm,
+  saveHomeAnnouncement,
   selectedPlayerId,
   setSelectedPlayerId,
   selectedTeamId,
@@ -431,6 +440,17 @@ export default function AdminTab({
     const value = event.target.value;
 
     setTournamentForm((prev) => ({
+      ...prev,
+      imageUrl: value,
+    }));
+  };
+
+  const handleHomeAnnouncementImageChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value;
+
+    setHomeAnnouncementForm((prev) => ({
       ...prev,
       imageUrl: value,
     }));
@@ -1199,6 +1219,207 @@ export default function AdminTab({
       </div>
 
       <div className="two-col reverse">
+        <div className="panel">
+          <h2 className="panel-title">Home page announcement</h2>
+
+          <div className="form-col">
+            <div className="field-block">
+              <label className="field-label">Title</label>
+              <input
+                className="input"
+                placeholder="Tournament title"
+                value={homeAnnouncementForm.title}
+                onChange={(e) =>
+                  setHomeAnnouncementForm((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Subtitle</label>
+              <input
+                className="input"
+                placeholder="Game + type / short subtitle"
+                value={homeAnnouncementForm.subtitle}
+                onChange={(e) =>
+                  setHomeAnnouncementForm((prev) => ({
+                    ...prev,
+                    subtitle: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Banner image URL</label>
+              <input
+                className="input"
+                type="text"
+                placeholder="Paste image URL..."
+                value={homeAnnouncementForm.imageUrl || ""}
+                onChange={handleHomeAnnouncementImageChange}
+              />
+
+              {homeAnnouncementForm.imageUrl ? (
+                <img
+                  src={homeAnnouncementForm.imageUrl}
+                  alt="Home banner preview"
+                  style={{
+                    marginTop: 10,
+                    width: "100%",
+                    maxHeight: 180,
+                    objectFit: "cover",
+                    borderRadius: 12,
+                  }}
+                />
+              ) : null}
+            </div>
+
+            <div className="form-grid two">
+              <div className="field-block">
+                <label className="field-label">Date</label>
+                <input
+                  className="input"
+                  type="date"
+                  value={homeAnnouncementForm.date}
+                  onChange={(e) =>
+                    setHomeAnnouncementForm((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="field-block">
+                <label className="field-label">Participants count</label>
+                <input
+                  className="input"
+                  type="number"
+                  min={0}
+                  value={homeAnnouncementForm.participantCount}
+                  onChange={(e) =>
+                    setHomeAnnouncementForm((prev) => ({
+                      ...prev,
+                      participantCount: Number(e.target.value),
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-grid two">
+              <div className="field-block">
+                <label className="field-label">Format</label>
+                <input
+                  className="input"
+                  placeholder="Format"
+                  value={homeAnnouncementForm.format}
+                  onChange={(e) =>
+                    setHomeAnnouncementForm((prev) => ({
+                      ...prev,
+                      format: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="field-block">
+                <label className="field-label">Status</label>
+                <input
+                  className="input"
+                  placeholder="upcoming / registrations open / etc"
+                  value={homeAnnouncementForm.status}
+                  onChange={(e) =>
+                    setHomeAnnouncementForm((prev) => ({
+                      ...prev,
+                      status: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Prize</label>
+              <input
+                className="input"
+                placeholder="Prize"
+                value={homeAnnouncementForm.prize}
+                onChange={(e) =>
+                  setHomeAnnouncementForm((prev) => ({
+                    ...prev,
+                    prize: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Linked tournament</label>
+              <select
+                className="input"
+                value={homeAnnouncementForm.tournamentId || 0}
+                onChange={(e) =>
+                  setHomeAnnouncementForm((prev) => ({
+                    ...prev,
+                    tournamentId: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  }))
+                }
+              >
+                <option value={0}>No linked tournament</option>
+                {tournaments.map((tournament) => (
+                  <option key={tournament.id} value={tournament.id}>
+                    {tournament.title || "Tournament"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">Description</label>
+              <textarea
+                className="input textarea"
+                placeholder="Announcement description"
+                value={homeAnnouncementForm.description}
+                onChange={(e) =>
+                  setHomeAnnouncementForm((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={Boolean(homeAnnouncementForm.isVisible)}
+                  onChange={(e) =>
+                    setHomeAnnouncementForm((prev) => ({
+                      ...prev,
+                      isVisible: e.target.checked,
+                    }))
+                  }
+                />
+                <span>Show on home page</span>
+              </label>
+            </div>
+
+            <div className="btn-row">
+              <button className="primary-btn" onClick={saveHomeAnnouncement}>
+                Save home announcement
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="panel">
           <h2 className="panel-title">Matches (admin)</h2>
 

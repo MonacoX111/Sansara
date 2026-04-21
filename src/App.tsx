@@ -17,6 +17,7 @@ import {
 } from "./data";
 import {
   Achievement,
+  HomeAnnouncement,
   Match,
   MatchStatus,
   Placement,
@@ -99,6 +100,21 @@ type MatchForm = {
   eloApplied: boolean;
 };
 
+type HomeAnnouncementForm = {
+  id: number;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  date: string;
+  prize: string;
+  format: string;
+  status: string;
+  description: string;
+  participantCount: number;
+  tournamentId?: number;
+  isVisible: boolean;
+};
+
 const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
   nickname: "",
   fullName: "",
@@ -153,6 +169,21 @@ const createEmptyMatchForm = (): MatchForm => ({
   bestOf: 1,
   notes: "",
   eloApplied: false,
+});
+
+const createEmptyHomeAnnouncementForm = (): HomeAnnouncementForm => ({
+  id: 1,
+  title: "",
+  subtitle: "",
+  imageUrl: "",
+  date: "",
+  prize: "",
+  format: "",
+  status: "",
+  description: "",
+  participantCount: 0,
+  tournamentId: undefined,
+  isVisible: true,
 });
 
 const normalizePlayers = (items: Player[]): Player[] =>
@@ -235,6 +266,24 @@ const normalizeAchievements = (items: Achievement[]): Achievement[] =>
       : [],
   }));
 
+const normalizeHomeAnnouncement = (
+  item?: Partial<HomeAnnouncement> | null
+): HomeAnnouncement => ({
+  id: typeof item?.id === "number" ? Number(item.id) : 1,
+  title: item?.title || "",
+  subtitle: item?.subtitle || "",
+  imageUrl: item?.imageUrl || "",
+  date: item?.date || "",
+  prize: item?.prize || "",
+  format: item?.format || "",
+  status: item?.status || "",
+  description: item?.description || "",
+  participantCount: Number(item?.participantCount || 0),
+  tournamentId:
+    typeof item?.tournamentId === "number" ? Number(item.tournamentId) : 0,
+  isVisible: typeof item?.isVisible === "boolean" ? item.isVisible : true,
+});
+
 export default function App() {
   const ADMIN_PASSWORD = "monaco123";
 
@@ -258,6 +307,13 @@ export default function App() {
     () => readStorage("tm_achievements", initialAchievements),
     []
   );
+  const fallbackHomeAnnouncement = useMemo(
+    () =>
+      normalizeHomeAnnouncement(
+        readStorage("tm_home_announcement", createEmptyHomeAnnouncementForm())
+      ),
+    []
+  );
 
   const [players, setPlayers] = useState<Player[]>(() =>
     normalizePlayers(fallbackPlayers)
@@ -274,8 +330,11 @@ export default function App() {
   const [achievements, setAchievements] = useState<Achievement[]>(() =>
     normalizeAchievements(fallbackAchievements)
   );
+  const [homeAnnouncement, setHomeAnnouncement] = useState<HomeAnnouncement>(
+    () => normalizeHomeAnnouncement(fallbackHomeAnnouncement)
+  );
 
-  const [activeTab, setActiveTab] = useState<TabKey>("players");
+  const [activeTab, setActiveTab] = useState<TabKey>("home");
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(1);
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
@@ -296,6 +355,8 @@ export default function App() {
     createEmptyTournamentForm()
   );
   const [matchForm, setMatchForm] = useState<MatchForm>(createEmptyMatchForm());
+  const [homeAnnouncementForm, setHomeAnnouncementForm] =
+    useState<HomeAnnouncementForm>(createEmptyHomeAnnouncementForm());
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -348,6 +409,10 @@ export default function App() {
     () => writeStorage("tm_achievements", achievements),
     [achievements]
   );
+  useEffect(
+    () => writeStorage("tm_home_announcement", homeAnnouncement),
+    [homeAnnouncement]
+  );
 
   useEffect(() => {
     let unsubPlayers = () => {};
@@ -355,6 +420,7 @@ export default function App() {
     let unsubTournaments = () => {};
     let unsubMatches = () => {};
     let unsubAchievements = () => {};
+    let unsubHomeAnnouncement = () => {};
     let isMounted = true;
 
     const initFirebase = async () => {
@@ -395,6 +461,18 @@ export default function App() {
           }
         );
 
+        unsubHomeAnnouncement = subscribeCollection<HomeAnnouncement>(
+          "homeAnnouncement",
+          (items) => {
+            const nextItem =
+              Array.isArray(items) && items.length > 0
+                ? items[0]
+                : fallbackHomeAnnouncement;
+
+            setHomeAnnouncement(normalizeHomeAnnouncement(nextItem));
+          }
+        );
+
         setFirebaseStatus("Firestore sync is active.");
       } catch (error) {
         console.error("Firebase init error:", error);
@@ -417,6 +495,7 @@ export default function App() {
       unsubTournaments();
       unsubMatches();
       unsubAchievements();
+      unsubHomeAnnouncement();
     };
   }, []);
 
@@ -614,6 +693,27 @@ export default function App() {
     });
   }, [selectedMatch]);
 
+  useEffect(() => {
+    setHomeAnnouncementForm({
+      id: 1,
+      title: homeAnnouncement.title || "",
+      subtitle: homeAnnouncement.subtitle || "",
+      imageUrl: homeAnnouncement.imageUrl || "",
+      date: homeAnnouncement.date || "",
+      prize: homeAnnouncement.prize || "",
+      format: homeAnnouncement.format || "",
+      status: homeAnnouncement.status || "",
+      description: homeAnnouncement.description || "",
+      participantCount: Number(homeAnnouncement.participantCount || 0),
+      tournamentId:
+        typeof homeAnnouncement.tournamentId === "number" &&
+        homeAnnouncement.tournamentId > 0
+          ? Number(homeAnnouncement.tournamentId)
+          : undefined,
+      isVisible: Boolean(homeAnnouncement.isVisible),
+    });
+  }, [homeAnnouncement]);
+
   const handleAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
@@ -637,6 +737,42 @@ export default function App() {
     setActiveTab("players");
   };
 
+  const saveHomeAnnouncement = async () => {
+    const safeTournamentId =
+      typeof homeAnnouncementForm.tournamentId === "number" &&
+      tournaments.some(
+        (tournament) =>
+          tournament.id === Number(homeAnnouncementForm.tournamentId)
+      )
+        ? Number(homeAnnouncementForm.tournamentId)
+        : 0;
+
+    const nextHomeAnnouncement: HomeAnnouncement = {
+      id: 1,
+      title: homeAnnouncementForm.title,
+      subtitle: homeAnnouncementForm.subtitle,
+      imageUrl: homeAnnouncementForm.imageUrl,
+      date: homeAnnouncementForm.date,
+      prize: homeAnnouncementForm.prize,
+      format: homeAnnouncementForm.format,
+      status: homeAnnouncementForm.status,
+      description: homeAnnouncementForm.description,
+      participantCount: Number(homeAnnouncementForm.participantCount || 0),
+      tournamentId: safeTournamentId,
+      isVisible: Boolean(homeAnnouncementForm.isVisible),
+    };
+
+    setHomeAnnouncement(nextHomeAnnouncement);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("homeAnnouncement", nextHomeAnnouncement);
+      }
+      showSaveToast("Home announcement saved");
+    } catch (error) {
+      console.error("Failed to save home announcement:", error);
+    }
+  };
   const handlePlayerAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !selectedPlayer) return;
@@ -1266,6 +1402,93 @@ export default function App() {
           )}
         </div>
 
+        {activeTab === "home" && (
+          <section className="home-announcement-page">
+            {!homeAnnouncement.isVisible ? (
+              <div className="panel">
+                <h2 className="panel-title">Home announcement is hidden</h2>
+                <p className="muted">
+                  Turn it on in Admin when you want to show the next tournament.
+                </p>
+              </div>
+            ) : (
+              <div
+                className="home-featured-banner"
+                style={{
+                  backgroundImage: homeAnnouncement.imageUrl
+                    ? `linear-gradient(90deg, rgba(5, 7, 14, 0.92) 0%, rgba(5, 7, 14, 0.72) 38%, rgba(5, 7, 14, 0.44) 62%, rgba(5, 7, 14, 0.88) 100%), url(${homeAnnouncement.imageUrl})`
+                    : "linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(76,29,149,0.9) 45%, rgba(190,24,93,0.82) 100%)",
+                }}
+              >
+                <div className="home-featured-overlay">
+                  <div className="home-featured-content">
+                    <p className="home-featured-kicker">Next tournament</p>
+                    <h2 className="home-featured-title">
+                      {homeAnnouncement.title || "Tournament announcement"}
+                    </h2>
+
+                    {homeAnnouncement.subtitle ? (
+                      <p className="home-featured-subtitle">
+                        {homeAnnouncement.subtitle}
+                      </p>
+                    ) : null}
+
+                    <div className="home-featured-meta">
+                      {homeAnnouncement.date ? (
+                        <span className="home-meta-pill">
+                          Date: {homeAnnouncement.date}
+                        </span>
+                      ) : null}
+                      {homeAnnouncement.format ? (
+                        <span className="home-meta-pill">
+                          Format: {homeAnnouncement.format}
+                        </span>
+                      ) : null}
+                      {homeAnnouncement.status ? (
+                        <span className="home-meta-pill">
+                          Status: {homeAnnouncement.status}
+                        </span>
+                      ) : null}
+                      {homeAnnouncement.prize ? (
+                        <span className="home-meta-pill">
+                          Prize: {homeAnnouncement.prize}
+                        </span>
+                      ) : null}
+                      {homeAnnouncement.participantCount > 0 ? (
+                        <span className="home-meta-pill">
+                          Players: {homeAnnouncement.participantCount}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {homeAnnouncement.description ? (
+                      <p className="home-featured-description">
+                        {homeAnnouncement.description}
+                      </p>
+                    ) : null}
+
+                    {homeAnnouncement.tournamentId ? (
+                      <div className="btn-row">
+                        <button
+                          className="primary-btn"
+                          onClick={() => {
+                            setSelectedTournamentId(
+                              Number(homeAnnouncement.tournamentId)
+                            );
+                            setActiveTab("tournaments");
+                          }}
+                        >
+                          Open tournament
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {activeTab === "players" && (
           <PlayersTab
             players={players}
@@ -1320,6 +1543,9 @@ export default function App() {
             tournaments={tournaments}
             matches={matches}
             achievements={achievements}
+            homeAnnouncementForm={homeAnnouncementForm}
+            setHomeAnnouncementForm={setHomeAnnouncementForm}
+            saveHomeAnnouncement={saveHomeAnnouncement}
             selectedPlayerId={selectedPlayerId}
             setSelectedPlayerId={setSelectedPlayerId}
             selectedTeamId={selectedTeamId}

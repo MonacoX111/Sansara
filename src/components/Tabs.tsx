@@ -6,7 +6,13 @@ type Props = {
   showAdmin?: boolean;
 };
 
-const baseTabs: TabKey[] = ["players", "teams", "tournaments", "leaderboard"];
+const baseTabs: TabKey[] = [
+  "home",
+  "players",
+  "teams",
+  "tournaments",
+  "leaderboard",
+];
 
 export default function Tabs({ active, onChange, showAdmin = false }: Props) {
   const tabs: TabKey[] = showAdmin ? [...baseTabs, "admin"] : baseTabs;

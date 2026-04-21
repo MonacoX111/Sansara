@@ -78,6 +78,21 @@ export type Achievement = {
   playerIds: number[];
 };
 
+export type HomeAnnouncement = {
+  id: number;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  date: string;
+  prize: string;
+  format: string;
+  status: string;
+  description: string;
+  participantCount: number;
+  tournamentId?: number;
+  isVisible: boolean;
+};
+
 export type GameItem = {
   id: string;
   name: string;
@@ -85,6 +100,7 @@ export type GameItem = {
 };
 
 export type TabKey =
+  | "home"
   | "players"
   | "teams"
   | "tournaments"
