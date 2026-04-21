@@ -299,6 +299,7 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   const [firebaseReady, setFirebaseReady] = useState(false);
   const [firebaseStatus, setFirebaseStatus] = useState("");
@@ -315,9 +316,16 @@ export default function App() {
     achievements.find(
       (achievement) => achievement.id === selectedAchievementId
     ) || null;
-
   const getSafeTeamId = (teamId: number) =>
     teams.some((team) => team.id === teamId) ? teamId : 0;
+
+  const showSaveToast = (text: string) => {
+    setSaveMessage(text);
+
+    window.setTimeout(() => {
+      setSaveMessage("");
+    }, 2000);
+  };
 
   useEffect(() => writeStorage("tm_players", players), [players]);
   useEffect(() => writeStorage("tm_teams", teams), [teams]);
@@ -695,7 +703,6 @@ export default function App() {
       rank: Number(playerForm.rank),
       elo: Number(playerForm.elo),
       bio: playerForm.bio,
-      isFeatured: Boolean(playerForm.isFeatured),
     };
 
     const nextPlayers = players.map((player) =>
@@ -713,6 +720,8 @@ export default function App() {
           saveItemsBatch("teams", nextTeams),
         ]);
       }
+
+      showSaveToast("Player saved");
     } catch (error) {
       console.error("Failed to save player:", error);
     }
@@ -842,6 +851,8 @@ export default function App() {
       if (isFirebaseConfigured) {
         await saveItem("teams", updatedTeam);
       }
+
+      showSaveToast("Team saved");
     } catch (error) {
       console.error("Failed to save team:", error);
     }
@@ -914,25 +925,10 @@ export default function App() {
       ? tournamentForm.participantIds.map(Number)
       : [];
 
-    const participantTeamIds = Array.from(
-      new Set(
-        players
-          .filter((player) => safeParticipantIds.includes(player.id))
-          .map((player) => Number(player.teamId))
-          .filter((teamId) => teamId > 0)
-      )
-    );
-
     const safeWinnerId =
       typeof tournamentForm.winnerId === "number" &&
       safeParticipantIds.includes(Number(tournamentForm.winnerId))
         ? Number(tournamentForm.winnerId)
-        : 0;
-
-    const safeWinnerTeamId =
-      typeof tournamentForm.winnerTeamId === "number" &&
-      participantTeamIds.includes(Number(tournamentForm.winnerTeamId))
-        ? Number(tournamentForm.winnerTeamId)
         : 0;
 
     const safeMvpId =
@@ -940,22 +936,6 @@ export default function App() {
       safeParticipantIds.includes(Number(tournamentForm.mvpId))
         ? Number(tournamentForm.mvpId)
         : 0;
-
-    const safePlacements = Array.isArray(tournamentForm.placements)
-      ? tournamentForm.placements
-          .filter(
-            (item) =>
-              item &&
-              typeof item.playerId === "number" &&
-              typeof item.place === "number" &&
-              safeParticipantIds.includes(Number(item.playerId)) &&
-              Number(item.place) > 0
-          )
-          .map((item) => ({
-            playerId: Number(item.playerId),
-            place: Number(item.place),
-          }))
-      : [];
 
     const updatedTournament: Tournament = {
       ...selectedTournament,
@@ -969,9 +949,10 @@ export default function App() {
       description: tournamentForm.description,
       participantIds: safeParticipantIds,
       winnerId: safeWinnerId,
-      winnerTeamId: safeWinnerTeamId,
       mvpId: safeMvpId,
-      placements: safePlacements,
+      placements: Array.isArray(selectedTournament.placements)
+        ? selectedTournament.placements
+        : [],
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
@@ -985,6 +966,8 @@ export default function App() {
       if (isFirebaseConfigured) {
         await saveItem("tournaments", updatedTournament);
       }
+
+      showSaveToast("Tournament saved");
     } catch (error) {
       console.error("Failed to save tournament:", error);
     }
@@ -1095,11 +1078,12 @@ export default function App() {
       if (isFirebaseConfigured) {
         await saveItem("matches", updatedMatch);
       }
+
+      showSaveToast("Match saved");
     } catch (error) {
       console.error("Failed to save match:", error);
     }
   };
-
   const addMatch = async () => {
     const newMatch: Match = {
       id: getNextId(matches),
@@ -1172,6 +1156,8 @@ export default function App() {
       if (isFirebaseConfigured) {
         await saveItem("achievements", updatedAchievement);
       }
+
+      showSaveToast("Achievement saved");
     } catch (error) {
       console.error("Failed to save achievement:", error);
     }
@@ -1345,6 +1331,8 @@ export default function App() {
             selectedAchievement={selectedAchievement}
           />
         )}
+
+        {saveMessage ? <div className="save-toast">{saveMessage}</div> : null}
 
         {showAdminLogin && (
           <div
