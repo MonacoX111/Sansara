@@ -57,10 +57,24 @@ export type Tournament = {
 export type Match = {
   id: number;
   game: string;
+
+  // режим матчу
+  matchType: "player" | "team";
+
+  // гравці
   player1: number;
   player2: number;
+
+  // команди
+  team1?: number;
+  team2?: number;
+
   score: string;
+
+  // переможці
   winnerId: number;
+  winnerTeamId?: number;
+
   tournamentId: number;
   date: string;
   status: MatchStatus;

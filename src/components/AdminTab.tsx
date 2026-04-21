@@ -55,10 +55,14 @@ type TournamentForm = {
 };
 type MatchForm = {
   game: string;
+  matchType: "player" | "team";
   player1: number;
   player2: number;
+  team1: number;
+  team2: number;
   score: string;
   winnerId: number;
+  winnerTeamId: number;
   tournamentId: number;
   date: string;
   status: MatchStatus;
@@ -243,6 +247,9 @@ export default function AdminTab({
     tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
     "No tournament";
 
+  const getTeamName = (teamId: number) =>
+    teams.find((team) => team.id === teamId)?.name || "Unknown team";
+
   const selectedTournament =
     tournaments.find((tournament) => tournament.id === selectedTournamentId) ||
     null;
@@ -302,6 +309,34 @@ export default function AdminTab({
     .map((playerId) => ({
       id: playerId,
       name: getPlayerName(playerId),
+    }));
+
+  const tournamentTeamPool =
+    matchForm.tournamentId && selectedTournament?.participantIds?.length
+      ? teams.filter((team) =>
+          players.some(
+            (player) =>
+              selectedTournament.participantIds.includes(player.id) &&
+              player.teamId === team.id
+          )
+        )
+      : teams;
+
+  const availableTeam1Options = tournamentTeamPool.filter(
+    (team) => team.id !== matchForm.team2
+  );
+
+  const availableTeam2Options = tournamentTeamPool.filter(
+    (team) => team.id !== matchForm.team1
+  );
+
+  const selectedWinnerTeamOptions = [matchForm.team1, matchForm.team2]
+    .filter(
+      (teamId, index, arr) => teamId !== 0 && arr.indexOf(teamId) === index
+    )
+    .map((teamId) => ({
+      id: teamId,
+      name: getTeamName(teamId),
     }));
 
   const [playerAdminSearch, setPlayerAdminSearch] = useState("");
@@ -1462,8 +1497,13 @@ export default function AdminTab({
                     selectedMatchId === match.id ? "admin-list-btn-active" : ""
                   }`}
                 >
-                  {getPlayerName(match.player1)} vs{" "}
-                  {getPlayerName(match.player2)}
+                  {match.matchType === "team"
+                    ? `${getTeamName(match.team1 || 0)} vs ${getTeamName(
+                        match.team2 || 0
+                      )}`
+                    : `${getPlayerName(match.player1)} vs ${getPlayerName(
+                        match.player2
+                      )}`}
                 </button>
               ))}
 
@@ -1477,6 +1517,29 @@ export default function AdminTab({
           <h2 className="panel-title">Edit match</h2>
 
           <div className="form-col">
+            <div className="field-block">
+              <label className="field-label">Match type</label>
+              <select
+                className="input"
+                value={matchForm.matchType}
+                onChange={(e) =>
+                  setMatchForm((prev) => ({
+                    ...prev,
+                    matchType: e.target.value as "player" | "team",
+                    player1: 0,
+                    player2: 0,
+                    team1: 0,
+                    team2: 0,
+                    winnerId: 0,
+                    winnerTeamId: 0,
+                  }))
+                }
+              >
+                <option value="player">Player vs Player</option>
+                <option value="team">Team vs Team</option>
+              </select>
+            </div>
+
             <div className="field-block">
               <label className="field-label">Tournament</label>
               <select
@@ -1507,10 +1570,36 @@ export default function AdminTab({
                     ? matchForm.player2
                     : 0;
 
+                  const nextTeamIds = Array.from(
+                    new Set(
+                      players
+                        .filter(
+                          (player) =>
+                            nextParticipantIds.includes(player.id) &&
+                            player.teamId > 0
+                        )
+                        .map((player) => player.teamId)
+                    )
+                  );
+
+                  const nextTeam1 = nextTeamIds.includes(matchForm.team1)
+                    ? matchForm.team1
+                    : 0;
+
+                  const nextTeam2 = nextTeamIds.includes(matchForm.team2)
+                    ? matchForm.team2
+                    : 0;
+
                   const nextWinnerId =
                     matchForm.winnerId === nextPlayer1 ||
                     matchForm.winnerId === nextPlayer2
                       ? matchForm.winnerId
+                      : 0;
+
+                  const nextWinnerTeamId =
+                    matchForm.winnerTeamId === nextTeam1 ||
+                    matchForm.winnerTeamId === nextTeam2
+                      ? matchForm.winnerTeamId
                       : 0;
 
                   setMatchForm((prev) => ({
@@ -1518,7 +1607,10 @@ export default function AdminTab({
                     tournamentId: nextTournamentId,
                     player1: nextPlayer1,
                     player2: nextPlayer2,
+                    team1: nextTeam1,
+                    team2: nextTeam2,
                     winnerId: nextWinnerId,
+                    winnerTeamId: nextWinnerTeamId,
                   }));
                 }}
               >
@@ -1563,65 +1655,127 @@ export default function AdminTab({
               </div>
             </div>
 
-            <div className="form-grid two">
-              <div className="field-block">
-                <label className="field-label">Player 1</label>
-                <select
-                  className="input"
-                  value={matchForm.player1}
-                  onChange={(e) => {
-                    const nextPlayer1 = Number(e.target.value);
-                    const nextWinnerId =
-                      matchForm.winnerId === nextPlayer1 ||
-                      matchForm.winnerId === matchForm.player2
-                        ? matchForm.winnerId
-                        : 0;
+            {matchForm.matchType === "player" ? (
+              <div className="form-grid two">
+                <div className="field-block">
+                  <label className="field-label">Player 1</label>
+                  <select
+                    className="input"
+                    value={matchForm.player1}
+                    onChange={(e) => {
+                      const nextPlayer1 = Number(e.target.value);
+                      const nextWinnerId =
+                        matchForm.winnerId === nextPlayer1 ||
+                        matchForm.winnerId === matchForm.player2
+                          ? matchForm.winnerId
+                          : 0;
 
-                    setMatchForm((prev) => ({
-                      ...prev,
-                      player1: nextPlayer1,
-                      winnerId: nextWinnerId,
-                    }));
-                  }}
-                >
-                  <option value={0}>Select player</option>
-                  {availablePlayer1Options.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.nickname}
-                    </option>
-                  ))}
-                </select>
+                      setMatchForm((prev) => ({
+                        ...prev,
+                        player1: nextPlayer1,
+                        winnerId: nextWinnerId,
+                      }));
+                    }}
+                  >
+                    <option value={0}>Select player</option>
+                    {availablePlayer1Options.map((player) => (
+                      <option key={player.id} value={player.id}>
+                        {player.nickname}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field-block">
+                  <label className="field-label">Player 2</label>
+                  <select
+                    className="input"
+                    value={matchForm.player2}
+                    onChange={(e) => {
+                      const nextPlayer2 = Number(e.target.value);
+                      const nextWinnerId =
+                        matchForm.winnerId === nextPlayer2 ||
+                        matchForm.winnerId === matchForm.player1
+                          ? matchForm.winnerId
+                          : 0;
+
+                      setMatchForm((prev) => ({
+                        ...prev,
+                        player2: nextPlayer2,
+                        winnerId: nextWinnerId,
+                      }));
+                    }}
+                  >
+                    <option value={0}>Select player</option>
+                    {availablePlayer2Options.map((player) => (
+                      <option key={player.id} value={player.id}>
+                        {player.nickname}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+            ) : (
+              <div className="form-grid two">
+                <div className="field-block">
+                  <label className="field-label">Team 1</label>
+                  <select
+                    className="input"
+                    value={matchForm.team1}
+                    onChange={(e) => {
+                      const nextTeam1 = Number(e.target.value);
+                      const nextWinnerTeamId =
+                        matchForm.winnerTeamId === nextTeam1 ||
+                        matchForm.winnerTeamId === matchForm.team2
+                          ? matchForm.winnerTeamId
+                          : 0;
 
-              <div className="field-block">
-                <label className="field-label">Player 2</label>
-                <select
-                  className="input"
-                  value={matchForm.player2}
-                  onChange={(e) => {
-                    const nextPlayer2 = Number(e.target.value);
-                    const nextWinnerId =
-                      matchForm.winnerId === nextPlayer2 ||
-                      matchForm.winnerId === matchForm.player1
-                        ? matchForm.winnerId
-                        : 0;
+                      setMatchForm((prev) => ({
+                        ...prev,
+                        team1: nextTeam1,
+                        winnerTeamId: nextWinnerTeamId,
+                      }));
+                    }}
+                  >
+                    <option value={0}>Select team</option>
+                    {availableTeam1Options.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    setMatchForm((prev) => ({
-                      ...prev,
-                      player2: nextPlayer2,
-                      winnerId: nextWinnerId,
-                    }));
-                  }}
-                >
-                  <option value={0}>Select player</option>
-                  {availablePlayer2Options.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.nickname}
-                    </option>
-                  ))}
-                </select>
+                <div className="field-block">
+                  <label className="field-label">Team 2</label>
+                  <select
+                    className="input"
+                    value={matchForm.team2}
+                    onChange={(e) => {
+                      const nextTeam2 = Number(e.target.value);
+                      const nextWinnerTeamId =
+                        matchForm.winnerTeamId === nextTeam2 ||
+                        matchForm.winnerTeamId === matchForm.team1
+                          ? matchForm.winnerTeamId
+                          : 0;
+
+                      setMatchForm((prev) => ({
+                        ...prev,
+                        team2: nextTeam2,
+                        winnerTeamId: nextWinnerTeamId,
+                      }));
+                    }}
+                  >
+                    <option value={0}>Select team</option>
+                    {availableTeam2Options.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="field-block">
               <label className="field-label">Score</label>
@@ -1638,32 +1792,61 @@ export default function AdminTab({
               />
             </div>
 
-            <div className="field-block">
-              <label className="field-label">Winner</label>
-              <select
-                className="input"
-                value={
-                  selectedWinnerOptions.some(
-                    (player) => player.id === matchForm.winnerId
-                  )
-                    ? matchForm.winnerId
-                    : 0
-                }
-                onChange={(e) =>
-                  setMatchForm((prev) => ({
-                    ...prev,
-                    winnerId: Number(e.target.value),
-                  }))
-                }
-              >
-                <option value={0}>Select winner</option>
-                {selectedWinnerOptions.map((player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {matchForm.matchType === "player" ? (
+              <div className="field-block">
+                <label className="field-label">Winner</label>
+                <select
+                  className="input"
+                  value={
+                    selectedWinnerOptions.some(
+                      (player) => player.id === matchForm.winnerId
+                    )
+                      ? matchForm.winnerId
+                      : 0
+                  }
+                  onChange={(e) =>
+                    setMatchForm((prev) => ({
+                      ...prev,
+                      winnerId: Number(e.target.value),
+                    }))
+                  }
+                >
+                  <option value={0}>Select winner</option>
+                  {selectedWinnerOptions.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="field-block">
+                <label className="field-label">Winning team</label>
+                <select
+                  className="input"
+                  value={
+                    selectedWinnerTeamOptions.some(
+                      (team) => team.id === matchForm.winnerTeamId
+                    )
+                      ? matchForm.winnerTeamId
+                      : 0
+                  }
+                  onChange={(e) =>
+                    setMatchForm((prev) => ({
+                      ...prev,
+                      winnerTeamId: Number(e.target.value),
+                    }))
+                  }
+                >
+                  <option value={0}>Select winning team</option>
+                  {selectedWinnerTeamOptions.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="form-grid two">
               <div className="field-block">

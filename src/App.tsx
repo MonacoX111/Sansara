@@ -87,10 +87,14 @@ type TournamentForm = {
 
 type MatchForm = {
   game: string;
+  matchType: "player" | "team";
   player1: number;
   player2: number;
+  team1: number;
+  team2: number;
   score: string;
   winnerId: number;
+  winnerTeamId: number;
   tournamentId: number;
   date: string;
   status: MatchStatus;
@@ -158,10 +162,14 @@ const createEmptyTournamentForm = (): TournamentForm => ({
 
 const createEmptyMatchForm = (): MatchForm => ({
   game: "",
+  matchType: "player",
   player1: 0,
   player2: 0,
+  team1: 0,
+  team2: 0,
   score: "",
   winnerId: 0,
+  winnerTeamId: 0,
   tournamentId: 0,
   date: "",
   status: "scheduled",
@@ -679,10 +687,14 @@ export default function App() {
 
     setMatchForm({
       game: selectedMatch.game,
+      matchType: selectedMatch.matchType || "player",
       player1: selectedMatch.player1,
       player2: selectedMatch.player2,
+      team1: Number(selectedMatch.team1 || 0),
+      team2: Number(selectedMatch.team2 || 0),
       score: selectedMatch.score,
       winnerId: selectedMatch.winnerId,
+      winnerTeamId: Number(selectedMatch.winnerTeamId || 0),
       tournamentId: selectedMatch.tournamentId,
       date: selectedMatch.date,
       status: selectedMatch.status,
@@ -1214,10 +1226,14 @@ export default function App() {
     const updatedMatch: Match = {
       ...selectedMatch,
       game: matchForm.game,
+      matchType: matchForm.matchType,
       player1: Number(matchForm.player1),
       player2: Number(matchForm.player2),
+      team1: Number(matchForm.team1),
+      team2: Number(matchForm.team2),
       score: matchForm.score,
       winnerId: Number(matchForm.winnerId),
+      winnerTeamId: Number(matchForm.winnerTeamId),
       tournamentId: Number(matchForm.tournamentId),
       date: matchForm.date,
       status: matchForm.status,
@@ -1243,14 +1259,19 @@ export default function App() {
       console.error("Failed to save match:", error);
     }
   };
+
   const addMatch = async () => {
     const newMatch: Match = {
       id: getNextId(matches),
       game: "",
+      matchType: "player",
       player1: 0,
       player2: 0,
+      team1: 0,
+      team2: 0,
       score: "",
       winnerId: 0,
+      winnerTeamId: 0,
       tournamentId: 0,
       date: "",
       status: "scheduled",
@@ -1330,13 +1351,6 @@ export default function App() {
       image: achievementPlaceholder("A"),
       playerIds: [],
     };
-
-    const upcomingMatches = matches
-      .filter((m) => m.status !== "completed")
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 5);
-
-    const topPlayers = [...players].sort((a, b) => b.elo - a.elo).slice(0, 5);
 
     setAchievements((prev) => [...prev, newAchievement]);
     setSelectedAchievementId(newAchievement.id);
