@@ -1,11 +1,16 @@
+export type ParticipantType = "player" | "team";
+
 export type Placement = {
-  playerId: number;
   place: number;
+  playerId?: number;
+  teamId?: number;
 };
 
 export type TournamentStatus = "draft" | "upcoming" | "ongoing" | "completed";
 
 export type MatchStatus = "scheduled" | "ongoing" | "completed" | "cancelled";
+
+export type MatchStage = "group" | "playoff" | "final" | "showmatch";
 
 export type Team = {
   id: number;
@@ -46,11 +51,17 @@ export type Tournament = {
   prize: string;
   description: string;
   imageUrl: string;
+
+  // хто бере участь у турнірі
+  participantType: ParticipantType;
   participantIds: number[];
+
+  // результати
   winnerId?: number;
   winnerTeamId?: number;
   mvpId?: number;
   placements: Placement[];
+
   isPublished: boolean;
 };
 
@@ -59,29 +70,36 @@ export type Match = {
   game: string;
 
   // режим матчу
-  matchType: "player" | "team";
+  matchType: ParticipantType;
 
-  // гравці
-  player1: number;
-  player2: number;
+  // player match
+  player1?: number;
+  player2?: number;
+  winnerId?: number;
 
-  // команди
+  // team match
   team1?: number;
   team2?: number;
+  winnerTeamId?: number;
 
   score: string;
 
-  // переможці
-  winnerId: number;
-  winnerTeamId?: number;
+  // прив’язка
+  tournamentId?: number;
 
-  tournamentId: number;
+  // базова інформація
   date: string;
   status: MatchStatus;
   round: string;
   bestOf: number;
   notes: string;
   eloApplied: boolean;
+
+  // нове для турнірної структури
+  stage?: MatchStage;
+  groupName?: string;
+  roundLabel?: string;
+  isPublished?: boolean;
 };
 
 export type Achievement = {

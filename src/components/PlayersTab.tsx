@@ -436,8 +436,8 @@ export default function PlayersTab({
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">
-                            {getPlayerName(match.player1)} vs{" "}
-                            {getPlayerName(match.player2)}
+                            {getPlayerName(match.player1 || 0)} vs{" "}
+                            {getPlayerName(match.player2 || 0)}
                           </div>
                           <div className="muted small">
                             {match.game} •{" "}
