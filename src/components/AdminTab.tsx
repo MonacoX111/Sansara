@@ -44,6 +44,7 @@ type TournamentForm = {
   date: string;
   prize: string;
   description: string;
+  imageUrl: string;
   participantIds: number[];
   winnerId?: number;
   winnerTeamId?: number;
@@ -423,6 +424,17 @@ export default function AdminTab({
       reader.readAsDataURL(file);
       event.target.value = "";
     };
+
+  const handleTournamentImageUpload = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value;
+
+    setTournamentForm((prev) => ({
+      ...prev,
+      imageUrl: value,
+    }));
+  };
 
   return (
     <div className="admin-wrap">
@@ -956,6 +968,30 @@ export default function AdminTab({
                   }))
                 }
               />
+            </div>
+            <div className="field-block">
+              <label className="field-label">Tournament Image</label>
+              <input
+                className="input"
+                type="text"
+                placeholder="Paste image URL..."
+                value={tournamentForm.imageUrl || ""}
+                onChange={handleTournamentImageUpload}
+              />
+
+              {tournamentForm.imageUrl ? (
+                <img
+                  src={tournamentForm.imageUrl}
+                  alt="Tournament preview"
+                  style={{
+                    marginTop: 10,
+                    width: "100%",
+                    maxHeight: 160,
+                    objectFit: "cover",
+                    borderRadius: 12,
+                  }}
+                />
+              ) : null}
             </div>
 
             <div className="field-block">

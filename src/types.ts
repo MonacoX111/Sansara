@@ -45,6 +45,7 @@ export type Tournament = {
   date: string;
   prize: string;
   description: string;
+  imageUrl: string;
   participantIds: number[];
   winnerId?: number;
   winnerTeamId?: number;

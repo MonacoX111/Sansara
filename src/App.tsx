@@ -75,6 +75,7 @@ type TournamentForm = {
   date: string;
   prize: string;
   description: string;
+  imageUrl: string;
   participantIds: number[];
   winnerId?: number;
   winnerTeamId?: number;
@@ -130,6 +131,7 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   date: "",
   prize: "",
   description: "",
+  imageUrl: "",
   participantIds: [],
   winnerId: undefined,
   winnerTeamId: undefined,
@@ -329,7 +331,18 @@ export default function App() {
 
   useEffect(() => writeStorage("tm_players", players), [players]);
   useEffect(() => writeStorage("tm_teams", teams), [teams]);
-  useEffect(() => writeStorage("tm_tournaments", tournaments), [tournaments]);
+  useEffect(() => {
+    const safeTournaments = tournaments.map((tournament) => ({
+      ...tournament,
+      imageUrl:
+        typeof tournament.imageUrl === "string" &&
+        tournament.imageUrl.startsWith("data:")
+          ? ""
+          : tournament.imageUrl || "",
+    }));
+
+    writeStorage("tm_tournaments", safeTournaments);
+  }, [tournaments]);
   useEffect(() => writeStorage("tm_matches", matches), [matches]);
   useEffect(
     () => writeStorage("tm_achievements", achievements),
@@ -543,6 +556,7 @@ export default function App() {
       date: selectedTournament.date,
       prize: selectedTournament.prize,
       description: selectedTournament.description || "",
+      imageUrl: selectedTournament.imageUrl || "",
       participantIds: Array.isArray(selectedTournament.participantIds)
         ? selectedTournament.participantIds.map(Number)
         : [],
@@ -947,14 +961,21 @@ export default function App() {
       date: tournamentForm.date,
       prize: tournamentForm.prize,
       description: tournamentForm.description,
+      imageUrl: tournamentForm.imageUrl,
       participantIds: safeParticipantIds,
       winnerId: safeWinnerId,
+      winnerTeamId:
+        typeof tournamentForm.winnerTeamId === "number"
+          ? Number(tournamentForm.winnerTeamId)
+          : 0,
       mvpId: safeMvpId,
-      placements: Array.isArray(selectedTournament.placements)
-        ? selectedTournament.placements
+      placements: Array.isArray(tournamentForm.placements)
+        ? tournamentForm.placements
         : [],
       isPublished: Boolean(tournamentForm.isPublished),
     };
+
+    console.log("UPDATED_TOURNAMENT", updatedTournament);
 
     setTournaments((prev) =>
       prev.map((tournament) =>
@@ -975,6 +996,7 @@ export default function App() {
 
   const addTournament = async () => {
     const newTournament: Tournament = {
+      imageUrl: "",
       id: getNextId(tournaments),
       title: "New Tournament",
       game: "",
@@ -1003,6 +1025,7 @@ export default function App() {
       date: "",
       prize: "",
       description: "",
+      imageUrl: "",
       participantIds: [],
       winnerId: undefined,
       winnerTeamId: undefined,
@@ -1274,7 +1297,11 @@ export default function App() {
         )}
 
         {activeTab === "tournaments" && (
-          <TournamentsTab tournaments={tournaments} players={players} />
+          <TournamentsTab
+            tournaments={tournaments}
+            players={players}
+            matches={matches}
+          />
         )}
 
         {activeTab === "leaderboard" && (

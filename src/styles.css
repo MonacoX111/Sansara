@@ -968,3 +968,219 @@ button {
     transform: translateY(8px);
   }
 }
+/* === TOURNAMENT PUBLIC VIEW === */
+
+.tournament-card-button {
+  cursor: pointer;
+  transition: 0.2s ease;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.tournament-card-button:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 59, 95, 0.4);
+  box-shadow: var(--shadow-red);
+}
+
+.tournament-card-footer {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* === HERO === */
+
+.tournament-public-view {
+  display: grid;
+  gap: 20px;
+}
+
+.tournament-hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 59, 95, 0.08), transparent 40%),
+    linear-gradient(225deg, rgba(67, 208, 255, 0.06), transparent 40%),
+    var(--panel);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-red), var(--shadow-blue);
+}
+
+.tournament-hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tournament-hero-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.tournament-hero-title {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tournament-hero-subtitle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tournament-hero-description {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.tournament-hero-side {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.tournament-stat-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* === SECTIONS === */
+
+.tournament-sections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tournament-section {
+  display: grid;
+  gap: 12px;
+}
+
+.tournament-section-full {
+  grid-column: span 2;
+}
+
+/* === PARTICIPANTS === */
+
+.tournament-participants {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.participant-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  transition: 0.2s ease;
+}
+
+.participant-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 59, 95, 0.35);
+  box-shadow: var(--shadow-red);
+}
+
+/* === PLACEMENTS === */
+
+.tournament-placements {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+/* === BACK BUTTON === */
+
+.ghost-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.ghost-btn:hover {
+  border-color: rgba(255, 59, 95, 0.4);
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 900px) {
+  .tournament-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-sections-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-section-full {
+    grid-column: span 1;
+  }
+
+  .tournament-participants {
+    grid-template-columns: 1fr;
+  }
+}
+.tournament-hero-image-note {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ebedf2;
+  font-size: 12px;
+}
+.tournament-cover-section {
+  margin-top: 16px;
+}
+
+.tournament-cover-image {
+  width: 100%;
+  display: block;
+  margin-top: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  max-height: 460px;
+  object-fit: cover;
+}
+
+.tournament-matches {
+  display: grid;
+  gap: 12px;
+}
+
+.match-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+}
