@@ -1363,3 +1363,124 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.home-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-block {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+}
+
+.match-card.new {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.02)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: 0.2s ease;
+}
+
+.match-card.new:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 59, 95, 0.35);
+}
+
+.match-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.match-center {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team-name {
+  font-weight: 700;
+}
+
+.vs-big {
+  font-weight: 800;
+  opacity: 0.6;
+}
+
+.match-bottom {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.player-row.new {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.player-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank-box-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--red), var(--red-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex: 0 0 32px;
+}
+
+.top-player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex: 0 0 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.elo-box {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(67, 208, 255, 0.12);
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.top-player {
+  border-color: rgba(255, 190, 61, 0.4);
+}

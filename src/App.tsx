@@ -1523,12 +1523,12 @@ export default function App() {
                 </div>
 
                 <div className="home-grid">
-                  <div className="panel">
+                  <div className="panel home-panel">
                     <h2 className="panel-title">Upcoming Matches</h2>
 
                     {matches.filter((m) => m.status !== "completed").length ===
                     0 ? (
-                      <p className="muted">No upcoming matches</p>
+                      <div className="empty-block">No upcoming matches</div>
                     ) : (
                       <div className="list-col">
                         {matches
@@ -1548,18 +1548,34 @@ export default function App() {
                             );
 
                             return (
-                              <div key={match.id} className="match-card">
-                                <div className="match-players">
-                                  <span>{p1?.nickname || "Player 1"}</span>
-                                  <span className="vs">vs</span>
-                                  <span>{p2?.nickname || "Player 2"}</span>
-                                </div>
-
-                                <div className="match-meta">
-                                  <span>{match.round}</span>
-                                  <span>
+                              <div key={match.id} className="match-card new">
+                                <div className="match-top">
+                                  <span className="pill light">
+                                    {match.round}
+                                  </span>
+                                  <span className="pill">
                                     {match.bestOf ? `BO${match.bestOf}` : ""}
                                   </span>
+                                </div>
+
+                                <div className="match-center">
+                                  <div className="team-side">
+                                    <div className="team-name">
+                                      {p1?.nickname || "Player 1"}
+                                    </div>
+                                  </div>
+
+                                  <div className="vs-big">VS</div>
+
+                                  <div className="team-side">
+                                    <div className="team-name">
+                                      {p2?.nickname || "Player 2"}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="match-bottom">
+                                  {match.date || "TBD"}
                                 </div>
                               </div>
                             );
@@ -1568,7 +1584,7 @@ export default function App() {
                     )}
                   </div>
 
-                  <div className="panel">
+                  <div className="panel home-panel">
                     <h2 className="panel-title">Top Players</h2>
 
                     <div className="list-col">
@@ -1576,10 +1592,33 @@ export default function App() {
                         .sort((a, b) => b.elo - a.elo)
                         .slice(0, 5)
                         .map((player: Player, index: number) => (
-                          <div key={player.id} className="player-row">
-                            <span className="rank">#{index + 1}</span>
-                            <span>{player.nickname}</span>
-                            <span className="elo">{player.elo}</span>
+                          <div
+                            key={player.id}
+                            className={`player-row new ${
+                              index < 3 ? "top-player" : ""
+                            }`}
+                          >
+                            <div className="player-left">
+                              <div className="rank-box-small">#{index + 1}</div>
+
+                              {player.avatar ? (
+                                <img
+                                  src={player.avatar}
+                                  alt={player.nickname}
+                                  className="top-player-avatar"
+                                />
+                              ) : (
+                                <div className="avatar-placeholder">
+                                  {player.nickname.charAt(0)}
+                                </div>
+                              )}
+
+                              <div className="player-name">
+                                {player.nickname}
+                              </div>
+                            </div>
+
+                            <div className="elo-box">{player.elo}</div>
                           </div>
                         ))}
                     </div>
