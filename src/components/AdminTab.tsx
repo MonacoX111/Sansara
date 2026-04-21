@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 import {
   Achievement,
   Match,
@@ -294,6 +294,18 @@ export default function AdminTab({
       name: getPlayerName(playerId),
     }));
 
+  const [playerAdminSearch, setPlayerAdminSearch] = useState("");
+
+  const filteredAdminPlayers = players.filter((player) => {
+    const q = playerAdminSearch.toLowerCase().trim();
+    if (!q) return true;
+
+    return (
+      player.nickname.toLowerCase().includes(q) ||
+      player.fullName.toLowerCase().includes(q)
+    );
+  });
+
   const toggleTournamentParticipant = (playerId: number) => {
     setTournamentForm((prev) => {
       const currentIds = Array.isArray(prev.participantIds)
@@ -418,22 +430,39 @@ export default function AdminTab({
         <div className="panel">
           <h2 className="panel-title">Players (admin)</h2>
 
-          <div className="list-col">
-            {players.map((player) => (
-              <button
-                key={player.id}
-                onClick={() => setSelectedPlayerId(player.id)}
-                className={`admin-list-btn ${
-                  selectedPlayerId === player.id ? "admin-list-btn-active" : ""
-                }`}
-              >
-                {player.nickname || "Player"}
-              </button>
-            ))}
+          <div className="form-col">
+            <div className="field-block">
+              <label className="field-label">Search player</label>
+              <input
+                className="input"
+                placeholder="Search by nickname or full name"
+                value={playerAdminSearch}
+                onChange={(e) => setPlayerAdminSearch(e.target.value)}
+              />
+            </div>
 
-            <button className="secondary-btn add-list-btn" onClick={addPlayer}>
-              + Add player
-            </button>
+            <div className="list-col">
+              {filteredAdminPlayers.map((player) => (
+                <button
+                  key={player.id}
+                  onClick={() => setSelectedPlayerId(player.id)}
+                  className={`admin-list-btn ${
+                    selectedPlayerId === player.id
+                      ? "admin-list-btn-active"
+                      : ""
+                  }`}
+                >
+                  {player.nickname || "Player"}
+                </button>
+              ))}
+
+              <button
+                className="secondary-btn add-list-btn"
+                onClick={addPlayer}
+              >
+                + Add player
+              </button>
+            </div>
           </div>
         </div>
 
