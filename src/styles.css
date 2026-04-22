@@ -307,9 +307,12 @@ button {
   border-radius: 20px;
   padding: 15px;
   text-align: left;
+  transition: transform 0.24s ease, box-shadow 0.24s ease,
+    border-color 0.24s ease, background 0.24s ease;
 }
 
 .player-card:hover,
+.simple-card:hover,
 .button-card:hover,
 .admin-list-btn:hover {
   transform: translateY(-2px);
@@ -3094,7 +3097,8 @@ button {
 .match-card.new,
 .tournament-match-card,
 .team-roster-card,
-.team-history-card {
+.team-history-card,
+.tournament-history-card {
   transition: transform 0.24s ease, box-shadow 0.24s ease,
     border-color 0.24s ease, background 0.24s ease;
 }
@@ -3103,7 +3107,8 @@ button {
 .match-card.new:hover,
 .tournament-match-card:hover,
 .team-roster-card:hover,
-.team-history-card:hover {
+.team-history-card:hover,
+.tournament-history-card:hover {
   transform: translateY(-2px);
   border-color: rgba(255, 59, 95, 0.28);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24), 0 0 20px rgba(255, 59, 95, 0.1);
@@ -3155,6 +3160,7 @@ button {
 /* ===== PREMIUM MOVING GLOW HOVER ===== */
 
 .player-card,
+.simple-card,
 .button-card,
 .admin-list-btn,
 .leader-row,
@@ -3179,6 +3185,7 @@ button {
 }
 
 .player-card::before,
+.simple-card::before,
 .button-card::before,
 .admin-list-btn::before,
 .leader-row::before,
@@ -3220,6 +3227,7 @@ button {
 }
 
 .player-card:hover::before,
+.simple-card:hover::before,
 .button-card:hover::before,
 .admin-list-btn:hover::before,
 .leader-row:hover::before,
@@ -3245,6 +3253,7 @@ button {
 
 /* щоб контент був поверх світла */
 .player-card > *,
+.simple-card > *,
 .button-card > *,
 .admin-list-btn > *,
 .leader-row > *,
@@ -3501,13 +3510,14 @@ button {
 
 .leader-row:active,
 .player-card:active,
+.simple-card:active,
 .button-card:active,
 .team-roster-card:active,
 .team-history-card:active,
 .tournament-card-button:active,
 .match-card:active,
 .result-card:active,
-.history-card:active {
+.tournament-history-card:active {
   transform: scale(0.97);
   box-shadow: none;
 }
@@ -3515,11 +3525,13 @@ button {
 
 .leaderboard-clickable,
 .player-card,
+.simple-card,
 .button-card,
 .admin-list-btn,
 .tournament-card-button,
 .match-card,
-.result-card {
+.result-card,
+.tournament-history-card {
   cursor: pointer;
 }
 /* ===== TAB CONTENT ANIMATION ===== */
@@ -3611,25 +3623,4 @@ button {
   100% {
     background-position: 0 0, 0 0, 0% 50%;
   }
-}
-/* ===== HISTORY + MATCHES HOVER ===== */
-
-.history-card,
-.match-card,
-.result-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.history-card:hover,
-.match-card:hover,
-.result-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 59, 95, 0.28);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), 0 0 20px rgba(255, 59, 95, 0.08);
-}
-.history-card,
-.match-card,
-.result-card {
-  cursor: pointer;
 }
