@@ -574,6 +574,10 @@ export default function App() {
       return;
     }
 
+    if (selectedMatchId === 0) {
+      return;
+    }
+
     if (!matches.some((match) => match.id === selectedMatchId)) {
       setSelectedMatchId(matches[0].id);
     }
@@ -686,7 +690,6 @@ export default function App() {
 
   useEffect(() => {
     if (!selectedMatch) {
-      setMatchForm(createEmptyMatchForm());
       return;
     }
 
@@ -1274,11 +1277,16 @@ export default function App() {
     }
   };
 
-  const addMatch = async () => {
+  const addMatch = async (tournamentId = 0) => {
+    const selectedMatchTournament =
+      tournaments.find(
+        (tournament) => tournament.id === Number(tournamentId)
+      ) || null;
+
     const newMatch: Match = {
       id: getNextId(matches),
-      game: "",
-      matchType: "player",
+      game: selectedMatchTournament?.game || "",
+      matchType: selectedMatchTournament?.participantType || "player",
       player1: 0,
       player2: 0,
       team1: 0,
@@ -1286,7 +1294,7 @@ export default function App() {
       score: "",
       winnerId: 0,
       winnerTeamId: 0,
-      tournamentId: 0,
+      tournamentId: Number(tournamentId || 0),
       date: "",
       status: "scheduled",
       round: "",
@@ -1297,7 +1305,24 @@ export default function App() {
 
     setMatches((prev) => [...prev, newMatch]);
     setSelectedMatchId(newMatch.id);
-    setMatchForm(createEmptyMatchForm());
+    setMatchForm({
+      game: selectedMatchTournament?.game || "",
+      matchType: selectedMatchTournament?.participantType || "player",
+      player1: 0,
+      player2: 0,
+      team1: 0,
+      team2: 0,
+      score: "",
+      winnerId: 0,
+      winnerTeamId: 0,
+      tournamentId: Number(tournamentId || 0),
+      date: "",
+      status: "scheduled",
+      round: "",
+      bestOf: 1,
+      notes: "",
+      eloApplied: false,
+    });
 
     try {
       if (isFirebaseConfigured) {
@@ -1684,19 +1709,59 @@ export default function App() {
                           .sort((a, b) => b.id - a.id)
                           .slice(0, 5)
                           .map((match: Match) => {
-                            const p1 = players.find(
-                              (p) => p.id === match.player1
-                            );
-                            const p2 = players.find(
-                              (p) => p.id === match.player2
-                            );
                             const tournament = tournaments.find(
                               (t) => t.id === match.tournamentId
                             );
 
-                            const winnerLeft = match.winnerId === match.player1;
-                            const winnerRight =
-                              match.winnerId === match.player2;
+                            const isTeamMatch = match.matchType === "team";
+
+                            const leftEntity = isTeamMatch
+                              ? teams.find((t) => t.id === match.team1)
+                              : players.find((p) => p.id === match.player1);
+
+                            const rightEntity = isTeamMatch
+                              ? teams.find((t) => t.id === match.team2)
+                              : players.find((p) => p.id === match.player2);
+
+                            const leftName = isTeamMatch
+                              ? leftEntity && "name" in leftEntity
+                                ? leftEntity.name
+                                : "Team 1"
+                              : leftEntity && "nickname" in leftEntity
+                              ? leftEntity.nickname
+                              : "Player 1";
+
+                            const rightName = isTeamMatch
+                              ? rightEntity && "name" in rightEntity
+                                ? rightEntity.name
+                                : "Team 2"
+                              : rightEntity && "nickname" in rightEntity
+                              ? rightEntity.nickname
+                              : "Player 2";
+
+                            const leftImage = isTeamMatch
+                              ? leftEntity && "logo" in leftEntity
+                                ? leftEntity.logo
+                                : ""
+                              : leftEntity && "avatar" in leftEntity
+                              ? leftEntity.avatar
+                              : "";
+
+                            const rightImage = isTeamMatch
+                              ? rightEntity && "logo" in rightEntity
+                                ? rightEntity.logo
+                                : ""
+                              : rightEntity && "avatar" in rightEntity
+                              ? rightEntity.avatar
+                              : "";
+
+                            const winnerLeft = isTeamMatch
+                              ? match.winnerTeamId === match.team1
+                              : match.winnerId === match.player1;
+
+                            const winnerRight = isTeamMatch
+                              ? match.winnerTeamId === match.team2
+                              : match.winnerId === match.player2;
 
                             return (
                               <div
@@ -1716,15 +1781,15 @@ export default function App() {
                               >
                                 <div className="result-row">
                                   <div className="result-player-side left">
-                                    {p1?.avatar ? (
+                                    {leftImage ? (
                                       <img
-                                        src={p1.avatar}
-                                        alt={p1.nickname}
+                                        src={leftImage}
+                                        alt={leftName}
                                         className="result-avatar"
                                       />
                                     ) : (
                                       <div className="result-avatar-placeholder">
-                                        {p1?.nickname?.charAt(0) || "P"}
+                                        {leftName.charAt(0) || "P"}
                                       </div>
                                     )}
 
@@ -1733,7 +1798,7 @@ export default function App() {
                                         winnerLeft ? "winner" : ""
                                       }`}
                                     >
-                                      {p1?.nickname || "Player 1"}
+                                      {leftName}
                                     </div>
                                   </div>
 
@@ -1749,18 +1814,18 @@ export default function App() {
                                         winnerRight ? "winner" : ""
                                       }`}
                                     >
-                                      {p2?.nickname || "Player 2"}
+                                      {rightName}
                                     </div>
 
-                                    {p2?.avatar ? (
+                                    {rightImage ? (
                                       <img
-                                        src={p2.avatar}
-                                        alt={p2.nickname}
+                                        src={rightImage}
+                                        alt={rightName}
                                         className="result-avatar"
                                       />
                                     ) : (
                                       <div className="result-avatar-placeholder">
-                                        {p2?.nickname?.charAt(0) || "P"}
+                                        {rightName.charAt(0) || "P"}
                                       </div>
                                     )}
                                   </div>

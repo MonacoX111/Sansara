@@ -129,7 +129,7 @@ type Props = {
   deleteTournament: () => void;
 
   saveMatch: () => void;
-  addMatch: () => void;
+  addMatch: (tournamentId?: number) => void;
   deleteMatch: () => void;
 
   saveAchievement: (id: number, updates: Partial<Achievement>) => void;
@@ -285,21 +285,27 @@ export default function AdminTab({
       ? Number(tournamentForm.mvpId)
       : "";
 
+  const [playerAdminSearch, setPlayerAdminSearch] = useState("");
+  const [matchTournamentFilterId, setMatchTournamentFilterId] = useState(0);
+
+  const selectedMatchTournament =
+    tournaments.find(
+      (tournament) => tournament.id === matchTournamentFilterId
+    ) || null;
+
   const tournamentPlayerPool =
-    matchForm.tournamentId &&
-    selectedTournament?.participantType === "player" &&
-    selectedTournament?.participantIds?.length
+    selectedMatchTournament?.participantType === "player" &&
+    selectedMatchTournament?.participantIds?.length
       ? players.filter((player) =>
-          selectedTournament.participantIds.includes(player.id)
+          selectedMatchTournament.participantIds.includes(player.id)
         )
       : players;
 
   const tournamentTeamPool =
-    matchForm.tournamentId &&
-    selectedTournament?.participantType === "team" &&
-    selectedTournament?.participantIds?.length
+    selectedMatchTournament?.participantType === "team" &&
+    selectedMatchTournament?.participantIds?.length
       ? teams.filter((team) =>
-          selectedTournament.participantIds.includes(team.id)
+          selectedMatchTournament.participantIds.includes(team.id)
         )
       : teams;
 
@@ -337,9 +343,6 @@ export default function AdminTab({
       id: teamId,
       name: getTeamName(teamId),
     }));
-
-  const [playerAdminSearch, setPlayerAdminSearch] = useState("");
-  const [matchTournamentFilterId, setMatchTournamentFilterId] = useState(0);
 
   const filteredAdminPlayers = players.filter((player) => {
     const q = playerAdminSearch.toLowerCase().trim();
@@ -389,77 +392,6 @@ export default function AdminTab({
 
   const handleTournamentSelect = (tournamentId: number) => {
     setSelectedTournamentId(tournamentId);
-
-    if (matchForm.tournamentId === tournamentId) return;
-
-    const nextTournament =
-      tournaments.find((tournament) => tournament.id === tournamentId) || null;
-
-    if (!nextTournament) {
-      setMatchForm((prev) => ({
-        ...prev,
-        tournamentId: 0,
-        matchType: "player",
-        player1: 0,
-        player2: 0,
-        team1: 0,
-        team2: 0,
-        winnerId: 0,
-        winnerTeamId: 0,
-      }));
-      return;
-    }
-
-    const participantIds = Array.isArray(nextTournament.participantIds)
-      ? nextTournament.participantIds
-      : [];
-
-    const nextParticipantType = nextTournament.participantType || "player";
-
-    const nextPlayer1 =
-      nextParticipantType === "player" &&
-      participantIds.includes(matchForm.player1)
-        ? matchForm.player1
-        : 0;
-
-    const nextPlayer2 =
-      nextParticipantType === "player" &&
-      participantIds.includes(matchForm.player2)
-        ? matchForm.player2
-        : 0;
-
-    const nextTeam1 =
-      nextParticipantType === "team" && participantIds.includes(matchForm.team1)
-        ? matchForm.team1
-        : 0;
-
-    const nextTeam2 =
-      nextParticipantType === "team" && participantIds.includes(matchForm.team2)
-        ? matchForm.team2
-        : 0;
-
-    const nextWinnerId =
-      matchForm.winnerId === nextPlayer1 || matchForm.winnerId === nextPlayer2
-        ? matchForm.winnerId
-        : 0;
-
-    const nextWinnerTeamId =
-      matchForm.winnerTeamId === nextTeam1 ||
-      matchForm.winnerTeamId === nextTeam2
-        ? matchForm.winnerTeamId
-        : 0;
-
-    setMatchForm((prev) => ({
-      ...prev,
-      tournamentId,
-      matchType: nextParticipantType,
-      player1: nextPlayer1,
-      player2: nextPlayer2,
-      team1: nextTeam1,
-      team2: nextTeam2,
-      winnerId: nextWinnerId,
-      winnerTeamId: nextWinnerTeamId,
-    }));
   };
 
   const handleAchievementImageUpload =
@@ -1534,9 +1466,35 @@ export default function AdminTab({
             <select
               className="input"
               value={matchTournamentFilterId}
-              onChange={(e) =>
-                setMatchTournamentFilterId(Number(e.target.value))
-              }
+              onChange={(e) => {
+                const nextTournamentId = Number(e.target.value);
+                const nextTournament =
+                  tournaments.find(
+                    (tournament) => tournament.id === nextTournamentId
+                  ) || null;
+
+                setMatchTournamentFilterId(nextTournamentId);
+                setSelectedMatchId(0);
+
+                setMatchForm({
+                  game: nextTournament?.game || "",
+                  matchType: nextTournament?.participantType || "player",
+                  player1: 0,
+                  player2: 0,
+                  team1: 0,
+                  team2: 0,
+                  score: "",
+                  winnerId: 0,
+                  winnerTeamId: 0,
+                  tournamentId: nextTournamentId,
+                  date: "",
+                  status: "scheduled",
+                  round: "",
+                  bestOf: 1,
+                  notes: "",
+                  eloApplied: false,
+                });
+              }}
             >
               <option value={0}>Select tournament</option>
               {tournaments.map((t) => (
@@ -1576,7 +1534,10 @@ export default function AdminTab({
                 </button>
               ))}
 
-            <button className="secondary-btn add-list-btn" onClick={addMatch}>
+            <button
+              className="secondary-btn add-list-btn"
+              onClick={() => addMatch(matchTournamentFilterId)}
+            >
               + Add match
             </button>
           </div>
@@ -1591,9 +1552,8 @@ export default function AdminTab({
               <select
                 className="input"
                 value={
-                  matchForm.tournamentId && selectedTournament?.participantType
-                    ? selectedTournament.participantType
-                    : matchForm.matchType
+                  selectedMatchTournament?.participantType ||
+                  matchForm.matchType
                 }
                 onChange={(e) =>
                   setMatchForm((prev) => ({
@@ -1607,7 +1567,7 @@ export default function AdminTab({
                     winnerTeamId: 0,
                   }))
                 }
-                disabled={Boolean(matchForm.tournamentId && selectedTournament)}
+                disabled={Boolean(selectedMatchTournament)}
               >
                 <option value="player">Player vs Player</option>
                 <option value="team">Team vs Team</option>
@@ -1616,74 +1576,7 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Tournament</label>
-              <select
-                className="input"
-                value={matchForm.tournamentId}
-                onChange={(e) => {
-                  const nextTournamentId = Number(e.target.value);
-                  const nextTournament =
-                    tournaments.find(
-                      (tournament) => tournament.id === nextTournamentId
-                    ) || null;
-
-                  const nextParticipantIds =
-                    nextTournament &&
-                    Array.isArray(nextTournament.participantIds)
-                      ? nextTournament.participantIds
-                      : [];
-
-                  const nextParticipantType =
-                    nextTournament?.participantType || "player";
-
-                  const nextPlayer1 =
-                    nextParticipantType === "player" &&
-                    nextParticipantIds.includes(matchForm.player1)
-                      ? matchForm.player1
-                      : 0;
-
-                  const nextPlayer2 =
-                    nextParticipantType === "player" &&
-                    nextParticipantIds.includes(matchForm.player2)
-                      ? matchForm.player2
-                      : 0;
-
-                  const nextTeam1 =
-                    nextParticipantType === "team" &&
-                    nextParticipantIds.includes(matchForm.team1)
-                      ? matchForm.team1
-                      : 0;
-
-                  const nextTeam2 =
-                    nextParticipantType === "team" &&
-                    nextParticipantIds.includes(matchForm.team2)
-                      ? matchForm.team2
-                      : 0;
-
-                  const nextWinnerId =
-                    matchForm.winnerId === nextPlayer1 ||
-                    matchForm.winnerId === nextPlayer2
-                      ? matchForm.winnerId
-                      : 0;
-
-                  const nextWinnerTeamId =
-                    matchForm.winnerTeamId === nextTeam1 ||
-                    matchForm.winnerTeamId === nextTeam2
-                      ? matchForm.winnerTeamId
-                      : 0;
-
-                  setMatchForm((prev) => ({
-                    ...prev,
-                    tournamentId: nextTournamentId,
-                    matchType: nextParticipantType,
-                    player1: nextPlayer1,
-                    player2: nextPlayer2,
-                    team1: nextTeam1,
-                    team2: nextTeam2,
-                    winnerId: nextWinnerId,
-                    winnerTeamId: nextWinnerTeamId,
-                  }));
-                }}
-              >
+              <select className="input" value={matchForm.tournamentId} disabled>
                 <option value={0}>No tournament</option>
                 {tournaments.map((tournament) => (
                   <option key={tournament.id} value={tournament.id}>
