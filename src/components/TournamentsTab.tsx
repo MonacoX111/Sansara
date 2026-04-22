@@ -143,12 +143,12 @@ export default function TournamentsTab({
             <button
               key={tournament.id}
               type="button"
-              className="simple-card tournament-card-button"
+              className="simple-card tournament-card-button tournament-history-card"
               onClick={() => setSelectedTournamentId(tournament.id)}
               style={
                 tournament.imageUrl
                   ? {
-                      backgroundImage: `linear-gradient(rgba(7, 9, 13, 0.7), rgba(7, 9, 13, 0.88)), url(${tournament.imageUrl})`,
+                      backgroundImage: `linear-gradient(rgba(7, 9, 13, 0.52), rgba(7, 9, 13, 0.86)), url(${tournament.imageUrl})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
@@ -156,41 +156,72 @@ export default function TournamentsTab({
                   : undefined
               }
             >
-              <div className="row-between">
-                <div>
-                  <div className="achievement-title">{tournament.title}</div>
-                  <div className="muted small">
-                    {tournament.game} • {tournament.type}
+              <div className="tournament-history-overlay">
+                <div className="tournament-history-top">
+                  <div className="tournament-history-head">
+                    <div className="tournament-history-title">
+                      {tournament.title}
+                    </div>
+
+                    <div className="tournament-history-subtitle">
+                      <span className="history-meta-pill">
+                        {tournament.game || "—"}
+                      </span>
+                      <span className="history-meta-pill">
+                        {tournament.type || "—"}
+                      </span>
+                      {tournament.format ? (
+                        <span className="history-meta-pill">
+                          {tournament.format}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <span className="pill light tournament-history-prize">
+                    {tournament.prize || "No prize"}
+                  </span>
+                </div>
+
+                <div className="tournament-history-info-grid">
+                  <div className="tournament-history-info-card">
+                    <span className="tournament-history-label">Date</span>
+                    <span className="tournament-history-value">
+                      {tournament.date || "—"}
+                    </span>
+                  </div>
+
+                  <div className="tournament-history-info-card">
+                    <span className="tournament-history-label">Winner</span>
+                    <span className="tournament-history-value">
+                      {tournament.participantType === "team"
+                        ? getTeamName(tournament.winnerTeamId)
+                        : getPlayerName(tournament.winnerId)}
+                    </span>
+                  </div>
+
+                  <div className="tournament-history-info-card">
+                    <span className="tournament-history-label">MVP</span>
+                    <span className="tournament-history-value">
+                      {getPlayerName(tournament.mvpId)}
+                    </span>
+                  </div>
+
+                  <div className="tournament-history-info-card">
+                    <span className="tournament-history-label">
+                      Participants
+                    </span>
+                    <span className="tournament-history-value">
+                      {Array.isArray(tournament.participantIds)
+                        ? tournament.participantIds.length
+                        : 0}
+                    </span>
                   </div>
                 </div>
 
-                <span className="pill light">{tournament.prize}</span>
-              </div>
-
-              <div className="tour-meta">
-                <div>
-                  <span className="muted">Date:</span> {tournament.date || "—"}
+                <div className="tournament-card-footer upgraded">
+                  <span className="tournament-open-pill">Open tournament</span>
                 </div>
-                <div>
-                  <span className="muted">Winner:</span>{" "}
-                  {tournament.participantType === "team"
-                    ? getTeamName(tournament.winnerTeamId)
-                    : getPlayerName(tournament.winnerId)}
-                </div>
-                <div>
-                  <span className="muted">MVP:</span>{" "}
-                  {getPlayerName(tournament.mvpId)}
-                </div>
-                <div>
-                  <span className="muted">Participants:</span>{" "}
-                  {Array.isArray(tournament.participantIds)
-                    ? tournament.participantIds.length
-                    : 0}
-                </div>
-              </div>
-
-              <div className="tournament-card-footer">
-                <span className="pill">Open tournament</span>
               </div>
             </button>
           ))}

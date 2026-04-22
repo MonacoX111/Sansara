@@ -2053,6 +2053,8 @@ export default function App() {
           <TeamsTab
             teams={teams}
             players={players}
+            tournaments={tournaments}
+            matches={matches}
             selectedTeamId={selectedTeamId}
             setSelectedTeamId={setSelectedTeamId}
           />
