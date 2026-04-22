@@ -1484,3 +1484,61 @@ button {
 .top-player {
   border-color: rgba(255, 190, 61, 0.4);
 }
+.champion-panel {
+  grid-column: span 2;
+}
+
+.champion-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 190, 61, 0.08),
+    rgba(255, 59, 95, 0.08)
+  );
+  box-shadow: 0 0 25px rgba(255, 190, 61, 0.15);
+}
+
+.champion-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.champion-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 190, 61, 0.5);
+}
+
+.champion-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.champion-name {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.champion-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.champion-badge {
+  font-size: 28px;
+}

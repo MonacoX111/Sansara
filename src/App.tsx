@@ -1523,6 +1523,75 @@ export default function App() {
                 </div>
 
                 <div className="home-grid">
+                  {tournaments.filter((t) => t.status === "completed").length >
+                    0 && (
+                    <div className="panel champion-panel">
+                      <h2 className="panel-title">Last Champion</h2>
+
+                      {(() => {
+                        const lastTournament = [...tournaments]
+                          .filter((t) => t.status === "completed")
+                          .sort(
+                            (a, b) =>
+                              new Date(b.date).getTime() -
+                              new Date(a.date).getTime()
+                          )[0];
+
+                        const winner =
+                          lastTournament.participantType === "team"
+                            ? teams.find(
+                                (team) =>
+                                  team.id === lastTournament.winnerTeamId
+                              )
+                            : players.find(
+                                (player) =>
+                                  player.id === lastTournament.winnerId
+                              );
+
+                        const winnerName = winner
+                          ? "name" in winner
+                            ? winner.name
+                            : winner.nickname
+                          : "Unknown";
+
+                        const winnerImage = winner
+                          ? "name" in winner
+                            ? winner.logo
+                            : winner.avatar
+                          : "";
+
+                        return (
+                          <div className="champion-card">
+                            <div className="champion-left">
+                              {winnerImage ? (
+                                <img
+                                  src={winnerImage}
+                                  alt={winnerName}
+                                  className="champion-avatar"
+                                />
+                              ) : (
+                                <div className="champion-avatar-placeholder">
+                                  {winnerName.charAt(0) || "C"}
+                                </div>
+                              )}
+
+                              <div>
+                                <div className="champion-name">
+                                  {winnerName}
+                                </div>
+                                <div className="champion-sub">
+                                  {lastTournament.title}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="champion-badge">🏆</div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
                   <div className="panel home-panel">
                     <h2 className="panel-title">Upcoming Matches</h2>
 
