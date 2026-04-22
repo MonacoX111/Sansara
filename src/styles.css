@@ -2440,3 +2440,314 @@ button {
   background: rgba(255, 255, 255, 0.03);
   border: 1px dashed rgba(255, 255, 255, 0.08);
 }
+.player-role-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 8px;
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffd166;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 190, 61, 0.14),
+    rgba(255, 59, 95, 0.12)
+  );
+  border: 1px solid rgba(255, 190, 61, 0.28);
+  box-shadow: 0 0 14px rgba(255, 190, 61, 0.08);
+}
+.profile-info-box.upgraded {
+  gap: 14px;
+}
+
+.profile-primary-row {
+  display: flex;
+  width: 100%;
+}
+
+.profile-primary-card {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.02)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-primary-value {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.profile-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-mini-stat-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-mini-stat-value {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text);
+}
+.profile-primary-card.team-card {
+  gap: 10px;
+}
+
+.profile-team-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-team-logo,
+.profile-team-logo-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex: 0 0 42px;
+}
+
+.profile-team-logo {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.24);
+}
+
+.profile-team-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-games-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.profile-game-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f3f6fb;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+}
+.profile-primary-card.team-card {
+  gap: 10px;
+}
+
+.profile-team-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-team-logo,
+.profile-team-logo-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex: 0 0 42px;
+}
+
+.profile-team-logo {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.24);
+}
+
+.profile-team-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-games-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.profile-game-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f3f6fb;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+}
+/* === PLAYER PROFILE LAYOUT POLISH === */
+
+.profile-head {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.profile-main-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.avatar.large {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin-top: 6px;
+}
+
+.player-role-badge {
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.profile-info-box.upgraded {
+  width: 100%;
+  margin-top: 0;
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.profile-primary-card.team-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+}
+
+.profile-team-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-team-logo,
+.profile-team-logo-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex: 0 0 44px;
+}
+
+.profile-primary-value {
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.profile-games-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.profile-game-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.profile-mini-stat-card {
+  min-height: 78px;
+  justify-content: center;
+}
+
+.stats-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stat-card {
+  min-height: 102px;
+  border-radius: 20px;
+}
+
+@media (max-width: 900px) {
+  .profile-head {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .avatar.large {
+    width: 96px;
+    height: 96px;
+    margin-top: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-mini-stats {
+    grid-template-columns: 1fr;
+  }
+}

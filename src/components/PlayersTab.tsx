@@ -41,6 +41,9 @@ export default function PlayersTab({
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
 
+  const getTeamLogo = (teamId: number) =>
+    teams.find((t) => t.id === teamId)?.logo || "";
+
   const getPlayerName = (playerId: number) =>
     players.find((p) => p.id === playerId)?.nickname || "Unknown";
 
@@ -303,23 +306,46 @@ export default function PlayersTab({
 
               <div className="profile-main-info">
                 <h3 className="profile-name">{selectedPlayer.nickname}</h3>
-                <p className="muted">{selectedPlayer.bio}</p>
 
-                <div className="profile-info-box">
-                  <div className="profile-info-row">
-                    <span className="info-label">Team</span>
-                    <span className="info-value">
-                      {getTeamName(selectedPlayer.teamId) || "Без команди"}
-                    </span>
+                {selectedPlayer.bio ? (
+                  <div className="player-role-badge">{selectedPlayer.bio}</div>
+                ) : null}
+
+                <div className="profile-info-box upgraded">
+                  <div className="profile-primary-row">
+                    <div className="profile-primary-card team-card">
+                      <span className="info-label">Team</span>
+
+                      <div className="profile-team-main">
+                        {selectedPlayer.teamId > 0 &&
+                        getTeamLogo(selectedPlayer.teamId) ? (
+                          <img
+                            src={getTeamLogo(selectedPlayer.teamId)}
+                            alt={getTeamName(selectedPlayer.teamId)}
+                            className="profile-team-logo"
+                          />
+                        ) : (
+                          <div className="profile-team-logo-placeholder">
+                            {(getTeamName(selectedPlayer.teamId) || "—").charAt(
+                              0
+                            )}
+                          </div>
+                        )}
+
+                        <span className="profile-primary-value">
+                          {getTeamName(selectedPlayer.teamId) || "Без команди"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="profile-info-row column">
                     <span className="info-label">Games</span>
 
-                    <div className="tag-row compact player-games-row">
+                    <div className="profile-games-enhanced">
                       {selectedPlayer.games.length > 0 ? (
                         selectedPlayer.games.map((game) => (
-                          <span key={game} className="pill">
+                          <span key={game} className="profile-game-chip">
                             {game}
                           </span>
                         ))
@@ -329,18 +355,20 @@ export default function PlayersTab({
                     </div>
                   </div>
 
-                  <div className="profile-info-row">
-                    <span className="info-label">Achievements</span>
-                    <span className="info-value">
-                      {playerAchievements.length}
-                    </span>
-                  </div>
+                  <div className="profile-mini-stats">
+                    <div className="profile-mini-stat-card">
+                      <span className="info-label">Achievements</span>
+                      <span className="profile-mini-stat-value">
+                        {playerAchievements.length}
+                      </span>
+                    </div>
 
-                  <div className="profile-info-row">
-                    <span className="info-label">Tournaments</span>
-                    <span className="info-value">
-                      {playerTournaments.length}
-                    </span>
+                    <div className="profile-mini-stat-card">
+                      <span className="info-label">Tournaments</span>
+                      <span className="profile-mini-stat-value">
+                        {playerTournaments.length}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
