@@ -676,12 +676,20 @@ export default function App() {
             .filter(
               (item) =>
                 item &&
-                typeof item.playerId === "number" &&
-                typeof item.place === "number"
+                typeof item.place === "number" &&
+                (typeof item.playerId === "number" ||
+                  typeof item.teamId === "number")
             )
             .map((item) => ({
-              playerId: Number(item.playerId),
               place: Number(item.place),
+              playerId:
+                typeof item.playerId === "number"
+                  ? Number(item.playerId)
+                  : undefined,
+              teamId:
+                typeof item.teamId === "number"
+                  ? Number(item.teamId)
+                  : undefined,
             }))
         : [],
       isPublished: Boolean(selectedTournament.isPublished),
@@ -1089,35 +1097,8 @@ export default function App() {
   };
 
   const saveTournament = async () => {
-    if (!selectedTournament) return;
-
-    const safeParticipantIds = Array.isArray(tournamentForm.participantIds)
-      ? tournamentForm.participantIds.map(Number)
-      : [];
-
-    const safeWinnerId =
-      tournamentForm.participantType === "player" &&
-      typeof tournamentForm.winnerId === "number" &&
-      safeParticipantIds.includes(Number(tournamentForm.winnerId))
-        ? Number(tournamentForm.winnerId)
-        : 0;
-
-    const safeWinnerTeamId =
-      tournamentForm.participantType === "team" &&
-      typeof tournamentForm.winnerTeamId === "number" &&
-      safeParticipantIds.includes(Number(tournamentForm.winnerTeamId))
-        ? Number(tournamentForm.winnerTeamId)
-        : 0;
-
-    const safeMvpId =
-      tournamentForm.participantType === "player" &&
-      typeof tournamentForm.mvpId === "number" &&
-      safeParticipantIds.includes(Number(tournamentForm.mvpId))
-        ? Number(tournamentForm.mvpId)
-        : 0;
-
     const updatedTournament: Tournament = {
-      ...selectedTournament,
+      id: selectedTournamentId,
       title: tournamentForm.title,
       game: tournamentForm.game,
       type: tournamentForm.type,
@@ -1127,31 +1108,46 @@ export default function App() {
       prize: tournamentForm.prize,
       description: tournamentForm.description,
       imageUrl: tournamentForm.imageUrl,
-      participantType: tournamentForm.participantType,
-      participantIds: safeParticipantIds,
-      winnerId: safeWinnerId,
-      winnerTeamId: safeWinnerTeamId,
-      mvpId: safeMvpId,
+      participantType: tournamentForm.participantType || "player",
+      participantIds: Array.isArray(tournamentForm.participantIds)
+        ? tournamentForm.participantIds.map(Number)
+        : [],
+      winnerId:
+        tournamentForm.participantType === "player" &&
+        tournamentForm.winnerId &&
+        tournamentForm.winnerId > 0
+          ? Number(tournamentForm.winnerId)
+          : undefined,
+      winnerTeamId:
+        tournamentForm.participantType === "team" &&
+        tournamentForm.winnerTeamId &&
+        tournamentForm.winnerTeamId > 0
+          ? Number(tournamentForm.winnerTeamId)
+          : undefined,
+      mvpId:
+        tournamentForm.participantType === "player" &&
+        tournamentForm.mvpId &&
+        tournamentForm.mvpId > 0
+          ? Number(tournamentForm.mvpId)
+          : undefined,
       placements: Array.isArray(tournamentForm.placements)
         ? tournamentForm.placements
         : [],
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
-    console.log("UPDATED_TOURNAMENT", updatedTournament);
-
     setTournaments((prev) =>
       prev.map((tournament) =>
-        tournament.id === selectedTournament.id ? updatedTournament : tournament
+        tournament.id === selectedTournamentId ? updatedTournament : tournament
       )
     );
+
+    showSaveToast("Tournament saved");
 
     try {
       if (isFirebaseConfigured) {
         await saveItem("tournaments", updatedTournament);
       }
-
-      showSaveToast("Tournament saved");
     } catch (error) {
       console.error("Failed to save tournament:", error);
     }
@@ -1876,18 +1872,57 @@ export default function App() {
                           )
                           .slice(0, 5)
                           .map((match: Match) => {
-                            const p1 = players.find(
-                              (p) => p.id === match.player1
-                            );
-                            const p2 = players.find(
-                              (p) => p.id === match.player2
-                            );
+                            const isTeamMatch = match.matchType === "team";
+
+                            const leftEntity = isTeamMatch
+                              ? teams.find((team) => team.id === match.team1)
+                              : players.find(
+                                  (player) => player.id === match.player1
+                                );
+
+                            const rightEntity = isTeamMatch
+                              ? teams.find((team) => team.id === match.team2)
+                              : players.find(
+                                  (player) => player.id === match.player2
+                                );
+
+                            const leftName = isTeamMatch
+                              ? leftEntity && "name" in leftEntity
+                                ? leftEntity.name
+                                : "Team 1"
+                              : leftEntity && "nickname" in leftEntity
+                              ? leftEntity.nickname
+                              : "Player 1";
+
+                            const rightName = isTeamMatch
+                              ? rightEntity && "name" in rightEntity
+                                ? rightEntity.name
+                                : "Team 2"
+                              : rightEntity && "nickname" in rightEntity
+                              ? rightEntity.nickname
+                              : "Player 2";
+
+                            const leftImage = isTeamMatch
+                              ? leftEntity && "logo" in leftEntity
+                                ? leftEntity.logo
+                                : ""
+                              : leftEntity && "avatar" in leftEntity
+                              ? leftEntity.avatar
+                              : "";
+
+                            const rightImage = isTeamMatch
+                              ? rightEntity && "logo" in rightEntity
+                                ? rightEntity.logo
+                                : ""
+                              : rightEntity && "avatar" in rightEntity
+                              ? rightEntity.avatar
+                              : "";
 
                             return (
                               <div key={match.id} className="match-card new">
                                 <div className="match-top">
                                   <span className="pill light">
-                                    {match.round}
+                                    {match.round || "Match"}
                                   </span>
                                   <span className="pill">
                                     {match.bestOf ? `BO${match.bestOf}` : ""}
@@ -1896,16 +1931,44 @@ export default function App() {
 
                                 <div className="match-center">
                                   <div className="team-side">
-                                    <div className="team-name">
-                                      {p1?.nickname || "Player 1"}
+                                    <div className="team-side-inner">
+                                      {leftImage ? (
+                                        <img
+                                          src={leftImage}
+                                          alt={leftName}
+                                          className="match-side-avatar"
+                                        />
+                                      ) : (
+                                        <div className="match-side-avatar-placeholder">
+                                          {leftName.charAt(0) || "T"}
+                                        </div>
+                                      )}
+
+                                      <div className="team-name">
+                                        {leftName}
+                                      </div>
                                     </div>
                                   </div>
 
                                   <div className="vs-big">VS</div>
 
                                   <div className="team-side">
-                                    <div className="team-name">
-                                      {p2?.nickname || "Player 2"}
+                                    <div className="team-side-inner team-side-inner-right">
+                                      <div className="team-name">
+                                        {rightName}
+                                      </div>
+
+                                      {rightImage ? (
+                                        <img
+                                          src={rightImage}
+                                          alt={rightName}
+                                          className="match-side-avatar"
+                                        />
+                                      ) : (
+                                        <div className="match-side-avatar-placeholder">
+                                          {rightName.charAt(0) || "T"}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -1999,6 +2062,7 @@ export default function App() {
           <TournamentsTab
             tournaments={tournaments}
             players={players}
+            teams={teams}
             matches={matches}
           />
         )}

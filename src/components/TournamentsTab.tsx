@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
-import { Match, Player, Tournament } from "../types";
+import { Match, Player, Team, Tournament } from "../types";
 
 type Props = {
   tournaments: Tournament[];
   players: Player[];
+  teams: Team[];
   matches: Match[];
 };
 
 export default function TournamentsTab({
   tournaments,
   players,
+  teams,
   matches,
 }: Props) {
   const [selectedTournamentId, setSelectedTournamentId] = useState<
@@ -27,32 +29,88 @@ export default function TournamentsTab({
   const getPlayerById = (playerId?: number) =>
     playerId ? players.find((player) => player.id === playerId) : undefined;
 
+  const getTeamById = (teamId?: number) =>
+    teamId ? teams.find((team) => team.id === teamId) : undefined;
+
   const getPlayerName = (playerId?: number) =>
     getPlayerById(playerId)?.nickname || "—";
 
-  const getParticipantPlayers = (tournament: Tournament) => {
+  const getTeamName = (teamId?: number) => getTeamById(teamId)?.name || "—";
+
+  const getParticipantEntries = (tournament: Tournament) => {
     if (!Array.isArray(tournament.participantIds)) return [];
+
+    if (tournament.participantType === "team") {
+      return tournament.participantIds
+        .map((participantId) => teams.find((team) => team.id === participantId))
+        .filter(Boolean)
+        .map((team) => ({
+          id: team!.id,
+          name: team!.name,
+          image: team!.logo,
+          type: "team" as const,
+        }));
+    }
 
     return tournament.participantIds
       .map((participantId) =>
         players.find((player) => player.id === participantId)
       )
-      .filter(Boolean) as Player[];
+      .filter(Boolean)
+      .map((player) => ({
+        id: player!.id,
+        name: player!.nickname,
+        image: player!.avatar,
+        type: "player" as const,
+      }));
   };
 
   const getPlacementEntries = (tournament: Tournament) => {
     if (!Array.isArray(tournament.placements)) return [];
 
+    if (tournament.participantType === "team") {
+      return tournament.placements
+        .map((placement) => {
+          const team = teams.find((team) => team.id === placement.teamId);
+
+          if (!team) return null;
+
+          return {
+            place: placement.place,
+            entityId: team.id,
+            entityName: team.name,
+          };
+        })
+        .filter(Boolean) as {
+        place: number;
+        entityId: number;
+        entityName: string;
+      }[];
+    }
+
     return tournament.placements
-      .map((placement) => ({
-        ...placement,
-        player: players.find((player) => player.id === placement.playerId),
-      }))
-      .filter((entry) => entry.player);
+      .map((placement) => {
+        const player = players.find(
+          (player) => player.id === placement.playerId
+        );
+
+        if (!player) return null;
+
+        return {
+          place: placement.place,
+          entityId: player.id,
+          entityName: player.nickname,
+        };
+      })
+      .filter(Boolean) as {
+      place: number;
+      entityId: number;
+      entityName: string;
+    }[];
   };
 
   const selectedParticipants = selectedTournament
-    ? getParticipantPlayers(selectedTournament)
+    ? getParticipantEntries(selectedTournament)
     : [];
 
   const selectedPlacements = selectedTournament
@@ -115,7 +173,9 @@ export default function TournamentsTab({
                 </div>
                 <div>
                   <span className="muted">Winner:</span>{" "}
-                  {getPlayerName(tournament.winnerId)}
+                  {tournament.participantType === "team"
+                    ? getTeamName(tournament.winnerTeamId)
+                    : getPlayerName(tournament.winnerId)}
                 </div>
                 <div>
                   <span className="muted">MVP:</span>{" "}
@@ -222,28 +282,47 @@ export default function TournamentsTab({
             <div className="simple-card tournament-section">
               <div className="achievement-title">Tournament overview</div>
 
-              <div className="tour-meta">
-                <div>
-                  <span className="muted">Game:</span> {selectedTournament.game}
+              <div className="tournament-overview-grid">
+                <div className="overview-stat-card game">
+                  <span className="overview-stat-label">Game</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.game || "—"}
+                  </strong>
                 </div>
-                <div>
-                  <span className="muted">Type:</span> {selectedTournament.type}
+
+                <div className="overview-stat-card type">
+                  <span className="overview-stat-label">Type</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.type || "—"}
+                  </strong>
                 </div>
-                <div>
-                  <span className="muted">Format:</span>{" "}
-                  {selectedTournament.format || "—"}
+
+                <div className="overview-stat-card format">
+                  <span className="overview-stat-label">Format</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.format || "—"}
+                  </strong>
                 </div>
-                <div>
-                  <span className="muted">Status:</span>{" "}
-                  {selectedTournament.status || "—"}
+
+                <div className="overview-stat-card status">
+                  <span className="overview-stat-label">Status</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.status || "—"}
+                  </strong>
                 </div>
-                <div>
-                  <span className="muted">Date:</span>{" "}
-                  {selectedTournament.date || "—"}
+
+                <div className="overview-stat-card date">
+                  <span className="overview-stat-label">Date</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.date || "—"}
+                  </strong>
                 </div>
-                <div>
-                  <span className="muted">Prize:</span>{" "}
-                  {selectedTournament.prize || "—"}
+
+                <div className="overview-stat-card prize">
+                  <span className="overview-stat-label">Prize</span>
+                  <strong className="overview-stat-value">
+                    {selectedTournament.prize || "—"}
+                  </strong>
                 </div>
               </div>
             </div>
@@ -251,80 +330,270 @@ export default function TournamentsTab({
             <div className="simple-card tournament-section">
               <div className="achievement-title">Results</div>
 
-              <div className="tour-meta">
-                <div>
-                  <span className="muted">Winner:</span>{" "}
-                  {getPlayerName(selectedTournament.winnerId)}
-                </div>
-                <div>
-                  <span className="muted">MVP:</span>{" "}
-                  {getPlayerName(selectedTournament.mvpId)}
-                </div>
-              </div>
+              {(() => {
+                const winnerName =
+                  selectedTournament.participantType === "team"
+                    ? getTeamName(selectedTournament.winnerTeamId)
+                    : getPlayerName(selectedTournament.winnerId);
 
-              {selectedPlacements.length > 0 ? (
-                <div className="tournament-placements">
-                  {selectedPlacements.map((entry) => (
-                    <div
-                      key={`${selectedTournament.id}-${entry.place}-${entry.playerId}`}
-                      className="placement-row"
-                    >
-                      <span className="pill">#{entry.place}</span>
-                      <span>{entry.player?.nickname || "Unknown"}</span>
+                const winnerImage =
+                  selectedTournament.participantType === "team"
+                    ? teams.find(
+                        (team) => team.id === selectedTournament.winnerTeamId
+                      )?.logo || ""
+                    : players.find(
+                        (player) => player.id === selectedTournament.winnerId
+                      )?.avatar || "";
+
+                const mvpName =
+                  selectedTournament.participantType === "player"
+                    ? getPlayerName(selectedTournament.mvpId)
+                    : "";
+
+                return (
+                  <div className="results-block-upgraded">
+                    <div className="results-winner-card">
+                      <div className="results-winner-head">
+                        {winnerImage ? (
+                          <img
+                            src={winnerImage}
+                            alt={winnerName}
+                            className="results-winner-avatar"
+                          />
+                        ) : (
+                          <div className="results-winner-avatar-placeholder">
+                            {winnerName.charAt(0) || "W"}
+                          </div>
+                        )}
+
+                        <div className="results-winner-text">
+                          <div className="results-label">Champion</div>
+                          <div className="results-winner-name">
+                            {winnerName}
+                          </div>
+
+                          {selectedTournament.participantType === "player" &&
+                          mvpName !== "—" ? (
+                            <div className="results-subline">
+                              MVP: {mvpName}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="muted small">No placements added yet.</div>
-              )}
+
+                    {selectedPlacements.length > 0 ? (
+                      <div className="results-placements-grid">
+                        {selectedPlacements
+                          .sort((a, b) => a.place - b.place)
+                          .map((entry) => (
+                            <div
+                              key={`${selectedTournament.id}-${entry.place}-${entry.entityId}`}
+                              className="results-placement-card"
+                            >
+                              <div className="results-placement-place">
+                                #{entry.place}
+                              </div>
+                              <div className="results-placement-name">
+                                {entry.entityName}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="results-empty-state">
+                        Placements have not been added yet.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="simple-card tournament-section tournament-section-full">
               <div className="achievement-title">Matches</div>
 
               {selectedMatches.length > 0 ? (
-                <div className="tournament-matches">
-                  {selectedMatches.map((match) => (
-                    <div key={match.id} className="match-card">
-                      <div className="row-between">
-                        <div className="achievement-title">
-                          {getPlayerName(match.player1)} vs{" "}
-                          {getPlayerName(match.player2)}
-                        </div>
+                <div className="tournament-matches upgraded">
+                  {[...selectedMatches]
+                    .sort((a, b) => {
+                      const getPriority = (match: Match) => {
+                        const round = (match.round || "").toLowerCase();
 
-                        <span className="pill">
-                          {match.score || "No score"}
-                        </span>
-                      </div>
+                        if (round.includes("final")) return 100;
+                        if (round.includes("1/2") || round.includes("semi"))
+                          return 90;
+                        if (round.includes("1/4") || round.includes("quarter"))
+                          return 80;
+                        if (round.includes("1/8")) return 70;
 
-                      <div className="tour-meta">
-                        <div>
-                          <span className="muted">Round:</span>{" "}
-                          {match.round || "—"}
-                        </div>
-                        <div>
-                          <span className="muted">Status:</span>{" "}
-                          {match.status || "—"}
-                        </div>
-                        <div>
-                          <span className="muted">Date:</span>{" "}
-                          {match.date || "—"}
-                        </div>
-                        <div>
-                          <span className="muted">Winner:</span>{" "}
-                          {getPlayerName(match.winnerId)}
-                        </div>
-                        <div>
-                          <span className="muted">Best of:</span>{" "}
-                          {match.bestOf || "—"}
-                        </div>
-                      </div>
+                        return 0;
+                      };
 
-                      {match.notes ? (
-                        <div className="muted small">{match.notes}</div>
-                      ) : null}
-                    </div>
-                  ))}
+                      return getPriority(b) - getPriority(a);
+                    })
+                    .map((match) => {
+                      const isTeamMatch = match.matchType === "team";
+
+                      const leftName = isTeamMatch
+                        ? getTeamName(match.team1)
+                        : getPlayerName(match.player1);
+
+                      const rightName = isTeamMatch
+                        ? getTeamName(match.team2)
+                        : getPlayerName(match.player2);
+
+                      const winnerName = isTeamMatch
+                        ? getTeamName(match.winnerTeamId)
+                        : getPlayerName(match.winnerId);
+
+                      const winnerLeft = isTeamMatch
+                        ? match.winnerTeamId === match.team1
+                        : match.winnerId === match.player1;
+
+                      const winnerRight = isTeamMatch
+                        ? match.winnerTeamId === match.team2
+                        : match.winnerId === match.player2;
+
+                      const leftImage = isTeamMatch
+                        ? teams.find((team) => team.id === match.team1)?.logo ||
+                          ""
+                        : players.find((player) => player.id === match.player1)
+                            ?.avatar || "";
+
+                      const rightImage = isTeamMatch
+                        ? teams.find((team) => team.id === match.team2)?.logo ||
+                          ""
+                        : players.find((player) => player.id === match.player2)
+                            ?.avatar || "";
+
+                      return (
+                        <div key={match.id} className="tournament-match-card">
+                          <div className="tournament-match-top">
+                            <div className="tournament-match-badges">
+                              <span className="pill light">
+                                {match.round || "Match"}
+                              </span>
+                              <span className="pill">
+                                {match.status || "—"}
+                              </span>
+                              <span className="pill">
+                                {match.bestOf ? `BO${match.bestOf}` : "BO—"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="tournament-match-center">
+                            <div className="tournament-match-side left">
+                              {leftImage ? (
+                                <img
+                                  src={leftImage}
+                                  alt={leftName}
+                                  className="tournament-match-avatar"
+                                />
+                              ) : (
+                                <div className="tournament-match-avatar-placeholder">
+                                  {leftName.charAt(0) || "L"}
+                                </div>
+                              )}
+
+                              <div
+                                className={`tournament-match-name ${
+                                  winnerLeft ? "winner" : ""
+                                }`}
+                              >
+                                {leftName}
+                              </div>
+                            </div>
+
+                            <div className="tournament-match-middle">
+                              <div className="tournament-match-score-top">
+                                {match.score
+                                  ? (() => {
+                                      const [s1, s2] = match.score
+                                        .split(":")
+                                        .map(Number);
+
+                                      const getColor = (
+                                        a: number,
+                                        b: number
+                                      ) => {
+                                        if (a === b) return "#ffffff"; // нічия
+                                        return a > b ? "#31d07f" : "#ff3b5f";
+                                      };
+
+                                      return (
+                                        <>
+                                          <span
+                                            style={{ color: getColor(s1, s2) }}
+                                          >
+                                            {s1}
+                                          </span>
+                                          <span
+                                            style={{
+                                              margin: "0 6px",
+                                              opacity: 0.6,
+                                            }}
+                                          >
+                                            :
+                                          </span>
+                                          <span
+                                            style={{ color: getColor(s2, s1) }}
+                                          >
+                                            {s2}
+                                          </span>
+                                        </>
+                                      );
+                                    })()
+                                  : "-"}
+                              </div>
+
+                              <div className="tournament-match-vs">VS</div>
+
+                              <div className="tournament-match-winner-bottom">
+                                {winnerName !== "—"
+                                  ? `Winner: ${winnerName}`
+                                  : ""}
+                              </div>
+                            </div>
+
+                            <div className="tournament-match-side right">
+                              <div
+                                className={`tournament-match-name ${
+                                  winnerRight ? "winner" : ""
+                                }`}
+                              >
+                                {rightName}
+                              </div>
+
+                              {rightImage ? (
+                                <img
+                                  src={rightImage}
+                                  alt={rightName}
+                                  className="tournament-match-avatar"
+                                />
+                              ) : (
+                                <div className="tournament-match-avatar-placeholder">
+                                  {rightName.charAt(0) || "R"}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="tournament-match-bottom">
+                            <div className="tournament-match-date">
+                              {match.date || "—"}
+                            </div>
+                          </div>
+
+                          {match.notes ? (
+                            <div className="tournament-match-notes">
+                              {match.notes}
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="muted small">No matches added yet.</div>
@@ -336,27 +605,182 @@ export default function TournamentsTab({
 
               {selectedParticipants.length > 0 ? (
                 <div className="tournament-participants">
-                  {selectedParticipants.map((player) => (
-                    <div key={player.id} className="participant-card">
-                      <div className="achievement-title">{player.nickname}</div>
+                  {selectedTournament?.participantType === "team"
+                    ? selectedParticipants.map((participant) => {
+                        const team = teams.find(
+                          (item) => item.id === participant.id
+                        );
+                        const isWinner =
+                          selectedTournament.winnerTeamId === participant.id;
 
-                      <div className="muted small">
-                        {player.fullName || "Player profile"}
-                      </div>
+                        return (
+                          <div
+                            key={participant.id}
+                            className={`participant-card ${
+                              isWinner ? "participant-card-winner" : ""
+                            }`}
+                          >
+                            <div className="participant-card-head">
+                              {participant.image ? (
+                                <img
+                                  src={participant.image}
+                                  alt={participant.name}
+                                  className="participant-avatar"
+                                />
+                              ) : (
+                                <div className="participant-avatar-placeholder">
+                                  {participant.name.charAt(0) || "T"}
+                                </div>
+                              )}
 
-                      <div className="tour-meta">
-                        <div>
-                          <span className="muted">Wins:</span> {player.wins}
-                        </div>
-                        <div>
-                          <span className="muted">Losses:</span> {player.losses}
-                        </div>
-                        <div>
-                          <span className="muted">ELO:</span> {player.elo}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                              <div className="participant-head-content">
+                                <div className="participant-title-row">
+                                  <div className="achievement-title">
+                                    {participant.name}
+                                  </div>
+
+                                  {isWinner ? (
+                                    <span className="participant-winner-badge">
+                                      Winner
+                                    </span>
+                                  ) : null}
+                                </div>
+
+                                <div className="muted small">Team profile</div>
+                              </div>
+                            </div>
+
+                            <div className="participant-stats-grid">
+                              <div className="participant-stat-box">
+                                <span className="muted">Wins</span>
+                                <strong>{team?.wins ?? 0}</strong>
+                              </div>
+
+                              <div className="participant-stat-box">
+                                <span className="muted">Earnings</span>
+                                <strong>{team?.earnings ?? 0}</strong>
+                              </div>
+
+                              <div className="participant-stat-box">
+                                <span className="muted">Players</span>
+                                <strong>{team?.players?.length ?? 0}</strong>
+                              </div>
+                            </div>
+
+                            <div className="participant-roster">
+                              <div className="participant-roster-label">
+                                Roster
+                              </div>
+
+                              {team?.players?.length ? (
+                                <div className="participant-roster-list">
+                                  {team.players.map((playerId) => {
+                                    const rosterPlayer = players.find(
+                                      (item) => item.id === playerId
+                                    );
+
+                                    return (
+                                      <div
+                                        key={`${participant.id}-${playerId}`}
+                                        className="participant-roster-item"
+                                      >
+                                        {rosterPlayer?.avatar ? (
+                                          <img
+                                            src={rosterPlayer.avatar}
+                                            alt={
+                                              rosterPlayer.nickname || "Player"
+                                            }
+                                            className="participant-roster-avatar"
+                                          />
+                                        ) : (
+                                          <div className="participant-roster-avatar-placeholder">
+                                            {rosterPlayer?.nickname?.charAt(
+                                              0
+                                            ) || "P"}
+                                          </div>
+                                        )}
+
+                                        <span className="participant-roster-name">
+                                          {rosterPlayer?.nickname || "Unknown"}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="participant-roster-empty">
+                                  No players in roster
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    : selectedParticipants.map((participant) => {
+                        const player = players.find(
+                          (item) => item.id === participant.id
+                        );
+                        const isWinner =
+                          selectedTournament.winnerId === participant.id;
+
+                        return (
+                          <div
+                            key={participant.id}
+                            className={`participant-card ${
+                              isWinner ? "participant-card-winner" : ""
+                            }`}
+                          >
+                            <div className="participant-card-head">
+                              {participant.image ? (
+                                <img
+                                  src={participant.image}
+                                  alt={participant.name}
+                                  className="participant-avatar"
+                                />
+                              ) : (
+                                <div className="participant-avatar-placeholder">
+                                  {participant.name.charAt(0) || "P"}
+                                </div>
+                              )}
+
+                              <div className="participant-head-content">
+                                <div className="participant-title-row">
+                                  <div className="achievement-title">
+                                    {participant.name}
+                                  </div>
+
+                                  {isWinner ? (
+                                    <span className="participant-winner-badge">
+                                      Winner
+                                    </span>
+                                  ) : null}
+                                </div>
+
+                                <div className="muted small">
+                                  Player profile
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="participant-stats-grid">
+                              <div className="participant-stat-box">
+                                <span className="muted">Wins</span>
+                                <strong>{player?.wins ?? 0}</strong>
+                              </div>
+
+                              <div className="participant-stat-box">
+                                <span className="muted">Losses</span>
+                                <strong>{player?.losses ?? 0}</strong>
+                              </div>
+
+                              <div className="participant-stat-box">
+                                <span className="muted">ELO</span>
+                                <strong>{player?.elo ?? 0}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                 </div>
               ) : (
                 <div className="muted small">No participants added yet.</div>

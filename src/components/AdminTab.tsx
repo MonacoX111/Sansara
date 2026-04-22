@@ -1151,80 +1151,155 @@ export default function AdminTab({
               </div>
             )}
 
-            {tournamentForm.participantType === "player" && (
-              <div className="field-block">
-                <label className="field-label">Placements</label>
+            <div className="field-block">
+              <label className="field-label">Placements</label>
 
-                <div className="form-col">
-                  {selectedTournamentPlayers.map((player) => {
-                    const placement = Array.isArray(tournamentForm.placements)
-                      ? tournamentForm.placements.find(
-                          (item) => item.playerId === player.id
-                        )
-                      : undefined;
+              <div className="form-col">
+                {tournamentForm.participantType === "team"
+                  ? selectedTournamentTeams.map((team) => {
+                      const placement = Array.isArray(tournamentForm.placements)
+                        ? tournamentForm.placements.find(
+                            (item) => item.teamId === team.id
+                          )
+                        : undefined;
 
-                    return (
-                      <div key={player.id} className="form-grid two">
-                        <div className="field-block">
-                          <label className="field-label">
-                            {player.nickname}
-                          </label>
-                          <input
-                            className="input"
-                            type="number"
-                            min={1}
-                            placeholder="Place"
-                            value={placement ? placement.place : ""}
-                            onChange={(e) => {
-                              const rawValue = e.target.value;
-                              const nextPlace = Number(rawValue);
+                      return (
+                        <div key={team.id} className="form-grid two">
+                          <div className="field-block">
+                            <label className="field-label">{team.name}</label>
+                            <input
+                              className="input"
+                              type="number"
+                              min={1}
+                              placeholder="Place"
+                              value={placement ? placement.place : ""}
+                              onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const nextPlace = Number(rawValue);
 
-                              setTournamentForm((prev) => {
-                                const safePlacements = Array.isArray(
-                                  prev.placements
-                                )
-                                  ? prev.placements
-                                  : [];
+                                setTournamentForm((prev) => {
+                                  const safePlacements = Array.isArray(
+                                    prev.placements
+                                  )
+                                    ? prev.placements
+                                    : [];
 
-                                if (!rawValue || nextPlace <= 0) {
+                                  if (!rawValue || nextPlace <= 0) {
+                                    return {
+                                      ...prev,
+                                      placements: safePlacements.filter(
+                                        (item) => item.teamId !== team.id
+                                      ),
+                                    };
+                                  }
+
+                                  const exists = safePlacements.some(
+                                    (item) => item.teamId === team.id
+                                  );
+
                                   return {
                                     ...prev,
-                                    placements: safePlacements.filter(
-                                      (item) => item.playerId !== player.id
-                                    ),
+                                    placements: exists
+                                      ? safePlacements.map((item) =>
+                                          item.teamId === team.id
+                                            ? {
+                                                ...item,
+                                                teamId: team.id,
+                                                playerId: undefined,
+                                                place: nextPlace,
+                                              }
+                                            : item
+                                        )
+                                      : [
+                                          ...safePlacements,
+                                          {
+                                            teamId: team.id,
+                                            playerId: undefined,
+                                            place: nextPlace,
+                                          },
+                                        ],
                                   };
-                                }
-
-                                const exists = safePlacements.some(
-                                  (item) => item.playerId === player.id
-                                );
-
-                                return {
-                                  ...prev,
-                                  placements: exists
-                                    ? safePlacements.map((item) =>
-                                        item.playerId === player.id
-                                          ? { ...item, place: nextPlace }
-                                          : item
-                                      )
-                                    : [
-                                        ...safePlacements,
-                                        {
-                                          playerId: player.id,
-                                          place: nextPlace,
-                                        },
-                                      ],
-                                };
-                              });
-                            }}
-                          />
+                                });
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })
+                  : selectedTournamentPlayers.map((player) => {
+                      const placement = Array.isArray(tournamentForm.placements)
+                        ? tournamentForm.placements.find(
+                            (item) => item.playerId === player.id
+                          )
+                        : undefined;
+
+                      return (
+                        <div key={player.id} className="form-grid two">
+                          <div className="field-block">
+                            <label className="field-label">
+                              {player.nickname}
+                            </label>
+                            <input
+                              className="input"
+                              type="number"
+                              min={1}
+                              placeholder="Place"
+                              value={placement ? placement.place : ""}
+                              onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const nextPlace = Number(rawValue);
+
+                                setTournamentForm((prev) => {
+                                  const safePlacements = Array.isArray(
+                                    prev.placements
+                                  )
+                                    ? prev.placements
+                                    : [];
+
+                                  if (!rawValue || nextPlace <= 0) {
+                                    return {
+                                      ...prev,
+                                      placements: safePlacements.filter(
+                                        (item) => item.playerId !== player.id
+                                      ),
+                                    };
+                                  }
+
+                                  const exists = safePlacements.some(
+                                    (item) => item.playerId === player.id
+                                  );
+
+                                  return {
+                                    ...prev,
+                                    placements: exists
+                                      ? safePlacements.map((item) =>
+                                          item.playerId === player.id
+                                            ? {
+                                                ...item,
+                                                playerId: player.id,
+                                                teamId: undefined,
+                                                place: nextPlace,
+                                              }
+                                            : item
+                                        )
+                                      : [
+                                          ...safePlacements,
+                                          {
+                                            playerId: player.id,
+                                            teamId: undefined,
+                                            place: nextPlace,
+                                          },
+                                        ],
+                                  };
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
               </div>
-            )}
+            </div>
 
             <div className="field-block">
               <label className="field-label checkbox-label">

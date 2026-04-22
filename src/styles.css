@@ -1830,3 +1830,613 @@ button {
     text-align: left;
   }
 }
+.match-side-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.match-side-inner-right {
+  justify-content: flex-end;
+}
+
+.match-side-avatar,
+.match-side-avatar-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex: 0 0 34px;
+}
+
+.match-side-avatar {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.match-side-avatar-placeholder {
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+.participant-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.participant-avatar,
+.participant-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex: 0 0 48px;
+}
+
+.participant-avatar {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.participant-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.participant-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.participant-stat {
+  font-size: 14px;
+}
+.participant-head-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.participant-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.participant-winner-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffcc66;
+  background: rgba(255, 190, 61, 0.14);
+  border: 1px solid rgba(255, 190, 61, 0.35);
+}
+
+.participant-card-winner {
+  border-color: rgba(255, 190, 61, 0.28);
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.08);
+}
+
+.participant-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.participant-stat-box {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.participant-stat-box strong {
+  font-size: 16px;
+  line-height: 1;
+}
+.results-block-upgraded {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.results-winner-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 190, 61, 0.12),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(255, 190, 61, 0.2);
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.08);
+}
+
+.results-winner-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.results-winner-avatar,
+.results-winner-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex: 0 0 56px;
+}
+
+.results-winner-avatar {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.results-winner-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.results-winner-text {
+  min-width: 0;
+}
+
+.results-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffcc66;
+  margin-bottom: 4px;
+}
+
+.results-winner-name {
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.results-subline {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.results-placements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.results-placement-card {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.results-placement-place {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ffcc66;
+  margin-bottom: 6px;
+}
+
+.results-placement-name {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.results-empty-state {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 14px;
+}
+.tournament-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.overview-stat-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overview-stat-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.overview-stat-value {
+  font-size: 18px;
+  line-height: 1.15;
+}
+/* база */
+.overview-stat-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* кольорові акценти */
+.overview-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* конкретні кольори */
+
+.overview-stat-card.game::before {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.overview-stat-card.type::before {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+
+.overview-stat-card.format::before {
+  background: linear-gradient(135deg, #fa709a, #fee140);
+}
+
+.overview-stat-card.status::before {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+
+.overview-stat-card.date::before {
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+}
+
+.overview-stat-card.prize::before {
+  background: linear-gradient(135deg, #ff9966, #ff5e62);
+}
+
+/* трохи підсилення тексту */
+.overview-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* hover ефект */
+.overview-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+  transition: 0.2s ease;
+}
+.tournament-matches.upgraded {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tournament-match-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: 0.2s ease;
+}
+
+.tournament-match-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tournament-match-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tournament-match-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tournament-match-score {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffcc66;
+  line-height: 1;
+}
+
+.tournament-match-center {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+}
+
+.tournament-match-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tournament-match-side.right {
+  justify-content: flex-end;
+}
+
+.tournament-match-avatar,
+.tournament-match-avatar-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex: 0 0 42px;
+}
+
+.tournament-match-avatar {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tournament-match-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tournament-match-name {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.tournament-match-name.winner {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(255, 190, 61, 0.18);
+}
+
+.tournament-match-vs {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.08),
+      transparent 70%
+    ),
+    linear-gradient(135deg, rgba(255, 190, 61, 0.18), rgba(255, 59, 95, 0.12));
+  border: 1px solid rgba(255, 190, 61, 0.28);
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.12),
+    inset 0 0 18px rgba(255, 255, 255, 0.03);
+  text-transform: uppercase;
+  flex: 0 0 54px;
+}
+
+.tournament-match-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tournament-match-date {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tournament-match-winner {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffcc66;
+}
+
+.tournament-match-notes {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .tournament-match-center {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tournament-match-side,
+  .tournament-match-side.right {
+    justify-content: space-between;
+  }
+
+  .tournament-match-vs {
+    text-align: center;
+  }
+}
+.tournament-match-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 140px;
+}
+
+.tournament-match-score-top {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffcc66;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 0 14px rgba(255, 190, 61, 0.18);
+}
+
+.tournament-match-winner-bottom {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffcc66;
+  text-align: center;
+  line-height: 1.2;
+  min-height: 18px;
+  text-shadow: 0 0 10px rgba(255, 190, 61, 0.12);
+}
+
+.tournament-match-center {
+  grid-template-columns: 1fr 160px 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 700px) {
+  .tournament-match-middle {
+    min-width: 100%;
+    gap: 8px;
+  }
+
+  .tournament-match-score-top {
+    font-size: 28px;
+  }
+
+  .tournament-match-winner-bottom {
+    font-size: 13px;
+  }
+
+  .tournament-match-center {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+.participant-roster {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.participant-roster-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.participant-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participant-roster-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  transition: all 0.2s ease;
+}
+
+.participant-roster-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 190, 61, 0.25);
+}
+
+.participant-roster-avatar,
+.participant-roster-avatar-placeholder {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  border-radius: 50%; /* ВАЖЛИВО */
+  overflow: hidden; /* щоб картинка обрізалась */
+}
+
+.participant-roster-avatar {
+  object-fit: cover;
+  display: block;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+.participant-roster-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.participant-roster-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.participant-roster-empty {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+}
