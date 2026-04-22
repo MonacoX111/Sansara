@@ -102,7 +102,7 @@ export default function TeamsTab({
         <div className="panel">
           <h2 className="panel-title">Team profile</h2>
 
-          <div className="profile-head">
+          <div className="team-profile-head">
             <img
               src={selectedTeam.logo}
               alt={selectedTeam.name}
