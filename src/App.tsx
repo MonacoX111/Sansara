@@ -1632,14 +1632,18 @@ export default function App() {
                                   {winnerName}
                                 </div>
 
-                                <div className="champion-sub">
+                                <div className="champion-tournament-badge">
                                   {lastTournament.title}
                                 </div>
 
-                                <div className="champion-meta">
-                                  <span>{lastTournament.game}</span>
-                                  <span>•</span>
-                                  <span>{lastTournament.date || "TBD"}</span>
+                                <div className="champion-meta-row">
+                                  <span className="champion-game-pill">
+                                    {lastTournament.game}
+                                  </span>
+
+                                  <span className="champion-date-pill">
+                                    {lastTournament.date || "TBD"}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -1655,7 +1659,7 @@ export default function App() {
                                   <div className="champion-score-big">
                                     {finalMatch.score || "—"}
                                   </div>
-                                  <div className="champion-score-opponent">
+                                  <div className="champion-opponent-pill">
                                     vs {opponentName}
                                   </div>
                                 </>
@@ -1666,6 +1670,129 @@ export default function App() {
                       })()}
                     </div>
                   )}
+
+                  <div className="panel home-panel">
+                    <h2 className="panel-title">Recent Results</h2>
+
+                    {matches.filter((m) => m.status === "completed").length ===
+                    0 ? (
+                      <div className="empty-block">No recent results</div>
+                    ) : (
+                      <div className="list-col">
+                        {[...matches]
+                          .filter((m) => m.status === "completed")
+                          .sort((a, b) => b.id - a.id)
+                          .slice(0, 5)
+                          .map((match: Match) => {
+                            const p1 = players.find(
+                              (p) => p.id === match.player1
+                            );
+                            const p2 = players.find(
+                              (p) => p.id === match.player2
+                            );
+                            const tournament = tournaments.find(
+                              (t) => t.id === match.tournamentId
+                            );
+
+                            const winnerLeft = match.winnerId === match.player1;
+                            const winnerRight =
+                              match.winnerId === match.player2;
+
+                            return (
+                              <div
+                                key={match.id}
+                                className="result-card"
+                                style={{
+                                  background: tournament?.imageUrl
+                                    ? `linear-gradient(
+                                        90deg,
+                                        rgba(5, 7, 14, 0.96) 0%,
+                                        rgba(5, 7, 14, 0.88) 28%,
+                                        rgba(5, 7, 14, 0.76) 52%,
+                                        rgba(5, 7, 14, 0.9) 100%
+                                      ), url(${tournament.imageUrl}) center / cover no-repeat`
+                                    : undefined,
+                                }}
+                              >
+                                <div className="result-row">
+                                  <div className="result-player-side left">
+                                    {p1?.avatar ? (
+                                      <img
+                                        src={p1.avatar}
+                                        alt={p1.nickname}
+                                        className="result-avatar"
+                                      />
+                                    ) : (
+                                      <div className="result-avatar-placeholder">
+                                        {p1?.nickname?.charAt(0) || "P"}
+                                      </div>
+                                    )}
+
+                                    <div
+                                      className={`result-player-name ${
+                                        winnerLeft ? "winner" : ""
+                                      }`}
+                                    >
+                                      {p1?.nickname || "Player 1"}
+                                    </div>
+                                  </div>
+
+                                  <div className="result-score-wrap">
+                                    <div className="result-score">
+                                      {match.score || "—"}
+                                    </div>
+                                  </div>
+
+                                  <div className="result-player-side right">
+                                    <div
+                                      className={`result-player-name ${
+                                        winnerRight ? "winner" : ""
+                                      }`}
+                                    >
+                                      {p2?.nickname || "Player 2"}
+                                    </div>
+
+                                    {p2?.avatar ? (
+                                      <img
+                                        src={p2.avatar}
+                                        alt={p2.nickname}
+                                        className="result-avatar"
+                                      />
+                                    ) : (
+                                      <div className="result-avatar-placeholder">
+                                        {p2?.nickname?.charAt(0) || "P"}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="result-meta">
+                                  <span
+                                    className={`result-round ${
+                                      (match.round || "")
+                                        .toLowerCase()
+                                        .includes("final")
+                                        ? "final"
+                                        : ""
+                                    }`}
+                                  >
+                                    {match.round || "Match"}
+                                  </span>
+
+                                  <span className="result-date">
+                                    {match.date || "TBD"}
+                                  </span>
+                                </div>
+
+                                <div className="result-tournament">
+                                  {tournament?.title || "No tournament"}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="panel home-panel">
                     <h2 className="panel-title">Upcoming Matches</h2>

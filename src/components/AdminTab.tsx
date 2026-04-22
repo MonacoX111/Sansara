@@ -1548,12 +1548,13 @@ export default function AdminTab({
           </div>
 
           <div className="list-col">
-            {matches
+            {[...matches]
               .filter((match) =>
                 matchTournamentFilterId
                   ? match.tournamentId === matchTournamentFilterId
                   : match.tournamentId === 0
               )
+              .sort((a, b) => b.id - a.id)
               .map((match) => (
                 <button
                   key={match.id}
