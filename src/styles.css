@@ -52,10 +52,55 @@ button {
 }
 
 .page {
+  position: relative;
   min-height: 100vh;
+  overflow: hidden;
+
+  /* базова сітка */
   background: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 28px 28px;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(120deg, #0f1117, #1a1f2e, #1a1424, #11141d, #0f1117);
+
+  background-size: 28px 28px, 28px 28px, 300% 300%;
+
+  animation: pageGradientFlow 22s ease infinite;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 59, 95, 0.12),
+      transparent 26%
+    ),
+    radial-gradient(circle at 80% 18%, rgba(67, 208, 255, 0.1), transparent 24%),
+    radial-gradient(
+      circle at 50% 78%,
+      rgba(255, 190, 61, 0.08),
+      transparent 22%
+    );
+  filter: blur(30px);
+  animation: pageAmbientShift 18s ease-in-out infinite alternate;
+}
+
+.page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.018) 35%,
+    transparent 60%
+  );
+  opacity: 0.5;
+  animation: pageLightSweep 14s linear infinite;
 }
 
 .container {
@@ -188,11 +233,6 @@ button {
   font-weight: 600;
 }
 
-.tab-btn:hover {
-  border-color: rgba(255, 59, 95, 0.45);
-  transform: translateY(-1px);
-}
-
 .tab-btn-active {
   background: linear-gradient(90deg, var(--red), var(--red-2));
   color: white;
@@ -226,6 +266,9 @@ button {
   backdrop-filter: blur(12px);
   padding: 22px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+  animation: fadeInPanel 0.35s ease;
 }
 
 .panel-title {
@@ -264,13 +307,6 @@ button {
   border-radius: 20px;
   padding: 15px;
   text-align: left;
-}
-
-.player-card,
-.button-card,
-.admin-list-btn,
-.picker-btn {
-  cursor: pointer;
 }
 
 .player-card:hover,
@@ -565,9 +601,6 @@ button {
   color: #fff;
 }
 
-.primary-btn:hover,
-.secondary-btn:hover,
-.danger-btn:hover,
 .picker-btn:hover {
   transform: translateY(-1px);
 }
@@ -604,15 +637,6 @@ button {
 
 .small {
   font-size: 12px;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
 }
 
 /* === SHARED FORM / ADMIN HELPERS === */
@@ -919,11 +943,6 @@ button {
   cursor: pointer;
 }
 
-.leaderboard-clickable:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 59, 95, 0.28);
-  box-shadow: var(--shadow-red);
-}
 .placement-row {
   display: flex;
   align-items: center;
@@ -1121,10 +1140,6 @@ button {
   padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
-}
-
-.ghost-btn:hover {
-  border-color: rgba(255, 59, 95, 0.4);
 }
 
 /* === RESPONSIVE === */
@@ -2058,28 +2073,6 @@ button {
   gap: 10px;
 }
 
-.overview-stat-card {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.overview-stat-label {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.overview-stat-value {
-  font-size: 18px;
-  line-height: 1.15;
-}
 /* база */
 .overview-stat-card {
   padding: 14px 16px;
@@ -2128,9 +2121,9 @@ button {
   background: linear-gradient(135deg, #ff9966, #ff5e62);
 }
 
-/* трохи підсилення тексту */
 .overview-stat-value {
   font-size: 18px;
+  line-height: 1.15;
   font-weight: 800;
 }
 
@@ -2477,7 +2470,7 @@ button {
 }
 
 .profile-primary-value {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.1;
   color: var(--text);
@@ -2487,6 +2480,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  width: 100%;
 }
 
 .profile-mini-stat-card {
@@ -2497,8 +2491,9 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 78px;
+  justify-content: center;
 }
-
 .profile-mini-stat-value {
   font-size: 28px;
   font-weight: 900;
@@ -2506,70 +2501,10 @@ button {
   color: var(--text);
 }
 
-.profile-primary-card.team-card {
-  gap: 10px;
-}
-
-.profile-team-main {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.profile-team-logo,
-.profile-team-logo-placeholder {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  flex: 0 0 42px;
-}
-
-.profile-team-logo {
-  object-fit: cover;
-  display: block;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.24);
-}
-
-.profile-team-logo-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.profile-games-enhanced {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-}
-
-.profile-game-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #f3f6fb;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.03)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
-}
 /* === PLAYER PROFILE LAYOUT POLISH === */
 
 .profile-head {
   display: flex;
-  align-items: center;
   gap: 16px;
 }
 
@@ -2622,11 +2557,6 @@ button {
   flex: 0 0 44px;
 }
 
-.profile-primary-value {
-  font-size: 22px;
-  line-height: 1.1;
-}
-
 .profile-games-enhanced {
   display: flex;
   flex-wrap: wrap;
@@ -2635,22 +2565,20 @@ button {
 }
 
 .profile-game-chip {
+  display: inline-flex;
+  align-items: center;
   padding: 7px 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-}
-
-.profile-mini-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  width: 100%;
-}
-
-.profile-mini-stat-card {
-  min-height: 78px;
-  justify-content: center;
+  color: #f3f6fb;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 
 .stats-grid {
@@ -2666,8 +2594,8 @@ button {
 
 @media (max-width: 900px) {
   .profile-head {
-    gap: 14px;
     flex-direction: column;
+    gap: 14px;
   }
 
   .avatar.large {
@@ -2678,9 +2606,7 @@ button {
     display: block;
     position: relative;
     z-index: 2;
-
     border: 2px solid rgba(255, 255, 255, 0.08);
-
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.02),
       0 0 20px rgba(255, 80, 120, 0.25), 0 0 40px rgba(255, 80, 120, 0.12);
   }
@@ -3137,10 +3063,6 @@ button {
   box-shadow: 0 0 18px rgba(255, 80, 120, 0.45), 0 10px 24px rgba(0, 0, 0, 0.4);
 }
 /* ===== SHARED PANEL HOVER ===== */
-.panel {
-  transition: transform 0.25s ease, box-shadow 0.25s ease,
-    border-color 0.25s ease;
-}
 
 .panel:hover {
   border-color: rgba(255, 255, 255, 0.1);
@@ -3574,4 +3496,140 @@ button {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+/* ===== ACTIVE PRESS FOR CARDS ===== */
+
+.leader-row:active,
+.player-card:active,
+.button-card:active,
+.team-roster-card:active,
+.team-history-card:active,
+.tournament-card-button:active,
+.match-card:active,
+.result-card:active,
+.history-card:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+/* ===== CLICKABLE UX ===== */
+
+.leaderboard-clickable,
+.player-card,
+.button-card,
+.admin-list-btn,
+.tournament-card-button,
+.match-card,
+.result-card {
+  cursor: pointer;
+}
+/* ===== TAB CONTENT ANIMATION ===== */
+
+@keyframes fadeInPanel {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===== CUSTOM SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 59, 95, 0.5),
+    rgba(255, 59, 95, 0.2)
+  );
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 95, 0.6);
+}
+.container,
+.hero,
+.panel,
+.home-featured-banner,
+.tournament-hero,
+.admin-overlay,
+.save-toast {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pageAmbientShift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, 1.5%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-1%, 2%, 0) scale(1.02);
+  }
+}
+
+@keyframes pageLightSweep {
+  0% {
+    transform: translateX(-35%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translateX(35%);
+    opacity: 0;
+  }
+}
+@keyframes pageGradientFlow {
+  0% {
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+  25% {
+    background-position: 0 0, 0 0, 50% 60%;
+  }
+  50% {
+    background-position: 0 0, 0 0, 100% 50%;
+  }
+  75% {
+    background-position: 0 0, 0 0, 50% 40%;
+  }
+  100% {
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+}
+/* ===== HISTORY + MATCHES HOVER ===== */
+
+.history-card,
+.match-card,
+.result-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.history-card:hover,
+.match-card:hover,
+.result-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 59, 95, 0.28);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28), 0 0 20px rgba(255, 59, 95, 0.08);
+}
+.history-card,
+.match-card,
+.result-card {
+  cursor: pointer;
 }
