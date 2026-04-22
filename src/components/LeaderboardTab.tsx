@@ -13,8 +13,8 @@ export default function LeaderboardTab({
   achievements,
   onOpenPlayer,
 }: Props) {
-  const getTeamName = (teamId: number) =>
-    teams.find((t) => t.id === teamId)?.name || "Без команди";
+  const getPlayerTeam = (teamId: number) =>
+    teams.find((team) => team.id === teamId) || null;
 
   const getPlayerAchievements = (playerId: number) =>
     achievements.filter((achievement) =>
@@ -37,6 +37,7 @@ export default function LeaderboardTab({
             playerAchievements.length - previewAchievements.length,
             0
           );
+          const playerTeam = getPlayerTeam(player.teamId);
 
           return (
             <button
@@ -47,16 +48,15 @@ export default function LeaderboardTab({
             >
               <div className="leader-left">
                 <div className="rank-box">{index + 1}</div>
+
                 <img
                   src={player.avatar}
                   alt={player.nickname}
                   className="avatar"
                 />
-                <div>
+
+                <div className="leader-main-info">
                   <div className="achievement-title">{player.nickname}</div>
-                  <div className="muted small">
-                    {getTeamName(player.teamId)}
-                  </div>
 
                   <div className="tag-row compact">
                     {previewAchievements.length > 0 ? (
@@ -79,6 +79,52 @@ export default function LeaderboardTab({
                       </>
                     ) : (
                       <span className="muted small">Немає досягнень</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="leader-team-side">
+                  <div className="leader-team-card">
+                    <div className="leader-team-label">TEAM</div>
+
+                    {playerTeam ? (
+                      <div className="leader-team-content">
+                        {playerTeam.logo ? (
+                          <img
+                            src={playerTeam.logo}
+                            alt={playerTeam.name}
+                            className="leader-team-logo-large"
+                          />
+                        ) : (
+                          <div className="leader-team-logo-large leader-team-logo-fallback-large">
+                            {playerTeam.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+
+                        <div className="leader-team-texts">
+                          <div className="leader-team-name-strong">
+                            {playerTeam.name}
+                          </div>
+                          <div className="leader-team-subtle">
+                            Active roster
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="leader-team-content leader-team-content--empty">
+                        <div className="leader-team-logo-large leader-team-empty-logo">
+                          —
+                        </div>
+
+                        <div className="leader-team-texts">
+                          <div className="leader-team-name-strong">
+                            Free Agent
+                          </div>
+                          <div className="leader-team-subtle">
+                            No team assigned
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
