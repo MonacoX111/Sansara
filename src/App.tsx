@@ -1560,8 +1560,60 @@ export default function App() {
                             : winner.avatar
                           : "";
 
+                        const tournamentCompletedMatches = matches.filter(
+                          (m) =>
+                            m.tournamentId === lastTournament.id &&
+                            m.status === "completed"
+                        );
+
+                        const explicitFinalMatch =
+                          tournamentCompletedMatches.find(
+                            (m) =>
+                              (m.round || "").toLowerCase().includes("final") &&
+                              !(m.round || "").toLowerCase().includes("semi")
+                          );
+
+                        const winnerLastMatch = [...tournamentCompletedMatches]
+                          .filter((m) =>
+                            lastTournament.participantType === "team"
+                              ? m.winnerTeamId === lastTournament.winnerTeamId
+                              : m.winnerId === lastTournament.winnerId
+                          )
+                          .sort(
+                            (a, b) =>
+                              new Date(b.date).getTime() -
+                              new Date(a.date).getTime()
+                          )[0];
+
+                        const finalMatch =
+                          explicitFinalMatch || winnerLastMatch || null;
+
+                        const opponent =
+                          finalMatch &&
+                          lastTournament.participantType === "team"
+                            ? teams.find(
+                                (t) =>
+                                  t.id !== finalMatch.winnerTeamId &&
+                                  (t.id === finalMatch.team1 ||
+                                    t.id === finalMatch.team2)
+                              )
+                            : finalMatch
+                            ? players.find(
+                                (p) =>
+                                  p.id !== finalMatch.winnerId &&
+                                  (p.id === finalMatch.player1 ||
+                                    p.id === finalMatch.player2)
+                              )
+                            : null;
+
+                        const opponentName = opponent
+                          ? "name" in opponent
+                            ? opponent.name
+                            : opponent.nickname
+                          : "Unknown";
+
                         return (
-                          <div className="champion-card">
+                          <div className="champion-card champion-card-upgraded">
                             <div className="champion-left">
                               {winnerImage ? (
                                 <img
@@ -1579,13 +1631,36 @@ export default function App() {
                                 <div className="champion-name">
                                   {winnerName}
                                 </div>
+
                                 <div className="champion-sub">
                                   {lastTournament.title}
+                                </div>
+
+                                <div className="champion-meta">
+                                  <span>{lastTournament.game}</span>
+                                  <span>•</span>
+                                  <span>{lastTournament.date || "TBD"}</span>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="champion-badge">🏆</div>
+                            <div className="champion-right">
+                              <div className="champion-badge">🏆</div>
+
+                              {finalMatch && (
+                                <>
+                                  <div className="champion-score-label">
+                                    FINAL RESULT
+                                  </div>
+                                  <div className="champion-score-big">
+                                    {finalMatch.score || "—"}
+                                  </div>
+                                  <div className="champion-score-opponent">
+                                    vs {opponentName}
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         );
                       })()}

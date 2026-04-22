@@ -1503,10 +1503,24 @@ button {
   box-shadow: 0 0 25px rgba(255, 190, 61, 0.15);
 }
 
+.champion-card-upgraded {
+  gap: 20px;
+}
+
 .champion-left {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+}
+
+.champion-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+  min-width: 180px;
 }
 
 .champion-avatar {
@@ -1539,6 +1553,66 @@ button {
   color: var(--muted);
 }
 
+.champion-meta {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.champion-final-line {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.champion-score-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.champion-score-big {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255, 190, 61, 0.2);
+}
+
+.champion-score-opponent {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .champion-badge {
   font-size: 28px;
+}
+
+@media (max-width: 768px) {
+  .champion-card,
+  .champion-card-upgraded {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .champion-right {
+    align-items: flex-start;
+    text-align: left;
+    min-width: 0;
+  }
+}
+.champion-final {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.9;
 }
