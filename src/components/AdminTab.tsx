@@ -469,6 +469,13 @@ export default function AdminTab({
             </div>
 
             <div className="list-col">
+              <button
+                className="secondary-btn add-list-btn add-player-btn-top"
+                onClick={addPlayer}
+              >
+                + Add player
+              </button>
+
               {filteredAdminPlayers.map((player) => (
                 <button
                   key={player.id}
@@ -485,12 +492,6 @@ export default function AdminTab({
                   ) : null}
                 </button>
               ))}
-              <button
-                className="secondary-btn add-list-btn"
-                onClick={addPlayer}
-              >
-                + Add player
-              </button>
             </div>
           </div>
         </div>
@@ -710,6 +711,13 @@ export default function AdminTab({
           <h2 className="panel-title">Teams (admin)</h2>
 
           <div className="list-col">
+            <button
+              className="secondary-btn add-list-btn add-team-btn-top"
+              onClick={addTeam}
+            >
+              + Add team
+            </button>
+
             {[...teams]
               .sort((a, b) => {
                 if (a.isFeatured && !b.isFeatured) return -1;
@@ -730,10 +738,6 @@ export default function AdminTab({
                   ) : null}
                 </button>
               ))}
-
-            <button className="secondary-btn add-list-btn" onClick={addTeam}>
-              + Add team
-            </button>
           </div>
         </div>
 
@@ -877,6 +881,13 @@ export default function AdminTab({
           <h2 className="panel-title">Tournaments (admin)</h2>
 
           <div className="list-col">
+            <button
+              className="secondary-btn add-list-btn add-tournament-btn-top"
+              onClick={addTournament}
+            >
+              + Add tournament
+            </button>
+
             {tournaments.map((tournament) => (
               <button
                 key={tournament.id}
@@ -890,13 +901,6 @@ export default function AdminTab({
                 {tournament.title || "Tournament"}
               </button>
             ))}
-
-            <button
-              className="secondary-btn add-list-btn"
-              onClick={addTournament}
-            >
-              + Add tournament
-            </button>
           </div>
         </div>
 
@@ -1643,6 +1647,13 @@ export default function AdminTab({
           </div>
 
           <div className="list-col">
+            <button
+              className="secondary-btn add-list-btn add-match-btn-top"
+              onClick={() => addMatch(matchTournamentFilterId)}
+            >
+              + Add match
+            </button>
+
             {[...matches]
               .filter((match) =>
                 matchTournamentFilterId
@@ -1670,13 +1681,6 @@ export default function AdminTab({
                       )}`}
                 </button>
               ))}
-
-            <button
-              className="secondary-btn add-list-btn"
-              onClick={() => addMatch(matchTournamentFilterId)}
-            >
-              + Add match
-            </button>
           </div>
         </div>
 
@@ -2049,6 +2053,13 @@ export default function AdminTab({
         <h2 className="panel-title">Achievements (admin)</h2>
 
         <div className="list-col">
+          <button
+            className="secondary-btn add-list-btn add-achievement-btn-top"
+            onClick={addAchievement}
+          >
+            + Add achievement
+          </button>
+
           {achievements.map((achievement) => (
             <button
               key={achievement.id}
@@ -2063,13 +2074,6 @@ export default function AdminTab({
               {achievement.title || "Achievement"}
             </button>
           ))}
-
-          <button
-            className="secondary-btn add-list-btn"
-            onClick={addAchievement}
-          >
-            + Add achievement
-          </button>
         </div>
       </div>
 
@@ -2080,6 +2084,13 @@ export default function AdminTab({
           {selectedAchievement ? (
             <div key={selectedAchievement.id} className="simple-card">
               <div className="form-col">
+                <button
+                  className="danger-btn delete-achievement-btn-top"
+                  onClick={() => deleteAchievement(selectedAchievement.id)}
+                >
+                  Delete achievement
+                </button>
+
                 <input
                   className="input"
                   value={selectedAchievement.title}
@@ -2135,15 +2146,6 @@ export default function AdminTab({
                       </button>
                     );
                   })}
-                </div>
-
-                <div className="btn-row">
-                  <button
-                    className="danger-btn"
-                    onClick={() => deleteAchievement(selectedAchievement.id)}
-                  >
-                    Delete achievement
-                  </button>
                 </div>
               </div>
             </div>

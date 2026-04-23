@@ -696,6 +696,293 @@ button {
   box-shadow: 0 0 20px rgba(255, 59, 95, 0.25);
 }
 
+.add-player-btn-top {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(49, 208, 127, 0.42);
+  background: linear-gradient(
+      135deg,
+      rgba(49, 208, 127, 0.12),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: #b7ffd5;
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 18px rgba(49, 208, 127, 0.16), 0 0 36px rgba(49, 208, 127, 0.08);
+}
+
+.add-player-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(49, 208, 127, 0.28) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: addPlayerButtonShimmer 3s linear infinite;
+}
+
+.add-player-btn-top:hover {
+  border-color: rgba(49, 208, 127, 0.72);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 24px rgba(49, 208, 127, 0.28), 0 0 48px rgba(49, 208, 127, 0.16);
+}
+
+@keyframes addPlayerButtonShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.add-team-btn-top {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(49, 208, 127, 0.42);
+  background: linear-gradient(
+      135deg,
+      rgba(49, 208, 127, 0.12),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: #b7ffd5;
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 18px rgba(49, 208, 127, 0.16), 0 0 36px rgba(49, 208, 127, 0.08);
+}
+
+.add-team-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(49, 208, 127, 0.28) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: addTeamButtonShimmer 3s linear infinite;
+}
+
+.add-team-btn-top:hover {
+  border-color: rgba(49, 208, 127, 0.72);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 24px rgba(49, 208, 127, 0.28), 0 0 48px rgba(49, 208, 127, 0.16);
+}
+
+@keyframes addTeamButtonShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.add-tournament-btn-top {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(49, 208, 127, 0.42);
+  background: linear-gradient(
+      135deg,
+      rgba(49, 208, 127, 0.12),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: #b7ffd5;
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 18px rgba(49, 208, 127, 0.16), 0 0 36px rgba(49, 208, 127, 0.08);
+}
+
+.add-tournament-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(49, 208, 127, 0.28) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: addTournamentButtonShimmer 3s linear infinite;
+}
+
+.add-tournament-btn-top:hover {
+  border-color: rgba(49, 208, 127, 0.72);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 24px rgba(49, 208, 127, 0.28), 0 0 48px rgba(49, 208, 127, 0.16);
+}
+
+.add-match-btn-top {
+  margin-top: 18px;
+
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(49, 208, 127, 0.42);
+  background: linear-gradient(
+      135deg,
+      rgba(49, 208, 127, 0.12),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: #b7ffd5;
+
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 18px rgba(49, 208, 127, 0.16), 0 0 36px rgba(49, 208, 127, 0.08);
+}
+
+.add-match-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(49, 208, 127, 0.28) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: addMatchButtonShimmer 3s linear infinite;
+}
+
+.add-match-btn-top:hover {
+  border-color: rgba(49, 208, 127, 0.72);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 24px rgba(49, 208, 127, 0.28), 0 0 48px rgba(49, 208, 127, 0.16);
+}
+
+@keyframes addMatchButtonShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.delete-achievement-btn-top {
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 59, 95, 0.5);
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.14),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: #ff7a92;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 20px rgba(255, 59, 95, 0.22), 0 0 40px rgba(255, 59, 95, 0.12);
+}
+
+.delete-achievement-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 59, 95, 0.35) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: deleteAchievementShimmer 2.8s linear infinite;
+}
+
+.delete-achievement-btn-top:hover {
+  border-color: rgba(255, 59, 95, 0.8);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.2) inset,
+    0 0 28px rgba(255, 59, 95, 0.34), 0 0 60px rgba(255, 59, 95, 0.2);
+}
+
+@keyframes deleteAchievementShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.add-achievement-btn-top {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgba(49, 208, 127, 0.5) !important;
+
+  background: linear-gradient(
+      135deg,
+      rgba(49, 208, 127, 0.14),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03) !important;
+
+  color: #b7ffd5 !important;
+
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.1) inset,
+    0 0 20px rgba(49, 208, 127, 0.22), 0 0 40px rgba(49, 208, 127, 0.12);
+}
+
+.add-achievement-btn-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(49, 208, 127, 0.28) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: addAchievementButtonShimmer 3s linear infinite;
+}
+
+.add-achievement-btn-top:hover {
+  border-color: rgba(49, 208, 127, 0.72);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 24px rgba(49, 208, 127, 0.28), 0 0 48px rgba(49, 208, 127, 0.16);
+}
+
+@keyframes addAchievementButtonShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 .admin-list-btn {
   display: flex;
   align-items: center;
@@ -845,7 +1132,9 @@ button {
 }
 
 .list-col {
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .admin-wrap {
@@ -874,7 +1163,7 @@ button {
 }
 
 .admin-wrap .list-col {
-  gap: 10px;
+  gap: 16px;
 }
 
 .admin-wrap .field-block .input[type="date"],
