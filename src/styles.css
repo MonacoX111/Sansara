@@ -3005,7 +3005,6 @@ button {
   line-height: 1.2;
 }
 /* ===== LEADER ROW HOVER ===== */
-/* ===== LEADER ROW HOVER ===== */
 .leader-row {
   position: relative;
   overflow: hidden;
@@ -3036,11 +3035,6 @@ button {
   opacity: 1;
 }
 
-.leader-row:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05),
-    0 0 20px rgba(255, 255, 255, 0.08);
-}
 .leader-row:hover {
   transform: translateY(-2px) scale(1.01);
   box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05),
@@ -3204,7 +3198,8 @@ button {
 .participant-stat-box,
 .profile-primary-card,
 .profile-mini-stat-card,
-.tournament-history-info-card {
+.tournament-history-info-card,
+.achievement-card {
   position: relative;
   overflow: hidden;
 }
@@ -3223,31 +3218,28 @@ button {
 .team-history-card::before,
 .stat-card::before,
 .tournament-stat-card::before,
-.overview-stat-card::after,
 .results-placement-card::before,
 .participant-stat-box::before,
 .profile-primary-card::before,
 .profile-mini-stat-card::before,
-.tournament-history-info-card::before {
+.tournament-history-info-card::before,
+.achievement-card::before {
   content: "";
   position: absolute;
-  top: -120%;
-  left: -35%;
-  width: 42%;
-  height: 260%;
-  transform: rotate(18deg) translateX(0);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0.11),
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0)
-  );
-  opacity: 0;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.75s ease;
   z-index: 0;
+
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.07) 28%,
+    transparent 68%
+  );
+
+  opacity: 0;
+  transition: opacity 0.18s ease;
 }
 
 .player-card:hover::before,
@@ -3264,14 +3256,13 @@ button {
 .team-history-card:hover::before,
 .stat-card:hover::before,
 .tournament-stat-card:hover::before,
-.overview-stat-card:hover::after,
 .results-placement-card:hover::before,
 .participant-stat-box:hover::before,
 .profile-primary-card:hover::before,
 .profile-mini-stat-card:hover::before,
-.tournament-history-info-card:hover::before {
+.tournament-history-info-card:hover::before,
+.achievement-card:hover::before {
   opacity: 1;
-  transform: rotate(18deg) translateX(340%);
 }
 
 /* щоб контент був поверх світла */
@@ -3294,7 +3285,8 @@ button {
 .participant-stat-box > *,
 .profile-primary-card > *,
 .profile-mini-stat-card > *,
-.tournament-history-info-card > * {
+.tournament-history-info-card > *,
+.achievement-card > * {
   position: relative;
   z-index: 1;
 }
@@ -3647,27 +3639,7 @@ button {
     background-position: 0 0, 0 0, 0% 50%;
   }
 }
-/* ===== ACTIVE CARD STATE ===== */
 
-.player-card-active,
-.team-card-active {
-  border-color: rgba(255, 59, 95, 0.9) !important;
-
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.6), 0 0 25px rgba(255, 59, 95, 0.35),
-    0 12px 35px rgba(255, 59, 95, 0.25);
-
-  transform: translateY(-2px) scale(1.01);
-}
-/* ===== ACTIVE CARD STATE ===== */
-
-.player-card-active,
-.team-card-active,
-.tournament-card-active {
-  border-color: rgba(255, 59, 95, 0.6) !important;
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.4),
-    0 12px 30px rgba(255, 59, 95, 0.15);
-  transform: translateY(-2px);
-}
 /* ===== ACTIVE CARD STATE ===== */
 
 .player-card-active,
@@ -3823,7 +3795,6 @@ button {
     opacity: 0;
   }
 }
-/* ===== CURSOR GLOW ===== */
 
 /* ===== STAGGER ANIMATION ===== */
 

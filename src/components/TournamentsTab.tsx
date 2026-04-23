@@ -144,6 +144,17 @@ export default function TournamentsTab({
               key={tournament.id}
               type="button"
               className="simple-card tournament-card-button tournament-history-card"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
               onClick={() => setSelectedTournamentId(tournament.id)}
               style={
                 tournament.imageUrl
@@ -184,14 +195,40 @@ export default function TournamentsTab({
                 </div>
 
                 <div className="tournament-history-info-grid">
-                  <div className="tournament-history-info-card">
+                  <div
+                    className="tournament-history-info-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     <span className="tournament-history-label">Date</span>
                     <span className="tournament-history-value">
                       {tournament.date || "—"}
                     </span>
                   </div>
 
-                  <div className="tournament-history-info-card">
+                  <div
+                    className="tournament-history-info-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     <span className="tournament-history-label">Winner</span>
                     <span className="tournament-history-value">
                       {tournament.participantType === "team"
@@ -200,14 +237,40 @@ export default function TournamentsTab({
                     </span>
                   </div>
 
-                  <div className="tournament-history-info-card">
+                  <div
+                    className="tournament-history-info-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     <span className="tournament-history-label">MVP</span>
                     <span className="tournament-history-value">
                       {getPlayerName(tournament.mvpId)}
                     </span>
                   </div>
 
-                  <div className="tournament-history-info-card">
+                  <div
+                    className="tournament-history-info-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     <span className="tournament-history-label">
                       Participants
                     </span>
@@ -230,6 +293,17 @@ export default function TournamentsTab({
         <div className="tournament-public-view">
           <div
             className="tournament-hero"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              e.currentTarget.style.setProperty(
+                "--x",
+                `${e.clientX - rect.left}px`
+              );
+              e.currentTarget.style.setProperty(
+                "--y",
+                `${e.clientY - rect.top}px`
+              );
+            }}
             style={
               selectedTournament.imageUrl
                 ? {
@@ -267,28 +341,80 @@ export default function TournamentsTab({
             </div>
 
             <div className="tournament-hero-side">
-              <div className="tournament-stat-card">
+              <div
+                className="tournament-stat-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+              >
                 <div className="muted small">Status</div>
                 <div className="achievement-title">
                   {selectedTournament.status || "—"}
                 </div>
               </div>
 
-              <div className="tournament-stat-card">
+              <div
+                className="tournament-stat-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+              >
                 <div className="muted small">Date</div>
                 <div className="achievement-title">
                   {selectedTournament.date || "—"}
                 </div>
               </div>
 
-              <div className="tournament-stat-card">
+              <div
+                className="tournament-stat-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+              >
                 <div className="muted small">Prize</div>
                 <div className="achievement-title">
                   {selectedTournament.prize || "—"}
                 </div>
               </div>
 
-              <div className="tournament-stat-card">
+              <div
+                className="tournament-stat-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+              >
                 <div className="muted small">Participants</div>
                 <div className="achievement-title">
                   {selectedParticipants.length}
@@ -310,46 +436,137 @@ export default function TournamentsTab({
           ) : null}
 
           <div className="tournament-sections-grid">
-            <div className="simple-card tournament-section">
+            <div
+              className="simple-card tournament-section"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
+            >
               <div className="achievement-title">Tournament overview</div>
 
               <div className="tournament-overview-grid">
-                <div className="overview-stat-card game">
+                <div
+                  className="overview-stat-card game"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Game</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.game || "—"}
                   </strong>
                 </div>
 
-                <div className="overview-stat-card type">
+                <div
+                  className="overview-stat-card type"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Type</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.type || "—"}
                   </strong>
                 </div>
 
-                <div className="overview-stat-card format">
+                <div
+                  className="overview-stat-card format"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Format</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.format || "—"}
                   </strong>
                 </div>
 
-                <div className="overview-stat-card status">
+                <div
+                  className="overview-stat-card status"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Status</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.status || "—"}
                   </strong>
                 </div>
 
-                <div className="overview-stat-card date">
+                <div
+                  className="overview-stat-card date"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Date</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.date || "—"}
                   </strong>
                 </div>
 
-                <div className="overview-stat-card prize">
+                <div
+                  className="overview-stat-card prize"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
+                >
                   <span className="overview-stat-label">Prize</span>
                   <strong className="overview-stat-value">
                     {selectedTournament.prize || "—"}
@@ -358,7 +575,20 @@ export default function TournamentsTab({
               </div>
             </div>
 
-            <div className="simple-card tournament-section">
+            <div
+              className="simple-card tournament-section"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
+            >
               <div className="achievement-title">Results</div>
 
               {(() => {
@@ -383,7 +613,20 @@ export default function TournamentsTab({
 
                 return (
                   <div className="results-block-upgraded">
-                    <div className="results-winner-card">
+                    <div
+                      className="results-winner-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <div className="results-winner-head">
                         {winnerImage ? (
                           <img
@@ -421,6 +664,18 @@ export default function TournamentsTab({
                             <div
                               key={`${selectedTournament.id}-${entry.place}-${entry.entityId}`}
                               className="results-placement-card"
+                              onMouseMove={(e) => {
+                                const rect =
+                                  e.currentTarget.getBoundingClientRect();
+                                e.currentTarget.style.setProperty(
+                                  "--x",
+                                  `${e.clientX - rect.left}px`
+                                );
+                                e.currentTarget.style.setProperty(
+                                  "--y",
+                                  `${e.clientY - rect.top}px`
+                                );
+                              }}
                             >
                               <div className="results-placement-place">
                                 #{entry.place}
@@ -441,7 +696,20 @@ export default function TournamentsTab({
               })()}
             </div>
 
-            <div className="simple-card tournament-section tournament-section-full">
+            <div
+              className="simple-card tournament-section tournament-section-full"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
+            >
               <div className="achievement-title">Matches</div>
 
               {selectedMatches.length > 0 ? (
@@ -499,7 +767,22 @@ export default function TournamentsTab({
                             ?.avatar || "";
 
                       return (
-                        <div key={match.id} className="tournament-match-card">
+                        <div
+                          key={match.id}
+                          className="tournament-match-card"
+                          onMouseMove={(e) => {
+                            const rect =
+                              e.currentTarget.getBoundingClientRect();
+                            e.currentTarget.style.setProperty(
+                              "--x",
+                              `${e.clientX - rect.left}px`
+                            );
+                            e.currentTarget.style.setProperty(
+                              "--y",
+                              `${e.clientY - rect.top}px`
+                            );
+                          }}
+                        >
                           <div className="tournament-match-top">
                             <div className="tournament-match-badges">
                               <span className="pill light">
@@ -631,7 +914,20 @@ export default function TournamentsTab({
               )}
             </div>
 
-            <div className="simple-card tournament-section tournament-section-full">
+            <div
+              className="simple-card tournament-section tournament-section-full"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
+            >
               <div className="achievement-title">Participants</div>
 
               {selectedParticipants.length > 0 ? (
@@ -650,6 +946,18 @@ export default function TournamentsTab({
                             className={`participant-card ${
                               isWinner ? "participant-card-winner" : ""
                             }`}
+                            onMouseMove={(e) => {
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              e.currentTarget.style.setProperty(
+                                "--x",
+                                `${e.clientX - rect.left}px`
+                              );
+                              e.currentTarget.style.setProperty(
+                                "--y",
+                                `${e.clientY - rect.top}px`
+                              );
+                            }}
                           >
                             <div className="participant-card-head">
                               {participant.image ? (
@@ -760,6 +1068,18 @@ export default function TournamentsTab({
                             className={`participant-card ${
                               isWinner ? "participant-card-winner" : ""
                             }`}
+                            onMouseMove={(e) => {
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              e.currentTarget.style.setProperty(
+                                "--x",
+                                `${e.clientX - rect.left}px`
+                              );
+                              e.currentTarget.style.setProperty(
+                                "--y",
+                                `${e.clientY - rect.top}px`
+                              );
+                            }}
                           >
                             <div className="participant-card-head">
                               {participant.image ? (

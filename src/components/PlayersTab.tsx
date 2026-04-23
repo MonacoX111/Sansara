@@ -210,6 +210,17 @@ export default function PlayersTab({
                   className={`player-card ${
                     selectedPlayerId === player.id ? "player-card-active" : ""
                   }`}
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
                   onClick={() => setSelectedPlayerId(player.id)}
                 >
                   <div className="player-head">
@@ -313,7 +324,20 @@ export default function PlayersTab({
 
                 <div className="profile-info-box upgraded">
                   <div className="profile-primary-row">
-                    <div className="profile-primary-card team-card">
+                    <div
+                      className="profile-primary-card team-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <span className="info-label">Team</span>
 
                       <div className="profile-team-main">
@@ -356,14 +380,40 @@ export default function PlayersTab({
                   </div>
 
                   <div className="profile-mini-stats">
-                    <div className="profile-mini-stat-card">
+                    <div
+                      className="profile-mini-stat-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <span className="info-label">Achievements</span>
                       <span className="profile-mini-stat-value">
                         {playerAchievements.length}
                       </span>
                     </div>
 
-                    <div className="profile-mini-stat-card">
+                    <div
+                      className="profile-mini-stat-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <span className="info-label">Tournaments</span>
                       <span className="profile-mini-stat-value">
                         {playerTournaments.length}
@@ -394,7 +444,21 @@ export default function PlayersTab({
               ) : (
                 <div className="achievement-grid">
                   {playerAchievements.map((achievement) => (
-                    <div key={achievement.id} className="achievement-card">
+                    <div
+                      key={achievement.id}
+                      className="achievement-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <img
                         src={achievement.image}
                         alt={achievement.title}
@@ -422,7 +486,21 @@ export default function PlayersTab({
               ) : (
                 <div className="list-col">
                   {playerTournamentHistory.map((tournament) => (
-                    <div key={tournament.id} className="simple-card">
+                    <div
+                      key={tournament.id}
+                      className="simple-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">
@@ -460,7 +538,21 @@ export default function PlayersTab({
               ) : (
                 <div className="list-col">
                   {playerMatches.map((match) => (
-                    <div key={match.id} className="simple-card">
+                    <div
+                      key={match.id}
+                      className="simple-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">

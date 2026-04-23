@@ -82,8 +82,19 @@ export default function TeamsTab({
             <button
               key={team.id}
               className={`simple-card button-card ${
-                selectedTeamId === team.id ? "team-card-active" : ""
+                selectedTeamId === team.id ? "player-card-active" : ""
               }`}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty(
+                  "--x",
+                  `${e.clientX - rect.left}px`
+                );
+                e.currentTarget.style.setProperty(
+                  "--y",
+                  `${e.clientY - rect.top}px`
+                );
+              }}
               onClick={() => setSelectedTeamId(team.id)}
             >
               <div className="player-head">
@@ -135,7 +146,21 @@ export default function TeamsTab({
             {teamPlayers.length > 0 ? (
               <div className="team-roster-list">
                 {teamPlayers.map((player) => (
-                  <div key={player.id} className="team-roster-card">
+                  <div
+                    key={player.id}
+                    className="team-roster-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     {player.avatar ? (
                       <img
                         src={player.avatar}
@@ -168,7 +193,21 @@ export default function TeamsTab({
             {wonTournaments.length > 0 ? (
               <div className="team-history-list">
                 {wonTournaments.map((tournament) => (
-                  <div key={tournament.id} className="team-history-card">
+                  <div
+                    key={tournament.id}
+                    className="team-history-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
                     <div className="team-history-top">
                       <div className="team-history-title">
                         {tournament.title}
