@@ -3005,14 +3005,12 @@ button {
   line-height: 1.2;
 }
 /* ===== LEADER ROW HOVER ===== */
-.leader-row {
-  transition: transform 0.25s ease, box-shadow 0.25s ease,
-    border-color 0.25s ease, background 0.25s ease;
-}
-
+/* ===== LEADER ROW HOVER ===== */
 .leader-row {
   position: relative;
   overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease, background 0.25s ease;
 }
 
 .leader-row::before {
@@ -3020,21 +3018,33 @@ button {
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
 
   background: radial-gradient(
-    circle at var(--x, 50%) var(--y, 50%),
-    rgba(255, 255, 255, 0.12),
-    transparent 60%
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.08) 28%,
+    transparent 68%
   );
 
   opacity: 0;
-  transition: opacity 0.25s ease;
-
-  pointer-events: none;
+  transition: opacity 0.18s ease;
 }
 
 .leader-row:hover::before {
   opacity: 1;
+}
+
+.leader-row:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05),
+    0 0 20px rgba(255, 255, 255, 0.08);
+}
+.leader-row:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05),
+    0 0 20px rgba(255, 255, 255, 0.08);
 }
 
 /* ===== TEAM CARD HOVER ===== */
@@ -3203,7 +3213,6 @@ button {
 .simple-card::before,
 .button-card::before,
 .admin-list-btn::before,
-.leader-row::before,
 .tournament-card-button::before,
 .participant-card::before,
 .result-card::before,
@@ -3245,7 +3254,6 @@ button {
 .simple-card:hover::before,
 .button-card:hover::before,
 .admin-list-btn:hover::before,
-.leader-row:hover::before,
 .tournament-card-button:hover::before,
 .participant-card:hover::before,
 .result-card:hover::before,

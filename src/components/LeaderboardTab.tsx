@@ -63,6 +63,17 @@ export default function LeaderboardTab({
                 className={`leader-row leaderboard-clickable ${
                   index === 0 ? "leader-top" : ""
                 }`}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
                 onClick={() => onOpenPlayer(player.id)}
               >
                 <div className="leader-left">

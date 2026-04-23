@@ -299,16 +299,8 @@ export default function App() {
   const ADMIN_PASSWORD = "monaco123";
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      document.documentElement.style.setProperty("--x", `${e.clientX}px`);
-      document.documentElement.style.setProperty("--y", `${e.clientY}px`);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    document.documentElement.style.setProperty("--x", "50%");
+    document.documentElement.style.setProperty("--y", "50%");
   }, []);
 
   const fallbackPlayers = useMemo(
