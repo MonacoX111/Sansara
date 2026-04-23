@@ -344,15 +344,21 @@ export default function AdminTab({
       name: getTeamName(teamId),
     }));
 
-  const filteredAdminPlayers = players.filter((player) => {
-    const q = playerAdminSearch.toLowerCase().trim();
-    if (!q) return true;
+  const filteredAdminPlayers = [...players]
+    .filter((player) => {
+      const q = playerAdminSearch.toLowerCase().trim();
+      if (!q) return true;
 
-    return (
-      player.nickname.toLowerCase().includes(q) ||
-      player.fullName.toLowerCase().includes(q)
-    );
-  });
+      return (
+        player.nickname.toLowerCase().includes(q) ||
+        player.fullName.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      return 0;
+    });
 
   const toggleTournamentParticipant = (id: number) => {
     setTournamentForm((prev) => {
@@ -459,12 +465,14 @@ export default function AdminTab({
                     selectedPlayerId === player.id
                       ? "admin-list-btn-active"
                       : ""
-                  }`}
+                  } ${player.isFeatured ? "admin-list-btn-featured" : ""}`}
                 >
-                  {player.nickname || "Player"}
+                  <span>{player.nickname || "Player"}</span>
+                  {player.isFeatured ? (
+                    <span className="admin-featured-badge">Featured</span>
+                  ) : null}
                 </button>
               ))}
-
               <button
                 className="secondary-btn add-list-btn"
                 onClick={addPlayer}

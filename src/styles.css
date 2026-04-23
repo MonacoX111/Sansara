@@ -683,7 +683,72 @@ button {
 .admin-list-btn {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ===== FEATURED PLAYER ===== */
+
+.admin-list-btn-featured {
+  border-color: rgba(255, 59, 95, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 20px rgba(255, 59, 95, 0.22), 0 0 40px rgba(255, 59, 95, 0.12);
+
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.12),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.03);
+}
+
+/* shimmer як у champion */
+.admin-list-btn-featured::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 59, 95, 0.28) 40%,
+    transparent 70%
+  );
+
+  transform: translateX(-120%);
+  animation: featuredShimmer 3s linear infinite;
+}
+
+@keyframes featuredShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* badge */
+.admin-featured-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #ff4d6d;
+
+  background: rgba(255, 59, 95, 0.14);
+  border: 1px solid rgba(255, 59, 95, 0.4);
+
+  box-shadow: 0 0 10px rgba(255, 59, 95, 0.25);
+
+  flex-shrink: 0;
 }
 
 .list-col {
