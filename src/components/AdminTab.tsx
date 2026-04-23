@@ -468,7 +468,7 @@ export default function AdminTab({
               />
             </div>
 
-            <div className="list-col">
+            <div className="list-col admin-scroll-list">
               <button
                 className="secondary-btn add-list-btn add-player-btn-top"
                 onClick={addPlayer}
@@ -710,7 +710,7 @@ export default function AdminTab({
         <div className="panel">
           <h2 className="panel-title">Teams (admin)</h2>
 
-          <div className="list-col">
+          <div className="list-col admin-scroll-list">
             <button
               className="secondary-btn add-list-btn add-team-btn-top"
               onClick={addTeam}
@@ -880,7 +880,7 @@ export default function AdminTab({
         <div className="panel">
           <h2 className="panel-title">Tournaments (admin)</h2>
 
-          <div className="list-col">
+          <div className="list-col admin-scroll-list">
             <button
               className="secondary-btn add-list-btn add-tournament-btn-top"
               onClick={addTournament}
@@ -1646,7 +1646,7 @@ export default function AdminTab({
             </select>
           </div>
 
-          <div className="list-col">
+          <div className="list-col admin-scroll-list">
             <button
               className="secondary-btn add-list-btn add-match-btn-top"
               onClick={() => addMatch(matchTournamentFilterId)}
@@ -2052,7 +2052,7 @@ export default function AdminTab({
       <div className="panel">
         <h2 className="panel-title">Achievements (admin)</h2>
 
-        <div className="list-col">
+        <div className="list-col admin-scroll-list">
           <button
             className="secondary-btn add-list-btn add-achievement-btn-top"
             onClick={addAchievement}
@@ -2080,7 +2080,7 @@ export default function AdminTab({
       <div className="panel">
         <h2 className="panel-title">Edit achievements</h2>
 
-        <div className="list-col">
+        <div className="list-col admin-scroll-list">
           {selectedAchievement ? (
             <div key={selectedAchievement.id} className="simple-card">
               <div className="form-col">

@@ -988,8 +988,13 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-}
 
+  padding: 14px 16px;
+  min-height: 56px;
+
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
 /* ===== FEATURED PLAYER ===== */
 
 .admin-list-btn-featured {
@@ -1164,6 +1169,17 @@ button {
 
 .admin-wrap .list-col {
   gap: 16px;
+}
+
+.admin-scroll-list {
+  max-height: 720px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  contain: layout paint style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .admin-wrap .field-block .input[type="date"],
@@ -4294,6 +4310,29 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 59, 95, 0.6);
 }
+
+.admin-scroll-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 59, 95, 0.4),
+    rgba(255, 59, 95, 0.18)
+  );
+  border-radius: 999px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 95, 0.65);
+}
+
 .container,
 .hero,
 .panel,
