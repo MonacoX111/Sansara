@@ -438,7 +438,12 @@ button {
   color: #ffd77a;
   border-color: rgba(255, 190, 61, 0.18);
 }
-
+.pill.featured-pill {
+  background: rgba(255, 59, 95, 0.14);
+  color: #ff4d6d;
+  border-color: rgba(255, 59, 95, 0.4);
+  box-shadow: 0 0 10px rgba(255, 59, 95, 0.22);
+}
 .tag-row {
   flex-wrap: wrap;
   margin-top: 10px;

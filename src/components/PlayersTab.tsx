@@ -234,7 +234,7 @@ export default function PlayersTab({
                         <div className="player-name">
                           {player.nickname}{" "}
                           {player.isFeatured ? (
-                            <span className="pill gold">Featured</span>
+                            <span className="pill featured-pill">Featured</span>
                           ) : null}
                         </div>
                         <span className="pill light">#{player.rank}</span>
