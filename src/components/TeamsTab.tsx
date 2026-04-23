@@ -82,7 +82,7 @@ export default function TeamsTab({
             <button
               key={team.id}
               className={`simple-card button-card ${
-                selectedTeamId === team.id ? "player-card-active" : ""
+                selectedTeamId === team.id ? "team-card-active" : ""
               }`}
               onClick={() => setSelectedTeamId(team.id)}
             >

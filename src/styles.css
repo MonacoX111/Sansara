@@ -3010,16 +3010,31 @@ button {
     border-color 0.25s ease, background 0.25s ease;
 }
 
-.leader-row:hover {
-  transform: translateY(-3px);
-  border-color: rgba(255, 90, 120, 0.35);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 18px 50px rgba(255, 60, 100, 0.18);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
+.leader-row {
+  position: relative;
+  overflow: hidden;
+}
+
+.leader-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.12),
+    transparent 60%
   );
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+
+  pointer-events: none;
+}
+
+.leader-row:hover::before {
+  opacity: 1;
 }
 
 /* ===== TEAM CARD HOVER ===== */
@@ -3622,5 +3637,213 @@ button {
   }
   100% {
     background-position: 0 0, 0 0, 0% 50%;
+  }
+}
+/* ===== ACTIVE CARD STATE ===== */
+
+.player-card-active,
+.team-card-active {
+  border-color: rgba(255, 59, 95, 0.9) !important;
+
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.6), 0 0 25px rgba(255, 59, 95, 0.35),
+    0 12px 35px rgba(255, 59, 95, 0.25);
+
+  transform: translateY(-2px) scale(1.01);
+}
+/* ===== ACTIVE CARD STATE ===== */
+
+.player-card-active,
+.team-card-active,
+.tournament-card-active {
+  border-color: rgba(255, 59, 95, 0.6) !important;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.4),
+    0 12px 30px rgba(255, 59, 95, 0.15);
+  transform: translateY(-2px);
+}
+/* ===== ACTIVE CARD STATE ===== */
+
+.player-card-active,
+.team-card-active,
+.tournament-card-active {
+  border-color: rgba(255, 59, 95, 0.6) !important;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.4),
+    0 12px 30px rgba(255, 59, 95, 0.15);
+  transform: translateY(-2px);
+}
+.team-card-active {
+  animation: teamActiveGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes teamActiveGlow {
+  0% {
+    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.5),
+      0 0 20px rgba(255, 59, 95, 0.25), 0 12px 30px rgba(255, 59, 95, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 59, 95, 0.9),
+      0 0 40px rgba(255, 59, 95, 0.5), 0 18px 45px rgba(255, 59, 95, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.5),
+      0 0 20px rgba(255, 59, 95, 0.25), 0 12px 30px rgba(255, 59, 95, 0.2);
+  }
+}
+/* ===== TOP 1 PLAYER ===== */
+
+.leader-top {
+  border-color: rgba(255, 215, 0, 0.8) !important;
+
+  box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.25),
+    0 15px 40px rgba(255, 215, 0, 0.2);
+
+  position: relative;
+}
+.leader-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.25) 40%,
+    transparent 70%
+  );
+
+  transform: translateX(-100%);
+  animation: leaderShimmer 3s linear infinite;
+
+  pointer-events: none;
+}
+@keyframes leaderShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+.leader-top {
+  animation: leaderGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes leaderGlow {
+  0% {
+    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.2), 0 15px 40px rgba(255, 215, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.9),
+      0 0 45px rgba(255, 215, 0, 0.5), 0 20px 60px rgba(255, 215, 0, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.2), 0 15px 40px rgba(255, 215, 0, 0.15);
+  }
+}
+/* ===== SKELETON ===== */
+
+.skeleton-row {
+  height: 72px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+
+.skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 40%,
+    transparent 70%
+  );
+
+  transform: translateX(-100%);
+  animation: skeletonShimmer 1.4s infinite;
+}
+
+@keyframes skeletonShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+/* ===== RIPPLE CLICK EFFECT ===== */
+
+.leader-row,
+.player-card,
+.simple-card,
+.button-card,
+.team-roster-card,
+.team-history-card,
+.tournament-card-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.leader-row:active::after,
+.player-card:active::after,
+.simple-card:active::after,
+.button-card:active::after,
+.team-roster-card:active::after,
+.team-history-card:active::after,
+.tournament-card-button:active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ripple 0.5s ease-out;
+}
+
+@keyframes ripple {
+  to {
+    width: 400px;
+    height: 400px;
+    opacity: 0;
+  }
+}
+/* ===== CURSOR GLOW ===== */
+
+/* ===== STAGGER ANIMATION ===== */
+
+.leader-row {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.4s ease forwards;
+}
+
+.leader-row:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.leader-row:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.leader-row:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.leader-row:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.leader-row:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

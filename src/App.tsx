@@ -298,6 +298,19 @@ const normalizeHomeAnnouncement = (
 export default function App() {
   const ADMIN_PASSWORD = "monaco123";
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty("--x", `${e.clientX}px`);
+      document.documentElement.style.setProperty("--y", `${e.clientY}px`);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   const fallbackPlayers = useMemo(
     () => readStorage("tm_players", initialPlayers),
     []
