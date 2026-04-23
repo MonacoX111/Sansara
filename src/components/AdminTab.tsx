@@ -264,6 +264,15 @@ export default function AdminTab({
     safeTournamentParticipantIds.includes(team.id)
   );
 
+  const selectedTournamentMvpPlayers =
+    tournamentForm.participantType === "team"
+      ? players.filter((player) =>
+          selectedTournamentTeams.some(
+            (team) => team.id === Number(player.teamId)
+          )
+        )
+      : selectedTournamentPlayers;
+
   const selectedTournamentWinnerId =
     tournamentForm.participantType === "player" &&
     typeof tournamentForm.winnerId === "number" &&
@@ -279,9 +288,10 @@ export default function AdminTab({
       : "";
 
   const selectedTournamentMvpId =
-    tournamentForm.participantType === "player" &&
     typeof tournamentForm.mvpId === "number" &&
-    safeTournamentParticipantIds.includes(Number(tournamentForm.mvpId))
+    selectedTournamentMvpPlayers.some(
+      (player) => player.id === Number(tournamentForm.mvpId)
+    )
       ? Number(tournamentForm.mvpId)
       : "";
 
@@ -1084,30 +1094,26 @@ export default function AdminTab({
               </div>
             </div>
 
-            {tournamentForm.participantType === "player" && (
-              <div className="field-block">
-                <label className="field-label">Winner</label>
-                <select
-                  className="input"
-                  value={selectedTournamentWinnerId}
-                  onChange={(e) =>
-                    setTournamentForm((prev) => ({
-                      ...prev,
-                      winnerId: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
-                    }))
-                  }
-                >
-                  <option value="">Select winner</option>
-                  {selectedTournamentPlayers.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.nickname}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="field-block">
+              <label className="field-label">MVP</label>
+              <select
+                className="input"
+                value={selectedTournamentMvpId}
+                onChange={(e) =>
+                  setTournamentForm((prev) => ({
+                    ...prev,
+                    mvpId: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+              >
+                <option value="">Select MVP</option>
+                {selectedTournamentMvpPlayers.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.nickname}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {tournamentForm.participantType === "team" && (
               <div className="field-block">
@@ -1136,20 +1142,20 @@ export default function AdminTab({
 
             {tournamentForm.participantType === "player" && (
               <div className="field-block">
-                <label className="field-label">MVP</label>
+                <label className="field-label">Winner Player</label>
                 <select
                   className="input"
-                  value={selectedTournamentMvpId}
+                  value={selectedTournamentWinnerId}
                   onChange={(e) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      mvpId: e.target.value
+                      winnerId: e.target.value
                         ? Number(e.target.value)
                         : undefined,
                     }))
                   }
                 >
-                  <option value="">Select MVP</option>
+                  <option value="">Select winner player</option>
                   {selectedTournamentPlayers.map((player) => (
                     <option key={player.id} value={player.id}>
                       {player.nickname}

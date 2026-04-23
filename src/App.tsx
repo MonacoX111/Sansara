@@ -248,6 +248,7 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     format: tournament.format || "",
     status: tournament.status || "draft",
     description: tournament.description || "",
+    imageUrl: tournament.imageUrl || "",
     participantType: tournament.participantType === "team" ? "team" : "player",
     participantIds: Array.isArray(tournament.participantIds)
       ? tournament.participantIds.map(Number)
@@ -261,12 +262,18 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
           .filter(
             (item) =>
               item &&
-              typeof item.playerId === "number" &&
-              typeof item.place === "number"
+              typeof item.place === "number" &&
+              (typeof item.playerId === "number" ||
+                typeof item.teamId === "number")
           )
           .map((item) => ({
-            playerId: Number(item.playerId),
             place: Number(item.place),
+            playerId:
+              typeof item.playerId === "number"
+                ? Number(item.playerId)
+                : undefined,
+            teamId:
+              typeof item.teamId === "number" ? Number(item.teamId) : undefined,
           }))
       : [],
     isPublished: Boolean(tournament.isPublished),
@@ -481,7 +488,15 @@ export default function App() {
         unsubTournaments = subscribeCollection<Tournament>(
           "tournaments",
           (items) => {
-            setTournaments(normalizeTournaments(items));
+            if (!items || items.length === 0) {
+              const latestLocalTournaments = readStorage(
+                "tm_tournaments",
+                initialTournaments
+              );
+              setTournaments(normalizeTournaments(latestLocalTournaments));
+            } else {
+              setTournaments(normalizeTournaments(items));
+            }
           }
         );
 
@@ -1158,28 +1173,44 @@ export default function App() {
           ? Number(tournamentForm.winnerTeamId)
           : undefined,
       mvpId:
-        tournamentForm.participantType === "player" &&
-        tournamentForm.mvpId &&
-        tournamentForm.mvpId > 0
+        tournamentForm.mvpId && tournamentForm.mvpId > 0
           ? Number(tournamentForm.mvpId)
           : undefined,
       placements: Array.isArray(tournamentForm.placements)
-        ? tournamentForm.placements
+        ? tournamentForm.placements.map((item) => ({
+            place: Number(item.place),
+            playerId:
+              typeof item.playerId === "number"
+                ? Number(item.playerId)
+                : undefined,
+            teamId:
+              typeof item.teamId === "number" ? Number(item.teamId) : undefined,
+          }))
         : [],
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
-    setTournaments((prev) =>
-      prev.map((tournament) =>
-        tournament.id === selectedTournamentId ? updatedTournament : tournament
-      )
+    const nextTournaments = tournaments.map((tournament) =>
+      tournament.id === selectedTournamentId ? updatedTournament : tournament
     );
+
+    const safeTournaments = nextTournaments.map((tournament) => ({
+      ...tournament,
+      imageUrl:
+        typeof tournament.imageUrl === "string" &&
+        tournament.imageUrl.startsWith("data:")
+          ? ""
+          : tournament.imageUrl || "",
+    }));
+
+    setTournaments(safeTournaments);
+    writeStorage("tm_tournaments", safeTournaments);
 
     showSaveToast("Tournament saved");
 
     try {
       if (isFirebaseConfigured) {
-        await saveItem("tournaments", updatedTournament);
+        await saveItemsBatch("tournaments", safeTournaments);
       }
     } catch (error) {
       console.error("Failed to save tournament:", error);
@@ -1207,7 +1238,20 @@ export default function App() {
       isPublished: false,
     };
 
-    setTournaments((prev) => [...prev, newTournament]);
+    const nextTournaments = [...tournaments, newTournament];
+
+    const safeTournaments = nextTournaments.map((tournament) => ({
+      ...tournament,
+      imageUrl:
+        typeof tournament.imageUrl === "string" &&
+        tournament.imageUrl.startsWith("data:")
+          ? ""
+          : tournament.imageUrl || "",
+    }));
+
+    setTournaments(safeTournaments);
+    writeStorage("tm_tournaments", safeTournaments);
+
     setSelectedTournamentId(newTournament.id);
     setTournamentForm({
       title: newTournament.title,
@@ -1230,7 +1274,7 @@ export default function App() {
 
     try {
       if (isFirebaseConfigured) {
-        await saveItem("tournaments", newTournament);
+        await saveItemsBatch("tournaments", safeTournaments);
       }
     } catch (error) {
       console.error("Failed to add tournament:", error);
@@ -1251,13 +1295,24 @@ export default function App() {
       .filter((match) => match.tournamentId === deletedId)
       .map((match) => match.id);
 
-    setTournaments(nextTournaments);
+    const safeTournaments = nextTournaments.map((tournament) => ({
+      ...tournament,
+      imageUrl:
+        typeof tournament.imageUrl === "string" &&
+        tournament.imageUrl.startsWith("data:")
+          ? ""
+          : tournament.imageUrl || "",
+    }));
+
+    setTournaments(safeTournaments);
     setMatches(nextMatches);
+    writeStorage("tm_tournaments", safeTournaments);
 
     try {
       if (isFirebaseConfigured) {
         await Promise.all([
           deleteItem("tournaments", deletedId),
+          saveItemsBatch("tournaments", safeTournaments),
           deleteItemsBatch("matches", deletedMatchIds),
         ]);
       }

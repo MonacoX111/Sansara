@@ -1601,36 +1601,46 @@ button {
   border: 1px solid rgba(255, 190, 61, 0.34);
   background: linear-gradient(
     135deg,
-    rgba(255, 190, 61, 0.08),
+    rgba(255, 190, 61, 0.1),
     rgba(255, 59, 95, 0.08)
   );
   box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.05) inset,
-    0 0 25px rgba(255, 190, 61, 0.15), 0 15px 40px rgba(255, 190, 61, 0.12);
+    0 0 28px rgba(255, 190, 61, 0.16), 0 15px 40px rgba(255, 190, 61, 0.12);
   position: relative;
   overflow: hidden;
 }
 .champion-card::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -6%;
   border-radius: inherit;
   pointer-events: none;
+  z-index: 1;
+
   background: linear-gradient(
-    120deg,
+    115deg,
     transparent 0%,
-    rgba(255, 215, 0, 0.22) 40%,
-    transparent 70%
+    transparent 28%,
+    rgba(255, 240, 180, 0.08) 36%,
+    rgba(255, 215, 0, 0.72) 46%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 215, 0, 0.72) 54%,
+    rgba(255, 240, 180, 0.08) 64%,
+    transparent 72%,
+    transparent 100%
   );
-  transform: translateX(-120%);
-  animation: championShimmer 3.2s linear infinite;
+
+  transform: translateX(-140%) skewX(-16deg);
+  animation: championShimmer 2.2s linear infinite;
+  filter: blur(2px);
 }
 
 @keyframes championShimmer {
   0% {
-    transform: translateX(-120%);
+    transform: translateX(-140%) skewX(-16deg);
   }
   100% {
-    transform: translateX(120%);
+    transform: translateX(140%) skewX(-16deg);
   }
 }
 
@@ -1773,7 +1783,118 @@ button {
 .champion-badge {
   font-size: 28px;
 }
+.mvp-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 59, 95, 0.34);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 95, 0.12),
+    rgba(67, 208, 255, 0.05)
+  );
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.05) inset,
+    0 0 20px rgba(255, 59, 95, 0.12), 0 10px 24px rgba(255, 59, 95, 0.08);
+}
 
+.mvp-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 59, 95, 0.24) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: mvpShimmer 3.2s linear infinite;
+}
+
+@keyframes mvpShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.mvp-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.mvp-avatar,
+.mvp-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex: 0 0 48px;
+}
+
+.mvp-avatar {
+  object-fit: cover;
+  display: block;
+  border: 2px solid rgba(255, 59, 95, 0.45);
+}
+
+.mvp-avatar-placeholder {
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.mvp-text {
+  min-width: 0;
+}
+
+.mvp-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff4d6d;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.mvp-name {
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.mvp-subline {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mvp-badge {
+  font-size: 22px;
+  color: #ff4d6d;
+  text-shadow: 0 0 14px rgba(255, 59, 95, 0.22);
+}
+
+@media (max-width: 768px) {
+  .mvp-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 @media (max-width: 768px) {
   .champion-card,
   .champion-card-upgraded {
@@ -2099,6 +2220,44 @@ button {
   );
   border: 1px solid rgba(255, 190, 61, 0.2);
   box-shadow: 0 0 18px rgba(255, 190, 61, 0.08);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.results-winner-card-shimmer::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -18%;
+  width: 34%;
+  pointer-events: none;
+  z-index: 3;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 240, 180, 0.18) 18%,
+    rgba(255, 255, 255, 0.92) 50%,
+    rgba(255, 215, 0, 0.65) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  transform: translateX(-220%) skewX(-22deg);
+  transform-origin: center;
+  animation: resultsWinnerShimmer 1.9s linear infinite;
+  opacity: 0.95;
+  mix-blend-mode: screen;
+}
+
+@keyframes resultsWinnerShimmer {
+  0% {
+    transform: translateX(-220%) skewX(-22deg);
+  }
+  100% {
+    transform: translateX(420%) skewX(-22deg);
+  }
 }
 
 .results-winner-head {
@@ -2157,10 +2316,10 @@ button {
 
 .results-placements-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 240px));
+  justify-content: center;
+  gap: 12px;
 }
-
 .results-placement-card {
   padding: 12px;
   border-radius: 14px;
@@ -2168,12 +2327,56 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* ===== RESULTS PLACEMENT COLORS ===== */
+
+/* після того як #1 прибрали:
+   перша картка в сітці = 2 місце
+   друга картка в сітці = 3 місце */
+
+/* #2 — Silver */
+.results-placement-card:nth-child(1) {
+  border-color: rgba(180, 200, 220, 0.42);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 200, 220, 0.14),
+    rgba(255, 255, 255, 0.03)
+  );
+  box-shadow: 0 0 18px rgba(180, 200, 220, 0.14);
+}
+
+.results-placement-card:nth-child(1) .results-placement-place {
+  color: #cbd5e1;
+}
+
+.results-placement-card:nth-child(1) .results-placement-name {
+  color: #e2e8f0;
+}
+
+/* #3 — Bronze */
+.results-placement-card:nth-child(2) {
+  border-color: rgba(205, 127, 50, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(205, 127, 50, 0.14),
+    rgba(255, 255, 255, 0.03)
+  );
+  box-shadow: 0 0 18px rgba(205, 127, 50, 0.14);
+}
+
+.results-placement-card:nth-child(2) .results-placement-place {
+  color: #d79a63;
+}
+
+.results-placement-card:nth-child(2) .results-placement-name {
+  color: #f0bf8f;
+}
+
 .results-placement-place {
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #ffcc66;
+  color: #cfd6e4;
   margin-bottom: 6px;
 }
 
@@ -2181,6 +2384,7 @@ button {
   font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
+  color: #f5f7fb;
 }
 
 .results-empty-state {
@@ -3415,6 +3619,7 @@ button {
 .tournament-history-info-card > *,
 .achievement-card > *,
 .champion-card > *,
+.mvp-card > *,
 .player-row.new > * {
   position: relative;
   z-index: 2;

@@ -23,6 +23,25 @@ const ensureDb = () => {
   return db;
 };
 
+const stripUndefinedDeep = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefinedDeep(item)) as unknown as T;
+  }
+
+  if (value && typeof value === "object") {
+    const nextObject: Record<string, unknown> = {};
+
+    Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+      if (val === undefined) return;
+      nextObject[key] = stripUndefinedDeep(val);
+    });
+
+    return nextObject as T;
+  }
+
+  return value;
+};
+
 export const subscribeCollection = <T extends FirebaseItem>(
   collectionName: string,
   onData: (items: T[]) => void
@@ -45,7 +64,10 @@ export const saveItem = async <T extends FirebaseItem>(
   item: T
 ) => {
   const currentDb = ensureDb();
-  await setDoc(doc(currentDb, collectionName, String(item.id)), item);
+  await setDoc(
+    doc(currentDb, collectionName, String(item.id)),
+    stripUndefinedDeep(item)
+  );
 };
 
 export const saveItemsBatch = async <T extends FirebaseItem>(
@@ -56,7 +78,10 @@ export const saveItemsBatch = async <T extends FirebaseItem>(
   const batch = writeBatch(currentDb);
 
   items.forEach((item) => {
-    batch.set(doc(currentDb, collectionName, String(item.id)), item);
+    batch.set(
+      doc(currentDb, collectionName, String(item.id)),
+      stripUndefinedDeep(item)
+    );
   });
 
   await batch.commit();
@@ -93,7 +118,10 @@ export const seedCollectionIfEmpty = async <T extends FirebaseItem>(
   const batch = writeBatch(currentDb);
 
   items.forEach((item) => {
-    batch.set(doc(currentDb, collectionName, String(item.id)), item);
+    batch.set(
+      doc(currentDb, collectionName, String(item.id)),
+      stripUndefinedDeep(item)
+    );
   });
 
   await batch.commit();

@@ -606,15 +606,18 @@ export default function TournamentsTab({
                         (player) => player.id === selectedTournament.winnerId
                       )?.avatar || "";
 
-                const mvpName =
-                  selectedTournament.participantType === "player"
-                    ? getPlayerName(selectedTournament.mvpId)
-                    : "";
+                const mvpName = getPlayerName(selectedTournament.mvpId);
+
+                const mvpPlayer = players.find(
+                  (player) => player.id === selectedTournament.mvpId
+                );
+
+                const mvpImage = mvpPlayer?.avatar || "";
 
                 return (
                   <div className="results-block-upgraded">
                     <div
-                      className="results-winner-card"
+                      className="results-winner-card results-winner-card-shimmer"
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         e.currentTarget.style.setProperty(
@@ -645,21 +648,59 @@ export default function TournamentsTab({
                           <div className="results-winner-name">
                             {winnerName}
                           </div>
-
-                          {selectedTournament.participantType === "player" &&
-                          mvpName !== "—" ? (
-                            <div className="results-subline">
-                              MVP: {mvpName}
-                            </div>
-                          ) : null}
                         </div>
                       </div>
                     </div>
+
+                    {mvpName !== "—" ? (
+                      <div
+                        className="mvp-card"
+                        onMouseMove={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          e.currentTarget.style.setProperty(
+                            "--x",
+                            `${e.clientX - rect.left}px`
+                          );
+                          e.currentTarget.style.setProperty(
+                            "--y",
+                            `${e.clientY - rect.top}px`
+                          );
+                        }}
+                      >
+                        <div className="mvp-left">
+                          {(() => {
+                            const mvpPlayer = players.find(
+                              (player) => player.id === selectedTournament.mvpId
+                            );
+
+                            return mvpPlayer?.avatar ? (
+                              <img
+                                src={mvpPlayer.avatar}
+                                alt={mvpName}
+                                className="mvp-avatar"
+                              />
+                            ) : (
+                              <div className="mvp-avatar-placeholder">
+                                {mvpName.charAt(0) || "M"}
+                              </div>
+                            );
+                          })()}
+
+                          <div className="mvp-text">
+                            <div className="mvp-label">MVP</div>
+                            <div className="mvp-name">{mvpName}</div>
+                          </div>
+                        </div>
+
+                        <div className="mvp-badge">★</div>
+                      </div>
+                    ) : null}
 
                     {selectedPlacements.length > 0 ? (
                       <div className="results-placements-grid">
                         {selectedPlacements
                           .sort((a, b) => a.place - b.place)
+                          .filter((entry) => entry.place !== 1)
                           .map((entry) => (
                             <div
                               key={`${selectedTournament.id}-${entry.place}-${entry.entityId}`}
