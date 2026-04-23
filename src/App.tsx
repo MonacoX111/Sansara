@@ -196,21 +196,40 @@ const createEmptyHomeAnnouncementForm = (): HomeAnnouncementForm => ({
   isVisible: true,
 });
 
-const normalizePlayers = (items: Player[]): Player[] =>
-  items.map((player) => ({
+const recalculatePlayerRanks = (items: Player[]): Player[] => {
+  const sortedPlayers = [...items].sort((a, b) => {
+    if (b.elo !== a.elo) return b.elo - a.elo;
+    return a.id - b.id;
+  });
+
+  const rankMap = new Map<number, number>();
+  sortedPlayers.forEach((player, index) => {
+    rankMap.set(player.id, index + 1);
+  });
+
+  return items.map((player) => ({
     ...player,
-    games: Array.isArray(player.games) ? player.games : [],
-    avatar: player.avatar || achievementPlaceholder("P"),
-    bio: player.bio || "",
-    teamId: typeof player.teamId === "number" ? player.teamId : 0,
-    wins: Number(player.wins || 0),
-    losses: Number(player.losses || 0),
-    earnings: Number(player.earnings || 0),
-    tournamentsWon: Number(player.tournamentsWon || 0),
-    rank: Number(player.rank || 0),
-    elo: Number(player.elo || 1000),
-    isFeatured: Boolean(player.isFeatured),
+    rank: rankMap.get(player.id) || 0,
   }));
+};
+
+const normalizePlayers = (items: Player[]): Player[] =>
+  recalculatePlayerRanks(
+    items.map((player) => ({
+      ...player,
+      games: Array.isArray(player.games) ? player.games : [],
+      avatar: player.avatar || achievementPlaceholder("P"),
+      bio: player.bio || "",
+      teamId: typeof player.teamId === "number" ? player.teamId : 0,
+      wins: Number(player.wins || 0),
+      losses: Number(player.losses || 0),
+      earnings: Number(player.earnings || 0),
+      tournamentsWon: Number(player.tournamentsWon || 0),
+      rank: Number(player.rank || 0),
+      elo: Number(player.elo || 1000),
+      isFeatured: Boolean(player.isFeatured),
+    }))
+  );
 
 const normalizeTeams = (items: Team[]): Team[] =>
   items.map((team) => ({
@@ -883,15 +902,21 @@ export default function App() {
       losses: Number(playerForm.losses),
       earnings: Number(playerForm.earnings),
       tournamentsWon: Number(playerForm.tournamentsWon),
-      rank: Number(playerForm.rank),
       elo: Number(playerForm.elo),
       bio: playerForm.bio,
+      isFeatured: Boolean(playerForm.isFeatured),
+      rank: selectedPlayer.rank,
     };
 
-    const nextPlayers = players.map((player) =>
-      player.id === selectedPlayer.id ? updatedPlayer : player
+    const nextPlayers = recalculatePlayerRanks(
+      players.map((player) =>
+        player.id === selectedPlayer.id ? updatedPlayer : player
+      )
     );
     const nextTeams = syncTeamPlayers(nextPlayers, teams);
+    const savedPlayer =
+      nextPlayers.find((player) => player.id === selectedPlayer.id) ||
+      updatedPlayer;
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
@@ -899,7 +924,7 @@ export default function App() {
     try {
       if (isFirebaseConfigured) {
         await Promise.all([
-          saveItem("players", updatedPlayer),
+          saveItemsBatch("players", nextPlayers),
           saveItemsBatch("teams", nextTeams),
         ]);
       }
@@ -922,13 +947,13 @@ export default function App() {
       losses: 0,
       earnings: 0,
       tournamentsWon: 0,
-      rank: players.length + 1,
+      rank: 0,
       elo: 1000,
       bio: "",
       isFeatured: false,
     };
 
-    const nextPlayers = [...players, newPlayer];
+    const nextPlayers = recalculatePlayerRanks([...players, newPlayer]);
     const nextTeams = syncTeamPlayers(nextPlayers, teams);
 
     setPlayers(nextPlayers);
@@ -939,7 +964,7 @@ export default function App() {
     try {
       if (isFirebaseConfigured) {
         await Promise.all([
-          saveItem("players", newPlayer),
+          saveItemsBatch("players", nextPlayers),
           saveItemsBatch("teams", nextTeams),
         ]);
       }
@@ -953,7 +978,9 @@ export default function App() {
 
     const deletedId = selectedPlayer.id;
 
-    const nextPlayers = players.filter((player) => player.id !== deletedId);
+    const nextPlayers = recalculatePlayerRanks(
+      players.filter((player) => player.id !== deletedId)
+    );
 
     const nextTeams = syncTeamPlayers(
       nextPlayers,
@@ -1003,6 +1030,7 @@ export default function App() {
       if (isFirebaseConfigured) {
         await Promise.all([
           deleteItem("players", deletedId),
+          saveItemsBatch("players", nextPlayers),
           saveItemsBatch("teams", nextTeams),
           saveItemsBatch("tournaments", nextTournaments),
           saveItemsBatch("achievements", nextAchievements),
