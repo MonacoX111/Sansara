@@ -1476,6 +1476,17 @@ export default function App() {
               <>
                 <div
                   className="home-featured-banner"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    e.currentTarget.style.setProperty(
+                      "--x",
+                      `${e.clientX - rect.left}px`
+                    );
+                    e.currentTarget.style.setProperty(
+                      "--y",
+                      `${e.clientY - rect.top}px`
+                    );
+                  }}
                   style={{
                     backgroundImage: homeAnnouncement.imageUrl
                       ? `linear-gradient(90deg, rgba(5, 7, 14, 0.92) 0%, rgba(5, 7, 14, 0.72) 38%, rgba(5, 7, 14, 0.44) 62%, rgba(5, 7, 14, 0.88) 100%), url(${homeAnnouncement.imageUrl})`
@@ -1639,7 +1650,21 @@ export default function App() {
                           : "Unknown";
 
                         return (
-                          <div className="champion-card champion-card-upgraded">
+                          <div
+                            className="champion-card champion-card-upgraded"
+                            onMouseMove={(e) => {
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              e.currentTarget.style.setProperty(
+                                "--x",
+                                `${e.clientX - rect.left}px`
+                              );
+                              e.currentTarget.style.setProperty(
+                                "--y",
+                                `${e.clientY - rect.top}px`
+                              );
+                            }}
+                          >
                             <div className="champion-left">
                               {winnerImage ? (
                                 <img
@@ -1768,6 +1793,18 @@ export default function App() {
                               <div
                                 key={match.id}
                                 className="result-card"
+                                onMouseMove={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  e.currentTarget.style.setProperty(
+                                    "--x",
+                                    `${e.clientX - rect.left}px`
+                                  );
+                                  e.currentTarget.style.setProperty(
+                                    "--y",
+                                    `${e.clientY - rect.top}px`
+                                  );
+                                }}
                                 style={{
                                   background: tournament?.imageUrl
                                     ? `linear-gradient(
@@ -1924,7 +1961,22 @@ export default function App() {
                               : "";
 
                             return (
-                              <div key={match.id} className="match-card new">
+                              <div
+                                key={match.id}
+                                className="match-card new"
+                                onMouseMove={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  e.currentTarget.style.setProperty(
+                                    "--x",
+                                    `${e.clientX - rect.left}px`
+                                  );
+                                  e.currentTarget.style.setProperty(
+                                    "--y",
+                                    `${e.clientY - rect.top}px`
+                                  );
+                                }}
+                              >
                                 <div className="match-top">
                                   <span className="pill light">
                                     {match.round || "Match"}
@@ -2001,6 +2053,18 @@ export default function App() {
                             className={`player-row new ${
                               index < 3 ? "top-player" : ""
                             }`}
+                            onMouseMove={(e) => {
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              e.currentTarget.style.setProperty(
+                                "--x",
+                                `${e.clientX - rect.left}px`
+                              );
+                              e.currentTarget.style.setProperty(
+                                "--y",
+                                `${e.clientY - rect.top}px`
+                              );
+                            }}
                           >
                             <div className="player-left">
                               <div className="rank-box-small">#{index + 1}</div>

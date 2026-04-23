@@ -1229,10 +1229,32 @@ button {
     );
   pointer-events: none;
 }
+.home-featured-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+
+  background: radial-gradient(
+    220px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.08) 28%,
+    transparent 70%
+  );
+
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.home-featured-banner:hover::after {
+  opacity: 1;
+}
 
 .home-featured-overlay {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 420px;
   display: flex;
   align-items: flex-end;
@@ -1504,13 +1526,40 @@ button {
   align-items: center;
   padding: 18px;
   border-radius: 20px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 190, 61, 0.34);
   background: linear-gradient(
     135deg,
     rgba(255, 190, 61, 0.08),
     rgba(255, 59, 95, 0.08)
   );
-  box-shadow: 0 0 25px rgba(255, 190, 61, 0.15);
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.05) inset,
+    0 0 25px rgba(255, 190, 61, 0.15), 0 15px 40px rgba(255, 190, 61, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+.champion-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.22) 40%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: championShimmer 3.2s linear infinite;
+}
+
+@keyframes championShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
 }
 
 .champion-card-upgraded {
@@ -3199,7 +3248,9 @@ button {
 .profile-primary-card,
 .profile-mini-stat-card,
 .tournament-history-info-card,
-.achievement-card {
+.achievement-card,
+.champion-card,
+.player-row.new {
   position: relative;
   overflow: hidden;
 }
@@ -3223,7 +3274,9 @@ button {
 .profile-primary-card::before,
 .profile-mini-stat-card::before,
 .tournament-history-info-card::before,
-.achievement-card::before {
+.achievement-card::before,
+.champion-card::before,
+.player-row.new::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -3261,7 +3314,9 @@ button {
 .profile-primary-card:hover::before,
 .profile-mini-stat-card:hover::before,
 .tournament-history-info-card:hover::before,
-.achievement-card:hover::before {
+.achievement-card:hover::before,
+.champion-card:hover::before,
+.player-row.new:hover::before {
   opacity: 1;
 }
 
@@ -3286,9 +3341,11 @@ button {
 .profile-primary-card > *,
 .profile-mini-stat-card > *,
 .tournament-history-info-card > *,
-.achievement-card > * {
+.achievement-card > *,
+.champion-card > *,
+.player-row.new > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 /* ===== BUTTON ENERGY SYSTEM ===== */
 
