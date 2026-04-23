@@ -189,6 +189,77 @@ function MultiGamePicker({
   );
 }
 
+function PremiumSelect({
+  value,
+  options,
+  placeholder,
+  onChange,
+  disabled = false,
+}: {
+  value: number | string;
+  options: { value: number | string; label: string }[];
+  placeholder: string;
+  onChange: (value: number | string) => void;
+  disabled?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectedOption = options.find(
+    (option) => String(option.value) === String(value)
+  );
+
+  return (
+    <div className="admin-premium-select">
+      <button
+        type="button"
+        className={`admin-premium-select-trigger ${
+          isOpen ? "admin-premium-select-trigger-open" : ""
+        }`}
+        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+        disabled={disabled}
+      >
+        <span>{selectedOption?.label || placeholder}</span>
+        <span className="admin-premium-select-arrow">⌄</span>
+      </button>
+
+      {isOpen && !disabled ? (
+        <div className="admin-premium-select-menu">
+          <button
+            type="button"
+            className={`admin-premium-select-option ${
+              !selectedOption ? "admin-premium-select-option-active" : ""
+            }`}
+            onClick={() => {
+              onChange(0);
+              setIsOpen(false);
+            }}
+          >
+            {placeholder}
+          </button>
+
+          {options.map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              className={`admin-premium-select-option ${
+                String(value) === String(option.value)
+                  ? "admin-premium-select-option-active"
+                  : ""
+              }`}
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function AdminTab({
   players,
   teams,
@@ -563,23 +634,20 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Team</label>
-              <select
-                className="input"
+              <PremiumSelect
                 value={playerForm.teamId}
-                onChange={(e) =>
+                placeholder="Без команди"
+                options={teams.map((team) => ({
+                  value: team.id,
+                  label: team.name,
+                }))}
+                onChange={(value) =>
                   setPlayerForm((prev) => ({
                     ...prev,
-                    teamId: Number(e.target.value),
+                    teamId: Number(value),
                   }))
                 }
-              >
-                <option value={0}>Без команди</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="field-block">
@@ -883,18 +951,15 @@ export default function AdminTab({
           <div className="form-col">
             <div className="field-block">
               <label className="field-label">Select tournament</label>
-              <select
-                className="input"
+              <PremiumSelect
                 value={selectedTournamentId}
-                onChange={(e) => handleTournamentSelect(Number(e.target.value))}
-              >
-                <option value={0}>Select tournament</option>
-                {tournaments.map((tournament) => (
-                  <option key={tournament.id} value={tournament.id}>
-                    {tournament.title || "Tournament"}
-                  </option>
-                ))}
-              </select>
+                placeholder="Select tournament"
+                options={tournaments.map((tournament) => ({
+                  value: tournament.id,
+                  label: tournament.title || "Tournament",
+                }))}
+                onChange={(value) => handleTournamentSelect(Number(value))}
+              />
             </div>
 
             <button
@@ -943,13 +1008,17 @@ export default function AdminTab({
 
               <div className="field-block">
                 <label className="field-label">Participant type</label>
-                <select
-                  className="input"
+                <PremiumSelect
                   value={tournamentForm.participantType || "player"}
-                  onChange={(e) =>
+                  placeholder="Players"
+                  options={[
+                    { value: "player", label: "Players" },
+                    { value: "team", label: "Teams" },
+                  ]}
+                  onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      participantType: e.target.value as "player" | "team",
+                      participantType: value as "player" | "team",
                       participantIds: [],
                       winnerId: undefined,
                       winnerTeamId: undefined,
@@ -957,10 +1026,7 @@ export default function AdminTab({
                       placements: [],
                     }))
                   }
-                >
-                  <option value="player">Players</option>
-                  <option value="team">Teams</option>
-                </select>
+                />
               </div>
 
               <div className="field-block">
@@ -997,22 +1063,20 @@ export default function AdminTab({
 
               <div className="field-block">
                 <label className="field-label">Status</label>
-                <select
-                  className="input"
+                <PremiumSelect
                   value={tournamentForm.status}
-                  onChange={(e) =>
+                  placeholder="Select status"
+                  options={tournamentStatusOptions.map((status) => ({
+                    value: status,
+                    label: status,
+                  }))}
+                  onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      status: e.target.value as TournamentStatus,
+                      status: value as TournamentStatus,
                     }))
                   }
-                >
-                  {tournamentStatusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 
@@ -1150,72 +1214,60 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">MVP</label>
-              <select
-                className="input"
-                value={selectedTournamentMvpId}
-                onChange={(e) =>
+              <PremiumSelect
+                value={selectedTournamentMvpId || 0}
+                placeholder="Select MVP"
+                options={selectedTournamentMvpPlayers.map((player) => ({
+                  value: player.id,
+                  label: player.nickname,
+                }))}
+                onChange={(value) =>
                   setTournamentForm((prev) => ({
                     ...prev,
-                    mvpId: e.target.value ? Number(e.target.value) : undefined,
+                    mvpId: Number(value) > 0 ? Number(value) : undefined,
                   }))
                 }
-              >
-                <option value="">Select MVP</option>
-                {selectedTournamentMvpPlayers.map((player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.nickname}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             {tournamentForm.participantType === "team" && (
               <div className="field-block">
                 <label className="field-label">Winner Team</label>
-                <select
-                  className="input"
-                  value={selectedTournamentWinnerTeamId}
-                  onChange={(e) =>
+                <PremiumSelect
+                  value={selectedTournamentWinnerTeamId || 0}
+                  placeholder="Select winner team"
+                  options={selectedTournamentTeams.map((team) => ({
+                    value: team.id,
+                    label: team.name,
+                  }))}
+                  onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      winnerTeamId: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      winnerTeamId:
+                        Number(value) > 0 ? Number(value) : undefined,
                     }))
                   }
-                >
-                  <option value="">Select winner team</option>
-                  {selectedTournamentTeams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             )}
 
             {tournamentForm.participantType === "player" && (
               <div className="field-block">
                 <label className="field-label">Winner Player</label>
-                <select
-                  className="input"
-                  value={selectedTournamentWinnerId}
-                  onChange={(e) =>
+                <PremiumSelect
+                  value={selectedTournamentWinnerId || 0}
+                  placeholder="Select winner player"
+                  options={selectedTournamentPlayers.map((player) => ({
+                    value: player.id,
+                    label: player.nickname,
+                  }))}
+                  onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      winnerId: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      winnerId: Number(value) > 0 ? Number(value) : undefined,
                     }))
                   }
-                >
-                  <option value="">Select winner player</option>
-                  {selectedTournamentPlayers.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.nickname}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             )}
 
@@ -1539,25 +1591,20 @@ export default function AdminTab({
 
             <div className="field-block">
               <label className="field-label">Linked tournament</label>
-              <select
-                className="input"
+              <PremiumSelect
                 value={homeAnnouncementForm.tournamentId || 0}
-                onChange={(e) =>
+                placeholder="No linked tournament"
+                options={tournaments.map((tournament) => ({
+                  value: tournament.id,
+                  label: tournament.title || "Tournament",
+                }))}
+                onChange={(value) =>
                   setHomeAnnouncementForm((prev) => ({
                     ...prev,
-                    tournamentId: e.target.value
-                      ? Number(e.target.value)
-                      : undefined,
+                    tournamentId: Number(value) > 0 ? Number(value) : undefined,
                   }))
                 }
-              >
-                <option value={0}>No linked tournament</option>
-                {tournaments.map((tournament) => (
-                  <option key={tournament.id} value={tournament.id}>
-                    {tournament.title || "Tournament"}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="field-block">
@@ -1606,11 +1653,15 @@ export default function AdminTab({
 
           <div className="field-block">
             <label className="field-label">Select tournament</label>
-            <select
-              className="input"
+            <PremiumSelect
               value={matchTournamentFilterId}
-              onChange={(e) => {
-                const nextTournamentId = Number(e.target.value);
+              placeholder="Select tournament"
+              options={tournaments.map((tournament) => ({
+                value: tournament.id,
+                label: tournament.title || "Tournament",
+              }))}
+              onChange={(value) => {
+                const nextTournamentId = Number(value);
                 const nextTournament =
                   tournaments.find(
                     (tournament) => tournament.id === nextTournamentId
@@ -1638,14 +1689,7 @@ export default function AdminTab({
                   eloApplied: false,
                 });
               }}
-            >
-              <option value={0}>Select tournament</option>
-              {tournaments.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.title}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="list-col admin-scroll-list">
@@ -1692,16 +1736,21 @@ export default function AdminTab({
           <div className="form-col">
             <div className="field-block">
               <label className="field-label">Match type</label>
-              <select
-                className="input"
+              <PremiumSelect
                 value={
                   selectedMatchTournament?.participantType ||
                   matchForm.matchType
                 }
-                onChange={(e) =>
+                placeholder="Match type"
+                disabled={Boolean(selectedMatchTournament)}
+                options={[
+                  { value: "player", label: "Player vs Player" },
+                  { value: "team", label: "Team vs Team" },
+                ]}
+                onChange={(value) =>
                   setMatchForm((prev) => ({
                     ...prev,
-                    matchType: e.target.value as "player" | "team",
+                    matchType: value as "player" | "team",
                     player1: 0,
                     player2: 0,
                     team1: 0,
@@ -1710,23 +1759,20 @@ export default function AdminTab({
                     winnerTeamId: 0,
                   }))
                 }
-                disabled={Boolean(selectedMatchTournament)}
-              >
-                <option value="player">Player vs Player</option>
-                <option value="team">Team vs Team</option>
-              </select>
+              />
             </div>
 
             <div className="field-block">
               <label className="field-label">Tournament</label>
-              <select className="input" value={matchForm.tournamentId} disabled>
-                <option value={0}>No tournament</option>
-                {tournaments.map((tournament) => (
-                  <option key={tournament.id} value={tournament.id}>
-                    {getTournamentName(tournament.id)}
-                  </option>
-                ))}
-              </select>
+              <div className="admin-premium-select admin-premium-select-disabled">
+                <div className="admin-premium-select-trigger admin-premium-select-trigger-disabled">
+                  <span>
+                    {getTournamentName(matchForm.tournamentId) ||
+                      "No tournament"}
+                  </span>
+                  <span className="admin-premium-select-arrow">⌄</span>
+                </div>
+              </div>
             </div>
 
             <div className="form-grid two">
@@ -1765,11 +1811,15 @@ export default function AdminTab({
               <div className="form-grid two">
                 <div className="field-block">
                   <label className="field-label">Player 1</label>
-                  <select
-                    className="input"
+                  <PremiumSelect
                     value={matchForm.player1}
-                    onChange={(e) => {
-                      const nextPlayer1 = Number(e.target.value);
+                    placeholder="Select player"
+                    options={availablePlayer1Options.map((player) => ({
+                      value: player.id,
+                      label: player.nickname,
+                    }))}
+                    onChange={(value) => {
+                      const nextPlayer1 = Number(value);
                       const nextWinnerId =
                         matchForm.winnerId === nextPlayer1 ||
                         matchForm.winnerId === matchForm.player2
@@ -1782,23 +1832,20 @@ export default function AdminTab({
                         winnerId: nextWinnerId,
                       }));
                     }}
-                  >
-                    <option value={0}>Select player</option>
-                    {availablePlayer1Options.map((player) => (
-                      <option key={player.id} value={player.id}>
-                        {player.nickname}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div className="field-block">
                   <label className="field-label">Player 2</label>
-                  <select
-                    className="input"
+                  <PremiumSelect
                     value={matchForm.player2}
-                    onChange={(e) => {
-                      const nextPlayer2 = Number(e.target.value);
+                    placeholder="Select player"
+                    options={availablePlayer2Options.map((player) => ({
+                      value: player.id,
+                      label: player.nickname,
+                    }))}
+                    onChange={(value) => {
+                      const nextPlayer2 = Number(value);
                       const nextWinnerId =
                         matchForm.winnerId === nextPlayer2 ||
                         matchForm.winnerId === matchForm.player1
@@ -1811,14 +1858,7 @@ export default function AdminTab({
                         winnerId: nextWinnerId,
                       }));
                     }}
-                  >
-                    <option value={0}>Select player</option>
-                    {availablePlayer2Options.map((player) => (
-                      <option key={player.id} value={player.id}>
-                        {player.nickname}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
             ) : (
@@ -1901,8 +1941,7 @@ export default function AdminTab({
             {matchForm.matchType === "player" ? (
               <div className="field-block">
                 <label className="field-label">Winner</label>
-                <select
-                  className="input"
+                <PremiumSelect
                   value={
                     selectedWinnerOptions.some(
                       (player) => player.id === matchForm.winnerId
@@ -1910,20 +1949,18 @@ export default function AdminTab({
                       ? matchForm.winnerId
                       : 0
                   }
-                  onChange={(e) =>
+                  placeholder="Select winner"
+                  options={selectedWinnerOptions.map((player) => ({
+                    value: player.id,
+                    label: player.name,
+                  }))}
+                  onChange={(value) =>
                     setMatchForm((prev) => ({
                       ...prev,
-                      winnerId: Number(e.target.value),
+                      winnerId: Number(value),
                     }))
                   }
-                >
-                  <option value={0}>Select winner</option>
-                  {selectedWinnerOptions.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             ) : (
               <div className="field-block">
@@ -1957,22 +1994,20 @@ export default function AdminTab({
             <div className="form-grid two">
               <div className="field-block">
                 <label className="field-label">Status</label>
-                <select
-                  className="input"
+                <PremiumSelect
                   value={matchForm.status}
-                  onChange={(e) =>
+                  placeholder="Select status"
+                  options={matchStatusOptions.map((status) => ({
+                    value: status,
+                    label: status,
+                  }))}
+                  onChange={(value) =>
                     setMatchForm((prev) => ({
                       ...prev,
-                      status: e.target.value as MatchStatus,
+                      status: value as MatchStatus,
                     }))
                   }
-                >
-                  {matchStatusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="field-block">
