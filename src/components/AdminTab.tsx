@@ -30,6 +30,7 @@ type PlayerForm = {
 
 type TeamForm = {
   name: string;
+  logo: string;
   games: string;
   wins: number;
   earnings: number;
@@ -803,13 +804,34 @@ export default function AdminTab({
             </div>
 
             <div className="field-block">
-              <label className="field-label">Logo</label>
+              <label className="field-label">Logo URL</label>
               <input
                 className="input"
-                type="file"
-                accept="image/*"
-                onChange={handleTeamLogoUpload}
+                type="text"
+                placeholder="Paste logo URL..."
+                value={teamForm.logo}
+                onChange={(e) =>
+                  setTeamForm((prev) => ({
+                    ...prev,
+                    logo: e.target.value,
+                  }))
+                }
               />
+
+              {teamForm.logo ? (
+                <img
+                  src={teamForm.logo}
+                  alt="Team logo preview"
+                  style={{
+                    marginTop: 10,
+                    width: 88,
+                    height: 88,
+                    objectFit: "cover",
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                  }}
+                />
+              ) : null}
             </div>
 
             <div className="btn-row">

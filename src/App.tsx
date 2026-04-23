@@ -61,6 +61,7 @@ type PlayerForm = {
 
 type TeamForm = {
   name: string;
+  logo: string;
   games: string;
   wins: number;
   earnings: number;
@@ -137,6 +138,7 @@ const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
 
 const createEmptyTeamForm = (): TeamForm => ({
   name: "",
+  logo: "",
   games: "",
   wins: 0,
   earnings: 0,
@@ -667,6 +669,7 @@ export default function App() {
 
     setTeamForm({
       name: selectedTeam.name,
+      logo: selectedTeam.logo || "",
       games: selectedTeam.games.join(", "),
       wins: selectedTeam.wins,
       earnings: selectedTeam.earnings,
@@ -873,35 +876,10 @@ export default function App() {
     event.target.value = "";
   };
 
-  const handleTeamLogoUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedTeam) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      if (!result) return;
-
-      const updatedTeam: Team = {
-        ...selectedTeam,
-        logo: result,
-      };
-
-      setTeams((prev) =>
-        prev.map((team) => (team.id === selectedTeam.id ? updatedTeam : team))
-      );
-
-      try {
-        if (isFirebaseConfigured) {
-          await saveItem("teams", updatedTeam);
-        }
-      } catch (error) {
-        console.error("Failed to save team logo:", error);
-      }
-    };
-
-    reader.readAsDataURL(file);
-    event.target.value = "";
+  const handleTeamLogoUpload = (_event: ChangeEvent<HTMLInputElement>) => {
+    alert(
+      "Logo upload via file is disabled. Paste a logo URL in the team form."
+    );
   };
 
   const savePlayer = async () => {
@@ -1063,6 +1041,7 @@ export default function App() {
     const updatedTeam: Team = {
       ...selectedTeam,
       name: teamForm.name,
+      logo: teamForm.logo || achievementPlaceholder("T"),
       games: parseList(teamForm.games),
       wins: Number(teamForm.wins),
       earnings: Number(teamForm.earnings),
