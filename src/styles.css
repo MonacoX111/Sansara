@@ -970,7 +970,9 @@ button {
   font-size: 14px;
   font-weight: 600;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
   animation: saveToastFade 2s ease forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes saveToastFade {
@@ -3645,8 +3647,7 @@ button {
 .panel,
 .home-featured-banner,
 .tournament-hero,
-.admin-overlay,
-.save-toast {
+.admin-overlay {
   position: relative;
   z-index: 1;
 }
