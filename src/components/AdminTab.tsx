@@ -255,8 +255,9 @@ export default function AdminTab({
     teams.find((team) => team.id === teamId)?.name || "Unknown team";
 
   const selectedTournament =
-    tournaments.find((tournament) => tournament.id === selectedTournamentId) ||
-    null;
+    selectedTournamentId === 0
+      ? null
+      : tournaments.find((t) => t.id === selectedTournamentId) || null;
 
   const selectedTournamentPlayers = players.filter((player) =>
     safeTournamentParticipantIds.includes(player.id)
@@ -411,7 +412,6 @@ export default function AdminTab({
   const handleTournamentSelect = (tournamentId: number) => {
     setSelectedTournamentId(tournamentId);
   };
-
   const handleAchievementImageUpload =
     (achievementId: number) => (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -880,27 +880,29 @@ export default function AdminTab({
         <div className="panel">
           <h2 className="panel-title">Tournaments (admin)</h2>
 
-          <div className="list-col admin-scroll-list">
+          <div className="form-col">
+            <div className="field-block">
+              <label className="field-label">Select tournament</label>
+              <select
+                className="input"
+                value={selectedTournamentId}
+                onChange={(e) => handleTournamentSelect(Number(e.target.value))}
+              >
+                <option value={0}>Select tournament</option>
+                {tournaments.map((tournament) => (
+                  <option key={tournament.id} value={tournament.id}>
+                    {tournament.title || "Tournament"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               className="secondary-btn add-list-btn add-tournament-btn-top"
               onClick={addTournament}
             >
               + Add tournament
             </button>
-
-            {tournaments.map((tournament) => (
-              <button
-                key={tournament.id}
-                onClick={() => handleTournamentSelect(tournament.id)}
-                className={`admin-list-btn ${
-                  selectedTournamentId === tournament.id
-                    ? "admin-list-btn-active"
-                    : ""
-                }`}
-              >
-                {tournament.title || "Tournament"}
-              </button>
-            ))}
           </div>
         </div>
 

@@ -385,7 +385,7 @@ export default function App() {
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(1);
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<number>(1);
+  const [selectedTournamentId, setSelectedTournamentId] = useState<number>(0);
   const [selectedMatchId, setSelectedMatchId] = useState<number>(1);
   const [selectedAchievementId, setSelectedAchievementId] = useState<number>(1);
 
@@ -605,10 +605,14 @@ export default function App() {
       return;
     }
 
+    if (selectedTournamentId === 0) {
+      return;
+    }
+
     if (
       !tournaments.some((tournament) => tournament.id === selectedTournamentId)
     ) {
-      setSelectedTournamentId(tournaments[0].id);
+      setSelectedTournamentId(0);
     }
   }, [tournaments, selectedTournamentId]);
 
