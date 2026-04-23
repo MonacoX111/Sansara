@@ -37,6 +37,61 @@ export default function TournamentsTab({
 
   const getTeamName = (teamId?: number) => getTeamById(teamId)?.name || "—";
 
+  const getSquadWinnerIds = (tournament: Tournament) => {
+    if (
+      Array.isArray(tournament.winnerSquadIds) &&
+      tournament.winnerSquadIds.length > 0
+    ) {
+      return tournament.winnerSquadIds.map(Number);
+    }
+
+    if (Array.isArray(tournament.placements)) {
+      return tournament.placements
+        .filter(
+          (placement) =>
+            placement.place === 1 && typeof placement.playerId === "number"
+        )
+        .map((placement) => Number(placement.playerId));
+    }
+
+    return [];
+  };
+
+  const getTournamentWinnerName = (tournament: Tournament) => {
+    if (tournament.participantType === "team") {
+      return getTeamName(tournament.winnerTeamId);
+    }
+
+    if (tournament.participantType === "squad") {
+      const squadWinnerIds = getSquadWinnerIds(tournament);
+
+      return squadWinnerIds.length > 0
+        ? squadWinnerIds.map((id) => getPlayerName(id)).join(" / ")
+        : "—";
+    }
+
+    return getPlayerName(tournament.winnerId);
+  };
+
+  const getTournamentWinnerImage = (tournament: Tournament) => {
+    if (tournament.participantType === "team") {
+      return (
+        teams.find((team) => team.id === tournament.winnerTeamId)?.logo || ""
+      );
+    }
+
+    if (tournament.participantType === "squad") {
+      const firstWinnerId = getSquadWinnerIds(tournament)[0];
+      return (
+        players.find((player) => player.id === firstWinnerId)?.avatar || ""
+      );
+    }
+
+    return (
+      players.find((player) => player.id === tournament.winnerId)?.avatar || ""
+    );
+  };
+
   const getParticipantEntries = (tournament: Tournament) => {
     if (!Array.isArray(tournament.participantIds)) return [];
 
@@ -61,7 +116,10 @@ export default function TournamentsTab({
         id: player!.id,
         name: player!.nickname,
         image: player!.avatar,
-        type: "player" as const,
+        type:
+          tournament.participantType === "squad"
+            ? ("squad" as const)
+            : ("player" as const),
       }));
   };
 
@@ -233,9 +291,7 @@ export default function TournamentsTab({
                     >
                       <span className="tournament-history-label">Winner</span>
                       <span className="tournament-history-value">
-                        {tournament.participantType === "team"
-                          ? getTeamName(tournament.winnerTeamId)
-                          : getPlayerName(tournament.winnerId)}
+                        {getTournamentWinnerName(tournament)}
                       </span>
                     </div>
 
@@ -596,19 +652,10 @@ export default function TournamentsTab({
               <div className="achievement-title">Results</div>
 
               {(() => {
-                const winnerName =
-                  selectedTournament.participantType === "team"
-                    ? getTeamName(selectedTournament.winnerTeamId)
-                    : getPlayerName(selectedTournament.winnerId);
+                const winnerName = getTournamentWinnerName(selectedTournament);
 
                 const winnerImage =
-                  selectedTournament.participantType === "team"
-                    ? teams.find(
-                        (team) => team.id === selectedTournament.winnerTeamId
-                      )?.logo || ""
-                    : players.find(
-                        (player) => player.id === selectedTournament.winnerId
-                      )?.avatar || "";
+                  getTournamentWinnerImage(selectedTournament);
 
                 const mvpName = getPlayerName(selectedTournament.mvpId);
 
@@ -983,7 +1030,11 @@ export default function TournamentsTab({
                           (item) => item.id === participant.id
                         );
                         const isWinner =
-                          selectedTournament.winnerTeamId === participant.id;
+                          selectedTournament.participantType === "squad"
+                            ? getSquadWinnerIds(selectedTournament).includes(
+                                participant.id
+                              )
+                            : selectedTournament.winnerId === participant.id;
 
                         return (
                           <div
@@ -1105,7 +1156,14 @@ export default function TournamentsTab({
                           (item) => item.id === participant.id
                         );
                         const isWinner =
-                          selectedTournament.winnerId === participant.id;
+                          selectedTournament.participantType === "squad"
+                            ? Array.isArray(
+                                selectedTournament.winnerSquadIds
+                              ) &&
+                              selectedTournament.winnerSquadIds.includes(
+                                participant.id
+                              )
+                            : selectedTournament.winnerId === participant.id;
 
                         return (
                           <div

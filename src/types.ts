@@ -1,4 +1,4 @@
-export type ParticipantType = "player" | "team";
+export type ParticipantType = "player" | "team" | "squad";
 
 export type Placement = {
   place: number;
@@ -61,6 +61,7 @@ export type Tournament = {
   // результати
   winnerId?: number;
   winnerTeamId?: number;
+  winnerSquadIds?: number[];
   mvpId?: number;
   placements: Placement[];
 

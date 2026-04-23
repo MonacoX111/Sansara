@@ -49,10 +49,11 @@ type TournamentForm = {
   description: string;
   imageUrl: string;
 
-  participantType: "player" | "team";
+  participantType: "player" | "team" | "squad";
   participantIds: number[];
   winnerId?: number;
   winnerTeamId?: number;
+  winnerSquadIds?: number[];
   mvpId?: number;
   placements: Placement[];
   isPublished: boolean;
@@ -467,6 +468,11 @@ export default function AdminTab({
         participantIds: nextParticipantIds,
         winnerId: undefined,
         winnerTeamId: undefined,
+        winnerSquadIds: Array.isArray(prev.winnerSquadIds)
+          ? prev.winnerSquadIds.filter((winnerId) =>
+              nextParticipantIds.includes(winnerId)
+            )
+          : [],
         mvpId: undefined,
       };
     });
@@ -1050,14 +1056,16 @@ export default function AdminTab({
                   options={[
                     { value: "player", label: "Players" },
                     { value: "team", label: "Teams" },
+                    { value: "squad", label: "Squad / Duo / Trio" },
                   ]}
                   onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      participantType: value as "player" | "team",
+                      participantType: value as "player" | "team" | "squad",
                       participantIds: [],
                       winnerId: undefined,
                       winnerTeamId: undefined,
+                      winnerSquadIds: [],
                       mvpId: undefined,
                       placements: [],
                     }))
@@ -1222,7 +1230,11 @@ export default function AdminTab({
                           }`}
                           onClick={() => toggleTournamentParticipant(player.id)}
                         >
-                          <span>{player.nickname}</span>
+                          <span>
+                            {tournamentForm.participantType === "squad"
+                              ? `Squad member: ${player.nickname}`
+                              : player.nickname}
+                          </span>
                         </button>
                       );
                     })}
@@ -1287,23 +1299,65 @@ export default function AdminTab({
               </div>
             )}
 
-            {tournamentForm.participantType === "player" && (
+            {tournamentForm.participantType === "squad" && (
               <div className="field-block">
-                <label className="field-label">Winner Player</label>
-                <PremiumSelect
-                  value={selectedTournamentWinnerId || 0}
-                  placeholder="Select winner player"
-                  options={selectedTournamentPlayers.map((player) => ({
-                    value: player.id,
-                    label: player.nickname,
-                  }))}
-                  onChange={(value) =>
-                    setTournamentForm((prev) => ({
-                      ...prev,
-                      winnerId: Number(value) > 0 ? Number(value) : undefined,
-                    }))
-                  }
-                />
+                <label className="field-label">Winner Squad Players</label>
+
+                <div className="picker-grid compact-grid">
+                  {selectedTournamentPlayers.map((player) => {
+                    const winnerSquadIds = Array.isArray(
+                      tournamentForm.winnerSquadIds
+                    )
+                      ? tournamentForm.winnerSquadIds
+                      : [];
+
+                    const isSelected = winnerSquadIds.includes(player.id);
+
+                    return (
+                      <button
+                        key={`winner-squad-${player.id}`}
+                        type="button"
+                        className={`picker-btn compact ${
+                          isSelected ? "picker-btn-active" : ""
+                        }`}
+                        onClick={() =>
+                          setTournamentForm((prev) => {
+                            const currentIds = Array.isArray(
+                              prev.winnerSquadIds
+                            )
+                              ? prev.winnerSquadIds
+                              : [];
+
+                            const nextWinnerSquadIds = currentIds.includes(
+                              player.id
+                            )
+                              ? currentIds.filter((id) => id !== player.id)
+                              : [...currentIds, player.id];
+
+                            return {
+                              ...prev,
+                              winnerSquadIds: nextWinnerSquadIds,
+                              winnerId: undefined,
+                              winnerTeamId: undefined,
+                            };
+                          })
+                        }
+                      >
+                        <span>{player.nickname}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="muted small">
+                  Selected winners:{" "}
+                  {Array.isArray(tournamentForm.winnerSquadIds) &&
+                  tournamentForm.winnerSquadIds.length > 0
+                    ? tournamentForm.winnerSquadIds
+                        .map((id) => getPlayerName(id))
+                        .join(" / ")
+                    : "No squad winners selected"}
+                </div>
               </div>
             )}
 
@@ -1710,7 +1764,7 @@ export default function AdminTab({
 
                 setMatchForm({
                   game: nextTournament?.game || "",
-                  matchType: nextTournament?.participantType || "player",
+                  matchType: nextTournament?.participantType === "team" ? "team" : "player",
                   player1: 0,
                   player2: 0,
                   team1: 0,

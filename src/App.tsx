@@ -79,10 +79,11 @@ type TournamentForm = {
   prize: string;
   description: string;
   imageUrl: string;
-  participantType: "player" | "team";
+  participantType: "player" | "team" | "squad";
   participantIds: number[];
   winnerId?: number;
   winnerTeamId?: number;
+  winnerSquadIds?: number[];
   mvpId?: number;
   placements: Placement[];
   isPublished: boolean;
@@ -161,6 +162,7 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   participantIds: [],
   winnerId: undefined,
   winnerTeamId: undefined,
+  winnerSquadIds: [],
   mvpId: undefined,
   placements: [],
   isPublished: false,
@@ -255,13 +257,21 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     status: tournament.status || "draft",
     description: tournament.description || "",
     imageUrl: tournament.imageUrl || "",
-    participantType: tournament.participantType === "team" ? "team" : "player",
+    participantType:
+      tournament.participantType === "team"
+        ? "team"
+        : tournament.participantType === "squad"
+        ? "squad"
+        : "player",
     participantIds: Array.isArray(tournament.participantIds)
       ? tournament.participantIds.map(Number)
       : [],
     winnerId: typeof tournament.winnerId === "number" ? tournament.winnerId : 0,
     winnerTeamId:
       typeof tournament.winnerTeamId === "number" ? tournament.winnerTeamId : 0,
+    winnerSquadIds: Array.isArray(tournament.winnerSquadIds)
+      ? tournament.winnerSquadIds.map(Number)
+      : [],
     mvpId: typeof tournament.mvpId === "number" ? tournament.mvpId : 0,
     placements: Array.isArray(tournament.placements)
       ? tournament.placements
@@ -703,7 +713,11 @@ export default function App() {
       description: selectedTournament.description || "",
       imageUrl: selectedTournament.imageUrl || "",
       participantType:
-        selectedTournament.participantType === "team" ? "team" : "player",
+        selectedTournament.participantType === "team"
+          ? "team"
+          : selectedTournament.participantType === "squad"
+          ? "squad"
+          : "player",
       participantIds: Array.isArray(selectedTournament.participantIds)
         ? selectedTournament.participantIds.map(Number)
         : [],
@@ -717,6 +731,9 @@ export default function App() {
         selectedTournament.winnerTeamId > 0
           ? Number(selectedTournament.winnerTeamId)
           : undefined,
+      winnerSquadIds: Array.isArray(selectedTournament.winnerSquadIds)
+        ? selectedTournament.winnerSquadIds.map(Number)
+        : [],
       mvpId:
         typeof selectedTournament.mvpId === "number" &&
         selectedTournament.mvpId > 0
@@ -754,7 +771,7 @@ export default function App() {
 
     setMatchForm({
       game: selectedMatch.game,
-      matchType: selectedMatch.matchType || "player",
+      matchType: selectedMatch.matchType === "team" ? "team" : "player",
       player1: Number(selectedMatch.player1 || 0),
       player2: Number(selectedMatch.player2 || 0),
       team1: Number(selectedMatch.team1 || 0),
@@ -1168,6 +1185,11 @@ export default function App() {
         tournamentForm.winnerTeamId > 0
           ? Number(tournamentForm.winnerTeamId)
           : undefined,
+      winnerSquadIds:
+        tournamentForm.participantType === "squad" &&
+        Array.isArray(tournamentForm.winnerSquadIds)
+          ? tournamentForm.winnerSquadIds.map(Number)
+          : [],
       mvpId:
         tournamentForm.mvpId && tournamentForm.mvpId > 0
           ? Number(tournamentForm.mvpId)
@@ -1237,6 +1259,7 @@ export default function App() {
       participantIds: [],
       winnerId: 0,
       winnerTeamId: 0,
+      winnerSquadIds: [],
       mvpId: 0,
       placements: [],
       isPublished: false,
@@ -1271,6 +1294,7 @@ export default function App() {
       participantIds: [],
       winnerId: undefined,
       winnerTeamId: undefined,
+      winnerSquadIds: [],
       mvpId: undefined,
       placements: [],
       isPublished: false,
@@ -1414,7 +1438,8 @@ export default function App() {
     const newMatch: Match = {
       id: getNextId(matches),
       game: selectedMatchTournament?.game || "",
-      matchType: selectedMatchTournament?.participantType || "player",
+      matchType:
+        selectedMatchTournament?.participantType === "team" ? "team" : "player",
       player1: 0,
       player2: 0,
       team1: 0,
@@ -1435,7 +1460,8 @@ export default function App() {
     setSelectedMatchId(newMatch.id);
     setMatchForm({
       game: selectedMatchTournament?.game || "",
-      matchType: selectedMatchTournament?.participantType || "player",
+      matchType:
+        selectedMatchTournament?.participantType === "team" ? "team" : "player",
       player1: 0,
       player2: 0,
       team1: 0,
@@ -1707,6 +1733,17 @@ export default function App() {
                                 (team) =>
                                   team.id === lastTournament.winnerTeamId
                               )
+                            : lastTournament.participantType === "squad"
+                            ? {
+                                name: (lastTournament.winnerSquadIds || [])
+                                  .map(
+                                    (id) =>
+                                      players.find((p) => p.id === id)
+                                        ?.nickname || "?"
+                                  )
+                                  .join(" / "),
+                                logo: "",
+                              }
                             : players.find(
                                 (player) =>
                                   player.id === lastTournament.winnerId
