@@ -78,34 +78,45 @@ export default function TeamsTab({
         <h2 className="panel-title">Teams</h2>
 
         <div className="list-col">
-          {teams.map((team) => (
-            <button
-              key={team.id}
-              className={`simple-card button-card ${
-                selectedTeamId === team.id ? "player-card-active" : ""
-              }`}
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                e.currentTarget.style.setProperty(
-                  "--x",
-                  `${e.clientX - rect.left}px`
-                );
-                e.currentTarget.style.setProperty(
-                  "--y",
-                  `${e.clientY - rect.top}px`
-                );
-              }}
-              onClick={() => setSelectedTeamId(team.id)}
-            >
-              <div className="player-head">
-                <img src={team.logo} alt={team.name} className="logo" />
-                <div>
-                  <div className="achievement-title">{team.name}</div>
-                  <div className="muted small">{team.description}</div>
+          {[...teams]
+            .sort((a, b) => {
+              if (a.isFeatured && !b.isFeatured) return -1;
+              if (!a.isFeatured && b.isFeatured) return 1;
+              return 0;
+            })
+            .map((team) => (
+              <button
+                key={team.id}
+                className={`simple-card button-card ${
+                  selectedTeamId === team.id ? "player-card-active" : ""
+                } ${team.isFeatured ? "featured-team-card" : ""}`}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+                onClick={() => setSelectedTeamId(team.id)}
+              >
+                <div className="player-head">
+                  <img src={team.logo} alt={team.name} className="logo" />
+                  <div>
+                    <div className="achievement-title">
+                      {team.name}
+                      {team.isFeatured ? (
+                        <span className="team-featured-badge">Featured</span>
+                      ) : null}
+                    </div>
+                    <div className="muted small">{team.description}</div>
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
         </div>
       </div>
 

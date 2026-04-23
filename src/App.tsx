@@ -66,6 +66,7 @@ type TeamForm = {
   wins: number;
   earnings: number;
   description: string;
+  isFeatured: boolean;
 };
 
 type TournamentForm = {
@@ -143,6 +144,7 @@ const createEmptyTeamForm = (): TeamForm => ({
   wins: 0,
   earnings: 0,
   description: "",
+  isFeatured: false,
 });
 
 const createEmptyTournamentForm = (): TournamentForm => ({
@@ -242,6 +244,7 @@ const normalizeTeams = (items: Team[]): Team[] =>
     description: team.description || "",
     earnings: Number(team.earnings || 0),
     wins: Number(team.wins || 0),
+    isFeatured: Boolean(team.isFeatured),
   }));
 
 const normalizeTournaments = (items: Tournament[]): Tournament[] =>
@@ -674,6 +677,7 @@ export default function App() {
       wins: selectedTeam.wins,
       earnings: selectedTeam.earnings,
       description: selectedTeam.description,
+      isFeatured: Boolean(selectedTeam.isFeatured),
     });
   }, [selectedTeam]);
 
@@ -1046,6 +1050,7 @@ export default function App() {
       wins: Number(teamForm.wins),
       earnings: Number(teamForm.earnings),
       description: teamForm.description,
+      isFeatured: Boolean(teamForm.isFeatured),
     };
 
     setTeams((prev) =>
@@ -1073,6 +1078,7 @@ export default function App() {
       wins: 0,
       players: [],
       description: "",
+      isFeatured: false,
     };
 
     setTeams((prev) => [...prev, newTeam]);

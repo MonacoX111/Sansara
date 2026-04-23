@@ -21,6 +21,7 @@ export type Team = {
   wins: number;
   players: number[];
   description: string;
+  isFeatured?: boolean;
 };
 
 export type Player = {

@@ -35,6 +35,7 @@ type TeamForm = {
   wins: number;
   earnings: number;
   description: string;
+  isFeatured: boolean;
 };
 
 type TournamentForm = {
@@ -709,17 +710,26 @@ export default function AdminTab({
           <h2 className="panel-title">Teams (admin)</h2>
 
           <div className="list-col">
-            {teams.map((team) => (
-              <button
-                key={team.id}
-                onClick={() => setSelectedTeamId(team.id)}
-                className={`admin-list-btn ${
-                  selectedTeamId === team.id ? "admin-list-btn-active" : ""
-                }`}
-              >
-                {team.name || "Team"}
-              </button>
-            ))}
+            {[...teams]
+              .sort((a, b) => {
+                if (a.isFeatured && !b.isFeatured) return -1;
+                if (!a.isFeatured && b.isFeatured) return 1;
+                return 0;
+              })
+              .map((team) => (
+                <button
+                  key={team.id}
+                  onClick={() => setSelectedTeamId(team.id)}
+                  className={`admin-list-btn ${
+                    selectedTeamId === team.id ? "admin-list-btn-active" : ""
+                  } ${team.isFeatured ? "admin-list-btn-featured" : ""}`}
+                >
+                  <span>{team.name || "Team"}</span>
+                  {team.isFeatured ? (
+                    <span className="admin-featured-badge">Featured</span>
+                  ) : null}
+                </button>
+              ))}
 
             <button className="secondary-btn add-list-btn" onClick={addTeam}>
               + Add team
@@ -801,6 +811,22 @@ export default function AdminTab({
                   }))
                 }
               />
+            </div>
+
+            <div className="field-block">
+              <label className="field-label checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={Boolean(teamForm.isFeatured)}
+                  onChange={(e) =>
+                    setTeamForm((prev) => ({
+                      ...prev,
+                      isFeatured: e.target.checked,
+                    }))
+                  }
+                />
+                Featured team
+              </label>
             </div>
 
             <div className="field-block">
