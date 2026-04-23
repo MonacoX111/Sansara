@@ -13,6 +13,7 @@ export const gamesList: GameItem[] = [
   { id: "dota2", name: "Dota 2", icon: makeIcon("D2") },
   { id: "fc26", name: "FC 26", icon: makeIcon("FC") },
   { id: "clash", name: "Clash Royale", icon: makeIcon("CR") },
+  { id: "fortnite", name: "Fortnite", icon: makeIcon("FN") },
 ];
 
 export const achievementPlaceholder = (label: string) =>
