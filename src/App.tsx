@@ -248,8 +248,9 @@ const normalizeTeams = (items: Team[]): Team[] =>
   }));
 
 const normalizeTournaments = (items: Tournament[]): Tournament[] =>
-  items.map((tournament) => ({
+  items.map((tournament, index) => ({
     ...tournament,
+    order: typeof tournament.order === "number" ? tournament.order : index,
     format: tournament.format || "",
     status: tournament.status || "draft",
     description: tournament.description || "",
@@ -1136,6 +1137,12 @@ export default function App() {
   const saveTournament = async () => {
     const updatedTournament: Tournament = {
       id: selectedTournamentId,
+      order:
+        typeof selectedTournament?.order === "number"
+          ? selectedTournament.order
+          : tournaments.findIndex(
+              (tournament) => tournament.id === selectedTournamentId
+            ),
       title: tournamentForm.title,
       game: tournamentForm.game,
       type: tournamentForm.type,
@@ -1210,6 +1217,14 @@ export default function App() {
     const newTournament: Tournament = {
       imageUrl: "",
       id: getNextId(tournaments),
+      order:
+        tournaments.length > 0
+          ? Math.max(
+              ...tournaments.map((tournament) =>
+                typeof tournament.order === "number" ? tournament.order : -1
+              )
+            ) + 1
+          : 0,
       title: "New Tournament",
       game: "",
       type: "",
@@ -1307,6 +1322,46 @@ export default function App() {
       }
     } catch (error) {
       console.error("Failed to delete tournament:", error);
+    }
+  };
+
+  const reorderTournament = async (direction: "up" | "down") => {
+    const sortedTournaments = [...tournaments].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0)
+    );
+
+    const index = sortedTournaments.findIndex(
+      (tournament) => tournament.id === selectedTournamentId
+    );
+
+    if (index === -1) return;
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === sortedTournaments.length - 1) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+
+    const nextTournaments = [...sortedTournaments];
+    [nextTournaments[index], nextTournaments[targetIndex]] = [
+      nextTournaments[targetIndex],
+      nextTournaments[index],
+    ];
+
+    const orderedTournaments = nextTournaments.map((tournament, order) => ({
+      ...tournament,
+      order,
+    }));
+
+    setTournaments(orderedTournaments);
+    writeStorage("tm_tournaments", orderedTournaments);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItemsBatch("tournaments", orderedTournaments);
+      }
+
+      showSaveToast("Tournament order updated");
+    } catch (error) {
+      console.error("Failed to reorder tournaments:", error);
     }
   };
 
@@ -2258,6 +2313,7 @@ export default function App() {
             saveTournament={saveTournament}
             addTournament={addTournament}
             deleteTournament={deleteTournament}
+            reorderTournament={reorderTournament}
             saveMatch={saveMatch}
             addMatch={addMatch}
             deleteMatch={deleteMatch}

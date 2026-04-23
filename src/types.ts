@@ -43,6 +43,7 @@ export type Player = {
 
 export type Tournament = {
   id: number;
+  order?: number;
   title: string;
   game: string;
   type: string;

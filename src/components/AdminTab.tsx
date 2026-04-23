@@ -129,6 +129,7 @@ type Props = {
   saveTournament: () => void;
   addTournament: () => void;
   deleteTournament: () => void;
+  reorderTournament: (direction: "up" | "down") => void;
 
   saveMatch: () => void;
   addMatch: (tournamentId?: number) => void;
@@ -298,6 +299,7 @@ export default function AdminTab({
   saveTournament,
   addTournament,
   deleteTournament,
+  reorderTournament,
   saveMatch,
   addMatch,
   deleteMatch,
@@ -324,6 +326,10 @@ export default function AdminTab({
 
   const getTeamName = (teamId: number) =>
     teams.find((team) => team.id === teamId)?.name || "Unknown team";
+
+  const orderedTournaments = [...tournaments].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
+  );
 
   const selectedTournament =
     selectedTournamentId === 0
@@ -954,7 +960,7 @@ export default function AdminTab({
               <PremiumSelect
                 value={selectedTournamentId}
                 placeholder="Select tournament"
-                options={tournaments.map((tournament) => ({
+                options={orderedTournaments.map((tournament) => ({
                   value: tournament.id,
                   label: tournament.title || "Tournament",
                 }))}
@@ -968,6 +974,36 @@ export default function AdminTab({
             >
               + Add tournament
             </button>
+
+            <div className="btn-row">
+              <button
+                className="secondary-btn"
+                disabled={
+                  orderedTournaments.findIndex(
+                    (tournament) => tournament.id === selectedTournamentId
+                  ) <= 0
+                }
+                onClick={() => reorderTournament("up")}
+              >
+                ↑ Move up
+              </button>
+
+              <button
+                className="secondary-btn"
+                disabled={
+                  orderedTournaments.findIndex(
+                    (tournament) => tournament.id === selectedTournamentId
+                  ) === -1 ||
+                  orderedTournaments.findIndex(
+                    (tournament) => tournament.id === selectedTournamentId
+                  ) >=
+                    orderedTournaments.length - 1
+                }
+                onClick={() => reorderTournament("down")}
+              >
+                ↓ Move down
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1594,10 +1630,12 @@ export default function AdminTab({
               <PremiumSelect
                 value={homeAnnouncementForm.tournamentId || 0}
                 placeholder="No linked tournament"
-                options={tournaments.map((tournament) => ({
-                  value: tournament.id,
-                  label: tournament.title || "Tournament",
-                }))}
+                options={[...tournaments]
+                  .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
+                  .map((tournament) => ({
+                    value: tournament.id,
+                    label: tournament.title || "Tournament",
+                  }))}
                 onChange={(value) =>
                   setHomeAnnouncementForm((prev) => ({
                     ...prev,

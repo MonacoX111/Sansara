@@ -139,155 +139,159 @@ export default function TournamentsTab({
 
       {!selectedTournament ? (
         <div className="tour-grid">
-          {tournaments.map((tournament) => (
-            <button
-              key={tournament.id}
-              type="button"
-              className="simple-card tournament-card-button tournament-history-card"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                e.currentTarget.style.setProperty(
-                  "--x",
-                  `${e.clientX - rect.left}px`
-                );
-                e.currentTarget.style.setProperty(
-                  "--y",
-                  `${e.clientY - rect.top}px`
-                );
-              }}
-              onClick={() => setSelectedTournamentId(tournament.id)}
-              style={
-                tournament.imageUrl
-                  ? {
-                      backgroundImage: `linear-gradient(rgba(7, 9, 13, 0.52), rgba(7, 9, 13, 0.86)), url(${tournament.imageUrl})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                    }
-                  : undefined
-              }
-            >
-              <div className="tournament-history-overlay">
-                <div className="tournament-history-top">
-                  <div className="tournament-history-head">
-                    <div className="tournament-history-title">
-                      {tournament.title}
-                    </div>
+          {[...tournaments]
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            .map((tournament) => (
+              <button
+                key={tournament.id}
+                type="button"
+                className="simple-card tournament-card-button tournament-history-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  e.currentTarget.style.setProperty(
+                    "--x",
+                    `${e.clientX - rect.left}px`
+                  );
+                  e.currentTarget.style.setProperty(
+                    "--y",
+                    `${e.clientY - rect.top}px`
+                  );
+                }}
+                onClick={() => setSelectedTournamentId(tournament.id)}
+                style={
+                  tournament.imageUrl
+                    ? {
+                        backgroundImage: `linear-gradient(rgba(7, 9, 13, 0.52), rgba(7, 9, 13, 0.86)), url(${tournament.imageUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                      }
+                    : undefined
+                }
+              >
+                <div className="tournament-history-overlay">
+                  <div className="tournament-history-top">
+                    <div className="tournament-history-head">
+                      <div className="tournament-history-title">
+                        {tournament.title}
+                      </div>
 
-                    <div className="tournament-history-subtitle">
-                      <span className="history-meta-pill">
-                        {tournament.game || "—"}
-                      </span>
-                      <span className="history-meta-pill">
-                        {tournament.type || "—"}
-                      </span>
-                      {tournament.format ? (
+                      <div className="tournament-history-subtitle">
                         <span className="history-meta-pill">
-                          {tournament.format}
+                          {tournament.game || "—"}
                         </span>
-                      ) : null}
+                        <span className="history-meta-pill">
+                          {tournament.type || "—"}
+                        </span>
+                        {tournament.format ? (
+                          <span className="history-meta-pill">
+                            {tournament.format}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <span className="pill light tournament-history-prize">
+                      {tournament.prize || "No prize"}
+                    </span>
+                  </div>
+
+                  <div className="tournament-history-info-grid">
+                    <div
+                      className="tournament-history-info-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
+                      <span className="tournament-history-label">Date</span>
+                      <span className="tournament-history-value">
+                        {tournament.date || "—"}
+                      </span>
+                    </div>
+
+                    <div
+                      className="tournament-history-info-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
+                      <span className="tournament-history-label">Winner</span>
+                      <span className="tournament-history-value">
+                        {tournament.participantType === "team"
+                          ? getTeamName(tournament.winnerTeamId)
+                          : getPlayerName(tournament.winnerId)}
+                      </span>
+                    </div>
+
+                    <div
+                      className="tournament-history-info-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
+                      <span className="tournament-history-label">MVP</span>
+                      <span className="tournament-history-value">
+                        {getPlayerName(tournament.mvpId)}
+                      </span>
+                    </div>
+
+                    <div
+                      className="tournament-history-info-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
+                      <span className="tournament-history-label">
+                        Participants
+                      </span>
+                      <span className="tournament-history-value">
+                        {Array.isArray(tournament.participantIds)
+                          ? tournament.participantIds.length
+                          : 0}
+                      </span>
                     </div>
                   </div>
 
-                  <span className="pill light tournament-history-prize">
-                    {tournament.prize || "No prize"}
-                  </span>
-                </div>
-
-                <div className="tournament-history-info-grid">
-                  <div
-                    className="tournament-history-info-card"
-                    onMouseMove={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      e.currentTarget.style.setProperty(
-                        "--x",
-                        `${e.clientX - rect.left}px`
-                      );
-                      e.currentTarget.style.setProperty(
-                        "--y",
-                        `${e.clientY - rect.top}px`
-                      );
-                    }}
-                  >
-                    <span className="tournament-history-label">Date</span>
-                    <span className="tournament-history-value">
-                      {tournament.date || "—"}
-                    </span>
-                  </div>
-
-                  <div
-                    className="tournament-history-info-card"
-                    onMouseMove={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      e.currentTarget.style.setProperty(
-                        "--x",
-                        `${e.clientX - rect.left}px`
-                      );
-                      e.currentTarget.style.setProperty(
-                        "--y",
-                        `${e.clientY - rect.top}px`
-                      );
-                    }}
-                  >
-                    <span className="tournament-history-label">Winner</span>
-                    <span className="tournament-history-value">
-                      {tournament.participantType === "team"
-                        ? getTeamName(tournament.winnerTeamId)
-                        : getPlayerName(tournament.winnerId)}
-                    </span>
-                  </div>
-
-                  <div
-                    className="tournament-history-info-card"
-                    onMouseMove={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      e.currentTarget.style.setProperty(
-                        "--x",
-                        `${e.clientX - rect.left}px`
-                      );
-                      e.currentTarget.style.setProperty(
-                        "--y",
-                        `${e.clientY - rect.top}px`
-                      );
-                    }}
-                  >
-                    <span className="tournament-history-label">MVP</span>
-                    <span className="tournament-history-value">
-                      {getPlayerName(tournament.mvpId)}
-                    </span>
-                  </div>
-
-                  <div
-                    className="tournament-history-info-card"
-                    onMouseMove={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      e.currentTarget.style.setProperty(
-                        "--x",
-                        `${e.clientX - rect.left}px`
-                      );
-                      e.currentTarget.style.setProperty(
-                        "--y",
-                        `${e.clientY - rect.top}px`
-                      );
-                    }}
-                  >
-                    <span className="tournament-history-label">
-                      Participants
-                    </span>
-                    <span className="tournament-history-value">
-                      {Array.isArray(tournament.participantIds)
-                        ? tournament.participantIds.length
-                        : 0}
+                  <div className="tournament-card-footer upgraded">
+                    <span className="tournament-open-pill">
+                      Open tournament
                     </span>
                   </div>
                 </div>
-
-                <div className="tournament-card-footer upgraded">
-                  <span className="tournament-open-pill">Open tournament</span>
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
         </div>
       ) : (
         <div className="tournament-public-view">
