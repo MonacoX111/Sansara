@@ -4684,3 +4684,38 @@ select.input option:checked {
   box-shadow: none;
   color: #9aa3b2;
 }
+.results-placement-card.results-placement-silver {
+  border-color: rgba(203, 213, 225, 0.75);
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.2),
+    rgba(15, 23, 42, 0.78)
+  );
+}
+
+.results-placement-card.results-placement-bronze {
+  border-color: rgba(245, 158, 11, 0.7);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 83, 9, 0.22),
+    rgba(15, 23, 42, 0.78)
+  );
+}
+
+.results-placement-card.results-placement-default {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.results-placement-card.results-placement-silver .results-placement-place,
+.results-placement-card.results-placement-silver .results-placement-name {
+  color: #e5e7eb;
+}
+
+.results-placement-card.results-placement-bronze .results-placement-place,
+.results-placement-card.results-placement-bronze .results-placement-name {
+  color: #f59e0b;
+}
+
+.results-placement-card.results-placement-default .results-placement-place,
+.results-placement-card.results-placement-default .results-placement-name {
+  color: #f4f4f5;
+}

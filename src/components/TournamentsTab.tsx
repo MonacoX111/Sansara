@@ -752,31 +752,40 @@ export default function TournamentsTab({
                         {selectedPlacements
                           .sort((a, b) => a.place - b.place)
                           .filter((entry) => entry.place !== 1)
-                          .map((entry) => (
-                            <div
-                              key={`${selectedTournament.id}-${entry.place}-${entry.entityId}`}
-                              className="results-placement-card"
-                              onMouseMove={(e) => {
-                                const rect =
-                                  e.currentTarget.getBoundingClientRect();
-                                e.currentTarget.style.setProperty(
-                                  "--x",
-                                  `${e.clientX - rect.left}px`
-                                );
-                                e.currentTarget.style.setProperty(
-                                  "--y",
-                                  `${e.clientY - rect.top}px`
-                                );
-                              }}
-                            >
-                              <div className="results-placement-place">
-                                #{entry.place}
+                          .map((entry) => {
+                            const placementClass =
+                              entry.place === 2
+                                ? "results-placement-silver"
+                                : entry.place === 3
+                                ? "results-placement-bronze"
+                                : "results-placement-default";
+
+                            return (
+                              <div
+                                key={`${selectedTournament.id}-${entry.place}-${entry.entityId}`}
+                                className={`results-placement-card ${placementClass}`}
+                                onMouseMove={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  e.currentTarget.style.setProperty(
+                                    "--x",
+                                    `${e.clientX - rect.left}px`
+                                  );
+                                  e.currentTarget.style.setProperty(
+                                    "--y",
+                                    `${e.clientY - rect.top}px`
+                                  );
+                                }}
+                              >
+                                <div className="results-placement-place">
+                                  #{entry.place}
+                                </div>
+                                <div className="results-placement-name">
+                                  {entry.entityName}
+                                </div>
                               </div>
-                              <div className="results-placement-name">
-                                {entry.entityName}
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                       </div>
                     ) : (
                       <div className="results-empty-state">
