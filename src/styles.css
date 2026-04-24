@@ -1352,23 +1352,38 @@ select.input option:checked {
 .admin-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.72);
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 59, 95, 0.18),
+    rgba(0, 0, 0, 0.84) 48%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   z-index: 999;
+  animation: adminOverlayIn 0.28s ease forwards;
 }
 
 .admin-modal {
   width: 100%;
   max-width: 420px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 59, 95, 0.38);
   border-radius: 24px;
-  background: var(--panel);
-  backdrop-filter: blur(14px);
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.12),
+      rgba(67, 208, 255, 0.06)
+    ),
+    var(--panel);
+  backdrop-filter: blur(18px);
   padding: 24px;
-  box-shadow: var(--shadow-red), 0 20px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 34px rgba(255, 59, 95, 0.28), 0 24px 80px rgba(0, 0, 0, 0.62);
+  animation: adminModalIn 0.34s cubic-bezier(0.2, 1.25, 0.35, 1) forwards;
+  position: relative;
+  overflow: hidden;
 }
 
 .admin-error {
@@ -4355,8 +4370,7 @@ select.input option:checked {
 .hero,
 .panel,
 .home-featured-banner,
-.tournament-hero,
-.admin-overlay {
+.tournament-hero {
   position: relative;
   z-index: 1;
 }
@@ -4736,4 +4750,218 @@ select.input option:checked {
 
 .achievement-player-picker::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.04);
+}
+.admin-modal::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(
+    from 180deg,
+    transparent,
+    rgba(255, 59, 95, 0.18),
+    rgba(67, 208, 255, 0.14),
+    transparent
+  );
+  animation: adminModalAura 3.6s linear infinite;
+  pointer-events: none;
+}
+
+.admin-modal::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 23px;
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.08),
+      rgba(67, 208, 255, 0.04)
+    ),
+    rgba(10, 14, 22, 0.92);
+  pointer-events: none;
+}
+
+.admin-modal > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes adminOverlayIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes adminModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes adminModalAura {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.home-panel .player-row.new {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.025)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.home-panel .player-row.new::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 38%,
+    transparent 68%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.45s ease;
+  pointer-events: none;
+}
+
+.home-panel .player-row.new:hover::after {
+  transform: translateX(120%);
+}
+
+.home-panel .player-row.new:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(255, 59, 95, 0.38);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28), 0 0 24px rgba(255, 59, 95, 0.14);
+}
+
+.home-panel .player-row.new.top-player:first-child {
+  border-color: rgba(255, 190, 61, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 190, 61, 0.16),
+    rgba(255, 59, 95, 0.08),
+    rgba(255, 255, 255, 0.03)
+  );
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.12) inset,
+    0 0 30px rgba(255, 190, 61, 0.16);
+}
+
+.home-panel .rank-box-small {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff3b5f, #ff1744);
+  box-shadow: 0 0 16px rgba(255, 59, 95, 0.35);
+}
+
+.home-panel .top-player:first-child .rank-box-small {
+  background: linear-gradient(135deg, #ffcc66, #ff9f43);
+  color: #1b1305;
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.4);
+}
+
+.home-panel .player-name {
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.home-panel .elo-box {
+  background: rgba(67, 208, 255, 0.14);
+  border: 1px solid rgba(67, 208, 255, 0.22);
+  box-shadow: 0 0 16px rgba(67, 208, 255, 0.12);
+}
+.home-panel .player-row.new.top-player:first-child::before {
+  background: radial-gradient(
+      220px circle at var(--x, 50%) var(--y, 50%),
+      rgba(255, 190, 61, 0.24),
+      transparent 62%
+    ),
+    linear-gradient(
+      110deg,
+      transparent 0%,
+      rgba(255, 190, 61, 0.22) 42%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 190, 61, 0.22) 58%,
+      transparent 100%
+    );
+  opacity: 1;
+  animation: homeTopOneSweep 2.8s linear infinite;
+}
+
+.home-panel .player-row.new:nth-child(2) {
+  border-color: rgba(203, 213, 225, 0.32);
+  box-shadow: 0 0 20px rgba(203, 213, 225, 0.08);
+}
+
+.home-panel .player-row.new:nth-child(3) {
+  border-color: rgba(245, 158, 11, 0.28);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
+}
+
+.home-panel .player-row.new:nth-child(2) .rank-box-small {
+  background: linear-gradient(135deg, #e5e7eb, #94a3b8);
+  color: #111827;
+  box-shadow: 0 0 16px rgba(203, 213, 225, 0.32);
+}
+
+.home-panel .player-row.new:nth-child(3) .rank-box-small {
+  background: linear-gradient(135deg, #f59e0b, #92400e);
+  color: #fff7ed;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.32);
+}
+
+.home-panel .player-row.new .top-player-avatar,
+.home-panel .player-row.new .avatar-placeholder {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.home-panel .player-row.new:first-child .top-player-avatar,
+.home-panel .player-row.new:first-child .avatar-placeholder {
+  border-color: rgba(255, 190, 61, 0.55);
+  box-shadow: 0 0 20px rgba(255, 190, 61, 0.28);
+}
+
+.home-panel .player-row.new .elo-box {
+  min-width: 72px;
+  text-align: center;
+  font-size: 15px;
+  border-radius: 999px;
+}
+
+.home-panel .player-row.new:first-child .elo-box {
+  color: #ffcc66;
+  background: rgba(255, 190, 61, 0.12);
+  border-color: rgba(255, 190, 61, 0.34);
+  box-shadow: 0 0 20px rgba(255, 190, 61, 0.2);
+}
+
+@keyframes homeTopOneSweep {
+  0% {
+    background-position: 0 0, -220% 0;
+  }
+  100% {
+    background-position: 0 0, 220% 0;
+  }
 }
