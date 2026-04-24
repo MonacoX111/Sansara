@@ -4719,3 +4719,21 @@ select.input option:checked {
 .results-placement-card.results-placement-default .results-placement-name {
   color: #f4f4f5;
 }
+.achievement-player-picker {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.achievement-player-picker::-webkit-scrollbar {
+  width: 6px;
+}
+
+.achievement-player-picker::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.achievement-player-picker::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}

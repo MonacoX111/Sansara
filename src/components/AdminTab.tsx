@@ -2294,7 +2294,7 @@ export default function AdminTab({
                   />
                 ) : null}
 
-                <div className="picker-grid compact-grid">
+                <div className="picker-grid compact-grid achievement-player-picker">
                   {players.map((player) => {
                     const isSelected = safeAchievementPlayerIds(
                       selectedAchievement
