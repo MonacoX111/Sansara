@@ -2269,12 +2269,30 @@ export default function AdminTab({
 
                 <input
                   className="input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAchievementImageUpload(
-                    selectedAchievement.id
-                  )}
+                  type="text"
+                  placeholder="Paste image URL..."
+                  value={selectedAchievement.image || ""}
+                  onChange={(e) =>
+                    saveAchievement(selectedAchievement.id, {
+                      image: e.target.value,
+                    })
+                  }
                 />
+
+                {selectedAchievement.image ? (
+                  <img
+                    src={selectedAchievement.image}
+                    alt="Achievement preview"
+                    style={{
+                      marginTop: 10,
+                      width: 80,
+                      height: 80,
+                      objectFit: "cover",
+                      borderRadius: 12,
+                      border: "1px solid rgba(255,255,255,0.12)",
+                    }}
+                  />
+                ) : null}
 
                 <div className="picker-grid compact-grid">
                   {players.map((player) => {
