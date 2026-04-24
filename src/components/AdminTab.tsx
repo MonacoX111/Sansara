@@ -1299,6 +1299,28 @@ export default function AdminTab({
               </div>
             )}
 
+            {tournamentForm.participantType === "player" && (
+              <div className="field-block">
+                <label className="field-label">Winner Player</label>
+                <PremiumSelect
+                  value={selectedTournamentWinnerId || 0}
+                  placeholder="Select winner player"
+                  options={selectedTournamentPlayers.map((player) => ({
+                    value: player.id,
+                    label: player.nickname,
+                  }))}
+                  onChange={(value) =>
+                    setTournamentForm((prev) => ({
+                      ...prev,
+                      winnerId: Number(value) > 0 ? Number(value) : undefined,
+                      winnerTeamId: undefined,
+                      winnerSquadIds: [],
+                    }))
+                  }
+                />
+              </div>
+            )}
+
             {tournamentForm.participantType === "squad" && (
               <div className="field-block">
                 <label className="field-label">Winner Squad Players</label>
@@ -1764,7 +1786,10 @@ export default function AdminTab({
 
                 setMatchForm({
                   game: nextTournament?.game || "",
-                  matchType: nextTournament?.participantType === "team" ? "team" : "player",
+                  matchType:
+                    nextTournament?.participantType === "team"
+                      ? "team"
+                      : "player",
                   player1: 0,
                   player2: 0,
                   team1: 0,
