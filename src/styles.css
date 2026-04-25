@@ -5051,15 +5051,6 @@ background: linear-gradient(
   }
 }
 
-.page {
-  animation: none;
-}
-
-.page::before,
-.page::after {
-  animation: none;
-}
-
 .admin-list-btn-featured::after,
 .leader-top::after {
   animation-play-state: paused;
@@ -6734,15 +6725,17 @@ will-change: transform;
     opacity 0.22s ease;
 }
 
-.bracket-columns .bracket-series-card {
-  opacity: 1;
+.bracket-columns:has(.bracket-series-active) .bracket-series-card,
+.bracket-columns:has(.bracket-series-path-loss) .bracket-series-card,
+.bracket-columns:has(.bracket-series-path-draw) .bracket-series-card {
+  opacity: 0.35;
 }
 
-.bracket-series-active,
-.bracket-series-path-loss,
-.bracket-series-path-draw {
+.bracket-columns:has(.bracket-series-active) .bracket-series-active,
+.bracket-columns:has(.bracket-series-path-loss) .bracket-series-path-loss,
+.bracket-columns:has(.bracket-series-path-draw) .bracket-series-path-draw {
   opacity: 1;
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.025);
 }
 
 .bracket-series-completed .bracket-side.winner {
@@ -6769,8 +6762,10 @@ will-change: transform;
   opacity: 1 !important;
   stroke: rgba(255, 210, 80, 1) !important;
   stroke-width: 3 !important;
-filter: none !important;
-animation: none;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 210, 80, 0.85))
+    drop-shadow(0 0 16px rgba(255, 190, 61, 0.45)) !important;
+  animation: bracketLinePulse 1.8s ease-in-out infinite;
 }
 
 @keyframes bracketLinePulse {
@@ -6821,16 +6816,20 @@ animation: none;
   opacity: 1 !important;
   stroke: rgba(255, 59, 95, 1) !important;
   stroke-width: 3 !important;
-filter: none !important;
-animation: none;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 59, 95, 0.85))
+    drop-shadow(0 0 16px rgba(255, 59, 95, 0.45)) !important;
+  animation: bracketLossPulse 1.8s ease-in-out infinite;
 }
 
 .bracket-svg-lines path.bracket-line-draw {
   opacity: 1 !important;
   stroke: rgba(203, 213, 225, 1) !important;
   stroke-width: 3 !important;
-filter: none !important;
-animation: none;
+  filter:
+    drop-shadow(0 0 6px rgba(203, 213, 225, 0.78))
+    drop-shadow(0 0 16px rgba(148, 163, 184, 0.42)) !important;
+  animation: bracketDrawPulse 1.8s ease-in-out infinite;
 }
 
 @keyframes bracketLossPulse {
@@ -6888,4 +6887,42 @@ animation: none;
     0 0 20px rgba(148, 163, 184, 0.24);
 
   transform: translateX(4px) scale(1.015);
+}
+/* ===== BRACKET PERFORMANCE SAFETY PATCH ===== */
+
+.bracket-scroll {
+  contain: layout paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.bracket-columns {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.bracket-series-card,
+.bracket-side,
+.bracket-svg-lines path {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.bracket-svg-lines {
+  transform: translateZ(0);
+  will-change: opacity;
+}
+
+.bracket-series-card {
+  will-change: transform, opacity;
+}
+
+.bracket-side {
+  will-change: transform;
+}
+
+.bracket-line-active,
+.bracket-line-loss,
+.bracket-line-draw {
+  will-change: stroke-width, opacity;
 }
