@@ -6198,6 +6198,7 @@ pointer-events: auto;
 .bracket-block {
   position: relative;
   padding: 18px;
+  padding-right: 34px;
   border-radius: 22px;
   border: 1px solid var(--line);
   background:
@@ -6220,10 +6221,13 @@ pointer-events: auto;
   position: relative;
   z-index: 2;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
   margin-bottom: 16px;
+  min-width: 0;
+  overflow: visible;
 }
 
 .bracket-block-head span {
@@ -6235,6 +6239,11 @@ pointer-events: auto;
 .bracket-block-head small {
   color: var(--muted);
   font-weight: 700;
+  flex: 0 0 auto;
+  margin-left: 0;
+  white-space: nowrap;
+  min-width: 0;
+  padding-right: 0;
 }
 
 .bracket-groups-grid {
@@ -6334,12 +6343,21 @@ pointer-events: auto;
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.055);
+  cursor: pointer;
+
+will-change: transform;
+
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .bracket-side.winner {
-  border-color: rgba(49, 208, 127, 0.35);
-  background: rgba(49, 208, 127, 0.08);
-  box-shadow: 0 0 16px rgba(49, 208, 127, 0.08);
+  border-color: rgba(49, 208, 127, 0.42);
+  background: rgba(49, 208, 127, 0.1);
+  box-shadow: 0 0 16px rgba(49, 208, 127, 0.12);
 }
 
 .bracket-player {
@@ -6450,7 +6468,18 @@ pointer-events: auto;
 
 /* BO-серія */
 .bracket-series-card {
-  padding: 10px;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .bracket-series-game {
@@ -6644,13 +6673,11 @@ pointer-events: auto;
 }
 
 .bracket-svg-lines path {
-  stroke: rgba(255, 59, 95, 0.95) !important;
-  stroke-width: 2.5 !important;
+  stroke: rgba(255, 59, 95, 0.9) !important;
+  stroke-width: 2.2 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
-  filter:
-    drop-shadow(0 0 5px rgba(255, 59, 95, 0.75))
-    drop-shadow(0 0 12px rgba(255, 59, 95, 0.35)) !important;
+  filter: none !important;
 }
 
 .bracket-column-title {
@@ -6670,4 +6697,195 @@ pointer-events: auto;
     0 0 0 1px rgba(255,190,61,0.08) inset,
     0 18px 40px rgba(0,0,0,0.38),
     0 0 28px rgba(255,190,61,0.18) !important;
+}
+/* ===== BRACKET HOVER PATH + WINNER GLOW + SCROLL UX ===== */
+
+.bracket-scroll {
+  cursor: grab;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 59, 95, 0.6) rgba(255, 255, 255, 0.04);
+}
+
+.bracket-scroll:active {
+  cursor: grabbing;
+}
+
+.bracket-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.bracket-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.bracket-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(255, 59, 95, 0.75), rgba(67, 208, 255, 0.55));
+  border-radius: 999px;
+}
+
+.bracket-series-card {
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.bracket-columns .bracket-series-card {
+  opacity: 1;
+}
+
+.bracket-series-active,
+.bracket-series-path-loss,
+.bracket-series-path-draw {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.bracket-series-completed .bracket-side.winner {
+  border-color: rgba(49, 208, 127, 0.48);
+  background: rgba(49, 208, 127, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 16px rgba(49, 208, 127, 0.22);
+}
+
+.bracket-svg-lines path {
+  transition:
+    stroke 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    stroke-width 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease;
+}
+
+.bracket-columns:has(.bracket-series-active) .bracket-svg-lines path {
+  opacity: 0.18;
+}
+
+.bracket-svg-lines path.bracket-line-active {
+  opacity: 1 !important;
+  stroke: rgba(255, 210, 80, 1) !important;
+  stroke-width: 3 !important;
+filter: none !important;
+animation: none;
+}
+
+@keyframes bracketLinePulse {
+  0%, 100% {
+    stroke-width: 2.8;
+  }
+
+  50% {
+    stroke-width: 4;
+  }
+}
+/* ===== BRACKET WIN / LOSS PATH FINAL ===== */
+
+.bracket-series-path-win {
+  border-color: rgba(255, 210, 80, 0.7) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 190, 61, 0.16), rgba(255, 59, 95, 0.08)),
+    rgba(12, 15, 22, 0.96) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 61, 0.16) inset,
+    0 0 30px rgba(255, 190, 61, 0.32),
+    0 20px 44px rgba(0, 0, 0, 0.42) !important;
+}
+
+.bracket-series-path-loss {
+  border-color: rgba(255, 59, 95, 0.78) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.22), rgba(95, 18, 31, 0.24)),
+    rgba(12, 15, 22, 0.96) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.18) inset,
+    0 0 32px rgba(255, 59, 95, 0.38),
+    0 20px 44px rgba(0, 0, 0, 0.42) !important;
+}
+
+.bracket-series-path-draw {
+  border-color: rgba(203, 213, 225, 0.72) !important;
+  background:
+    linear-gradient(135deg, rgba(203, 213, 225, 0.18), rgba(100, 116, 139, 0.12)),
+    rgba(12, 15, 22, 0.96) !important;
+  box-shadow:
+    0 0 0 1px rgba(203, 213, 225, 0.16) inset,
+    0 0 30px rgba(203, 213, 225, 0.28),
+    0 20px 44px rgba(0, 0, 0, 0.42) !important;
+}
+
+.bracket-svg-lines path.bracket-line-loss {
+  opacity: 1 !important;
+  stroke: rgba(255, 59, 95, 1) !important;
+  stroke-width: 3 !important;
+filter: none !important;
+animation: none;
+}
+
+.bracket-svg-lines path.bracket-line-draw {
+  opacity: 1 !important;
+  stroke: rgba(203, 213, 225, 1) !important;
+  stroke-width: 3 !important;
+filter: none !important;
+animation: none;
+}
+
+@keyframes bracketLossPulse {
+  0%, 100% {
+    stroke-width: 2.8;
+  }
+
+  50% {
+    stroke-width: 4;
+  }
+}
+
+@keyframes bracketDrawPulse {
+  0%, 100% {
+    stroke-width: 2.8;
+  }
+
+  50% {
+    stroke-width: 4;
+  }
+}
+
+/* ===== BRACKET PLAYER SIDE RESULT HOVER ===== */
+
+.bracket-side-hover-win {
+  border-color: rgba(49, 208, 127, 0.82) !important;
+  background: rgba(49, 208, 127, 0.18) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.16) inset,
+    0 6px 24px rgba(49, 208, 127, 0.35),
+    0 0 20px rgba(49, 208, 127, 0.25);
+
+  transform: translateX(4px) scale(1.015);
+}
+
+.bracket-side-hover-loss {
+  border-color: rgba(255, 59, 95, 0.82) !important;
+  background: rgba(255, 59, 95, 0.18) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.16) inset,
+    0 6px 24px rgba(255, 59, 95, 0.35),
+    0 0 20px rgba(255, 59, 95, 0.25);
+
+  transform: translateX(4px) scale(1.015);
+}
+.bracket-side-hover-draw {
+  border-color: rgba(203, 213, 225, 0.82) !important;
+  background: rgba(203, 213, 225, 0.16) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(203, 213, 225, 0.16) inset,
+    0 6px 24px rgba(203, 213, 225, 0.3),
+    0 0 20px rgba(148, 163, 184, 0.24);
+
+  transform: translateX(4px) scale(1.015);
 }

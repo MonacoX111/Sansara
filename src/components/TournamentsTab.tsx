@@ -479,9 +479,108 @@ const finalSeries = Object.values(
   });
 
 const bracketRef = useRef<HTMLDivElement | null>(null);
+const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
+const [activeParticipantId, setActiveParticipantId] = useState<number>(0);
+
 const [bracketLines, setBracketLines] = useState<
-  { id: string; path: string }[]
+  { id: string; fromId: string; toId: string; path: string }[]
 >([]);
+
+const getSeriesPathIds = (seriesId: string | null) => {
+  if (!seriesId) return [];
+
+  const allSeries = [...playoffMatches, ...finalMatches];
+  const path = new Set<string>();
+  let currentId = seriesId;
+
+  while (currentId) {
+    path.add(currentId);
+
+    const currentMatch = allSeries.find(
+      (match) => getSeriesKey(match) === currentId
+    );
+
+    if (!currentMatch?.nextSeriesId) break;
+
+    currentId = currentMatch.nextSeriesId;
+  }
+
+  return Array.from(path);
+};
+
+const activeSeriesPath = getSeriesPathIds(activeSeriesId);
+
+const getMatchParticipantIds = (match: Match) =>
+  match.matchType === "team"
+    ? [Number(match.team1 || 0), Number(match.team2 || 0)]
+    : [Number(match.player1 || 0), Number(match.player2 || 0)];
+
+const getMatchWinnerId = (match: Match) =>
+  match.matchType === "team"
+    ? Number(match.winnerTeamId || 0)
+    : Number(match.winnerId || 0);
+
+
+
+const activeSeriesResultMap = (() => {
+  const result = new Map<string, "win" | "loss" | "draw">();
+
+  if (!activeParticipantId) return result;
+
+  const allSeries = [...playoffMatches, ...finalMatches];
+
+  allSeries.forEach((match) => {
+    const seriesId = getSeriesKey(match);
+    const participants = getMatchParticipantIds(match);
+    const winnerId = getMatchWinnerId(match);
+
+    if (!participants.includes(activeParticipantId)) return;
+
+    // якщо виграв
+    if (winnerId === activeParticipantId) {
+      result.set(seriesId, "win");
+      return;
+    }
+
+    // якщо програв
+    if (winnerId > 0) {
+      result.set(seriesId, "loss");
+      return;
+    }
+
+    // якщо матч ще не завершений або без winner → draw
+    result.set(seriesId, "draw");
+  });
+
+  return result;
+})();
+
+const winnerSeriesPath = (() => {
+  if (!selectedTournament) return [];
+
+  const allSeries = [...playoffMatches, ...finalMatches];
+
+  const championPlayerId = Number(selectedTournament.winnerId || 0);
+  const championTeamId = Number(selectedTournament.winnerTeamId || 0);
+
+  if (!championPlayerId && !championTeamId) return [];
+
+  const championWonMatches = allSeries.filter((match) => {
+    if (championPlayerId) {
+      return Number(match.winnerId || 0) === championPlayerId;
+    }
+
+    if (championTeamId) {
+      return Number(match.winnerTeamId || 0) === championTeamId;
+    }
+
+    return false;
+  });
+
+  return Array.from(
+    new Set(championWonMatches.map((match) => getSeriesKey(match)))
+  );
+})();
 
 useEffect(() => {
   const buildLines = () => {
@@ -493,7 +592,12 @@ useEffect(() => {
       root.querySelectorAll<HTMLElement>("[data-series-id]")
     );
 
-    const nextLines: { id: string; path: string }[] = [];
+    const nextLines: {
+      id: string;
+      fromId: string;
+      toId: string;
+      path: string;
+    }[] = [];
 
     cards.forEach((card) => {
       const seriesId = card.dataset.seriesId;
@@ -520,6 +624,8 @@ useEffect(() => {
 
       nextLines.push({
         id: `${seriesId}-${nextSeriesId}`,
+        fromId: seriesId,
+        toId: nextSeriesId,
         path: `M ${startX} ${startY} H ${middleX} V ${endY} H ${endX}`,
       });
     });
@@ -654,36 +760,77 @@ const renderBracketSeries = (
   seriesCount = 1,
   showLines = false
 ) => {
-  const mainMatch = seriesMatches[seriesMatches.length - 1] || seriesMatches[0];
+const mainMatch = seriesMatches[seriesMatches.length - 1] || seriesMatches[0];
+const seriesId = getSeriesKey(mainMatch);
+const activeSeriesResult = activeSeriesResultMap.get(seriesId);
 
   return (
 <div
-  key={mainMatch.seriesId || mainMatch.id}
-  data-series-id={mainMatch.seriesId || `single-match-${mainMatch.id}`}
+  key={mainMatch.id}
+  data-series-id={seriesId}
   data-next-series-id={mainMatch.nextSeriesId || ""}
-  className={`bracket-match-card bracket-series-card ${
-    seriesMatches.length > 1 ? "bracket-series-multi" : ""
-  }`}
+onMouseLeave={() => {
+  setActiveSeriesId(null);
+  setActiveParticipantId(0);
+}}
+className={`bracket-match-card bracket-series-card ${
+  activeSeriesResult === "win"
+    ? "bracket-series-active bracket-series-path-win"
+    : activeSeriesResult === "loss"
+    ? "bracket-series-path-loss"
+    : activeSeriesResult === "draw"
+    ? "bracket-series-path-draw"
+    : ""
+} ${
+  mainMatch.status === "completed" &&
+  (mainMatch.winnerId || mainMatch.winnerTeamId)
+    ? "bracket-series-completed"
+    : ""
+} ${seriesMatches.length > 1 ? "bracket-series-multi" : ""}`}
 >
       <div className="bracket-match-top">
         <span>{mainMatch.roundLabel || mainMatch.round || "Series"}</span>
         <span>{mainMatch.status || "—"}</span>
       </div>
 
-      {seriesMatches.map((match) => {
-        const {
-          leftName,
-          rightName,
-          winnerName,
-          winnerLeft,
-          winnerRight,
-          leftImage,
-          rightImage,
-        } = getMatchPreviewData(match);
+{seriesMatches.map((match) => {
+  const {
+    leftName,
+    rightName,
+    winnerName,
+    winnerLeft,
+    winnerRight,
+    leftImage,
+    rightImage,
+  } = getMatchPreviewData(match);
 
-        return (
+  const leftParticipantId =
+    match.matchType === "team"
+      ? Number(match.team1 || 0)
+      : Number(match.player1 || 0);
+
+  const rightParticipantId =
+    match.matchType === "team"
+      ? Number(match.team2 || 0)
+      : Number(match.player2 || 0);
+
+  return (
           <div key={match.id} className="bracket-series-game">
-            <div className={`bracket-side ${winnerLeft ? "winner" : ""}`}>
+<div
+  onMouseEnter={() => {
+    setActiveSeriesId(seriesId);
+    setActiveParticipantId(leftParticipantId);
+  }}
+  className={`bracket-side ${winnerLeft ? "winner" : ""} ${
+activeParticipantId === leftParticipantId
+  ? winnerLeft
+    ? "bracket-side-hover-win"
+    : winnerName !== "—"
+    ? "bracket-side-hover-loss"
+    : "bracket-side-hover-draw"
+      : ""
+  }`}
+>
               <div className="bracket-player">
                 {leftImage ? (
                   <img src={leftImage} alt={leftName} />
@@ -698,7 +845,21 @@ const renderBracketSeries = (
 
             <div className="bracket-score">{match.score || "VS"}</div>
 
-            <div className={`bracket-side ${winnerRight ? "winner" : ""}`}>
+<div
+  onMouseEnter={() => {
+    setActiveSeriesId(seriesId);
+    setActiveParticipantId(rightParticipantId);
+  }}
+className={`bracket-side ${winnerRight ? "winner" : ""} ${
+  activeParticipantId === rightParticipantId
+    ? winnerRight
+      ? "bracket-side-hover-win"
+      : winnerName !== "—"
+      ? "bracket-side-hover-loss"
+      : "bracket-side-hover-draw"
+    : ""
+}`}
+>
               <div className="bracket-player">
                 {rightImage ? (
                   <img src={rightImage} alt={rightName} />
@@ -1418,17 +1579,38 @@ const renderBracketSeries = (
     {shouldShowPlayoff &&
     (playoffMatches.length > 0 || finalMatches.length > 0) ? (
       <div className="bracket-block">
-        <div className="bracket-block-head">
-          <span>Playoff bracket</span>
-          <small>{playoffMatches.length + finalMatches.length} matches</small>
-        </div>
+<div className="bracket-block-head bracket-block-head-stacked">
+  <span>Playoff bracket</span>
+  <small>{playoffMatches.length + finalMatches.length} matches</small>
+</div>
 
         <div className="bracket-scroll">
           <div className="bracket-columns" ref={bracketRef}>
             <svg className="bracket-svg-lines">
-              {bracketLines.map((line) => (
-                <path key={line.id} d={line.path} />
-              ))}
+{bracketLines.map((line) => {
+const fromResult = activeSeriesResultMap.get(line.fromId);
+const toResult = activeSeriesResultMap.get(line.toId);
+
+const isWinLine = fromResult === "win" && toResult === "win";
+const isLossLine = fromResult === "win" && toResult === "loss";
+const isDrawLine = fromResult === "draw" || toResult === "draw";
+
+return (
+  <path
+    key={line.id}
+    d={line.path}
+className={
+  isLossLine
+    ? "bracket-line-loss"
+    : isWinLine
+    ? "bracket-line-active"
+    : isDrawLine
+    ? "bracket-line-draw"
+    : ""
+}
+  />
+);
+})}
             </svg>
 
             {playoffRoundSeries.map(({ roundName, series }) => (
