@@ -421,6 +421,17 @@ const groupStandings = Object.entries(groupedMatches).reduce(
 const getSeriesKey = (match: Match) =>
   match.seriesId?.trim() || `single-match-${match.id}`;
 
+const roundPriority = (roundName: string) => {
+  const normalized = roundName.toLowerCase();
+
+  if (normalized.includes("1/8") || normalized.includes("r16")) return 1;
+  if (normalized.includes("1/4") || normalized.includes("qf")) return 2;
+  if (normalized.includes("1/2") || normalized.includes("sf")) return 3;
+  if (normalized.includes("final")) return 4;
+
+  return 99;
+};
+
 const playoffRounds = playoffMatches.reduce((acc, match) => {
   const round = match.roundLabel || match.round || "Playoff";
   const seriesKey = getSeriesKey(match);
@@ -433,16 +444,22 @@ const playoffRounds = playoffMatches.reduce((acc, match) => {
   return acc;
 }, {} as Record<string, Record<string, Match[]>>);
 
-const playoffRoundSeries = Object.entries(playoffRounds).reduce(
-  (acc, [roundName, seriesMap]) => {
-    acc[roundName] = Object.values(seriesMap).map((seriesMatches) =>
-      [...seriesMatches].sort((a, b) => a.id - b.id)
-    );
-
-    return acc;
-  },
-  {} as Record<string, Match[][]>
-);
+const playoffRoundSeries = Object.entries(playoffRounds)
+  .sort(([roundA], [roundB]) => {
+    const priorityDiff = roundPriority(roundA) - roundPriority(roundB);
+    if (priorityDiff !== 0) return priorityDiff;
+    return roundA.localeCompare(roundB);
+  })
+  .map(([roundName, seriesMap]) => ({
+    roundName,
+    series: Object.values(seriesMap)
+      .map((seriesMatches) => [...seriesMatches].sort((a, b) => a.id - b.id))
+      .sort((a, b) => {
+        const aKey = getSeriesKey(a[0] || ({} as Match));
+        const bKey = getSeriesKey(b[0] || ({} as Match));
+        return aKey.localeCompare(bKey, undefined, { numeric: true });
+      }),
+  }));
 
 const finalSeries = Object.values(
   finalMatches.reduce((acc, match) => {
@@ -453,7 +470,13 @@ const finalSeries = Object.values(
 
     return acc;
   }, {} as Record<string, Match[]>)
-).map((seriesMatches) => [...seriesMatches].sort((a, b) => a.id - b.id));
+)
+  .map((seriesMatches) => [...seriesMatches].sort((a, b) => a.id - b.id))
+  .sort((a, b) => {
+    const aKey = getSeriesKey(a[0] || ({} as Match));
+    const bKey = getSeriesKey(b[0] || ({} as Match));
+    return aKey.localeCompare(bKey, undefined, { numeric: true });
+  });
 
 const bracketRef = useRef<HTMLDivElement | null>(null);
 const [bracketLines, setBracketLines] = useState<
@@ -504,11 +527,17 @@ useEffect(() => {
     setBracketLines(nextLines);
   };
 
-  buildLines();
+  const frame = window.requestAnimationFrame(buildLines);
+  const timer = window.setTimeout(buildLines, 150);
 
   window.addEventListener("resize", buildLines);
-  return () => window.removeEventListener("resize", buildLines);
-}, [selectedTournamentId, matches, playoffRoundSeries, finalSeries]);
+
+  return () => {
+    window.cancelAnimationFrame(frame);
+    window.clearTimeout(timer);
+    window.removeEventListener("resize", buildLines);
+  };
+}, [selectedTournamentId, matches]);
 
 const getMatchPreviewData = (match: Match) => {
   const isTeamMatch = match.matchType === "team";
@@ -1402,24 +1431,22 @@ const renderBracketSeries = (
               ))}
             </svg>
 
-            {Object.entries(playoffRoundSeries).map(
-              ([roundName, roundSeries]) => (
-                <div key={roundName} className="bracket-column">
-                  <div className="bracket-column-title">{roundName}</div>
+            {playoffRoundSeries.map(({ roundName, series }) => (
+              <div key={roundName} className="bracket-column">
+                <div className="bracket-column-title">{roundName}</div>
 
-                  <div className="bracket-column-matches">
-                    {roundSeries.map((seriesMatches, seriesIndex) =>
-                      renderBracketSeries(
-                        seriesMatches,
-                        seriesIndex,
-                        roundSeries.length,
-                        false
-                      )
-                    )}
-                  </div>
+                <div className="bracket-column-matches">
+                  {series.map((seriesMatches, seriesIndex) =>
+                    renderBracketSeries(
+                      seriesMatches,
+                      seriesIndex,
+                      series.length,
+                      false
+                    )
+                  )}
                 </div>
-              )
-            )}
+              </div>
+            ))}
 
             {finalMatches.length > 0 ? (
               <div className="bracket-column bracket-column-final">
