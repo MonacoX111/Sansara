@@ -24,9 +24,18 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+
   background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
     radial-gradient(circle at 12% 16%, rgba(255, 59, 95, 0.08), transparent 28%),
     radial-gradient(circle at 86% 20%, rgba(67, 208, 255, 0.06), transparent 26%);
+
+  background-size:
+    60px 60px,
+    60px 60px,
+    auto,
+    auto;
 }
 
 .bracket-block-head {
@@ -77,17 +86,28 @@
 
 .bracket-group-title,
 .bracket-column-title {
-  margin-bottom: 14px;
-  padding: 7px 12px;
-  width: fit-content;
+  margin-bottom: 16px;
+  padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: #ffffff;
-  font-size: 13px;
+
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+    rgba(0,0,0,0.4);
+
+  border: 1px solid rgba(255,255,255,0.15);
+
+  font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+
+  color: rgba(255,255,255,0.85);
+
+  backdrop-filter: blur(6px);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 6px 18px rgba(0,0,0,0.4);
 }
 
 .bracket-group-matches,
@@ -406,7 +426,13 @@
 .bracket-columns:has(.bracket-series-active) .bracket-series-card,
 .bracket-columns:has(.bracket-series-path-loss) .bracket-series-card,
 .bracket-columns:has(.bracket-series-path-draw) .bracket-series-card {
-  opacity: 0.35;
+  opacity: 0.25;
+  filter: saturate(0.7);
+}
+
+.bracket-series-champion-route {
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .bracket-columns:has(.bracket-series-active) .bracket-series-active,
@@ -416,7 +442,7 @@
   transform: translateY(-3px) scale(1.025);
 }
 
-.bracket-columns:has(.bracket-series-active) .bracket-svg-lines path {
+.bracket-columns:has(.bracket-series-active) .bracket-svg-lines path:not(.bracket-line-champion-route) {
   opacity: 0.18;
 }
 
@@ -662,4 +688,93 @@
   transform: scale(0.96);
   transform-origin: top left;
   width: 104.17%;
+}
+/* ===== GRAND FINAL SPECIAL ===== */
+
+.bracket-column-final .bracket-column-title {
+  background:
+    linear-gradient(135deg, rgba(255,190,61,0.25), rgba(255,59,95,0.15)),
+    rgba(0,0,0,0.5);
+
+  border: 1px solid rgba(255,190,61,0.4);
+
+  color: #ffd66b;
+
+  box-shadow:
+    0 0 20px rgba(255,190,61,0.3),
+    0 0 0 1px rgba(255,190,61,0.2) inset;
+}
+/* ===== FACEIT ULTRA EFFECTS ===== */
+
+.bracket-series-card {
+  isolation: isolate;
+}
+
+.bracket-series-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 59, 95, 0.16), rgba(67, 208, 255, 0.1));
+
+  transition: opacity 0.25s ease;
+  z-index: -1;
+}
+
+.bracket-series-card:hover::after {
+  opacity: 1;
+}
+
+/* ===== CHAMPION ROUTE ===== */
+
+.bracket-series-champion-route {
+  border-color: rgba(255, 210, 80, 0.5) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 210, 80, 0.12) inset,
+    0 18px 36px rgba(0, 0, 0, 0.36),
+    0 0 26px rgba(255, 190, 61, 0.16) !important;
+}
+
+/* ===== LIVE LINES (FLOW) ===== */
+
+.bracket-svg-lines path.bracket-line-champion-route {
+  opacity: 1 !important;
+  stroke: rgba(255, 210, 80, 1) !important;
+  stroke-width: 4.2 !important;
+
+  filter:
+    drop-shadow(0 0 8px rgba(255, 210, 80, 0.9))
+    drop-shadow(0 0 20px rgba(255, 190, 61, 0.6)) !important;
+
+  stroke-dasharray: 8 6;
+  animation: bracketChampionFlow 1.4s linear infinite;
+  paint-order: stroke;
+}
+
+@keyframes bracketChampionFlow {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ===== FINAL GLOW BOOST ===== */
+
+.bracket-column-final .bracket-series-card {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 190, 61, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 190, 61, 0.12), rgba(255, 59, 95, 0.1)),
+    rgba(9, 12, 18, 0.9) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 61, 0.1) inset,
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 32px rgba(255, 190, 61, 0.25) !important;
 }

@@ -802,7 +802,9 @@ className={`bracket-match-card bracket-series-card ${
   (mainMatch.winnerId || mainMatch.winnerTeamId)
     ? "bracket-series-completed"
     : ""
-} ${seriesMatches.length > 1 ? "bracket-series-multi" : ""}`}
+} ${winnerSeriesPath.includes(seriesId) ? "bracket-series-champion-route" : ""} ${
+  seriesMatches.length > 1 ? "bracket-series-multi" : ""
+}`}
 >
       <div className="bracket-match-top">
         <span>{mainMatch.roundLabel || mainMatch.round || "Series"}</span>
@@ -1615,20 +1617,25 @@ const toResult = activeSeriesResultMap.get(line.toId);
 const isWinLine = fromResult === "win" && toResult === "win";
 const isLossLine = fromResult === "win" && toResult === "loss";
 const isDrawLine = fromResult === "draw" || toResult === "draw";
+const isChampionLine = winnerSeriesPath.includes(line.fromId);
+
+const finalSeriesIds = finalSeries
+  .map((seriesMatches) => seriesMatches[0])
+  .filter(Boolean)
+  .map((match) => getSeriesKey(match));
 
 return (
   <path
     key={line.id}
     d={line.path}
-className={
-  isLossLine
-    ? "bracket-line-loss"
-    : isWinLine
-    ? "bracket-line-active"
-    : isDrawLine
-    ? "bracket-line-draw"
-    : ""
-}
+className={[
+  isLossLine && "bracket-line-loss",
+  isWinLine && "bracket-line-active",
+  isDrawLine && "bracket-line-draw",
+  isChampionLine && "bracket-line-champion-route",
+]
+  .filter(Boolean)
+  .join(" ")}
   />
 );
 })}
