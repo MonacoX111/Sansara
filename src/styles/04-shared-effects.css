@@ -1,0 +1,1229 @@
+/* ===== LEADER ROW HOVER ===== */
+.leader-row {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease, background 0.25s ease;
+}
+
+.leader-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.08) 28%,
+    transparent 68%
+  );
+
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.leader-row:hover::before {
+  opacity: 1;
+}
+
+.leader-row:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05),
+    0 0 20px rgba(255, 255, 255, 0.08);
+}
+
+/* ===== TEAM CARD HOVER ===== */
+.leader-team-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.leader-row:hover .leader-team-card {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 120, 150, 0.35);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 12px 30px rgba(255, 80, 120, 0.25);
+}
+
+/* ===== TEAM LOGO GLOW ===== */
+.leader-team-logo-large {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.leader-row:hover .leader-team-logo-large {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 18px rgba(255, 90, 130, 0.35), 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== ACHIEVEMENTS HOVER ===== */
+.achievement-img {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.achievement-img:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3), 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== RANK BOX POP ===== */
+.rank-box {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.leader-row:hover .rank-box {
+  transform: scale(1.08);
+  box-shadow: 0 0 18px rgba(255, 80, 120, 0.45), 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+/* ===== SHARED PANEL HOVER ===== */
+
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.26), 0 0 24px rgba(255, 59, 95, 0.06);
+}
+
+/* ===== STAT CARDS ===== */
+.stat-card,
+.tournament-stat-card,
+.overview-stat-card,
+.participant-stat-box,
+.results-placement-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease,
+    border-color 0.22s ease, background 0.22s ease;
+}
+
+.stat-card:hover,
+.tournament-stat-card:hover,
+.overview-stat-card:hover,
+.participant-stat-box:hover,
+.results-placement-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24), 0 0 18px rgba(255, 59, 95, 0.08);
+}
+
+/* ===== MATCH / RESULT / ROSTER CARDS ===== */
+.match-card,
+.match-card.new,
+.tournament-match-card,
+.team-roster-card,
+.team-history-card,
+.tournament-history-card {
+  transition: transform 0.24s ease, box-shadow 0.24s ease,
+    border-color 0.24s ease, background 0.24s ease;
+}
+
+.match-card:hover,
+.match-card.new:hover,
+.tournament-match-card:hover,
+.team-roster-card:hover,
+.team-history-card:hover,
+.tournament-history-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 59, 95, 0.28);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24), 0 0 20px rgba(255, 59, 95, 0.1);
+}
+
+/* ===== BUTTON POLISH ===== */
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.ghost-btn,
+.tab-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.primary-btn:hover {
+  box-shadow: 0 0 20px rgba(255, 59, 95, 0.28), 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.secondary-btn:hover,
+.ghost-btn:hover {
+  border-color: rgba(255, 59, 95, 0.35);
+  box-shadow: 0 0 14px rgba(255, 59, 95, 0.12), 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.danger-btn:hover {
+  box-shadow: 0 0 18px rgba(255, 59, 95, 0.18), 0 10px 20px rgba(0, 0, 0, 0.22);
+}
+
+/* ===== PREMIUM BADGES / PILLS ===== */
+.home-meta-pill,
+.history-meta-pill,
+.result-tournament,
+.champion-tournament-badge,
+.champion-game-pill,
+.champion-date-pill {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.home-meta-pill:hover,
+.history-meta-pill:hover,
+.result-tournament:hover,
+.champion-tournament-badge:hover,
+.champion-game-pill:hover,
+.champion-date-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(255, 59, 95, 0.1), 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+/* ===== PREMIUM MOVING GLOW HOVER ===== */
+
+.player-card,
+.simple-card,
+.button-card,
+.admin-list-btn,
+.leader-row,
+.tournament-card-button,
+.participant-card,
+.result-card,
+.match-card,
+.match-card.new,
+.tournament-match-card,
+.team-roster-card,
+.team-history-card,
+.stat-card,
+.tournament-stat-card,
+.overview-stat-card,
+.results-placement-card,
+.participant-stat-box,
+.profile-primary-card,
+.profile-mini-stat-card,
+.tournament-history-info-card,
+.achievement-card,
+.champion-card,
+.player-row.new {
+  position: relative;
+  overflow: hidden;
+}
+
+.player-card::before,
+.simple-card::before,
+.button-card::before,
+.admin-list-btn::before,
+.tournament-card-button::before,
+.participant-card::before,
+.result-card::before,
+.match-card::before,
+.match-card.new::before,
+.tournament-match-card::before,
+.team-roster-card::before,
+.team-history-card::before,
+.stat-card::before,
+.tournament-stat-card::before,
+.results-placement-card::before,
+.participant-stat-box::before,
+.profile-primary-card::before,
+.profile-mini-stat-card::before,
+.tournament-history-info-card::before,
+.achievement-card::before,
+.champion-card::before,
+.player-row.new::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.07) 28%,
+    transparent 68%
+  );
+
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.player-card:hover::before,
+.simple-card:hover::before,
+.button-card:hover::before,
+.admin-list-btn:hover::before,
+.tournament-card-button:hover::before,
+.participant-card:hover::before,
+.result-card:hover::before,
+.match-card:hover::before,
+.match-card.new:hover::before,
+.tournament-match-card:hover::before,
+.team-roster-card:hover::before,
+.team-history-card:hover::before,
+.stat-card:hover::before,
+.tournament-stat-card:hover::before,
+.results-placement-card:hover::before,
+.participant-stat-box:hover::before,
+.profile-primary-card:hover::before,
+.profile-mini-stat-card:hover::before,
+.tournament-history-info-card:hover::before,
+.achievement-card:hover::before,
+.champion-card:hover::before,
+.player-row.new:hover::before {
+  opacity: 1;
+}
+
+/* щоб контент був поверх світла */
+.player-card > *,
+.simple-card > *,
+.button-card > *,
+.admin-list-btn > *,
+.leader-row > *,
+.tournament-card-button > *,
+.participant-card > *,
+.result-card > *,
+.match-card > *,
+.match-card.new > *,
+.tournament-match-card > *,
+.team-roster-card > *,
+.team-history-card > *,
+.stat-card > *,
+.tournament-stat-card > *,
+.results-placement-card > *,
+.participant-stat-box > *,
+.profile-primary-card > *,
+.profile-mini-stat-card > *,
+.tournament-history-info-card > *,
+.achievement-card > *,
+.champion-card > *,
+.mvp-card > *,
+.player-row.new > * {
+  position: relative;
+  z-index: 2;
+}
+/* ===== BUTTON ENERGY SYSTEM ===== */
+
+/* БАЗА */
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.ghost-btn,
+.tab-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== PRIMARY BUTTON (MAIN GLOW) ===== */
+.primary-btn::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle, rgba(255, 59, 95, 0.35), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.primary-btn:hover::before {
+  opacity: 1;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 26px rgba(255, 59, 95, 0.4), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* ===== ACTIVE PRESS EFFECT ===== */
+.primary-btn:active,
+.secondary-btn:active,
+.ghost-btn:active,
+.danger-btn:active,
+.tab-btn:active {
+  transform: scale(0.96);
+  box-shadow: none;
+}
+
+/* ===== TAB ACTIVE (GLOW LINE) ===== */
+.tab-btn-active {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-btn-active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 59, 95, 0),
+    rgba(255, 59, 95, 0.9),
+    rgba(255, 59, 95, 0)
+  );
+  box-shadow: 0 0 12px rgba(255, 59, 95, 0.8);
+}
+
+/* ===== GHOST BUTTON (SOFT ENERGY) ===== */
+.ghost-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.ghost-btn:hover::before {
+  opacity: 1;
+}
+
+.ghost-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* ===== SECONDARY BUTTON ===== */
+.secondary-btn:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 0 12px rgba(255, 59, 95, 0.12), 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== DANGER BUTTON (RED INTENSITY) ===== */
+.danger-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 18px rgba(255, 59, 95, 0.35), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* ===== RIPPLE CLICK EFFECT ===== */
+.primary-btn::after,
+.secondary-btn::after,
+.ghost-btn::after,
+.danger-btn::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.primary-btn:active::after,
+.secondary-btn:active::after,
+.ghost-btn:active::after,
+.danger-btn:active::after {
+  width: 140%;
+  height: 140%;
+  opacity: 0.2;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.4s ease;
+}
+/* ===== PLAYER PROFILE LINE EFFECTS ===== */
+
+.profile-head::after {
+  transition: background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+
+.profile-head::before {
+  animation: profileDotPulse 2.4s ease-in-out infinite;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.profile-head:hover::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 59, 95, 0.22),
+    rgba(255, 255, 255, 0.06)
+  );
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.06),
+    0 0 22px rgba(255, 59, 95, 0.12);
+}
+
+.profile-head:hover::before {
+  transform: scale(1.12);
+  background: #ff3b5f;
+  box-shadow: 0 0 0 6px rgba(255, 59, 95, 0.08),
+    0 0 14px rgba(255, 59, 95, 0.28), 0 0 24px rgba(255, 59, 95, 0.2);
+}
+
+@keyframes profileDotPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 0 0 0 rgba(255, 59, 95, 0.25),
+      0 0 10px rgba(255, 59, 95, 0.35);
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+    box-shadow: 0 0 0 8px rgba(255, 59, 95, 0.08),
+      0 0 18px rgba(255, 59, 95, 0.45);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 0 0 0 rgba(255, 59, 95, 0), 0 0 10px rgba(255, 59, 95, 0.35);
+  }
+}
+
+/* ===== TOP 1 PLAYER SPECIAL LOOK ===== */
+
+.leader-row:first-child {
+  border-color: rgba(255, 190, 61, 0.26);
+  background: linear-gradient(
+      135deg,
+      rgba(255, 190, 61, 0.08),
+      rgba(255, 255, 255, 0.02)
+    ),
+    rgba(255, 255, 255, 0.025);
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.05) inset,
+    0 14px 36px rgba(0, 0, 0, 0.24), 0 0 24px rgba(255, 190, 61, 0.08);
+}
+
+.leader-row:first-child:hover {
+  border-color: rgba(255, 190, 61, 0.42);
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.08) inset,
+    0 18px 44px rgba(0, 0, 0, 0.28), 0 0 28px rgba(255, 190, 61, 0.16);
+}
+
+.leader-row:first-child .rank-box {
+  background: linear-gradient(135deg, #ffcc66, #ff9f43);
+  color: #1b1305;
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.34), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.leader-row:first-child:hover .rank-box {
+  box-shadow: 0 0 24px rgba(255, 190, 61, 0.45), 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+.leader-row:first-child .achievement-title {
+  text-shadow: 0 0 14px rgba(255, 190, 61, 0.12);
+}
+
+.leader-row:first-child .leader-team-card {
+  border-color: rgba(255, 190, 61, 0.18);
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.04) inset,
+    0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.leader-row:first-child:hover .leader-team-card {
+  border-color: rgba(255, 190, 61, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 190, 61, 0.06) inset,
+    0 14px 30px rgba(0, 0, 0, 0.24), 0 0 22px rgba(255, 190, 61, 0.1);
+}
+.team-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .team-profile-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* ===== ACTIVE PRESS FOR CARDS ===== */
+
+.leader-row:active,
+.player-card:active,
+.simple-card:active,
+.button-card:active,
+.team-roster-card:active,
+.team-history-card:active,
+.tournament-card-button:active,
+.match-card:active,
+.result-card:active,
+.tournament-history-card:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+/* ===== CLICKABLE UX ===== */
+
+.leaderboard-clickable,
+.player-card,
+.simple-card,
+.button-card,
+.admin-list-btn,
+.tournament-card-button,
+.match-card,
+.result-card,
+.tournament-history-card {
+  cursor: pointer;
+}
+/* ===== TAB CONTENT ANIMATION ===== */
+
+@keyframes fadeInPanel {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===== CUSTOM SCROLLBAR ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 59, 95, 0.5),
+    rgba(255, 59, 95, 0.2)
+  );
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 95, 0.6);
+}
+
+.admin-scroll-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 59, 95, 0.4),
+    rgba(255, 59, 95, 0.18)
+  );
+  border-radius: 999px;
+}
+
+.admin-scroll-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 95, 0.65);
+}
+
+.container,
+.hero,
+.panel,
+.home-featured-banner,
+.tournament-hero {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pageAmbientShift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, 1.5%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-1%, 2%, 0) scale(1.02);
+  }
+}
+
+@keyframes pageLightSweep {
+  0% {
+    transform: translateX(-35%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translateX(35%);
+    opacity: 0;
+  }
+}
+@keyframes pageGradientFlow {
+  0% {
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+  25% {
+    background-position: 0 0, 0 0, 50% 60%;
+  }
+  50% {
+    background-position: 0 0, 0 0, 100% 50%;
+  }
+  75% {
+    background-position: 0 0, 0 0, 50% 40%;
+  }
+  100% {
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+}
+
+/* ===== ACTIVE CARD STATE ===== */
+
+.player-card-active,
+.team-card-active,
+.tournament-card-active {
+  border-color: rgba(255, 59, 95, 0.6) !important;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.4),
+    0 12px 30px rgba(255, 59, 95, 0.15);
+  transform: translateY(-2px);
+}
+.team-card-active {
+  animation: teamActiveGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes teamActiveGlow {
+  0% {
+    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.5),
+      0 0 20px rgba(255, 59, 95, 0.25), 0 12px 30px rgba(255, 59, 95, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 59, 95, 0.9),
+      0 0 40px rgba(255, 59, 95, 0.5), 0 18px 45px rgba(255, 59, 95, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.5),
+      0 0 20px rgba(255, 59, 95, 0.25), 0 12px 30px rgba(255, 59, 95, 0.2);
+  }
+}
+/* ===== TOP 1 PLAYER ===== */
+
+.leader-top {
+  border-color: rgba(255, 215, 0, 0.8) !important;
+
+  box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.25),
+    0 15px 40px rgba(255, 215, 0, 0.2);
+
+  position: relative;
+}
+.leader-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.25) 40%,
+    transparent 70%
+  );
+
+  transform: translateX(-100%);
+  animation: leaderShimmer 3s linear infinite;
+
+  pointer-events: none;
+}
+@keyframes leaderShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+.leader-top {
+  opacity: 1;
+  transform: translateY(0);
+  animation: leaderGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes leaderGlow {
+  0% {
+    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.2), 0 15px 40px rgba(255, 215, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.9),
+      0 0 45px rgba(255, 215, 0, 0.5), 0 20px 60px rgba(255, 215, 0, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.2), 0 15px 40px rgba(255, 215, 0, 0.15);
+  }
+}
+/* ===== SKELETON ===== */
+
+.skeleton-row {
+  height: 72px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+
+.skeleton-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 40%,
+    transparent 70%
+  );
+
+  transform: translateX(-100%);
+  animation: skeletonShimmer 1.4s infinite;
+}
+
+@keyframes skeletonShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+/* ===== RIPPLE CLICK EFFECT ===== */
+
+.leader-row,
+.player-card,
+.simple-card,
+.button-card,
+.team-roster-card,
+.team-history-card,
+.tournament-card-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.leader-row:active::after,
+.player-card:active::after,
+.simple-card:active::after,
+.button-card:active::after,
+.team-roster-card:active::after,
+.team-history-card:active::after,
+.tournament-card-button:active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ripple 0.5s ease-out;
+}
+
+@keyframes ripple {
+  to {
+    width: 400px;
+    height: 400px;
+    opacity: 0;
+  }
+}
+
+/* ===== STAGGER ANIMATION ===== */
+
+.leader-row {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.4s ease forwards;
+}
+
+.leader-row:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.leader-row:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.leader-row:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.leader-row:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.leader-row:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.admin-premium-select {
+  position: relative;
+  width: 100%;
+}
+
+.admin-premium-select-trigger {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 59, 95, 0.45);
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.08),
+      rgba(67, 208, 255, 0.04)
+    ),
+    rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.08) inset,
+    0 0 18px rgba(255, 59, 95, 0.08);
+}
+
+.admin-premium-select-trigger-open {
+  border-color: rgba(255, 59, 95, 0.75);
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.16) inset,
+    0 0 24px rgba(255, 59, 95, 0.18);
+}
+
+.admin-premium-select-arrow {
+  color: #ff4d6d;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.admin-premium-select-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 59, 95, 0.28);
+  background: rgba(16, 20, 29, 0.98);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42), 0 0 28px rgba(255, 59, 95, 0.12);
+}
+
+.admin-premium-select-option {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #dce3ef;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-premium-select-option:hover {
+  background: rgba(255, 59, 95, 0.12);
+  color: #ffffff;
+}
+
+.admin-premium-select-option-active {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 59, 95, 0.22),
+    rgba(67, 208, 255, 0.08)
+  );
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.22) inset;
+}
+.admin-premium-select-disabled {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.admin-premium-select-trigger-disabled {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+  color: #9aa3b2;
+}
+.results-placement-card.results-placement-silver {
+  border-color: rgba(203, 213, 225, 0.75);
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.2),
+    rgba(15, 23, 42, 0.78)
+  );
+}
+
+.results-placement-card.results-placement-bronze {
+  border-color: rgba(245, 158, 11, 0.7);
+  background: linear-gradient(
+    135deg,
+    rgba(180, 83, 9, 0.22),
+    rgba(15, 23, 42, 0.78)
+  );
+}
+
+.results-placement-card.results-placement-default {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.results-placement-card.results-placement-silver .results-placement-place,
+.results-placement-card.results-placement-silver .results-placement-name {
+  color: #e5e7eb;
+}
+
+.results-placement-card.results-placement-bronze .results-placement-place,
+.results-placement-card.results-placement-bronze .results-placement-name {
+  color: #f59e0b;
+}
+
+.results-placement-card.results-placement-default .results-placement-place,
+.results-placement-card.results-placement-default .results-placement-name {
+  color: #f4f4f5;
+}
+.achievement-player-picker {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.achievement-player-picker::-webkit-scrollbar {
+  width: 6px;
+}
+
+.achievement-player-picker::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.achievement-player-picker::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+.admin-modal::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(
+    from 180deg,
+    transparent,
+    rgba(255, 59, 95, 0.18),
+    rgba(67, 208, 255, 0.14),
+    transparent
+  );
+  animation: adminModalAura 3.6s linear infinite;
+  pointer-events: none;
+}
+
+.admin-modal::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 23px;
+  background: linear-gradient(
+      135deg,
+      rgba(255, 59, 95, 0.08),
+      rgba(67, 208, 255, 0.04)
+    ),
+    rgba(10, 14, 22, 0.92);
+  pointer-events: none;
+}
+
+.admin-modal > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes adminOverlayIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes adminModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes adminModalAura {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.home-panel .player-row.new {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.home-panel .player-row.new:nth-child(1) {
+  background: linear-gradient(135deg, rgba(255, 190, 61, 0.22), rgba(120, 78, 24, 0.42), rgba(255, 190, 61, 0.12));
+  border-color: rgba(255, 190, 61, 0.55);
+  box-shadow: 0 0 24px rgba(255, 190, 61, 0.22);
+}
+
+.home-panel .player-row.new:nth-child(2) {
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.24), rgba(71, 85, 105, 0.36), rgba(148, 163, 184, 0.12));
+  border-color: rgba(203, 213, 225, 0.5);
+  box-shadow: 0 0 20px rgba(203, 213, 225, 0.14);
+}
+
+.home-panel .player-row.new:nth-child(3) {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.24), rgba(92, 49, 16, 0.36), rgba(245, 158, 11, 0.12));
+  border-color: rgba(245, 158, 11, 0.42);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.12);
+}
+
+.home-panel .player-row.new:nth-child(4) {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.76), rgba(37, 99, 235, 0.08));
+  border-color: rgba(96, 165, 250, 0.22);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.08);
+}
+
+.home-panel .player-row.new:nth-child(5) {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.76), rgba(37, 99, 235, 0.08));
+  border-color: rgba(96, 165, 250, 0.22);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.08);
+}
+
+.home-panel .player-row.new:nth-child(1) .rank-box-small,
+.home-panel .player-row.new:nth-child(1) .elo-box {
+  background: linear-gradient(135deg, #ffcc66, #ff9f43);
+  color: #1b1305;
+  border: 1px solid rgba(255, 190, 61, 0.5);
+  box-shadow: 0 0 18px rgba(255, 190, 61, 0.38);
+}
+
+.home-panel .player-row.new:nth-child(2) .rank-box-small,
+.home-panel .player-row.new:nth-child(2) .elo-box {
+  background: linear-gradient(135deg, #e5e7eb, #94a3b8);
+  color: #0f172a;
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  box-shadow: 0 0 16px rgba(203, 213, 225, 0.3);
+}
+
+.home-panel .player-row.new:nth-child(3) .rank-box-small,
+.home-panel .player-row.new:nth-child(3) .elo-box {
+  background: linear-gradient(135deg, #f59e0b, #92400e);
+  color: #fff7ed;
+  border: 1px solid rgba(245, 158, 11, 0.48);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+}
+
+.home-panel .player-row.new:nth-child(4) .rank-box-small,
+.home-panel .player-row.new:nth-child(4) .elo-box {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.26);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.16);
+}
+
+.home-panel .player-row.new:nth-child(5) .rank-box-small,
+.home-panel .player-row.new:nth-child(5) .elo-box {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.26);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.16);
+}
+
+.home-panel .player-row.new .elo-box {
+  min-width: 72px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.home-panel .player-row.new::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+
+  transform: translateX(-140%) skewX(-16deg);
+  animation: homeTopPlayersSweep 2.4s linear infinite;
+  filter: blur(2px);
+  opacity: 0.92;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.home-panel .player-row.new:nth-child(1)::after {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(255, 240, 180, 0.08) 36%,
+    rgba(255, 190, 61, 0.62) 46%,
+    rgba(255, 190, 61, 0.62) 54%,
+    rgba(255, 240, 180, 0.08) 64%,
+    transparent 72%,
+    transparent 100%
+  );
+}
+
+.home-panel .player-row.new:nth-child(2)::after {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(226, 232, 240, 0.08) 36%,
+    rgba(203, 213, 225, 0.52) 46%,
+    rgba(203, 213, 225, 0.52) 54%,
+    rgba(226, 232, 240, 0.08) 64%,
+    transparent 72%,
+    transparent 100%
+  );
+}
+
+.home-panel .player-row.new:nth-child(3)::after {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(245, 158, 11, 0.08) 36%,
+    rgba(245, 158, 11, 0.5) 46%,
+    rgba(245, 158, 11, 0.5) 54%,
+    rgba(245, 158, 11, 0.08) 64%,
+    transparent 72%,
+    transparent 100%
+  );
+}
+
+.home-panel .player-row.new:nth-child(4)::after,
+.home-panel .player-row.new:nth-child(5)::after {
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(96, 165, 250, 0.06) 36%,
+    rgba(96, 165, 250, 0.34) 46%,
+    rgba(96, 165, 250, 0.34) 54%,
+    rgba(96, 165, 250, 0.06) 64%,
+    transparent 72%,
+    transparent 100%
+  );
+}
+
+@keyframes homeTopPlayersSweep {
+  0% {
+    transform: translateX(-140%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(140%) skewX(-16deg);
+  }
+}

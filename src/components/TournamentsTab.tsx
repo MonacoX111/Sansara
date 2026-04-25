@@ -508,7 +508,10 @@ const getSeriesPathIds = (seriesId: string | null) => {
   return Array.from(path);
 };
 
-const activeSeriesPath = getSeriesPathIds(activeSeriesId);
+const activeSeriesPath = useMemo(
+  () => getSeriesPathIds(activeSeriesId),
+  [activeSeriesId, playoffMatches, finalMatches]
+);
 
 const getMatchParticipantIds = (match: Match) =>
   match.matchType === "team"
@@ -522,7 +525,7 @@ const getMatchWinnerId = (match: Match) =>
 
 
 
-const activeSeriesResultMap = (() => {
+const activeSeriesResultMap = useMemo(() => {
   const result = new Map<string, "win" | "loss" | "draw">();
 
   if (!activeParticipantId) return result;
@@ -536,24 +539,21 @@ const activeSeriesResultMap = (() => {
 
     if (!participants.includes(activeParticipantId)) return;
 
-    // якщо виграв
     if (winnerId === activeParticipantId) {
       result.set(seriesId, "win");
       return;
     }
 
-    // якщо програв
     if (winnerId > 0) {
       result.set(seriesId, "loss");
       return;
     }
 
-    // якщо матч ще не завершений або без winner → draw
     result.set(seriesId, "draw");
   });
 
   return result;
-})();
+}, [activeParticipantId, playoffMatches, finalMatches]);
 
 const winnerSeriesPath = (() => {
   if (!selectedTournament) return [];
@@ -630,7 +630,17 @@ useEffect(() => {
       });
     });
 
-    setBracketLines(nextLines);
+setBracketLines((currentLines) => {
+  const currentSignature = currentLines
+    .map((line) => `${line.id}:${line.path}`)
+    .join("|");
+
+  const nextSignature = nextLines
+    .map((line) => `${line.id}:${line.path}`)
+    .join("|");
+
+  return currentSignature === nextSignature ? currentLines : nextLines;
+});
   };
 
   const frame = window.requestAnimationFrame(buildLines);
@@ -770,8 +780,8 @@ const activeSeriesResult = activeSeriesResultMap.get(seriesId);
   data-series-id={seriesId}
   data-next-series-id={mainMatch.nextSeriesId || ""}
 onMouseLeave={() => {
-  setActiveSeriesId(null);
-  setActiveParticipantId(0);
+  setActiveSeriesId((current) => (current === null ? current : null));
+  setActiveParticipantId((current) => (current === 0 ? current : 0));
 }}
 className={`bracket-match-card bracket-series-card ${
   activeSeriesResult === "win"
@@ -817,10 +827,12 @@ className={`bracket-match-card bracket-series-card ${
   return (
           <div key={match.id} className="bracket-series-game">
 <div
-  onMouseEnter={() => {
-    setActiveSeriesId(seriesId);
-    setActiveParticipantId(leftParticipantId);
-  }}
+onMouseEnter={() => {
+  setActiveSeriesId((current) => (current === seriesId ? current : seriesId));
+  setActiveParticipantId((current) =>
+    current === leftParticipantId ? current : leftParticipantId
+  );
+}}
   className={`bracket-side ${winnerLeft ? "winner" : ""} ${
 activeParticipantId === leftParticipantId
   ? winnerLeft
@@ -846,10 +858,12 @@ activeParticipantId === leftParticipantId
             <div className="bracket-score">{match.score || "VS"}</div>
 
 <div
-  onMouseEnter={() => {
-    setActiveSeriesId(seriesId);
-    setActiveParticipantId(rightParticipantId);
-  }}
+onMouseEnter={() => {
+  setActiveSeriesId((current) => (current === seriesId ? current : seriesId));
+  setActiveParticipantId((current) =>
+    current === rightParticipantId ? current : rightParticipantId
+  );
+}}
 className={`bracket-side ${winnerRight ? "winner" : ""} ${
   activeParticipantId === rightParticipantId
     ? winnerRight
