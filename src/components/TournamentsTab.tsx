@@ -203,6 +203,11 @@ const finalMatches = shouldShowPlayoff
   ? selectedMatches.filter((match) => match.stage === "final")
   : [];
 
+const allSeries = useMemo(
+  () => [...playoffMatches, ...finalMatches],
+  [playoffMatches, finalMatches]
+);
+
 const otherMatches = selectedMatches.filter(
   (match) =>
     match.stage !== "group" &&
@@ -489,7 +494,6 @@ const [bracketLines, setBracketLines] = useState<
 const getSeriesPathIds = (seriesId: string | null) => {
   if (!seriesId) return [];
 
-  const allSeries = [...playoffMatches, ...finalMatches];
   const path = new Set<string>();
   let currentId = seriesId;
 
@@ -510,7 +514,7 @@ const getSeriesPathIds = (seriesId: string | null) => {
 
 const activeSeriesPath = useMemo(
   () => getSeriesPathIds(activeSeriesId),
-  [activeSeriesId, playoffMatches, finalMatches]
+  [activeSeriesId, allSeries]
 );
 
 const getMatchParticipantIds = (match: Match) =>
@@ -529,8 +533,6 @@ const activeSeriesResultMap = useMemo(() => {
   const result = new Map<string, "win" | "loss" | "draw">();
 
   if (!activeParticipantId) return result;
-
-  const allSeries = [...playoffMatches, ...finalMatches];
 
   allSeries.forEach((match) => {
     const seriesId = getSeriesKey(match);
@@ -553,12 +555,10 @@ const activeSeriesResultMap = useMemo(() => {
   });
 
   return result;
-}, [activeParticipantId, playoffMatches, finalMatches]);
+}, [activeParticipantId, allSeries]);
 
 const winnerSeriesPath = (() => {
   if (!selectedTournament) return [];
-
-  const allSeries = [...playoffMatches, ...finalMatches];
 
   const championPlayerId = Number(selectedTournament.winnerId || 0);
   const championTeamId = Number(selectedTournament.winnerTeamId || 0);
@@ -587,7 +587,13 @@ useEffect(() => {
     const root = bracketRef.current;
     if (!root) return;
 
-    const rootRect = root.getBoundingClientRect();
+const scaleContainer = root.closest(".bracket-inner-scale") as HTMLElement | null;
+
+const scale = scaleContainer
+  ? scaleContainer.getBoundingClientRect().width / scaleContainer.offsetWidth
+  : 1;
+
+const rootRect = root.getBoundingClientRect();
     const cards = Array.from(
       root.querySelectorAll<HTMLElement>("[data-series-id]")
     );
@@ -614,13 +620,13 @@ useEffect(() => {
       const fromRect = card.getBoundingClientRect();
       const toRect = target.getBoundingClientRect();
 
-      const startX = fromRect.right - rootRect.left;
-      const startY = fromRect.top + fromRect.height / 2 - rootRect.top;
+const startX = (fromRect.right - rootRect.left) / scale;
+const startY = (fromRect.top + fromRect.height / 2 - rootRect.top) / scale;
 
-      const endX = toRect.left - rootRect.left;
-      const endY = toRect.top + toRect.height / 2 - rootRect.top;
+const endX = (toRect.left - rootRect.left) / scale;
+const endY = (toRect.top + toRect.height / 2 - rootRect.top) / scale;
 
-      const middleX = startX + (endX - startX) / 2;
+const middleX = startX + (endX - startX) * 0.5;
 
       nextLines.push({
         id: `${seriesId}-${nextSeriesId}`,
@@ -1598,8 +1604,9 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
   <small>{playoffMatches.length + finalMatches.length} matches</small>
 </div>
 
-        <div className="bracket-scroll">
-          <div className="bracket-columns" ref={bracketRef}>
+<div className="bracket-scroll">
+  <div className="bracket-inner-scale">
+    <div className="bracket-columns" ref={bracketRef}>
             <svg className="bracket-svg-lines">
 {bracketLines.map((line) => {
 const fromResult = activeSeriesResultMap.get(line.fromId);
@@ -1663,6 +1670,7 @@ className={
           </div>
         </div>
       </div>
+    </div>
     ) : null}
 
     {otherMatches.length > 0 ? (
