@@ -44,6 +44,7 @@ export default function PlayersTab({
 
 const text = t[lang] || t.en;
 const playerText = text.playersPage;
+const commonText = text.common;
 
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
@@ -52,7 +53,7 @@ const playerText = text.playersPage;
     teams.find((t) => t.id === teamId)?.logo || "";
 
   const getPlayerName = (playerId: number) =>
-    players.find((p) => p.id === playerId)?.nickname || "Unknown";
+    players.find((p) => p.id === playerId)?.nickname || playerText.unknown;
 
   const getPlayerAchievements = (playerId: number) =>
     achievements.filter((achievement) =>
@@ -301,8 +302,12 @@ placeholder={playerText.searchPlaceholder}
                   </div>
 
                   <div className="mini-stats">
-                    <div>W: {player.wins}</div>
-                    <div>ELO: {player.elo}</div>
+                    <div>
+                      {playerText.winsShort}: {player.wins}
+                    </div>
+                    <div>
+                      {playerText.elo}: {player.elo}
+                    </div>
                     <div>₴: {player.earnings}</div>
                   </div>
                 </button>
@@ -364,7 +369,8 @@ placeholder={playerText.searchPlaceholder}
                         )}
 
                         <span className="profile-primary-value">
-                          {getTeamName(selectedPlayer.teamId) || "Без команди"}
+                          {getTeamName(selectedPlayer.teamId) ||
+                            playerText.noTeam}
                         </span>
                       </div>
                     </div>
@@ -432,7 +438,7 @@ placeholder={playerText.searchPlaceholder}
             </div>
 
 <div className="stats-grid">
-  <StatCard title="ELO" value={selectedPlayer.elo} />
+  <StatCard title={playerText.elo} value={selectedPlayer.elo} />
   <StatCard title={playerText.wins} value={selectedPlayer.wins} />
   <StatCard
     title={playerText.tournamentsWon}
@@ -527,7 +533,7 @@ placeholder={playerText.searchPlaceholder}
   <span className="pill green">{playerText.winner}</span>
 ) : null}
                           {tournament.isMvp ? (
-                            <span className="pill gold">MVP</span>
+                            <span className="pill gold">{playerText.mvp}</span>
                           ) : null}
                         </div>
                       </div>
@@ -563,14 +569,14 @@ placeholder={playerText.searchPlaceholder}
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">
-                            {getPlayerName(match.player1 || 0)} vs{" "}
+                            {getPlayerName(match.player1 || 0)} {playerText.vs}{" "}
                             {getPlayerName(match.player2 || 0)}
                           </div>
                           <div className="muted small">
                             {match.game} •{" "}
                             {tournaments.find(
                               (t) => t.id === match.tournamentId
-                            )?.title || "Friendly match"}
+                            )?.title || playerText.friendlyMatch}
                           </div>
                         </div>
 
@@ -582,20 +588,22 @@ placeholder={playerText.searchPlaceholder}
 
                       <div className="tour-meta">
                         <div>
-                          <span className="muted">Status:</span>{" "}
+                          <span className="muted">{playerText.status}:</span>{" "}
                           {match.status || "—"}
                         </div>
                         <div>
-                          <span className="muted">Round:</span>{" "}
+                          <span className="muted">{playerText.round}:</span>{" "}
                           {match.round || "—"}
                         </div>
                         <div>
-                          <span className="muted">Format:</span> BO
+                          <span className="muted">{playerText.format}:</span>{" "}
+                          {commonText.bestOfShort}
                           {match.bestOf || 1}
                         </div>
                         {match.notes ? (
                           <div>
-                            <span className="muted">Notes:</span> {match.notes}
+                            <span className="muted">{playerText.notes}:</span>{" "}
+                            {match.notes}
                           </div>
                         ) : null}
                       </div>

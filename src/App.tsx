@@ -2188,6 +2188,10 @@ const deleteAchievement = async (achievementId: number) => {
   );
 };
 
+  const text = t[lang] || t.en;
+  const generalText = text.generalPage;
+  const commonText = text.common;
+
   return (
     <div className="page">
       <div className="container">
@@ -2220,7 +2224,7 @@ const deleteAchievement = async (achievementId: number) => {
 
     {isAdmin && (
       <button className="secondary-btn" onClick={handleAdminLogout}>
-        Logout admin
+        {commonText.logoutAdmin}
       </button>
     )}
   </div>
@@ -2242,9 +2246,11 @@ const deleteAchievement = async (achievementId: number) => {
           <section className="home-announcement-page">
             {!homeAnnouncement.isVisible ? (
               <div className="panel">
-                <h2 className="panel-title">Home announcement is hidden</h2>
+                <h2 className="panel-title">
+                  {generalText.homeAnnouncementHidden}
+                </h2>
                 <p className="muted">
-                  Turn it on in Admin when you want to show the next tournament.
+                  {generalText.homeAnnouncementHiddenDescription}
                 </p>
               </div>
             ) : (
@@ -2260,9 +2266,12 @@ onMouseMove={handleGlow}
                 >
                   <div className="home-featured-overlay">
                     <div className="home-featured-content">
-                      <p className="home-featured-kicker">Next tournament</p>
+                      <p className="home-featured-kicker">
+                        {generalText.nextTournament}
+                      </p>
                       <h2 className="home-featured-title">
-                        {homeAnnouncement.title || "Tournament announcement"}
+                        {homeAnnouncement.title ||
+                          generalText.tournamentAnnouncement}
                       </h2>
 
                       {homeAnnouncement.subtitle ? (
@@ -2274,27 +2283,28 @@ onMouseMove={handleGlow}
                       <div className="home-featured-meta">
                         {homeAnnouncement.date ? (
                           <span className="home-meta-pill">
-                            Date: {homeAnnouncement.date}
+                            {generalText.date}: {homeAnnouncement.date}
                           </span>
                         ) : null}
                         {homeAnnouncement.format ? (
                           <span className="home-meta-pill">
-                            Format: {homeAnnouncement.format}
+                            {generalText.format}: {homeAnnouncement.format}
                           </span>
                         ) : null}
                         {homeAnnouncement.status ? (
                           <span className="home-meta-pill">
-                            Status: {homeAnnouncement.status}
+                            {generalText.status}: {homeAnnouncement.status}
                           </span>
                         ) : null}
                         {homeAnnouncement.prize ? (
                           <span className="home-meta-pill">
-                            Prize: {homeAnnouncement.prize}
+                            {generalText.prize}: {homeAnnouncement.prize}
                           </span>
                         ) : null}
                         {homeAnnouncement.participantCount > 0 ? (
                           <span className="home-meta-pill">
-                            Players: {homeAnnouncement.participantCount}
+                            {generalText.players}:{" "}
+                            {homeAnnouncement.participantCount}
                           </span>
                         ) : null}
                       </div>
@@ -2316,7 +2326,7 @@ onMouseMove={handleGlow}
                               setActiveTab("tournaments");
                             }}
                           >
-                            Open tournament
+                            {generalText.openTournament}
                           </button>
                         </div>
                       ) : null}
@@ -2328,7 +2338,9 @@ onMouseMove={handleGlow}
                   {tournaments.filter((t) => t.status === "completed").length >
                     0 && (
                     <div className="panel champion-panel">
-                      <h2 className="panel-title">Last Champion</h2>
+                      <h2 className="panel-title">
+                        {generalText.lastChampion}
+                      </h2>
 
                       {(() => {
                         const lastTournament = [...tournaments]
@@ -2365,7 +2377,7 @@ onMouseMove={handleGlow}
                           ? "name" in winner
                             ? winner.name
                             : winner.nickname
-                          : "Unknown";
+                          : generalText.unknown;
 
                         const winnerImage = winner
                           ? "name" in winner
@@ -2423,7 +2435,7 @@ onMouseMove={handleGlow}
                           ? "name" in opponent
                             ? opponent.name
                             : opponent.nickname
-                          : "Unknown";
+                          : generalText.unknown;
 
                         return (
                           <div
@@ -2458,7 +2470,7 @@ onMouseMove={handleGlow}
                                   </span>
 
                                   <span className="champion-date-pill">
-                                    {lastTournament.date || "TBD"}
+                                    {lastTournament.date || commonText.tbd}
                                   </span>
                                 </div>
                               </div>
@@ -2470,13 +2482,13 @@ onMouseMove={handleGlow}
                               {finalMatch && (
                                 <>
                                   <div className="champion-score-label">
-                                    FINAL RESULT
+                                    {generalText.finalResult}
                                   </div>
                                   <div className="champion-score-big">
                                     {finalMatch.score || "—"}
                                   </div>
                                   <div className="champion-opponent-pill">
-                                    vs {opponentName}
+                                    {commonText.vs} {opponentName}
                                   </div>
                                 </>
                               )}
@@ -2488,11 +2500,15 @@ onMouseMove={handleGlow}
                   )}
 
                   <div className="panel home-panel">
-                    <h2 className="panel-title">Recent Results</h2>
+                    <h2 className="panel-title">
+                      {generalText.recentResults}
+                    </h2>
 
                     {matches.filter((m) => m.status === "completed").length ===
                     0 ? (
-                      <div className="empty-block">No recent results</div>
+                      <div className="empty-block">
+                        {generalText.noRecentResults}
+                      </div>
                     ) : (
                       <div className="list-col">
                         {[...matches]
@@ -2517,18 +2533,18 @@ onMouseMove={handleGlow}
                             const leftName = isTeamMatch
                               ? leftEntity && "name" in leftEntity
                                 ? leftEntity.name
-                                : "Team 1"
+                                : generalText.team1
                               : leftEntity && "nickname" in leftEntity
                               ? leftEntity.nickname
-                              : "Player 1";
+                              : generalText.player1;
 
                             const rightName = isTeamMatch
                               ? rightEntity && "name" in rightEntity
                                 ? rightEntity.name
-                                : "Team 2"
+                                : generalText.team2
                               : rightEntity && "nickname" in rightEntity
                               ? rightEntity.nickname
-                              : "Player 2";
+                              : generalText.player2;
 
                             const leftImage = isTeamMatch
                               ? leftEntity && "logo" in leftEntity
@@ -2633,16 +2649,16 @@ onMouseMove={handleGlow}
                                         : ""
                                     }`}
                                   >
-                                    {match.round || "Match"}
+                                    {match.round || commonText.match}
                                   </span>
 
                                   <span className="result-date">
-                                    {match.date || "TBD"}
+                                    {match.date || commonText.tbd}
                                   </span>
                                 </div>
 
                                 <div className="result-tournament">
-                                  {tournament?.title || "No tournament"}
+                                  {tournament?.title || generalText.noTournament}
                                 </div>
                               </div>
                             );
@@ -2652,11 +2668,15 @@ onMouseMove={handleGlow}
                   </div>
 
                   <div className="panel home-panel">
-                    <h2 className="panel-title">Upcoming Matches</h2>
+                    <h2 className="panel-title">
+                      {generalText.upcomingMatches}
+                    </h2>
 
                     {matches.filter((m) => m.status !== "completed").length ===
                     0 ? (
-                      <div className="empty-block">No upcoming matches</div>
+                      <div className="empty-block">
+                        {generalText.noUpcomingMatches}
+                      </div>
                     ) : (
                       <div className="list-col">
                         {matches
@@ -2685,18 +2705,18 @@ onMouseMove={handleGlow}
                             const leftName = isTeamMatch
                               ? leftEntity && "name" in leftEntity
                                 ? leftEntity.name
-                                : "Team 1"
+                                : generalText.team1
                               : leftEntity && "nickname" in leftEntity
                               ? leftEntity.nickname
-                              : "Player 1";
+                              : generalText.player1;
 
                             const rightName = isTeamMatch
                               ? rightEntity && "name" in rightEntity
                                 ? rightEntity.name
-                                : "Team 2"
+                                : generalText.team2
                               : rightEntity && "nickname" in rightEntity
                               ? rightEntity.nickname
-                              : "Player 2";
+                              : generalText.player2;
 
                             const leftImage = isTeamMatch
                               ? leftEntity && "logo" in leftEntity
@@ -2722,10 +2742,12 @@ onMouseMove={handleGlow}
                               >
                                 <div className="match-top">
                                   <span className="pill light">
-                                    {match.round || "Match"}
+                                    {match.round || commonText.match}
                                   </span>
                                   <span className="pill">
-                                    {match.bestOf ? `BO${match.bestOf}` : ""}
+                                    {match.bestOf
+                                      ? `${commonText.bestOfShort}${match.bestOf}`
+                                      : ""}
                                   </span>
                                 </div>
 
@@ -2750,7 +2772,7 @@ onMouseMove={handleGlow}
                                     </div>
                                   </div>
 
-                                  <div className="vs-big">VS</div>
+                                  <div className="vs-big">{commonText.vs}</div>
 
                                   <div className="team-side">
                                     <div className="team-side-inner team-side-inner-right">
@@ -2774,7 +2796,7 @@ onMouseMove={handleGlow}
                                 </div>
 
                                 <div className="match-bottom">
-                                  {match.date || "TBD"}
+                                  {match.date || commonText.tbd}
                                 </div>
                               </div>
                             );
@@ -2784,7 +2806,7 @@ onMouseMove={handleGlow}
                   </div>
 
                   <div className="panel home-panel">
-                    <h2 className="panel-title">Top Players</h2>
+                    <h2 className="panel-title">{generalText.topPlayers}</h2>
 
                     <div className="list-col">
                       {[...players]
@@ -2950,7 +2972,7 @@ lang={lang}
           setToast(null);
         }}
       >
-        {toast.actionLabel || "Undo"}
+        {toast.actionLabel || commonText.undo}
       </button>
     )}
   </div>

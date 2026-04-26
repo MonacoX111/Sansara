@@ -13,6 +13,8 @@ export const t = {
     platform: "Platform",
     tournaments: "Tournaments",
     topElo: "Top ELO",
+    teamsLabel: "teams",
+    matchesLabel: "matches",
 
 
 
@@ -179,14 +181,46 @@ admin: {
   confirmDeletion: "Confirm deletion",
   confirmDeletePrefix: "Are you sure you want to delete this",
 
-  save: "Save",
-  delete: "Delete",
 },
 
 common: {
   save: "Save",
   delete: "Delete",
   cancel: "Cancel",
+  undo: "Undo",
+  logoutAdmin: "Logout admin",
+  vs: "vs",
+  tbd: "TBD",
+  match: "Match",
+  elo: "ELO",
+  bestOfShort: "BO",
+},
+
+generalPage: {
+  homeAnnouncementHidden: "Home announcement is hidden",
+  homeAnnouncementHiddenDescription:
+    "Turn it on in Admin when you want to show the next tournament.",
+  nextTournament: "Next tournament",
+  tournamentAnnouncement: "Tournament announcement",
+  date: "Date",
+  format: "Format",
+  status: "Status",
+  prize: "Prize",
+  players: "Players",
+  openTournament: "Open tournament",
+  lastChampion: "Last Champion",
+  unknown: "Unknown",
+  finalResult: "FINAL RESULT",
+  recentResults: "Recent Results",
+  noRecentResults: "No recent results",
+  noTournament: "No tournament",
+  upcomingMatches: "Upcoming Matches",
+  noUpcomingMatches: "No upcoming matches",
+  topPlayers: "Top Players",
+  team1: "Team 1",
+  team2: "Team 2",
+  player1: "Player 1",
+  player2: "Player 2",
 },
 
 adminLogin: {
@@ -250,6 +284,16 @@ tournamentsPage: {
   unknown: "Unknown",
   noPlayersInRoster: "No players in roster",
   noParticipants: "No participants added yet.",
+  match: "Match",
+  series: "Series",
+  vs: "VS",
+  mvp: "MVP",
+  elo: "ELO",
+  winnerLabel: "Winner",
+  playedShort: "P",
+  winsShort: "W",
+  lossesShort: "L",
+  pointsShort: "Pts",
 },
 
 teamsPage: {
@@ -309,6 +353,11 @@ playersPage: {
   format: "Format",
   notes: "Notes",
   featured: "Featured",
+  unknown: "Unknown",
+  elo: "ELO",
+  winsShort: "W",
+  mvp: "MVP",
+  vs: "vs",
 },
 
 nav: {
@@ -346,6 +395,8 @@ nav: {
     platform: "Платформа",
     tournaments: "Турніри",
     topElo: "Топ ELO",
+    teamsLabel: "команд",
+    matchesLabel: "матчів",
 
 admin: {
   players: "Гравці (адмін)",
@@ -510,14 +561,46 @@ admin: {
   confirmDeletion: "Підтвердіть видалення",
   confirmDeletePrefix: "Ви впевнені, що хочете видалити це",
 
-  save: "Зберегти",
-  delete: "Видалити",
 },
 
 common: {
   save: "Зберегти",
   delete: "Видалити",
   cancel: "Скасувати",
+  undo: "Скасувати дію",
+  logoutAdmin: "Вийти з адміна",
+  vs: "проти",
+  tbd: "Буде визначено",
+  match: "Матч",
+  elo: "ELO",
+  bestOfShort: "BO",
+},
+
+generalPage: {
+  homeAnnouncementHidden: "Анонс на головній приховано",
+  homeAnnouncementHiddenDescription:
+    "Увімкніть його в адмінці, коли захочете показати наступний турнір.",
+  nextTournament: "Наступний турнір",
+  tournamentAnnouncement: "Анонс турніру",
+  date: "Дата",
+  format: "Формат",
+  status: "Статус",
+  prize: "Приз",
+  players: "Гравці",
+  openTournament: "Відкрити турнір",
+  lastChampion: "Останній чемпіон",
+  unknown: "Невідомо",
+  finalResult: "ФІНАЛЬНИЙ РЕЗУЛЬТАТ",
+  recentResults: "Останні результати",
+  noRecentResults: "Останніх результатів немає",
+  noTournament: "Без турніру",
+  upcomingMatches: "Майбутні матчі",
+  noUpcomingMatches: "Майбутніх матчів немає",
+  topPlayers: "Топ гравців",
+  team1: "Команда 1",
+  team2: "Команда 2",
+  player1: "Гравець 1",
+  player2: "Гравець 2",
 },
 
 adminLogin: {
@@ -581,6 +664,16 @@ tournamentsPage: {
   unknown: "Невідомо",
   noPlayersInRoster: "У складі немає гравців",
   noParticipants: "Учасників ще не додано.",
+  match: "Матч",
+  series: "Серія",
+  vs: "VS",
+  mvp: "MVP",
+  elo: "ELO",
+  winnerLabel: "Переможець",
+  playedShort: "І",
+  winsShort: "В",
+  lossesShort: "П",
+  pointsShort: "Очки",
 },
 
 teamsPage: {
@@ -640,6 +733,11 @@ playersPage: {
   format: "Формат",
   notes: "Нотатки",
   featured: "Обраний",
+  unknown: "Невідомо",
+  elo: "ELO",
+  winsShort: "П",
+  mvp: "MVP",
+  vs: "проти",
 },
 
 nav: {

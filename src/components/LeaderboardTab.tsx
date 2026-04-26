@@ -20,6 +20,7 @@ export default function LeaderboardTab({
 }: Props) {
   const text = t[lang] || t.en;
   const leaderboardText = text.leaderboardPage;
+  const commonText = text.common;
   const getPlayerTeam = (teamId: number) =>
     teams.find((team) => team.id === teamId) || null;
 
@@ -89,7 +90,9 @@ export default function LeaderboardTab({
 
 
 <div className="premium-leader-champion-meta">
-  <span>{topPlayer.elo} ELO</span>
+  <span>
+    {topPlayer.elo} {commonText.elo}
+  </span>
   <span>{topPlayer.wins} {leaderboardText.wins}</span>
   <span>{topPlayer.earnings} ₴</span>
 </div>
@@ -253,7 +256,7 @@ export default function LeaderboardTab({
 
                   <div className="premium-leader-stats">
                     <div>
-                      <span>ELO</span>
+                      <span>{commonText.elo}</span>
                       <strong>{player.elo}</strong>
                     </div>
                     <div>

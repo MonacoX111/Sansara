@@ -61,7 +61,8 @@ export default function HomeTab({
             <span>{text.platform}</span>
             <strong>{players.length}</strong>
             <p>
-              {teams.length} teams · {matches.length} matches
+              {teams.length} {text.teamsLabel} · {matches.length}{" "}
+              {text.matchesLabel}
             </p>
           </div>
 

@@ -1116,7 +1116,7 @@ reorderMatch,
                 }
                 onClick={() => reorderTournament("up")}
               >
-                ↑ Move up
+                {adminText.moveUp}
               </button>
 
               <button
@@ -1132,7 +1132,7 @@ reorderMatch,
                 }
                 onClick={() => reorderTournament("down")}
               >
-                ↓ Move down
+                {adminText.moveDown}
               </button>
             </div>
           </div>
@@ -2067,7 +2067,7 @@ game: nextTournament?.game || "",
   disabled={!matchTournamentFilterId}
   onClick={() => autoGenerateBracket(matchTournamentFilterId)}
 >
-  ⚡ Auto generate bracket
+  {adminText.autoGenerateBracket}
 </button>
 </div>
 
@@ -2077,7 +2077,7 @@ game: nextTournament?.game || "",
     disabled={!selectedMatchId}
     onClick={() => reorderMatch("up", matchTournamentFilterId)}
   >
-    ↑ Move up
+    {adminText.moveUp}
   </button>
 
   <button
@@ -2085,7 +2085,7 @@ game: nextTournament?.game || "",
     disabled={!selectedMatchId}
     onClick={() => reorderMatch("down", matchTournamentFilterId)}
   >
-    ↓ Move down
+    {adminText.moveDown}
   </button>
 </div>
 

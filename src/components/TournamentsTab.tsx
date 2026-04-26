@@ -736,7 +736,7 @@ return (
     }`}
   >
       <div className="bracket-match-top">
-        <span>{match.roundLabel || match.round || "Match"}</span>
+        <span>{match.roundLabel || match.round || tournamentText.match}</span>
         <span>{match.status || "—"}</span>
       </div>
 
@@ -753,7 +753,7 @@ return (
         </div>
       </div>
 
-      <div className="bracket-score">{match.score || "VS"}</div>
+      <div className="bracket-score">{match.score || tournamentText.vs}</div>
 
       <div className={`bracket-side ${winnerRight ? "winner" : ""}`}>
         <div className="bracket-player">
@@ -769,7 +769,9 @@ return (
       </div>
 
       {winnerName !== "—" ? (
-        <div className="bracket-winner">Winner: {winnerName}</div>
+        <div className="bracket-winner">
+          {tournamentText.winnerLabel}: {winnerName}
+        </div>
       ) : null}
     </div>
   );
@@ -812,7 +814,9 @@ className={`bracket-match-card bracket-series-card ${
 }`}
 >
       <div className="bracket-match-top">
-        <span>{mainMatch.roundLabel || mainMatch.round || "Series"}</span>
+        <span>
+          {mainMatch.roundLabel || mainMatch.round || tournamentText.series}
+        </span>
         <span>{mainMatch.status || "—"}</span>
       </div>
 
@@ -868,7 +872,9 @@ activeParticipantId === leftParticipantId
               </div>
             </div>
 
-            <div className="bracket-score">{match.score || "VS"}</div>
+            <div className="bracket-score">
+              {match.score || tournamentText.vs}
+            </div>
 
 <div
 onMouseEnter={() => {
@@ -900,7 +906,9 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
             </div>
 
             {winnerName !== "—" ? (
-              <div className="bracket-winner">Winner: {winnerName}</div>
+              <div className="bracket-winner">
+                {tournamentText.winnerLabel}: {winnerName}
+              </div>
             ) : null}
           </div>
         );
@@ -1039,7 +1047,9 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                         );
                       }}
                     >
-                      <span className="tournament-history-label">MVP</span>
+                      <span className="tournament-history-label">
+                        {tournamentText.mvp}
+                      </span>
                       <span className="tournament-history-value">
                         {getPlayerName(tournament.mvpId)}
                       </span>
@@ -1468,7 +1478,9 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                           })()}
 
                           <div className="mvp-text">
-                            <div className="mvp-label">MVP</div>
+                            <div className="mvp-label">
+                              {tournamentText.mvp}
+                            </div>
                             <div className="mvp-name">{mvpName}</div>
                           </div>
                         </div>
@@ -1565,10 +1577,10 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
     <div className="group-standings-row group-standings-head">
       <span>#</span>
       <span>{tournamentText.participant}</span>
-      <span>P</span>
-      <span>W</span>
-      <span>L</span>
-      <span>Pts</span>
+      <span>{tournamentText.playedShort}</span>
+      <span>{tournamentText.winsShort}</span>
+      <span>{tournamentText.lossesShort}</span>
+      <span>{tournamentText.pointsShort}</span>
     </div>
 
 {(groupStandings[groupName] || []).map((row, index) => (
@@ -1769,7 +1781,9 @@ className={[
 
                             <div className="participant-stats-grid">
                               <div className="participant-stat-box">
-                                <span className="muted">Wins</span>
+                                <span className="muted">
+                                  {tournamentText.wins}
+                                </span>
                                 <strong>{team?.wins ?? 0}</strong>
                               </div>
 
@@ -1805,7 +1819,8 @@ className={[
                                           <img
                                             src={rosterPlayer.avatar}
                                             alt={
-                                              rosterPlayer.nickname || "Player"
+                                              rosterPlayer.nickname ||
+                                              tournamentText.unknown
                                             }
                                             className="participant-roster-avatar"
                                           />
@@ -1887,7 +1902,7 @@ className={[
 
                                   {isWinner ? (
                                     <span className="participant-winner-badge">
-                                      Winner
+                                      {tournamentText.winner}
                                     </span>
                                   ) : null}
                                 </div>
@@ -1910,7 +1925,9 @@ className={[
                               </div>
 
                               <div className="participant-stat-box">
-                                <span className="muted">ELO</span>
+                                <span className="muted">
+                                  {tournamentText.elo}
+                                </span>
                                 <strong>{player?.elo ?? 0}</strong>
                               </div>
                             </div>

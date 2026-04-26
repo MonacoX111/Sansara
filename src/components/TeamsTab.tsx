@@ -23,6 +23,7 @@ export default function TeamsTab({
 }: Props) {
   const text = t[lang] || t.en;
   const teamText = text.teamsPage;
+  const commonText = text.common;
   const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
 
   const teamPlayers = players.filter(
@@ -253,7 +254,8 @@ return teamText.loss;
                   <div key={match.id} className="team-history-card">
                     <div className="team-history-top">
                       <div className="team-history-title">
-                        {selectedTeam.name} vs {getMatchOpponentName(match)}
+                        {selectedTeam.name} {commonText.vs}{" "}
+                        {getMatchOpponentName(match)}
                       </div>
 
                       <span
