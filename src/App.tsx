@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
 import TeamsTab from "./components/TeamsTab";
@@ -911,7 +912,7 @@ bestOf: selectedMatch.bestOf,
       return;
     }
 
-    setAdminError("Wrong password");
+    setAdminError(t[lang].adminLogin.wrongPassword);
   };
 
   const handleAdminLogout = () => {
@@ -2851,24 +2852,26 @@ onMouseMove={handleGlow}
 />
         )}
 
-        {activeTab === "teams" && (
-          <TeamsTab
-            teams={teams}
-            players={players}
-            tournaments={tournaments}
-            matches={matches}
-            selectedTeamId={selectedTeamId}
-            setSelectedTeamId={setSelectedTeamId}
-          />
-        )}
+{activeTab === "teams" && (
+  <TeamsTab
+    teams={teams}
+    players={players}
+    tournaments={tournaments}
+    matches={matches}
+    selectedTeamId={selectedTeamId}
+    setSelectedTeamId={setSelectedTeamId}
+    lang={lang}
+  />
+)}
 
         {activeTab === "tournaments" && (
-          <TournamentsTab
-            tournaments={tournaments}
-            players={players}
-            teams={teams}
-            matches={matches}
-          />
+<TournamentsTab
+  tournaments={tournaments}
+  players={players}
+  teams={teams}
+  matches={matches}
+  lang={lang}
+/>
         )}
 
         {activeTab === "leaderboard" && (
@@ -2878,6 +2881,7 @@ onMouseMove={handleGlow}
   achievements={achievements}
   onOpenPlayer={openPlayerProfile}
   loading={showLeaderboardSkeleton}
+  lang={lang}
 />
         )}
 
@@ -2927,10 +2931,11 @@ onMouseMove={handleGlow}
 deleteMatch={deleteMatch}
 reorderMatch={reorderMatch}
 saveAchievement={saveAchievement}
-            addAchievement={addAchievement}
-            deleteAchievement={deleteAchievement}
-            selectedAchievement={selectedAchievement}
-          />
+addAchievement={addAchievement}
+deleteAchievement={deleteAchievement}
+selectedAchievement={selectedAchievement}
+lang={lang}
+/>
         )}
 
 {toast ? (
@@ -2961,13 +2966,13 @@ saveAchievement={saveAchievement}
             }}
           >
             <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-              <h2 className="panel-title">Admin access</h2>
+              <h2 className="panel-title">{t[lang].adminLogin.title}</h2>
 
               <div className="form-col">
                 <input
                   type="password"
                   className="input"
-                  placeholder="Enter password"
+                  placeholder={t[lang].adminLogin.placeholder}
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   onKeyDown={(e) => {
@@ -2982,21 +2987,21 @@ saveAchievement={saveAchievement}
                   <div className="admin-error">{adminError}</div>
                 ) : null}
 
-                <div className="btn-row">
-                  <button className="primary-btn" onClick={handleAdminLogin}>
-                    Login
-                  </button>
-                  <button
-                    className="secondary-btn"
-                    onClick={() => {
-                      setShowAdminLogin(false);
-                      setAdminPassword("");
-                      setAdminError("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
+<div className="btn-row">
+  <button className="primary-btn" onClick={handleAdminLogin}>
+    {t[lang].adminLogin.login}
+  </button>
+  <button
+    className="secondary-btn"
+    onClick={() => {
+      setShowAdminLogin(false);
+      setAdminPassword("");
+      setAdminError("");
+    }}
+  >
+{t[lang].adminLogin.cancel}
+  </button>
+</div>
               </div>
             </div>
           </div>

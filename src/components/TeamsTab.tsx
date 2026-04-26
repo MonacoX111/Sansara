@@ -1,7 +1,9 @@
 import { Match, Player, Team, Tournament } from "../types";
+import { Lang, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
 type Props = {
+  lang: Lang;
   teams: Team[];
   players: Player[];
   tournaments: Tournament[];
@@ -17,7 +19,10 @@ export default function TeamsTab({
   matches,
   selectedTeamId,
   setSelectedTeamId,
+  lang,
 }: Props) {
+  const text = t[lang] || t.en;
+  const teamText = text.teamsPage;
   const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
 
   const teamPlayers = players.filter(
@@ -41,14 +46,14 @@ export default function TeamsTab({
     })
     .slice(0, 5);
 
-  const getTeamName = (teamId?: number) =>
-    teams.find((team) => team.id === teamId)?.name || "Unknown team";
+const getTeamName = (teamId?: number) =>
+  teams.find((team) => team.id === teamId)?.name || teamText.unknownTeam;
 
-  const getTournamentTitle = (tournamentId?: number) =>
-    tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
-    "Independent match";
+const getTournamentTitle = (tournamentId?: number) =>
+  tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
+  teamText.independentMatch;
 
-  const getMatchOpponentName = (match: Match) => {
+const getMatchOpponentName = (match: Match) => {
     if (match.team1 === selectedTeamId) {
       return getTeamName(match.team2);
     }
@@ -57,25 +62,25 @@ export default function TeamsTab({
       return getTeamName(match.team1);
     }
 
-    return "Unknown opponent";
+    return teamText.unknownOpponent;
   };
 
   const getMatchResultLabel = (match: Match) => {
-    if (!selectedTeamId || !match.winnerTeamId) {
-      return "No winner";
-    }
+if (!selectedTeamId || !match.winnerTeamId) {
+  return teamText.noWinner;
+}
 
-    if (match.winnerTeamId === selectedTeamId) {
-      return "Win";
-    }
+if (match.winnerTeamId === selectedTeamId) {
+  return teamText.win;
+}
 
-    return "Loss";
+return teamText.loss;
   };
 
   return (
     <div className="two-col reverse">
       <div className="panel">
-        <h2 className="panel-title">Teams</h2>
+        <h2 className="panel-title">{teamText.directory}</h2>
 
         <div className="list-col">
           {[...teams]
@@ -109,7 +114,7 @@ export default function TeamsTab({
                     <div className="achievement-title">
                       {team.name}
                       {team.isFeatured ? (
-                        <span className="team-featured-badge">Featured</span>
+                        <span className="team-featured-badge">{teamText.featured}</span>
                       ) : null}
                     </div>
                     <div className="muted small">{team.description}</div>
@@ -122,7 +127,7 @@ export default function TeamsTab({
 
       {selectedTeam && (
         <div className="panel">
-          <h2 className="panel-title">Team profile</h2>
+          <h2 className="panel-title">{teamText.profile}</h2>
 
           <div className="team-profile-head">
             <img
@@ -145,14 +150,14 @@ export default function TeamsTab({
           </div>
 
           <div className="stats-grid">
-            <StatCard title="Players" value={teamPlayers.length} />
-            <StatCard title="Wins" value={selectedTeam.wins} />
-            <StatCard title="Earnings" value={`${selectedTeam.earnings} ₴`} />
-            <StatCard title="Games" value={selectedTeam.games.length} />
+<StatCard title={teamText.players} value={teamPlayers.length} />
+<StatCard title={teamText.wins} value={selectedTeam.wins} />
+<StatCard title={teamText.earnings} value={`${selectedTeam.earnings} ₴`} />
+<StatCard title={teamText.games} value={selectedTeam.games.length} />
           </div>
 
           <div className="section-block">
-            <h4>Players</h4>
+            <h4>{teamText.players}</h4>
 
             {teamPlayers.length > 0 ? (
               <div className="team-roster-list">
@@ -187,19 +192,19 @@ export default function TeamsTab({
                     <div className="team-roster-content">
                       <div className="team-roster-name">{player.nickname}</div>
                       <div className="team-roster-sub">
-                        ELO: {player.elo} • Wins: {player.wins}
+                        {teamText.elo}: {player.elo} • {teamText.wins}: {player.wins}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="empty-block">No players added yet</div>
+              <div className="empty-block">{teamText.noPlayersAdded}</div>
             )}
           </div>
 
           <div className="section-block">
-            <h4>Won tournaments</h4>
+            <h4>{teamText.wonTournaments}</h4>
 
             {wonTournaments.length > 0 ? (
               <div className="team-history-list">
@@ -223,24 +228,24 @@ export default function TeamsTab({
                       <div className="team-history-title">
                         {tournament.title}
                       </div>
-                      <span className="pill gold">Winner</span>
+                      <span className="pill gold">{teamText.winner}</span>
                     </div>
 
                     <div className="team-history-meta">
                       <span>{tournament.game}</span>
-                      <span>{tournament.date || "No date"}</span>
+                      <span>{tournament.date || teamText.noDate}</span>
                       <span>{tournament.format}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="empty-block">No tournaments won yet</div>
+              <div className="empty-block">{teamText.noTournamentsWon}</div>
             )}
           </div>
 
           <div className="section-block">
-            <h4>Recent matches</h4>
+            <h4>{teamText.recentMatches}</h4>
 
             {recentTeamMatches.length > 0 ? (
               <div className="team-history-list">
@@ -253,7 +258,7 @@ export default function TeamsTab({
 
                       <span
                         className={`pill ${
-                          getMatchResultLabel(match) === "Win" ? "green" : ""
+                          getMatchResultLabel(match) === teamText.win ? "green" : ""
                         }`}
                       >
                         {getMatchResultLabel(match)}
@@ -261,15 +266,15 @@ export default function TeamsTab({
                     </div>
 
                     <div className="team-history-meta">
-                      <span>{match.score || "No score"}</span>
-                      <span>{match.date || "No date"}</span>
+<span>{match.score || teamText.noScore}</span>
+<span>{match.date || teamText.noDate}</span>
                       <span>{getTournamentTitle(match.tournamentId)}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="empty-block">No recent matches yet</div>
+<div className="empty-block">{teamText.noRecentMatches}</div>
             )}
           </div>
         </div>

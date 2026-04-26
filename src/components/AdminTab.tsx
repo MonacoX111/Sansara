@@ -13,6 +13,7 @@ import {
 } from "../types";
 import { gamesList } from "../data";
 import { parseList } from "../utils";
+import { t } from "../utils/translations";
 
 type PlayerForm = {
   nickname: string;
@@ -158,6 +159,7 @@ reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
   deleteAchievement: (id: number) => void;
   selectedAchievement: Achievement | null;
 autoGenerateBracket: (tournamentId: number) => void;
+lang: "en" | "ua";
 };
 
 const tournamentStatusOptions: TournamentStatus[] = [
@@ -281,6 +283,7 @@ function PremiumSelect({
 }
 
 export default function AdminTab({
+  lang,
   autoGenerateBracket,
   players,
   teams,
@@ -335,18 +338,22 @@ reorderMatch,
     ? tournamentForm.participantIds.map(Number)
     : [];
 
+    const text = t[lang] || t.en;
+    const adminText = text.admin;
+    const commonText = text.common;
+    
   const safeAchievementPlayerIds = (achievement: Achievement) =>
     Array.isArray(achievement.playerIds) ? achievement.playerIds : [];
 
   const getPlayerName = (playerId: number) =>
-    players.find((player) => player.id === playerId)?.nickname || "Unknown";
+    players.find((player) => player.id === playerId)?.nickname || adminText.unknown;
 
   const getTournamentName = (tournamentId: number) =>
     tournaments.find((tournament) => tournament.id === tournamentId)?.title ||
-    "No tournament";
+    adminText.noTournament;
 
   const getTeamName = (teamId: number) =>
-    teams.find((team) => team.id === teamId)?.name || "Unknown team";
+    teams.find((team) => team.id === teamId)?.name || adminText.unknownTeam;
 
   const orderedTournaments = [...tournaments].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0)
@@ -650,14 +657,14 @@ reorderMatch,
     <div className="admin-wrap">
       <div className="two-col reverse">
         <div className="panel">
-          <h2 className="panel-title">Players (admin)</h2>
+          <h2 className="panel-title">{adminText.players}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Search player</label>
+              <label className="field-label">{adminText.searchPlayer}</label>
               <input
                 className="input"
-                placeholder="Search by nickname or full name"
+                placeholder={adminText.searchPlaceholder}
                 value={playerAdminSearch}
                 onChange={(e) => setPlayerAdminSearch(e.target.value)}
               />
@@ -668,7 +675,7 @@ reorderMatch,
                 className="secondary-btn add-list-btn add-player-btn-top"
                 onClick={addPlayer}
               >
-                + Add player
+                {adminText.addPlayer}
               </button>
 
               {filteredAdminPlayers.map((player) => (
@@ -681,9 +688,9 @@ reorderMatch,
                       : ""
                   } ${player.isFeatured ? "admin-list-btn-featured" : ""}`}
                 >
-                  <span>{player.nickname || "Player"}</span>
+                  <span>{player.nickname || adminText.playerFallback}</span>
                   {player.isFeatured ? (
-                    <span className="admin-featured-badge">Featured</span>
+                    <span className="admin-featured-badge">{adminText.featured}</span>
                   ) : null}
                 </button>
               ))}
@@ -692,14 +699,14 @@ reorderMatch,
         </div>
 
         <div className="panel">
-          <h2 className="panel-title">Edit player</h2>
+          <h2 className="panel-title">{adminText.editPlayer}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Nickname</label>
+              <label className="field-label">{adminText.nickname}</label>
               <input
                 className="input"
-                placeholder="Nickname"
+                placeholder={adminText.nickname}
                 value={playerForm.nickname}
                 onChange={(e) =>
                   setPlayerForm((prev) => ({
@@ -711,10 +718,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Full Name</label>
+              <label className="field-label">{adminText.fullName}</label>
               <input
                 className="input"
-                placeholder="Full name"
+                placeholder={adminText.fullName}
                 value={playerForm.fullName}
                 onChange={(e) =>
                   setPlayerForm((prev) => ({
@@ -726,10 +733,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Bio</label>
+              <label className="field-label">{adminText.bio}</label>
               <textarea
                 className="input textarea"
-                placeholder="Bio"
+                placeholder={adminText.bio}
                 value={playerForm.bio}
                 onChange={(e) =>
                   setPlayerForm((prev) => ({
@@ -752,15 +759,15 @@ reorderMatch,
                     }))
                   }
                 />
-                Featured player
+                {adminText.featuredPlayer}
               </label>
             </div>
 
             <div className="field-block">
-              <label className="field-label">Team</label>
+              <label className="field-label">{adminText.team}</label>
               <PremiumSelect
                 value={playerForm.teamId}
-                placeholder="Без команди"
+                placeholder={adminText.noTeam}
                 options={teams.map((team) => ({
                   value: team.id,
                   label: team.name,
@@ -775,7 +782,7 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Games</label>
+              <label className="field-label">{adminText.games}</label>
               <MultiGamePicker
                 value={playerForm.games}
                 onChange={(value) =>
@@ -786,7 +793,7 @@ reorderMatch,
 
             <div className="form-grid">
               <div className="field-block">
-                <label className="field-label">Wins</label>
+                <label className="field-label">{adminText.wins}</label>
                 <input
                   className="input"
                   type="number"
@@ -801,7 +808,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Losses</label>
+                <label className="field-label">{adminText.losses}</label>
                 <input
                   className="input"
                   type="number"
@@ -816,7 +823,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Earnings</label>
+                <label className="field-label">{adminText.earnings}</label>
                 <input
                   className="input"
                   type="number"
@@ -831,7 +838,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Tournaments Won</label>
+                <label className="field-label">{adminText.tournamentsWon}</label>
                 <input
                   className="input"
                   type="number"
@@ -846,7 +853,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Rank</label>
+                <label className="field-label">{adminText.rank}</label>
                 <input
                   className="input"
                   type="number"
@@ -861,7 +868,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">ELO</label>
+                <label className="field-label">{adminText.elo}</label>
                 <input
                   className="input"
                   type="number"
@@ -877,7 +884,7 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Avatar</label>
+              <label className="field-label">{adminText.avatar}</label>
               <input
                 className="input"
                 type="file"
@@ -886,31 +893,31 @@ reorderMatch,
               />
             </div>
 
-            <div className="btn-row">
-              <button className="primary-btn" onClick={savePlayer}>
-                Save
-              </button>
-<button
-  className="danger-btn"
-  onClick={() => setConfirmDelete({ open: true, type: "player" })}
->
-  Delete
-</button>
-            </div>
+<div className="btn-row">
+  <button className="primary-btn" onClick={savePlayer}>
+    {commonText.save}
+  </button>
+  <button
+    className="danger-btn"
+    onClick={() => setConfirmDelete({ open: true, type: "player" })}
+  >
+    {commonText.delete}
+  </button>
+</div>
           </div>
         </div>
       </div>
 
       <div className="two-col reverse">
         <div className="panel">
-          <h2 className="panel-title">Teams (admin)</h2>
+          <h2 className="panel-title">{adminText.teams}</h2>
 
           <div className="list-col admin-scroll-list">
             <button
               className="secondary-btn add-list-btn add-team-btn-top"
               onClick={addTeam}
             >
-              + Add team
+              {adminText.addTeam}
             </button>
 
             {[...teams]
@@ -927,9 +934,9 @@ reorderMatch,
                     selectedTeamId === team.id ? "admin-list-btn-active" : ""
                   } ${team.isFeatured ? "admin-list-btn-featured" : ""}`}
                 >
-                  <span>{team.name || "Team"}</span>
+                  <span>{team.name || adminText.teamFallback}</span>
                   {team.isFeatured ? (
-                    <span className="admin-featured-badge">Featured</span>
+                    <span className="admin-featured-badge">{adminText.featured}</span>
                   ) : null}
                 </button>
               ))}
@@ -937,14 +944,14 @@ reorderMatch,
         </div>
 
         <div className="panel">
-          <h2 className="panel-title">Edit team</h2>
+          <h2 className="panel-title">{adminText.editTeam}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Name</label>
+              <label className="field-label">{adminText.name}</label>
               <input
                 className="input"
-                placeholder="Team name"
+                placeholder={adminText.teamNamePlaceholder}
                 value={teamForm.name}
                 onChange={(e) =>
                   setTeamForm((prev) => ({
@@ -956,7 +963,7 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Games</label>
+              <label className="field-label">{adminText.games}</label>
               <MultiGamePicker
                 value={teamForm.games}
                 onChange={(value) =>
@@ -967,7 +974,7 @@ reorderMatch,
 
             <div className="form-grid">
               <div className="field-block">
-                <label className="field-label">Wins</label>
+                <label className="field-label">{adminText.wins}</label>
                 <input
                   className="input"
                   type="number"
@@ -982,7 +989,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Earnings</label>
+                <label className="field-label">{adminText.earnings}</label>
                 <input
                   className="input"
                   type="number"
@@ -998,10 +1005,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Description</label>
+              <label className="field-label">{adminText.description}</label>
               <textarea
                 className="input textarea"
-                placeholder="Team description"
+                placeholder={adminText.teamDescriptionPlaceholder}
                 value={teamForm.description}
                 onChange={(e) =>
                   setTeamForm((prev) => ({
@@ -1024,16 +1031,16 @@ reorderMatch,
                     }))
                   }
                 />
-                Featured team
+                {adminText.featuredTeam}
               </label>
             </div>
 
             <div className="field-block">
-              <label className="field-label">Logo URL</label>
+              <label className="field-label">{adminText.logoUrl}</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Paste logo URL..."
+                placeholder={adminText.logoUrlPlaceholder}
                 value={teamForm.logo}
                 onChange={(e) =>
                   setTeamForm((prev) => ({
@@ -1046,7 +1053,7 @@ reorderMatch,
               {teamForm.logo ? (
                 <img
                   src={teamForm.logo}
-                  alt="Team logo preview"
+                  alt={adminText.teamLogoPreviewAlt}
                   style={{
                     marginTop: 10,
                     width: 88,
@@ -1059,34 +1066,34 @@ reorderMatch,
               ) : null}
             </div>
 
-            <div className="btn-row">
-              <button className="primary-btn" onClick={saveTeam}>
-                Save
-              </button>
-<button
-  className="danger-btn"
-  onClick={() => setConfirmDelete({ open: true, type: "team" })}
->
-  Delete
-</button>
-            </div>
+<div className="btn-row">
+  <button className="primary-btn" onClick={saveTeam}>
+    {commonText.save}
+  </button>
+  <button
+    className="danger-btn"
+    onClick={() => setConfirmDelete({ open: true, type: "team" })}
+  >
+    {commonText.delete}
+  </button>
+</div>
           </div>
         </div>
       </div>
 
       <div className="two-col reverse">
         <div className="panel">
-          <h2 className="panel-title">Tournaments (admin)</h2>
+          <h2 className="panel-title">{adminText.tournaments}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Select tournament</label>
+              <label className="field-label">{adminText.selectTournament}</label>
               <PremiumSelect
                 value={selectedTournamentId}
-                placeholder="Select tournament"
+                placeholder={adminText.selectTournament}
                 options={orderedTournaments.map((tournament) => ({
                   value: tournament.id,
-                  label: tournament.title || "Tournament",
+                  label: tournament.title || adminText.tournamentFallback,
                 }))}
                 onChange={(value) => handleTournamentSelect(Number(value))}
               />
@@ -1096,7 +1103,7 @@ reorderMatch,
               className="secondary-btn add-list-btn add-tournament-btn-top"
               onClick={addTournament}
             >
-              + Add tournament
+              {adminText.addTournament}
             </button>
 
             <div className="btn-row">
@@ -1132,14 +1139,14 @@ reorderMatch,
         </div>
 
         <div className="panel">
-          <h2 className="panel-title">Edit tournament</h2>
+          <h2 className="panel-title">{adminText.editTournament}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Title</label>
+              <label className="field-label">{adminText.title}</label>
               <input
                 className="input"
-                placeholder="Tournament title"
+                placeholder={adminText.tournamentTitlePlaceholder}
                 value={tournamentForm.title}
                 onChange={(e) =>
                   setTournamentForm((prev) => ({
@@ -1152,10 +1159,10 @@ reorderMatch,
 
             <div className="form-grid two">
               <div className="field-block">
-                <label className="field-label">Game</label>
+                <label className="field-label">{adminText.game}</label>
                 <input
                   className="input"
-                  placeholder="Game"
+                  placeholder={adminText.game}
                   value={tournamentForm.game}
                   onChange={(e) =>
                     setTournamentForm((prev) => ({
@@ -1167,14 +1174,14 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Participant type</label>
+                <label className="field-label">{adminText.participantType}</label>
                 <PremiumSelect
                   value={tournamentForm.participantType || "player"}
-                  placeholder="Players"
+                  placeholder={adminText.playersOption}
                   options={[
-                    { value: "player", label: "Players" },
-                    { value: "team", label: "Teams" },
-                    { value: "squad", label: "Squad / Duo / Trio" },
+                    { value: "player", label: adminText.playersOption },
+                    { value: "team", label: adminText.teamsOption },
+                    { value: "squad", label: adminText.squadOption },
                   ]}
                   onChange={(value) =>
                     setTournamentForm((prev) => ({
@@ -1192,16 +1199,16 @@ reorderMatch,
               </div>
 
 <div className="field-block">
-  <label className="field-label">Type</label>
+  <label className="field-label">{adminText.type}</label>
   <PremiumSelect
     value={tournamentForm.type || "1x1"}
-    placeholder="Select type"
+    placeholder={adminText.selectType}
     options={[
-      { value: "1x1", label: "1 vs 1" },
-      { value: "2x2", label: "2 vs 2" },
-      { value: "3x3", label: "3 vs 3" },
-      { value: "5x5", label: "5 vs 5" },
-      { value: "custom", label: "Custom" },
+      { value: "1x1", label: adminText.oneVsOne },
+      { value: "2x2", label: adminText.twoVsTwo },
+      { value: "3x3", label: adminText.threeVsThree },
+      { value: "5x5", label: adminText.fiveVsFive },
+      { value: "custom", label: adminText.customOption },
     ]}
     onChange={(value) =>
       setTournamentForm((prev) => ({
@@ -1215,17 +1222,17 @@ reorderMatch,
 
             <div className="form-grid two">
 <div className="field-block">
-  <label className="field-label">Format</label>
+  <label className="field-label">{adminText.format}</label>
   <PremiumSelect
     value={tournamentForm.format || "playoff"}
-    placeholder="Select format"
+    placeholder={adminText.selectFormat}
     options={[
-      { value: "playoff", label: "Playoff (Single Elimination)" },
-      { value: "groups_playoff", label: "Groups + Playoff" },
-      { value: "groups_only", label: "Groups only" },
-      { value: "swiss", label: "Swiss system" },
-      { value: "league", label: "League / Round Robin" },
-      { value: "custom", label: "Custom" },
+      { value: "playoff", label: adminText.playoffSingleElimination },
+      { value: "groups_playoff", label: adminText.groupsPlayoff },
+      { value: "groups_only", label: adminText.groupsOnly },
+      { value: "swiss", label: adminText.swissSystem },
+      { value: "league", label: adminText.leagueRoundRobin },
+      { value: "custom", label: adminText.customOption },
     ]}
     onChange={(value) =>
       setTournamentForm((prev) => ({
@@ -1237,10 +1244,10 @@ reorderMatch,
 </div>
 
               <div className="field-block">
-                <label className="field-label">Status</label>
+                <label className="field-label">{adminText.status}</label>
                 <PremiumSelect
                   value={tournamentForm.status}
-                  placeholder="Select status"
+                  placeholder={adminText.selectStatus}
                   options={tournamentStatusOptions.map((status) => ({
                     value: status,
                     label: status,
@@ -1256,7 +1263,7 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Date</label>
+              <label className="field-label">{adminText.date}</label>
               <input
                 className="input"
                 type="date"
@@ -1271,10 +1278,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Prize</label>
+              <label className="field-label">{adminText.prize}</label>
               <input
                 className="input"
-                placeholder="Prize pool or reward"
+                placeholder={adminText.prizePlaceholder}
                 value={tournamentForm.prize}
                 onChange={(e) =>
                   setTournamentForm((prev) => ({
@@ -1286,10 +1293,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Description</label>
+              <label className="field-label">{adminText.description}</label>
               <textarea
                 className="input textarea"
-                placeholder="Tournament description"
+                placeholder={adminText.tournamentDescriptionPlaceholder}
                 value={tournamentForm.description}
                 onChange={(e) =>
                   setTournamentForm((prev) => ({
@@ -1300,11 +1307,11 @@ reorderMatch,
               />
             </div>
             <div className="field-block">
-              <label className="field-label">Tournament Image</label>
+              <label className="field-label">{adminText.tournamentImage}</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Paste image URL..."
+                placeholder={adminText.imageUrlPlaceholder}
                 value={tournamentForm.imageUrl || ""}
                 onChange={handleTournamentImageUpload}
               />
@@ -1312,7 +1319,7 @@ reorderMatch,
               {tournamentForm.imageUrl ? (
                 <img
                   src={tournamentForm.imageUrl}
-                  alt="Tournament preview"
+                  alt={adminText.tournamentPreviewAlt}
                   style={{
                     marginTop: 10,
                     width: "100%",
@@ -1325,7 +1332,7 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Participants</label>
+              <label className="field-label">{adminText.participants}</label>
 
               <div className="picker-grid compact-grid">
                 {tournamentForm.participantType === "team"
@@ -1363,7 +1370,7 @@ reorderMatch,
                         >
                           <span>
                             {tournamentForm.participantType === "squad"
-                              ? `Squad member: ${player.nickname}`
+                              ? `${adminText.squadMember}: ${player.nickname}`
                               : player.nickname}
                           </span>
                         </button>
@@ -1374,18 +1381,18 @@ reorderMatch,
 
             <div className="match-preview">
               <div className="muted small">
-                Participants selected: {safeTournamentParticipantIds.length}
+                {adminText.participantsSelected}: {safeTournamentParticipantIds.length}
               </div>
               <div className="muted small">
                 {tournamentForm.participantType === "team"
                   ? selectedTournamentTeams.length > 0
                     ? selectedTournamentTeams.map((team) => team.name).join(", ")
-                    : "No participants selected"
+                    : adminText.noParticipantsSelected
                   : selectedTournamentPlayers.length > 0
                   ? selectedTournamentPlayers
                       .map((player) => player.nickname)
                       .join(", ")
-                  : "No participants selected"}
+                  : adminText.noParticipantsSelected}
               </div>
             </div>
 
@@ -1395,13 +1402,13 @@ reorderMatch,
               tournamentForm.format === "swiss") && (
               <div className="field-block">
                 <div className="btn-row">
-                  <label className="field-label">Groups setup</label>
+                  <label className="field-label">{adminText.groupsSetup}</label>
                   <button
                     type="button"
                     className="secondary-btn"
                     onClick={addTournamentGroup}
                   >
-                    + Add group
+                    {adminText.addGroup}
                   </button>
                 </div>
 
@@ -1415,7 +1422,7 @@ reorderMatch,
                         <input
                           className="input"
                           value={group.name}
-                          placeholder="Group A"
+                          placeholder={adminText.groupPlaceholder}
                           onChange={(e) =>
                             updateTournamentGroupName(group.id, e.target.value)
                           }
@@ -1426,7 +1433,7 @@ reorderMatch,
                           className="danger-btn"
                           onClick={() => deleteTournamentGroup(group.id)}
                         >
-                          Delete
+                          {commonText.delete}
                         </button>
                       </div>
 
@@ -1490,10 +1497,10 @@ reorderMatch,
             )}
 
             <div className="field-block">
-              <label className="field-label">MVP</label>
+              <label className="field-label">{adminText.mvp}</label>
               <PremiumSelect
                 value={selectedTournamentMvpId || 0}
-                placeholder="Select MVP"
+                placeholder={adminText.selectMvp}
                 options={selectedTournamentMvpPlayers.map((player) => ({
                   value: player.id,
                   label: player.nickname,
@@ -1509,10 +1516,10 @@ reorderMatch,
 
             {tournamentForm.participantType === "team" && (
               <div className="field-block">
-                <label className="field-label">Winner Team</label>
+                <label className="field-label">{adminText.winnerTeam}</label>
                 <PremiumSelect
                   value={selectedTournamentWinnerTeamId || 0}
-                  placeholder="Select winner team"
+                  placeholder={adminText.selectWinnerTeam}
                   options={selectedTournamentTeams.map((team) => ({
                     value: team.id,
                     label: team.name,
@@ -1530,10 +1537,10 @@ reorderMatch,
 
             {tournamentForm.participantType === "player" && (
               <div className="field-block">
-                <label className="field-label">Winner Player</label>
+                <label className="field-label">{adminText.winnerPlayer}</label>
                 <PremiumSelect
                   value={selectedTournamentWinnerId || 0}
-                  placeholder="Select winner player"
+                  placeholder={adminText.selectWinnerPlayer}
                   options={selectedTournamentPlayers.map((player) => ({
                     value: player.id,
                     label: player.nickname,
@@ -1552,7 +1559,7 @@ reorderMatch,
 
             {tournamentForm.participantType === "squad" && (
               <div className="field-block">
-                <label className="field-label">Winner Squad Players</label>
+                <label className="field-label">{adminText.winnerSquadPlayers}</label>
 
                 <div className="picker-grid compact-grid">
                   {selectedTournamentPlayers.map((player) => {
@@ -1601,19 +1608,19 @@ reorderMatch,
                 </div>
 
                 <div className="muted small">
-                  Selected winners:{" "}
+                  {adminText.selectedWinners}:{" "}
                   {Array.isArray(tournamentForm.winnerSquadIds) &&
                   tournamentForm.winnerSquadIds.length > 0
                     ? tournamentForm.winnerSquadIds
                         .map((id) => getPlayerName(id))
                         .join(" / ")
-                    : "No squad winners selected"}
+                    : adminText.noSquadWinnersSelected}
                 </div>
               </div>
             )}
 
             <div className="field-block">
-              <label className="field-label">Placements</label>
+              <label className="field-label">{adminText.placements}</label>
 
               <div className="form-col">
                 {tournamentForm.participantType === "team"
@@ -1632,7 +1639,7 @@ reorderMatch,
                               className="input"
                               type="number"
                               min={1}
-                              placeholder="Place"
+                              placeholder={adminText.place}
                               value={placement ? placement.place : ""}
                               onChange={(e) => {
                                 const rawValue = e.target.value;
@@ -1704,7 +1711,7 @@ reorderMatch,
                               className="input"
                               type="number"
                               min={1}
-                              placeholder="Place"
+                              placeholder={adminText.place}
                               value={placement ? placement.place : ""}
                               onChange={(e) => {
                                 const rawValue = e.target.value;
@@ -1774,19 +1781,19 @@ reorderMatch,
                     }))
                   }
                 />
-                <span>Published</span>
+                <span>{adminText.published}</span>
               </label>
             </div>
 
             <div className="btn-row">
-              <button className="primary-btn" onClick={saveTournament}>
-                Save
-              </button>
+<button className="primary-btn" onClick={saveTournament}>
+  {commonText.save}
+</button>
 <button
   className="danger-btn"
   onClick={() => setConfirmDelete({ open: true, type: "tournament" })}
 >
-  Delete
+  {commonText.delete}
 </button>
             </div>
           </div>
@@ -1795,14 +1802,14 @@ reorderMatch,
 
       <div className="two-col reverse">
         <div className="panel">
-          <h2 className="panel-title">Home page announcement</h2>
+          <h2 className="panel-title">{adminText.homeAnnouncement}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Title</label>
+              <label className="field-label">{adminText.title}</label>
               <input
                 className="input"
-                placeholder="Tournament title"
+                placeholder={adminText.tournamentTitlePlaceholder}
                 value={homeAnnouncementForm.title}
                 onChange={(e) =>
                   setHomeAnnouncementForm((prev) => ({
@@ -1814,10 +1821,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Subtitle</label>
+              <label className="field-label">{adminText.subtitle}</label>
               <input
                 className="input"
-                placeholder="Game + type / short subtitle"
+                placeholder={adminText.subtitlePlaceholder}
                 value={homeAnnouncementForm.subtitle}
                 onChange={(e) =>
                   setHomeAnnouncementForm((prev) => ({
@@ -1829,11 +1836,11 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Banner image URL</label>
+              <label className="field-label">{adminText.bannerImageUrl}</label>
               <input
                 className="input"
                 type="text"
-                placeholder="Paste image URL..."
+                placeholder={adminText.imageUrlPlaceholder}
                 value={homeAnnouncementForm.imageUrl || ""}
                 onChange={handleHomeAnnouncementImageChange}
               />
@@ -1841,7 +1848,7 @@ reorderMatch,
               {homeAnnouncementForm.imageUrl ? (
                 <img
                   src={homeAnnouncementForm.imageUrl}
-                  alt="Home banner preview"
+                  alt={adminText.homeBannerPreviewAlt}
                   style={{
                     marginTop: 10,
                     width: "100%",
@@ -1855,7 +1862,7 @@ reorderMatch,
 
             <div className="form-grid two">
               <div className="field-block">
-                <label className="field-label">Date</label>
+                <label className="field-label">{adminText.date}</label>
                 <input
                   className="input"
                   type="date"
@@ -1870,7 +1877,7 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Participants count</label>
+                <label className="field-label">{adminText.participantsCount}</label>
                 <input
                   className="input"
                   type="number"
@@ -1888,10 +1895,10 @@ reorderMatch,
 
             <div className="form-grid two">
               <div className="field-block">
-                <label className="field-label">Format</label>
+                <label className="field-label">{adminText.format}</label>
                 <input
                   className="input"
-                  placeholder="Format"
+                  placeholder={adminText.format}
                   value={homeAnnouncementForm.format}
                   onChange={(e) =>
                     setHomeAnnouncementForm((prev) => ({
@@ -1903,10 +1910,10 @@ reorderMatch,
               </div>
 
               <div className="field-block">
-                <label className="field-label">Status</label>
+                <label className="field-label">{adminText.status}</label>
                 <input
                   className="input"
-                  placeholder="upcoming / registrations open / etc"
+                  placeholder={adminText.statusPlaceholder}
                   value={homeAnnouncementForm.status}
                   onChange={(e) =>
                     setHomeAnnouncementForm((prev) => ({
@@ -1919,10 +1926,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Prize</label>
+              <label className="field-label">{adminText.prize}</label>
               <input
                 className="input"
-                placeholder="Prize"
+                placeholder={adminText.prize}
                 value={homeAnnouncementForm.prize}
                 onChange={(e) =>
                   setHomeAnnouncementForm((prev) => ({
@@ -1934,15 +1941,15 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Linked tournament</label>
+              <label className="field-label">{adminText.linkedTournament}</label>
               <PremiumSelect
                 value={homeAnnouncementForm.tournamentId || 0}
-                placeholder="No linked tournament"
+                placeholder={adminText.noLinkedTournament}
                 options={[...tournaments]
                   .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
                   .map((tournament) => ({
                     value: tournament.id,
-                    label: tournament.title || "Tournament",
+                    label: tournament.title || adminText.tournamentFallback,
                   }))}
                 onChange={(value) =>
                   setHomeAnnouncementForm((prev) => ({
@@ -1954,10 +1961,10 @@ reorderMatch,
             </div>
 
             <div className="field-block">
-              <label className="field-label">Description</label>
+              <label className="field-label">{adminText.description}</label>
               <textarea
                 className="input textarea"
-                placeholder="Announcement description"
+                placeholder={adminText.announcementDescriptionPlaceholder}
                 value={homeAnnouncementForm.description}
                 onChange={(e) =>
                   setHomeAnnouncementForm((prev) => ({
@@ -1980,13 +1987,13 @@ reorderMatch,
                     }))
                   }
                 />
-                <span>Show on home page</span>
+                <span>{adminText.showOnHome}</span>
               </label>
             </div>
 
             <div className="btn-row">
               <button className="primary-btn" onClick={saveHomeAnnouncement}>
-                Save home announcement
+                {adminText.saveHomeAnnouncement}
               </button>
             </div>
           </div>
@@ -1995,16 +2002,16 @@ reorderMatch,
 
       <div className="two-col">
         <div className="panel">
-          <h2 className="panel-title">Matches (admin)</h2>
+          <h2 className="panel-title">{adminText.matches}</h2>
 
           <div className="field-block">
-            <label className="field-label">Select tournament</label>
+            <label className="field-label">{adminText.selectTournament}</label>
             <PremiumSelect
               value={matchTournamentFilterId}
-              placeholder="Select tournament"
+              placeholder={adminText.selectTournament}
               options={tournaments.map((tournament) => ({
                 value: tournament.id,
-                label: tournament.title || "Tournament",
+                label: tournament.title || adminText.tournamentFallback,
               }))}
               onChange={(value) => {
                 const nextTournamentId = Number(value);
@@ -2052,7 +2059,7 @@ game: nextTournament?.game || "",
     className="secondary-btn add-list-btn add-match-btn-top"
     onClick={() => addMatch(matchTournamentFilterId)}
   >
-    + Add match
+    {adminText.addMatch}
   </button>
 
 <button
@@ -2113,21 +2120,21 @@ game: nextTournament?.game || "",
         </div>
 
         <div className="panel">
-          <h2 className="panel-title">Edit match</h2>
+          <h2 className="panel-title">{adminText.editMatch}</h2>
 
           <div className="form-col">
             <div className="field-block">
-              <label className="field-label">Match type</label>
+              <label className="field-label">{adminText.matchType}</label>
               <PremiumSelect
                 value={
                   selectedMatchTournament?.participantType ||
                   matchForm.matchType
                 }
-                placeholder="Match type"
+                placeholder={adminText.matchType}
                 disabled={Boolean(selectedMatchTournament)}
                 options={[
-                  { value: "player", label: "Player vs Player" },
-                  { value: "team", label: "Team vs Team" },
+                  { value: "player", label: adminText.playerVsPlayer },
+                  { value: "team", label: adminText.teamVsTeam },
                 ]}
                 onChange={(value) =>
                   setMatchForm((prev) => ({
@@ -2145,12 +2152,12 @@ game: nextTournament?.game || "",
             </div>
 
             <div className="field-block">
-              <label className="field-label">Tournament</label>
+              <label className="field-label">{adminText.tournament}</label>
               <div className="admin-premium-select admin-premium-select-disabled">
                 <div className="admin-premium-select-trigger admin-premium-select-trigger-disabled">
                   <span>
                     {getTournamentName(matchForm.tournamentId) ||
-                      "No tournament"}
+                      adminText.noTournament}
                   </span>
                   <span className="admin-premium-select-arrow">⌄</span>
                 </div>
@@ -2159,10 +2166,10 @@ game: nextTournament?.game || "",
 
             <div className="form-grid two">
               <div className="field-block">
-                <label className="field-label">Game</label>
+                <label className="field-label">{adminText.game}</label>
                 <input
                   className="input"
-                  placeholder="Game"
+                  placeholder={adminText.game}
                   value={matchForm.game}
                   onChange={(e) =>
                     setMatchForm((prev) => ({
@@ -2174,7 +2181,7 @@ game: nextTournament?.game || "",
               </div>
 
               <div className="field-block">
-                <label className="field-label">Date</label>
+                <label className="field-label">{adminText.date}</label>
                 <input
                   className="input"
                   type="date"
@@ -2192,10 +2199,10 @@ game: nextTournament?.game || "",
             {matchForm.matchType === "player" ? (
               <div className="form-grid two">
                 <div className="field-block">
-                  <label className="field-label">Player 1</label>
+                  <label className="field-label">{adminText.player1}</label>
                   <PremiumSelect
                     value={matchForm.player1}
-                    placeholder="Select player"
+                    placeholder={adminText.selectPlayer}
                     options={availablePlayer1Options.map((player) => ({
                       value: player.id,
                       label: player.nickname,
@@ -2218,10 +2225,10 @@ game: nextTournament?.game || "",
                 </div>
 
                 <div className="field-block">
-                  <label className="field-label">Player 2</label>
+                  <label className="field-label">{adminText.player2}</label>
                   <PremiumSelect
                     value={matchForm.player2}
-                    placeholder="Select player"
+                    placeholder={adminText.selectPlayer}
                     options={availablePlayer2Options.map((player) => ({
                       value: player.id,
                       label: player.nickname,
@@ -2246,10 +2253,10 @@ game: nextTournament?.game || "",
             ) : (
               <div className="form-grid two">
                 <div className="field-block">
-                  <label className="field-label">Team 1</label>
+                  <label className="field-label">{adminText.team1}</label>
 <PremiumSelect
   value={matchForm.team1}
-  placeholder="Select team"
+  placeholder={adminText.selectTeam}
   options={availableTeam1Options.map((team) => ({
     value: team.id,
     label: team.name,
@@ -2272,10 +2279,10 @@ game: nextTournament?.game || "",
                 </div>
 
                 <div className="field-block">
-                  <label className="field-label">Team 2</label>
+                  <label className="field-label">{adminText.team2}</label>
 <PremiumSelect
   value={matchForm.team2}
-  placeholder="Select team"
+  placeholder={adminText.selectTeam}
   options={availableTeam2Options.map((team) => ({
     value: team.id,
     label: team.name,
@@ -2300,7 +2307,7 @@ game: nextTournament?.game || "",
             )}
 
             <div className="field-block">
-              <label className="field-label">Score</label>
+              <label className="field-label">{adminText.score}</label>
               <input
                 className="input"
                 placeholder="2:1"
@@ -2316,7 +2323,7 @@ game: nextTournament?.game || "",
 
             {matchForm.matchType === "player" ? (
               <div className="field-block">
-                <label className="field-label">Winner</label>
+                <label className="field-label">{adminText.winner}</label>
                 <PremiumSelect
                   value={
                     selectedWinnerOptions.some(
@@ -2325,7 +2332,7 @@ game: nextTournament?.game || "",
                       ? matchForm.winnerId
                       : 0
                   }
-                  placeholder="Select winner"
+                  placeholder={adminText.selectWinner}
                   options={selectedWinnerOptions.map((player) => ({
                     value: player.id,
                     label: player.name,
@@ -2340,7 +2347,7 @@ game: nextTournament?.game || "",
               </div>
             ) : (
               <div className="field-block">
-                <label className="field-label">Winning team</label>
+                <label className="field-label">{adminText.winningTeam}</label>
 <PremiumSelect
   value={
     selectedWinnerTeamOptions.some(
@@ -2349,7 +2356,7 @@ game: nextTournament?.game || "",
       ? matchForm.winnerTeamId
       : 0
   }
-  placeholder="Select winning team"
+  placeholder={adminText.selectWinningTeam}
   options={selectedWinnerTeamOptions.map((team) => ({
     value: team.id,
     label: team.name,
@@ -2366,10 +2373,10 @@ game: nextTournament?.game || "",
 
 <div className="form-grid two">
   <div className="field-block">
-    <label className="field-label">Status</label>
+    <label className="field-label">{adminText.status}</label>
     <PremiumSelect
       value={matchForm.status}
-      placeholder="Select status"
+      placeholder={adminText.selectStatus}
       options={matchStatusOptions.map((status) => ({
         value: status,
         label: status,
@@ -2384,15 +2391,15 @@ game: nextTournament?.game || "",
   </div>
 
   <div className="field-block">
-    <label className="field-label">Stage</label>
+    <label className="field-label">{adminText.stage}</label>
     <PremiumSelect
       value={matchForm.stage}
-      placeholder="Select stage"
+      placeholder={adminText.selectStage}
       options={[
-        { value: "group", label: "Group" },
-        { value: "playoff", label: "Playoff" },
-        { value: "final", label: "Final" },
-        { value: "showmatch", label: "Showmatch" },
+        { value: "group", label: adminText.groupStage },
+        { value: "playoff", label: adminText.playoffStage },
+        { value: "final", label: adminText.finalStage },
+        { value: "showmatch", label: adminText.showmatchStage },
       ]}
       onChange={(value) =>
         setMatchForm((prev) => ({
@@ -2407,10 +2414,10 @@ game: nextTournament?.game || "",
 
 <div className="form-grid two">
 <div className="field-block">
-  <label className="field-label">Group</label>
+  <label className="field-label">{adminText.group}</label>
   <PremiumSelect
     value={matchForm.groupName || ""}
-    placeholder="Select group"
+    placeholder={adminText.selectGroup}
     disabled={matchForm.stage !== "group"}
     options={(selectedMatchTournament?.groups || []).map((group) => ({
       value: group.name,
@@ -2426,10 +2433,10 @@ game: nextTournament?.game || "",
 </div>
 
   <div className="field-block">
-    <label className="field-label">Round label</label>
+    <label className="field-label">{adminText.roundLabel}</label>
     <input
       className="input"
-      placeholder="Round 1 / Quarterfinal / Semifinal / Final"
+      placeholder={adminText.roundLabelPlaceholder}
       value={matchForm.roundLabel}
       onChange={(e) =>
         setMatchForm((prev) => ({
@@ -2443,12 +2450,12 @@ game: nextTournament?.game || "",
 </div>
 
 <div className="field-block">
-  <label className="field-label">Series ID</label>
+  <label className="field-label">{adminText.seriesId}</label>
   <div className="field-block">
-  <label className="field-label">Next Series</label>
+  <label className="field-label">{adminText.nextSeries}</label>
   <input
     className="input"
-    placeholder="semifinal-1 / final-1"
+    placeholder={adminText.nextSeriesPlaceholder}
     value={matchForm.nextSeriesId || ""}
     onChange={(e) =>
       setMatchForm((prev) => ({
@@ -2460,7 +2467,7 @@ game: nextTournament?.game || "",
 </div>
   <input
     className="input"
-    placeholder="quarterfinal-1 / semifinal-1 / final-1"
+    placeholder={adminText.seriesIdPlaceholder}
     value={matchForm.seriesId || ""}
     onChange={(e) =>
       setMatchForm((prev) => ({
@@ -2473,7 +2480,7 @@ game: nextTournament?.game || "",
 
             <div className="form-grid two">
               <div className="field-block">
-                <label className="field-label">Best Of</label>
+                <label className="field-label">{adminText.bestOf}</label>
                 <input
                   className="input"
                   type="number"
@@ -2500,16 +2507,16 @@ game: nextTournament?.game || "",
                       }))
                     }
                   />
-                  <span>ELO applied</span>
+                  <span>{adminText.eloApplied}</span>
                 </label>
               </div>
             </div>
 
             <div className="field-block">
-              <label className="field-label">Notes</label>
+              <label className="field-label">{adminText.notes}</label>
               <textarea
                 className="input textarea"
-                placeholder="Notes"
+                placeholder={adminText.notes}
                 value={matchForm.notes}
                 onChange={(e) =>
                   setMatchForm((prev) => ({
@@ -2521,28 +2528,28 @@ game: nextTournament?.game || "",
             </div>
 
             <div className="btn-row">
-              <button className="primary-btn" onClick={saveMatch}>
-                Save
-              </button>
+<button className="primary-btn" onClick={saveMatch}>
+  {commonText.save}
+</button>
 <button
   className="danger-btn"
   onClick={() => setConfirmDelete({ open: true, type: "match" })}
 >
-  Delete
+  {commonText.delete}
 </button>
             </div>
           </div>
         </div>
       </div>
       <div className="panel">
-        <h2 className="panel-title">Achievements (admin)</h2>
+        <h2 className="panel-title">{adminText.achievements}</h2>
 
         <div className="list-col admin-scroll-list">
           <button
             className="secondary-btn add-list-btn add-achievement-btn-top"
             onClick={addAchievement}
           >
-            + Add achievement
+            {adminText.addAchievement}
           </button>
 
           {achievements.map((achievement) => (
@@ -2556,14 +2563,14 @@ game: nextTournament?.game || "",
                   : ""
               }`}
             >
-              {achievement.title || "Achievement"}
+              {achievement.title || adminText.achievementFallback}
             </button>
           ))}
         </div>
       </div>
 
       <div className="panel">
-        <h2 className="panel-title">Edit achievements</h2>
+        <h2 className="panel-title">{adminText.editAchievements}</h2>
 
         <div className="list-col admin-scroll-list">
           {selectedAchievement ? (
@@ -2579,7 +2586,7 @@ game: nextTournament?.game || "",
     })
   }
 >
-  Delete achievement
+  {adminText.deleteAchievement}
 </button>
 
                 <input
@@ -2590,7 +2597,7 @@ game: nextTournament?.game || "",
                       title: e.target.value,
                     })
                   }
-                  placeholder="Achievement title"
+                  placeholder={adminText.achievementTitlePlaceholder}
                 />
 
                 <textarea
@@ -2601,13 +2608,13 @@ game: nextTournament?.game || "",
                       description: e.target.value,
                     })
                   }
-                  placeholder="Achievement description"
+                  placeholder={adminText.achievementDescriptionPlaceholder}
                 />
 
                 <input
                   className="input"
                   type="text"
-                  placeholder="Paste image URL..."
+                  placeholder={adminText.imageUrlPlaceholder}
                   value={selectedAchievement.image || ""}
                   onChange={(e) =>
                     saveAchievement(selectedAchievement.id, {
@@ -2619,7 +2626,7 @@ game: nextTournament?.game || "",
                 {selectedAchievement.image ? (
                   <img
                     src={selectedAchievement.image}
-                    alt="Achievement preview"
+                    alt={adminText.achievementPreviewAlt}
                     style={{
                       marginTop: 10,
                       width: 80,
@@ -2661,7 +2668,7 @@ game: nextTournament?.game || "",
           ) : (
             <div className="simple-card">
               <div className="form-col">
-                <div className="muted">No achievement selected</div>
+                <div className="muted">{adminText.noAchievementSelected}</div>
               </div>
             </div>
           )}
@@ -2671,9 +2678,9 @@ game: nextTournament?.game || "",
       {confirmDelete.open ? (
         <div className="confirm-overlay">
           <div className="confirm-modal">
-            <h3>Confirm deletion</h3>
+            <h3>{adminText.confirmDeletion}</h3>
             <p>
-              Are you sure you want to delete this{" "}
+              {adminText.confirmDeletePrefix}{" "}
               <strong>{confirmDelete.type}</strong>?
             </p>
 
@@ -2682,7 +2689,7 @@ game: nextTournament?.game || "",
                 className="secondary-btn"
                 onClick={() => setConfirmDelete({ open: false, type: null })}
               >
-                Cancel
+                {commonText.cancel}
               </button>
 
               <button
@@ -2703,7 +2710,7 @@ game: nextTournament?.game || "",
                   setConfirmDelete({ open: false, type: null });
                 }}
               >
-                Delete
+                {commonText.delete}
               </button>
             </div>
           </div>

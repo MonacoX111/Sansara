@@ -1,4 +1,5 @@
 import { Achievement, Player, Team } from "../types";
+import { Lang, t } from "../utils/translations";
 
 type Props = {
   players: Player[];
@@ -6,6 +7,7 @@ type Props = {
   achievements: Achievement[];
   onOpenPlayer: (playerId: number) => void;
   loading: boolean;
+  lang: Lang;
 };
 
 export default function LeaderboardTab({
@@ -14,7 +16,10 @@ export default function LeaderboardTab({
   achievements,
   onOpenPlayer,
   loading,
+  lang,
 }: Props) {
+  const text = t[lang] || t.en;
+  const leaderboardText = text.leaderboardPage;
   const getPlayerTeam = (teamId: number) =>
     teams.find((team) => team.id === teamId) || null;
 
@@ -43,14 +48,14 @@ export default function LeaderboardTab({
     <div className="panel premium-leaderboard-panel">
       <div className="premium-leaderboard-head">
         <div>
-          <p className="premium-leaderboard-kicker">Ranked arena</p>
+          <p className="premium-leaderboard-kicker">{leaderboardText.kicker}</p>
           <h2 className="panel-title premium-leaderboard-title">
-            Premium Leaderboard
+            {leaderboardText.title}
           </h2>
         </div>
 
         <div className="premium-leaderboard-count">
-          {leaderboard.length} players
+          {leaderboard.length} {leaderboardText.players}
         </div>
       </div>
 
@@ -61,7 +66,7 @@ export default function LeaderboardTab({
           ))}
         </div>
       ) : leaderboard.length === 0 ? (
-        <div className="empty-block">No players yet</div>
+        <div className="empty-block">{leaderboardText.noPlayers}</div>
       ) : (
         <>
           {topPlayer && (
@@ -76,7 +81,7 @@ export default function LeaderboardTab({
                 {renderAvatar(topPlayer, "premium-leader-champion-avatar")}
 
                 <div>
-                  <div className="premium-leader-label">Current leader</div>
+                  <div className="premium-leader-label">{leaderboardText.currentLeader}</div>
                   <div className="premium-leader-champion-name">
                     {topPlayer.nickname}
                   </div>
@@ -85,7 +90,7 @@ export default function LeaderboardTab({
 
 <div className="premium-leader-champion-meta">
   <span>{topPlayer.elo} ELO</span>
-  <span>{topPlayer.wins} Wins</span>
+  <span>{topPlayer.wins} {leaderboardText.wins}</span>
   <span>{topPlayer.earnings} ₴</span>
 </div>
 
@@ -108,15 +113,15 @@ export default function LeaderboardTab({
         <div className="premium-leader-team-name">
           {getPlayerTeam(topPlayer.teamId)?.name}
         </div>
-        <div className="premium-leader-team-sub">Active roster</div>
+        <div className="premium-leader-team-sub">{leaderboardText.activeRoster}</div>
       </div>
     </>
   ) : (
     <>
       <div className="premium-leader-team-logo premium-leader-free-logo">—</div>
       <div>
-        <div className="premium-leader-team-name">Free Agent</div>
-        <div className="premium-leader-team-sub">No team assigned</div>
+<div className="premium-leader-team-name">{leaderboardText.freeAgent}</div>
+<div className="premium-leader-team-sub">{leaderboardText.noTeamAssigned}</div>
       </div>
     </>
   )}
@@ -135,7 +140,7 @@ export default function LeaderboardTab({
         />
       ))
   ) : (
-    <span className="premium-leader-muted">Немає досягнень</span>
+    <span className="premium-leader-muted">{leaderboardText.noAchievements}</span>
   )}
 </div>
                 </div>
@@ -143,7 +148,7 @@ export default function LeaderboardTab({
 
               <div className="premium-leader-champion-right">
                 <div className="premium-leader-big-elo">{topPlayer.elo}</div>
-                <div className="premium-leader-big-label">ELO rating</div>
+                <div className="premium-leader-big-label">{leaderboardText.eloRating}</div>
               </div>
             </button>
           )}
@@ -199,7 +204,7 @@ export default function LeaderboardTab({
                           </>
                         ) : (
                           <span className="premium-leader-muted">
-                            Немає досягнень
+                            {leaderboardText.noAchievements}
                           </span>
                         )}
                       </div>
@@ -224,9 +229,9 @@ export default function LeaderboardTab({
                           <div className="premium-leader-team-name">
                             {playerTeam.name}
                           </div>
-                          <div className="premium-leader-team-sub">
-                            Active roster
-                          </div>
+<div className="premium-leader-team-sub">
+  {leaderboardText.activeRoster}
+</div>
                         </div>
                       </>
                     ) : (
@@ -235,12 +240,12 @@ export default function LeaderboardTab({
                           —
                         </div>
                         <div>
-                          <div className="premium-leader-team-name">
-                            Free Agent
-                          </div>
-                          <div className="premium-leader-team-sub">
-                            No team assigned
-                          </div>
+<div className="premium-leader-team-name">
+  {leaderboardText.freeAgent}
+</div>
+<div className="premium-leader-team-sub">
+  {leaderboardText.noTeamAssigned}
+</div>
                         </div>
                       </>
                     )}
@@ -252,11 +257,11 @@ export default function LeaderboardTab({
                       <strong>{player.elo}</strong>
                     </div>
                     <div>
-                      <span>Wins</span>
+                      <span>{leaderboardText.wins}</span>
                       <strong>{player.wins}</strong>
                     </div>
                     <div>
-                      <span>Earnings</span>
+                      <span>{leaderboardText.earnings}</span>
                       <strong>{player.earnings} ₴</strong>
                     </div>
                   </div>
