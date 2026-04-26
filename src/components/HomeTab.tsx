@@ -119,7 +119,7 @@ export default function HomeTab({
 
             <button
               className="secondary-btn"
-              onClick={() => setActiveTab("players")}
+onClick={() => setActiveTab("leaderboard")}
             >
               {text.viewTopPlayers}
             </button>
