@@ -129,6 +129,7 @@ type HomeAnnouncementForm = {
   status: string;
   description: string;
   participantCount: number;
+  participantLabelType: "players" | "teams";
   tournamentId?: number;
   isVisible: boolean;
 };
@@ -213,8 +214,9 @@ const createEmptyHomeAnnouncementForm = (): HomeAnnouncementForm => ({
   format: "",
   status: "",
   description: "",
-  participantCount: 0,
-  tournamentId: undefined,
+participantCount: 0,
+participantLabelType: "players",
+tournamentId: undefined,
   isVisible: true,
 });
 
@@ -361,8 +363,10 @@ const normalizeHomeAnnouncement = (
   format: item?.format || "",
   status: item?.status || "",
   description: item?.description || "",
-  participantCount: Number(item?.participantCount || 0),
-  tournamentId:
+participantCount: Number(item?.participantCount || 0),
+participantLabelType:
+  item?.participantLabelType === "teams" ? "teams" : "players",
+tournamentId:
     typeof item?.tournamentId === "number" ? Number(item.tournamentId) : 0,
   isVisible: typeof item?.isVisible === "boolean" ? item.isVisible : true,
 });
@@ -893,8 +897,10 @@ bestOf: selectedMatch.bestOf,
       format: homeAnnouncement.format || "",
       status: homeAnnouncement.status || "",
       description: homeAnnouncement.description || "",
-      participantCount: Number(homeAnnouncement.participantCount || 0),
-      tournamentId:
+participantCount: Number(homeAnnouncement.participantCount || 0),
+participantLabelType:
+  homeAnnouncement.participantLabelType === "teams" ? "teams" : "players",
+tournamentId:
         typeof homeAnnouncement.tournamentId === "number" &&
         homeAnnouncement.tournamentId > 0
           ? Number(homeAnnouncement.tournamentId)
@@ -946,8 +952,10 @@ bestOf: selectedMatch.bestOf,
       format: homeAnnouncementForm.format,
       status: homeAnnouncementForm.status,
       description: homeAnnouncementForm.description,
-      participantCount: Number(homeAnnouncementForm.participantCount || 0),
-      tournamentId: safeTournamentId,
+participantCount: Number(homeAnnouncementForm.participantCount || 0),
+participantLabelType:
+  homeAnnouncementForm.participantLabelType === "teams" ? "teams" : "players",
+tournamentId: safeTournamentId,
       isVisible: Boolean(homeAnnouncementForm.isVisible),
     };
 

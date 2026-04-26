@@ -63,11 +63,14 @@ export default function FeaturedBanner({
                 {generalText.prize}: {homeAnnouncement.prize}
               </span>
             ) : null}
-            {homeAnnouncement.participantCount > 0 ? (
-              <span className="home-meta-pill">
-                {generalText.players}: {homeAnnouncement.participantCount}
-              </span>
-            ) : null}
+{homeAnnouncement.participantCount > 0 ? (
+  <span className="home-meta-pill">
+    {homeAnnouncement.participantLabelType === "teams"
+      ? generalText.teams
+      : generalText.players}
+    : {homeAnnouncement.participantCount}
+  </span>
+) : null}
           </div>
 
           {homeAnnouncement.description ? (

@@ -145,6 +145,7 @@ export type HomeAnnouncement = {
   status: string;
   description: string;
   participantCount: number;
+  participantLabelType: "players" | "teams";
   tournamentId?: number;
   isVisible: boolean;
 };

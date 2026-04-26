@@ -209,6 +209,7 @@ common: {
 },
 
 generalPage: {
+    teams: "Teams",
   homeAnnouncementHidden: "Home announcement is hidden",
   homeAnnouncementHiddenDescription:
     "Turn it on in Admin when you want to show the next tournament.",
@@ -601,6 +602,7 @@ common: {
 },
 
 generalPage: {
+    teams: "Команди",
   homeAnnouncementHidden: "Анонс на головній приховано",
   homeAnnouncementHiddenDescription:
     "Увімкніть його в адмінці, коли захочете показати наступний турнір.",

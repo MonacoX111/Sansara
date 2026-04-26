@@ -1876,21 +1876,39 @@ reorderMatch,
                 />
               </div>
 
-              <div className="field-block">
-                <label className="field-label">{adminText.participantsCount}</label>
-                <input
-                  className="input"
-                  type="number"
-                  min={0}
-                  value={homeAnnouncementForm.participantCount}
-                  onChange={(e) =>
-                    setHomeAnnouncementForm((prev) => ({
-                      ...prev,
-                      participantCount: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
+<div className="field-block">
+  <label className="field-label">{adminText.participantsCount}</label>
+  <input
+    className="input"
+    type="number"
+    min={0}
+    value={homeAnnouncementForm.participantCount}
+    onChange={(e) =>
+      setHomeAnnouncementForm((prev) => ({
+        ...prev,
+        participantCount: Number(e.target.value),
+      }))
+    }
+  />
+</div>
+
+<div className="field-block">
+  <label className="field-label">{adminText.participantType}</label>
+  <PremiumSelect
+    value={homeAnnouncementForm.participantLabelType || "players"}
+    placeholder={adminText.playersOption}
+    options={[
+      { value: "players", label: adminText.playersOption },
+      { value: "teams", label: adminText.teamsOption },
+    ]}
+    onChange={(value) =>
+      setHomeAnnouncementForm((prev) => ({
+        ...prev,
+        participantLabelType: value as "players" | "teams",
+      }))
+    }
+  />
+</div>
             </div>
 
             <div className="form-grid two">
