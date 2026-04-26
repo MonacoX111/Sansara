@@ -1158,7 +1158,10 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
               >
 <div className="muted small">{tournamentText.status}</div>
                 <div className="achievement-title">
-                  {selectedTournament.status || "—"}
+{selectedTournament.status
+  ? selectedTournament.status.charAt(0).toUpperCase() +
+    selectedTournament.status.slice(1)
+  : "—"}
                 </div>
               </div>
 
@@ -1226,7 +1229,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
 
           {selectedTournament.imageUrl ? (
             <div className="simple-card tournament-section tournament-cover-section">
-              <div className="achievement-title">{tournamentText.tournamentCover}</div>
+              <div className="tournament-section-title cover">{tournamentText.tournamentCover}</div>
 
               <img
                 src={selectedTournament.imageUrl}
@@ -1251,7 +1254,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 );
               }}
             >
-              <div className="achievement-title">{tournamentText.overview}</div>
+              <div className="tournament-section-title">{tournamentText.overview}</div>
 
               <div className="tournament-overview-grid">
                 <div
@@ -1310,7 +1313,10 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 >
                   <span className="overview-stat-label">{tournamentText.format}</span>
                   <strong className="overview-stat-value">
-                    {selectedTournament.format || "—"}
+{selectedTournament.format
+  ? selectedTournament.format.charAt(0).toUpperCase() +
+    selectedTournament.format.slice(1)
+  : "—"}
                   </strong>
                 </div>
 
@@ -1330,7 +1336,10 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 >
                   <span className="overview-stat-label">{tournamentText.status}</span>
                   <strong className="overview-stat-value">
-                    {selectedTournament.status || "—"}
+{selectedTournament.status
+  ? selectedTournament.status.charAt(0).toUpperCase() +
+    selectedTournament.status.slice(1)
+  : "—"}
                   </strong>
                 </div>
 
@@ -1390,7 +1399,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 );
               }}
             >
-              <div className="achievement-title">{tournamentText.results}</div>
+              <div className="tournament-section-title results">{tournamentText.results}</div>
 
               {(() => {
                 const winnerName = getTournamentWinnerName(selectedTournament);
@@ -1554,7 +1563,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 );
               }}
             >
-<div className="achievement-title">{tournamentText.structure}</div>
+<div className="tournament-section-title structure">{tournamentText.structure}</div>
 
 {selectedMatches.length > 0 || Object.keys(groupedMatches).length > 0 ? (
   <div className="tournament-bracket-layout">

@@ -111,6 +111,62 @@
   grid-column: span 2;
 }
 
+/* === TOURNAMENT SECTION TITLES === */
+
+.tournament-section-title {
+  position: relative;
+  width: fit-content;
+  max-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 9px 15px;
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+    rgba(10, 14, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tournament-section-title::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ff3b5f;
+  box-shadow:
+    0 0 8px rgba(255, 59, 95, 0.8),
+    0 0 18px rgba(255, 59, 95, 0.35);
+}
+
+.tournament-section-title.results::before {
+  background: #ffcc66;
+  box-shadow:
+    0 0 8px rgba(255, 190, 61, 0.8),
+    0 0 18px rgba(255, 190, 61, 0.35);
+}
+
+.tournament-section-title.cover::before {
+  background: #43d0ff;
+  box-shadow:
+    0 0 8px rgba(67, 208, 255, 0.75),
+    0 0 18px rgba(67, 208, 255, 0.32);
+}
+
+.tournament-section-title.structure::before {
+  background: #a78bfa;
+  box-shadow:
+    0 0 8px rgba(167, 139, 250, 0.75),
+    0 0 18px rgba(167, 139, 250, 0.32);
+}
+
 /* === PARTICIPANTS === */
 
 .tournament-participants {
@@ -1332,68 +1388,103 @@ background: linear-gradient(
 .tournament-overview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
-/* база */
 .overview-stat-card {
+  min-height: 78px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(12, 15, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   position: relative;
   overflow: hidden;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
-/* кольорові акценти */
 .overview-stat-card::before {
   content: "";
   position: absolute;
   inset: 0;
   opacity: 0.08;
   pointer-events: none;
+  background: radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.38), transparent 34%);
 }
 
-/* конкретні кольори */
-
-.overview-stat-card.game::before {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
+.overview-stat-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 999px;
+  opacity: 0.85;
+  background: rgba(255, 59, 95, 0.7);
 }
 
-.overview-stat-card.type::before {
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
+.overview-stat-card.game::after {
+  background: rgba(67, 208, 255, 0.8);
 }
 
-.overview-stat-card.format::before {
-  background: linear-gradient(135deg, #fa709a, #fee140);
+.overview-stat-card.type::after {
+  background: rgba(49, 208, 127, 0.8);
 }
 
-.overview-stat-card.status::before {
-  background: linear-gradient(135deg, #f7971e, #ffd200);
+.overview-stat-card.format::after {
+  background: rgba(255, 59, 95, 0.8);
 }
 
-.overview-stat-card.date::before {
-  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+.overview-stat-card.status::after {
+  background: rgba(255, 190, 61, 0.85);
 }
 
-.overview-stat-card.prize::before {
-  background: linear-gradient(135deg, #ff9966, #ff5e62);
+.overview-stat-card.date::after {
+  background: rgba(167, 139, 250, 0.85);
+}
+
+.overview-stat-card.prize::after {
+  background: rgba(255, 140, 100, 0.85);
+}
+
+.overview-stat-label {
+  position: relative;
+  z-index: 2;
+  color: rgba(235, 241, 255, 0.58);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .overview-stat-value {
-  font-size: 18px;
-  line-height: 1.15;
-  font-weight: 800;
+  position: relative;
+  z-index: 2;
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
 }
 
-/* hover ефект */
 .overview-stat-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.12);
-  transition: 0.2s ease;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(255, 255, 255, 0.055);
 }
 .tournament-matches.upgraded {
   display: flex;
