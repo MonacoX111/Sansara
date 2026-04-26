@@ -574,3 +574,84 @@
     transform: translateX(150%) skewX(-18deg);
   }
 }
+
+/* ===== RANK #2 / #3 PREMIUM SHIMMER ===== */
+
+.premium-leader-rank-2,
+.premium-leader-rank-3 {
+  isolation: isolate;
+}
+
+.premium-leader-rank-2::after,
+.premium-leader-rank-3::after {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  pointer-events: none;
+  z-index: 0;
+  transform: translateX(-145%) skewX(-18deg);
+  animation: premiumLeaderAlive 6s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  filter: blur(2px);
+}
+
+.premium-leader-rank-2::after {
+  background:
+    radial-gradient(circle at 22% 50%, rgba(226, 232, 240, 0.12), transparent 22%),
+    radial-gradient(circle at 78% 50%, rgba(148, 163, 184, 0.08), transparent 24%),
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(226, 232, 240, 0.18) 48%,
+      rgba(248, 250, 252, 0.32) 50%,
+      rgba(226, 232, 240, 0.18) 52%,
+      transparent 60%
+    );
+}
+
+.premium-leader-rank-3::after {
+  background:
+    radial-gradient(circle at 22% 50%, rgba(245, 158, 11, 0.14), transparent 22%),
+    radial-gradient(circle at 78% 50%, rgba(180, 83, 9, 0.10), transparent 24%),
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(245, 158, 11, 0.20) 48%,
+      rgba(251, 146, 60, 0.34) 50%,
+      rgba(245, 158, 11, 0.20) 52%,
+      transparent 60%
+    );
+  animation-duration: 6.4s;
+}
+
+.premium-leader-rank-2 > *,
+.premium-leader-rank-3 > * {
+  position: relative;
+  z-index: 1;
+}
+
+.premium-leader-rank-2:hover {
+  border-color: rgba(226, 232, 240, 0.7);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.28),
+    0 0 22px rgba(226, 232, 240, 0.18);
+}
+
+.premium-leader-rank-3:hover {
+  border-color: rgba(251, 146, 60, 0.6);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.28),
+    0 0 22px rgba(245, 158, 11, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-leader-rank-2::after,
+  .premium-leader-rank-3::after {
+    animation: none;
+    transform: translateX(0) skewX(0);
+    opacity: 0;
+  }
+}
