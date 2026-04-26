@@ -592,13 +592,15 @@ useEffect(() => {
     const root = bracketRef.current;
     if (!root) return;
 
-const scaleContainer = root.closest(".bracket-inner-scale") as HTMLElement | null;
-
-const scale = scaleContainer
-  ? scaleContainer.getBoundingClientRect().width / scaleContainer.offsetWidth
-  : 1;
-
-const rootRect = root.getBoundingClientRect();
+    const scaleContainer = root.closest(
+      ".bracket-inner-scale"
+    ) as HTMLElement | null;
+    const scale =
+      scaleContainer && scaleContainer.offsetWidth > 0
+        ? scaleContainer.getBoundingClientRect().width /
+          scaleContainer.offsetWidth
+        : 1;
+    const rootRect = root.getBoundingClientRect();
     const cards = Array.from(
       root.querySelectorAll<HTMLElement>("[data-series-id]")
     );
@@ -616,8 +618,8 @@ const rootRect = root.getBoundingClientRect();
 
       if (!seriesId || !nextSeriesId) return;
 
-      const target = root.querySelector<HTMLElement>(
-        `[data-series-id="${nextSeriesId}"]`
+      const target = cards.find(
+        (item) => item.dataset.seriesId === nextSeriesId
       );
 
       if (!target) return;
@@ -625,13 +627,13 @@ const rootRect = root.getBoundingClientRect();
       const fromRect = card.getBoundingClientRect();
       const toRect = target.getBoundingClientRect();
 
-const startX = (fromRect.right - rootRect.left) / scale;
-const startY = (fromRect.top + fromRect.height / 2 - rootRect.top) / scale;
+      const startX = (fromRect.right - rootRect.left) / scale;
+      const startY = (fromRect.top + fromRect.height / 2 - rootRect.top) / scale;
 
-const endX = (toRect.left - rootRect.left) / scale;
-const endY = (toRect.top + toRect.height / 2 - rootRect.top) / scale;
+      const endX = (toRect.left - rootRect.left) / scale;
+      const endY = (toRect.top + toRect.height / 2 - rootRect.top) / scale;
 
-const middleX = startX + (endX - startX) * 0.5;
+      const middleX = startX + (endX - startX) * 0.5;
 
       nextLines.push({
         id: `${seriesId}-${nextSeriesId}`,
@@ -641,27 +643,40 @@ const middleX = startX + (endX - startX) * 0.5;
       });
     });
 
-setBracketLines((currentLines) => {
-  const currentSignature = currentLines
-    .map((line) => `${line.id}:${line.path}`)
-    .join("|");
+    setBracketLines((currentLines) => {
+      const currentSignature = currentLines
+        .map((line) => `${line.id}:${line.path}`)
+        .join("|");
 
-  const nextSignature = nextLines
-    .map((line) => `${line.id}:${line.path}`)
-    .join("|");
+      const nextSignature = nextLines
+        .map((line) => `${line.id}:${line.path}`)
+        .join("|");
 
-  return currentSignature === nextSignature ? currentLines : nextLines;
-});
+      return currentSignature === nextSignature ? currentLines : nextLines;
+    });
   };
 
   const frame = window.requestAnimationFrame(buildLines);
   const timer = window.setTimeout(buildLines, 150);
+  let resizeFrame = 0;
+  const resizeObserver =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(() => {
+          window.cancelAnimationFrame(resizeFrame);
+          resizeFrame = window.requestAnimationFrame(buildLines);
+        });
 
+  if (bracketRef.current && resizeObserver) {
+    resizeObserver.observe(bracketRef.current);
+  }
   window.addEventListener("resize", buildLines);
 
   return () => {
     window.cancelAnimationFrame(frame);
+    window.cancelAnimationFrame(resizeFrame);
     window.clearTimeout(timer);
+    resizeObserver?.disconnect();
     window.removeEventListener("resize", buildLines);
   };
 }, [selectedTournamentId, matches]);
@@ -708,12 +723,7 @@ const getMatchPreviewData = (match: Match) => {
   };
 };
 
-const renderBracketMatch = (
-  match: Match,
-  matchIndex = 0,
-  matchesCount = 1,
-  showLines = false
-) => {
+const renderBracketMatch = (match: Match) => {
   const {
     leftName,
     rightName,
@@ -729,11 +739,7 @@ const renderBracketMatch = (
 return (
   <div
     key={match.id}
-    className={`bracket-match-card ${
-      showLines ? "bracket-match-card-lined" : ""
-    } ${matchIndex % 2 === 0 ? "bracket-match-even" : "bracket-match-odd"} ${
-      matchIndex === matchesCount - 1 ? "bracket-match-last" : ""
-    }`}
+    className="bracket-match-card"
   >
       <div className="bracket-match-top">
         <span>{match.roundLabel || match.round || tournamentText.match}</span>
@@ -777,12 +783,7 @@ return (
   );
 };
 
-const renderBracketSeries = (
-  seriesMatches: Match[],
-  seriesIndex = 0,
-  seriesCount = 1,
-  showLines = false
-) => {
+const renderBracketSeries = (seriesMatches: Match[]) => {
 const mainMatch = seriesMatches[seriesMatches.length - 1] || seriesMatches[0];
 const seriesId = getSeriesKey(mainMatch);
 const activeSeriesResult = activeSeriesResultMap.get(seriesId);
@@ -1629,6 +1630,13 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
   <div className="bracket-inner-scale">
     <div className="bracket-columns" ref={bracketRef}>
             <svg className="bracket-svg-lines">
+<defs>
+  <linearGradient id="championGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stopColor="#ffb347" />
+    <stop offset="50%" stopColor="#fff3b0" />
+    <stop offset="100%" stopColor="#ffd66b" />
+  </linearGradient>
+</defs>
 {bracketLines.map((line) => {
 const fromResult = activeSeriesResultMap.get(line.fromId);
 const toResult = activeSeriesResultMap.get(line.toId);
@@ -1638,24 +1646,27 @@ const isLossLine = fromResult === "win" && toResult === "loss";
 const isDrawLine = fromResult === "draw" || toResult === "draw";
 const isChampionLine = winnerSeriesPath.includes(line.fromId);
 
-const finalSeriesIds = finalSeries
-  .map((seriesMatches) => seriesMatches[0])
-  .filter(Boolean)
-  .map((match) => getSeriesKey(match));
-
 return (
-  <path
-    key={line.id}
-    d={line.path}
-className={[
-  isLossLine && "bracket-line-loss",
-  isWinLine && "bracket-line-active",
-  isDrawLine && "bracket-line-draw",
-  isChampionLine && "bracket-line-champion-route",
-]
-  .filter(Boolean)
-  .join(" ")}
-  />
+  <g key={line.id}>
+    <path
+      d={line.path}
+      className={[
+        isLossLine && "bracket-line-loss",
+        isWinLine && "bracket-line-active",
+        isDrawLine && "bracket-line-draw",
+        isChampionLine && "bracket-line-champion-route",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    />
+
+    {isChampionLine ? (
+      <path
+        d={line.path}
+        className="bracket-line-champion-flow"
+      />
+    ) : null}
+  </g>
 );
 })}
             </svg>
@@ -1665,13 +1676,8 @@ className={[
                 <div className="bracket-column-title">{roundName}</div>
 
                 <div className="bracket-column-matches">
-                  {series.map((seriesMatches, seriesIndex) =>
-                    renderBracketSeries(
-                      seriesMatches,
-                      seriesIndex,
-                      series.length,
-                      false
-                    )
+                  {series.map((seriesMatches) =>
+                    renderBracketSeries(seriesMatches)
                   )}
                 </div>
               </div>
@@ -1682,13 +1688,8 @@ className={[
                 <div className="bracket-column-title">{tournamentText.final}</div>
 
                 <div className="bracket-column-matches">
-                  {finalSeries.map((seriesMatches, seriesIndex) =>
-                    renderBracketSeries(
-                      seriesMatches,
-                      seriesIndex,
-                      finalSeries.length,
-                      false
-                    )
+                  {finalSeries.map((seriesMatches) =>
+                    renderBracketSeries(seriesMatches)
                   )}
                 </div>
               </div>
