@@ -214,31 +214,46 @@ export default function LeaderboardTab({
                     </div>
                   </div>
 
-                  {playerTeam ? (
-                    <div className="premium-leader-team">
-                      {playerTeam.logo ? (
-                        <img
-                          src={playerTeam.logo}
-                          alt={playerTeam.name}
-                          className="premium-leader-team-logo"
-                        />
-                      ) : (
-                        <div className="premium-leader-team-logo premium-leader-avatar-fallback">
-                          {playerTeam.name.slice(0, 2).toUpperCase()}
+                  <div
+                    className="premium-leader-team"
+                    aria-hidden={playerTeam ? undefined : true}
+                  >
+                    {playerTeam ? (
+                      <>
+                        {playerTeam.logo ? (
+                          <img
+                            src={playerTeam.logo}
+                            alt={playerTeam.name}
+                            className="premium-leader-team-logo"
+                          />
+                        ) : (
+                          <div className="premium-leader-team-logo premium-leader-avatar-fallback">
+                            {playerTeam.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div className="premium-leader-team-name">
+                            {playerTeam.name}
+                          </div>
+                          <div className="premium-leader-team-sub">
+                            {leaderboardText.activeRoster}
+                          </div>
                         </div>
-                      )}
-                      <div>
-                        <div className="premium-leader-team-name">
-                          {playerTeam.name}
+                      </>
+                    ) : (
+                      <>
+                        <div className="premium-leader-team-logo premium-leader-team-placeholder-logo" />
+                        <div>
+                          <div className="premium-leader-team-name premium-leader-team-placeholder-title">
+                            Free Agent
+                          </div>
+                          <div className="premium-leader-team-sub premium-leader-team-placeholder-sub">
+                            No team assigned
+                          </div>
                         </div>
-                        <div className="premium-leader-team-sub">
-                          {leaderboardText.activeRoster}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="premium-leader-team-spacer" aria-hidden="true" />
-                  )}
+                      </>
+                    )}
+                  </div>
 
                   <div className="premium-leader-stats">
                     <div>

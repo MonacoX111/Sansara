@@ -353,6 +353,16 @@
   flex: 0 0 42px;
 }
 
+.premium-leader-team-placeholder-logo {
+  opacity: 0.5;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.025)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .premium-leader-free-logo {
   color: #aab4c4;
   background: rgba(255, 255, 255, 0.06);
@@ -389,10 +399,18 @@
   text-overflow: ellipsis;
 }
 
+.premium-leader-team-placeholder-title {
+  color: rgba(255, 255, 255, 0.48);
+}
+
 .premium-leader-team-sub {
   margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.premium-leader-team-placeholder-sub {
+  color: rgba(255, 255, 255, 0.32);
 }
 
 .premium-leader-stats {
