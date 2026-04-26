@@ -16,6 +16,7 @@ export const t = {
     tournaments: "Tournaments",
     topElo: "Top ELO",
     teamsLabel: "teams",
+    tournamentsLabel: "tournaments",
     matchesLabel: "matches",
     quickNavigation: "Quick Navigation",
     quickNavigationSubtitle: "Jump straight into the main tournament tools.",
@@ -381,17 +382,17 @@ nav: {
   admin: "Admin",
 },
 
-    f1: "Manage tournaments",
-    f1d: "Create formats, participants and results.",
+    f1: "Tournament management",
+    f1d: "Tournament formats, participants, and results are admin controlled.",
 
-    f2: "Track players",
-    f2d: "Monitor stats, ELO and achievements.",
+    f2: "Player profiles",
+    f2d: "Player stats, ELO, and achievements are shown in one place.",
 
-    f3: "Build brackets",
-    f3d: "Visual playoff and group systems.",
+    f3: "Tournament brackets",
+    f3d: "Playoff and group systems are displayed visually.",
 
-    f4: "Save history",
-    f4d: "All tournaments stored permanently.",
+    f4: "Tournament history",
+    f4d: "Completed tournaments remain available as platform history.",
   },
 
   ua: {
@@ -409,6 +410,7 @@ nav: {
     tournaments: "Турніри",
     topElo: "Топ ELO",
     teamsLabel: "команд",
+    tournamentsLabel: "турнірів",
     matchesLabel: "матчів",
     quickNavigation: "Швидка навігація",
     quickNavigationSubtitle: "Переходьте одразу до основних турнірних інструментів.",
@@ -773,15 +775,15 @@ nav: {
 },
 
     f1: "Керування турнірами",
-    f1d: "Створюйте формати, учасників і результати.",
+    f1d: "Формати турнірів, учасники та результати керуються адміністратором.",
 
     f2: "Гравці",
-    f2d: "Відстежуйте статистику, ELO та досягнення.",
+    f2d: "Статистика, ELO та досягнення гравців показані в одному місці.",
 
     f3: "Сітка турніру",
-    f3d: "Візуалізація плей-офф і груп.",
+    f3d: "Плей-офф і групові етапи відображаються у візуальному форматі.",
 
     f4: "Історія",
-    f4d: "Усі турніри зберігаються назавжди.",
+    f4d: "Завершені турніри залишаються доступними в історії платформи.",
   },
 };

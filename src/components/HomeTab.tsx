@@ -63,6 +63,7 @@ export default function HomeTab({
     description: string;
     count: number;
     accent: string;
+    tone: string;
   }[] = [
     {
       tab: "players",
@@ -70,6 +71,7 @@ export default function HomeTab({
       description: text.quickPlayersDescription,
       count: players.length,
       accent: "01",
+      tone: "players",
     },
     {
       tab: "teams",
@@ -77,6 +79,7 @@ export default function HomeTab({
       description: text.quickTeamsDescription,
       count: teams.length,
       accent: "02",
+      tone: "teams",
     },
     {
       tab: "tournaments",
@@ -84,6 +87,7 @@ export default function HomeTab({
       description: text.quickTournamentsDescription,
       count: tournaments.length,
       accent: "03",
+      tone: "tournaments",
     },
     {
       tab: "leaderboard",
@@ -91,6 +95,7 @@ export default function HomeTab({
       description: text.quickLeaderboardDescription,
       count: topElo,
       accent: "04",
+      tone: "leaderboard",
     },
   ];
 
@@ -128,8 +133,8 @@ export default function HomeTab({
               {players.length} {text.platformPlayers}
             </strong>
             <p>
-              {teams.length} {text.teamsLabel} · {matches.length}{" "}
-              {text.matchesLabel}
+              {teams.length} {text.teamsLabel} · {tournaments.length}{" "}
+              {text.tournamentsLabel}
             </p>
           </div>
 
@@ -160,7 +165,7 @@ export default function HomeTab({
               type="button"
               className={`welcome-nav-card ${
                 item.tab === "tournaments" ? "welcome-nav-card-primary" : ""
-              }`}
+              } welcome-nav-card-${item.tone}`}
               onMouseMove={handleGlow}
               onClick={() => setActiveTab(item.tab)}
             >
@@ -180,7 +185,7 @@ export default function HomeTab({
         </div>
       </div>
 
-      <div className="welcome-section">
+      <div className="welcome-section welcome-activity-section">
         <div className="welcome-section-head">
           <span>{text.recentActivity}</span>
           <p>{text.recentActivitySubtitle}</p>
@@ -217,7 +222,9 @@ export default function HomeTab({
                   </div>
 
                   <div className="welcome-activity-meta">
-                    <span>{match.score || "—"}</span>
+                    <div className="welcome-score-badge">
+                      <span>{match.score || "—"}</span>
+                    </div>
                     <small>{match.round || text.common.match}</small>
                   </div>
                 </div>
