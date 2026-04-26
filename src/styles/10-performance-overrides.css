@@ -1,0 +1,131 @@
+/* ============================================================
+   PERFORMANCE OVERRIDES
+   Imported LAST so its rules override previous files.
+   Purpose: keep premium dark esports look while killing
+   GPU-heavy effects that caused scroll jitter / high INP.
+   ============================================================ */
+
+/* ===== HARD RESET BACKGROUND + SCROLL PERFORMANCE FIX ===== */
+
+/* Minimal premium base: dark gradient + 2 soft glow sources, fixed */
+body {
+  background:
+    radial-gradient(ellipse 60% 55% at 8% 6%, rgba(255, 59, 95, 0.10), transparent 62%),
+    radial-gradient(ellipse 60% 55% at 92% 94%, rgba(67, 208, 255, 0.08), transparent 62%),
+    linear-gradient(180deg, #04060a 0%, #060810 50%, #04060a 100%);
+  background-attachment: fixed;
+  background-color: #04060a;
+}
+
+/* Kill noise overlay (fixed full-viewport paint layer) */
+body::before {
+  content: none;
+  display: none;
+}
+
+/* Kill heavy .page background layers + animated grid + 300% gradient */
+.page {
+  background: none !important;
+  animation: none !important;
+}
+
+/* Kill .page::before (filter: blur 30px over full viewport — most expensive) */
+/* Kill .page::after (animated diagonal sweep over full viewport) */
+.page::before,
+.page::after {
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+  filter: none !important;
+  background: none !important;
+}
+
+/* ===== PERF KILL SWITCH (deep audit) ===== */
+
+/* 1. Backdrop-filter on commonly visible elements — heaviest scroll killer */
+.hero,
+.panel,
+.input,
+.stat-card,
+.welcome-stat-pill,
+.bracket-side,
+.premium-leader-team-inline,
+.confirm-overlay,
+.tournament-history-card,
+.tournament-history-meta-pill,
+.tournament-history-prize-pill,
+.tournament-history-stat,
+.tournament-history-prize,
+.scroll-top-btn {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Compensate with slightly more opaque backgrounds */
+.panel {
+  background: rgba(17, 21, 29, 0.96) !important;
+}
+
+.input {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.tournament-history-meta-pill,
+.tournament-history-stat {
+  background: rgba(13, 16, 24, 0.88) !important;
+}
+
+.scroll-top-btn {
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.28), rgba(67, 208, 255, 0.14)),
+    rgba(10, 12, 18, 0.94) !important;
+}
+
+.scroll-top-btn:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.38), rgba(67, 208, 255, 0.18)),
+    rgba(10, 12, 18, 0.98) !important;
+}
+
+/* 2. Kill animated filter:blur (re-rasterized every frame of shimmer animation) */
+.premium-leader-champion::after,
+.premium-leader-champion::before,
+.premium-leader-rank-2::after,
+.premium-leader-rank-3::after,
+.home-panel .player-row.new:nth-child(1)::after,
+.tournament-card-button::after {
+  filter: none !important;
+}
+
+/* Disable secondary shimmer on champion (::after already provides shimmer; ::before doubled cost) */
+.premium-leader-champion::before {
+  animation: none !important;
+  display: none !important;
+}
+
+/* 3. Reduce large box-shadow blur radii on visible cards */
+.simple-card,
+.button-card,
+.tournament-history-card,
+.tournament-card-button,
+.match-card,
+.result-card,
+.team-roster-card,
+.team-history-card,
+.profile-primary-card,
+.stat-card,
+.tournament-stat-card,
+.overview-stat-card {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+.simple-card:hover,
+.button-card:hover,
+.tournament-history-card:hover,
+.tournament-card-button:hover,
+.match-card:hover,
+.result-card:hover,
+.team-roster-card:hover,
+.team-history-card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36) !important;
+}
