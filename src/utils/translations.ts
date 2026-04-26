@@ -208,6 +208,11 @@ common: {
   bestOfShort: "BO",
 },
 
+team: {
+  freeAgent: "Free Agent",
+  noTeam: "No team assigned",
+},
+
 generalPage: {
     teams: "Teams",
   homeAnnouncementHidden: "Home announcement is hidden",
@@ -253,8 +258,6 @@ leaderboardPage: {
   wins: "Wins",
   earnings: "Earnings",
   activeRoster: "Active roster",
-  freeAgent: "Free Agent",
-  noTeamAssigned: "No team assigned",
   noAchievements: "No achievements",
   eloRating: "ELO rating",
 },
@@ -601,6 +604,11 @@ common: {
   bestOfShort: "BO",
 },
 
+team: {
+  freeAgent: "Вільний агент",
+  noTeam: "Команду не призначено",
+},
+
 generalPage: {
     teams: "Команди",
   homeAnnouncementHidden: "Анонс на головній приховано",
@@ -646,8 +654,6 @@ leaderboardPage: {
   wins: "Перемоги",
   earnings: "Заробіток",
   activeRoster: "Активний склад",
-  freeAgent: "Вільний агент",
-  noTeamAssigned: "Команду не призначено",
   noAchievements: "Немає досягнень",
   eloRating: "ELO рейтинг",
 },

@@ -21,6 +21,7 @@ export default function LeaderboardTab({
   const text = t[lang] || t.en;
   const leaderboardText = text.leaderboardPage;
   const commonText = text.common;
+  const teamText = text.team;
   const getPlayerTeam = (teamId: number) =>
     teams.find((team) => team.id === teamId) || null;
 
@@ -87,7 +88,7 @@ export default function LeaderboardTab({
                     {topPlayer.nickname}
                     {!getPlayerTeam(topPlayer.teamId) && (
                       <span className="premium-leader-free-badge">
-                        {leaderboardText.freeAgent}
+                        {teamText.freeAgent}
                       </span>
                     )}
                   </div>
@@ -181,7 +182,7 @@ export default function LeaderboardTab({
                         {player.nickname}
                         {!playerTeam && (
                           <span className="premium-leader-free-badge">
-                            {leaderboardText.freeAgent}
+                            {teamText.freeAgent}
                           </span>
                         )}
                       </div>
@@ -245,10 +246,10 @@ export default function LeaderboardTab({
                         <div className="premium-leader-team-logo premium-leader-team-placeholder-logo" />
                         <div>
                           <div className="premium-leader-team-name premium-leader-team-placeholder-title">
-                            Free Agent
+                            {teamText.freeAgent}
                           </div>
                           <div className="premium-leader-team-sub premium-leader-team-placeholder-sub">
-                            No team assigned
+                            {teamText.noTeam}
                           </div>
                         </div>
                       </>
