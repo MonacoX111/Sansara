@@ -358,6 +358,29 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* Inline Free Agent badge next to player name (no container, no bar) */
+.premium-leader-free-badge {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.premium-leader-champion-name .premium-leader-free-badge {
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
 .premium-leader-team-name {
   font-size: 14px;
   font-weight: 900;

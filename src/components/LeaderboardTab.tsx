@@ -85,6 +85,11 @@ export default function LeaderboardTab({
                   <div className="premium-leader-label">{leaderboardText.currentLeader}</div>
                   <div className="premium-leader-champion-name">
                     {topPlayer.nickname}
+                    {!getPlayerTeam(topPlayer.teamId) && (
+                      <span className="premium-leader-free-badge">
+                        {leaderboardText.freeAgent}
+                      </span>
+                    )}
                   </div>
 
 
@@ -97,38 +102,28 @@ export default function LeaderboardTab({
   <span>{topPlayer.earnings} ₴</span>
 </div>
 
-<div className="premium-leader-team-inline">
-  {getPlayerTeam(topPlayer.teamId) ? (
-    <>
-      {getPlayerTeam(topPlayer.teamId)?.logo ? (
-        <img
-          src={getPlayerTeam(topPlayer.teamId)?.logo}
-          alt={getPlayerTeam(topPlayer.teamId)?.name}
-          className="premium-leader-team-logo"
-        />
-      ) : (
-        <div className="premium-leader-team-logo premium-leader-avatar-fallback">
-          {getPlayerTeam(topPlayer.teamId)?.name.slice(0, 2).toUpperCase()}
-        </div>
-      )}
+{getPlayerTeam(topPlayer.teamId) && (
+  <div className="premium-leader-team-inline">
+    {getPlayerTeam(topPlayer.teamId)?.logo ? (
+      <img
+        src={getPlayerTeam(topPlayer.teamId)?.logo}
+        alt={getPlayerTeam(topPlayer.teamId)?.name}
+        className="premium-leader-team-logo"
+      />
+    ) : (
+      <div className="premium-leader-team-logo premium-leader-avatar-fallback">
+        {getPlayerTeam(topPlayer.teamId)?.name.slice(0, 2).toUpperCase()}
+      </div>
+    )}
 
-      <div>
-        <div className="premium-leader-team-name">
-          {getPlayerTeam(topPlayer.teamId)?.name}
-        </div>
-        <div className="premium-leader-team-sub">{leaderboardText.activeRoster}</div>
+    <div>
+      <div className="premium-leader-team-name">
+        {getPlayerTeam(topPlayer.teamId)?.name}
       </div>
-    </>
-  ) : (
-    <>
-      <div className="premium-leader-team-logo premium-leader-free-logo">—</div>
-      <div>
-<div className="premium-leader-team-name">{leaderboardText.freeAgent}</div>
-<div className="premium-leader-team-sub">{leaderboardText.noTeamAssigned}</div>
-      </div>
-    </>
-  )}
-</div>
+      <div className="premium-leader-team-sub">{leaderboardText.activeRoster}</div>
+    </div>
+  </div>
+)}
 <div className="premium-leader-champion-achievements">
   {getPlayerAchievements(topPlayer.id).length > 0 ? (
     getPlayerAchievements(topPlayer.id)
@@ -184,6 +179,11 @@ export default function LeaderboardTab({
                     <div className="premium-leader-info">
                       <div className="premium-leader-name">
                         {player.nickname}
+                        {!playerTeam && (
+                          <span className="premium-leader-free-badge">
+                            {leaderboardText.freeAgent}
+                          </span>
+                        )}
                       </div>
 
                       <div className="premium-leader-achievements">
@@ -214,45 +214,31 @@ export default function LeaderboardTab({
                     </div>
                   </div>
 
-                  <div className="premium-leader-team">
-                    {playerTeam ? (
-                      <>
-                        {playerTeam.logo ? (
-                          <img
-                            src={playerTeam.logo}
-                            alt={playerTeam.name}
-                            className="premium-leader-team-logo"
-                          />
-                        ) : (
-                          <div className="premium-leader-team-logo premium-leader-avatar-fallback">
-                            {playerTeam.name.slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                        <div>
-                          <div className="premium-leader-team-name">
-                            {playerTeam.name}
-                          </div>
-<div className="premium-leader-team-sub">
-  {leaderboardText.activeRoster}
-</div>
+                  {playerTeam ? (
+                    <div className="premium-leader-team">
+                      {playerTeam.logo ? (
+                        <img
+                          src={playerTeam.logo}
+                          alt={playerTeam.name}
+                          className="premium-leader-team-logo"
+                        />
+                      ) : (
+                        <div className="premium-leader-team-logo premium-leader-avatar-fallback">
+                          {playerTeam.name.slice(0, 2).toUpperCase()}
                         </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="premium-leader-team-logo premium-leader-free-logo">
-                          —
+                      )}
+                      <div>
+                        <div className="premium-leader-team-name">
+                          {playerTeam.name}
                         </div>
-                        <div>
-<div className="premium-leader-team-name">
-  {leaderboardText.freeAgent}
-</div>
-<div className="premium-leader-team-sub">
-  {leaderboardText.noTeamAssigned}
-</div>
+                        <div className="premium-leader-team-sub">
+                          {leaderboardText.activeRoster}
                         </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="premium-leader-team-spacer" aria-hidden="true" />
+                  )}
 
                   <div className="premium-leader-stats">
                     <div>
