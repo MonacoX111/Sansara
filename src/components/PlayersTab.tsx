@@ -18,8 +18,8 @@ type Props = {
   setTeamFilter: (value: string) => void;
   sortMode: string;
   setSortMode: (value: string) => void;
-gamesList: { id: string; name: string; icon: string }[];
-lang: Lang;
+  gamesList: { id: string; name: string; icon: string }[];
+  lang: Lang;
 };
 
 export default function PlayersTab({
@@ -39,12 +39,12 @@ export default function PlayersTab({
   sortMode,
   setSortMode,
   gamesList,
-    lang,
+  lang = "en",
 }: Props) {
 
-const text = t[lang] || t.en;
-const playerText = text.playersPage;
-const commonText = text.common;
+  const text = t[lang] || t.en;
+  const playerText = text.playersPage;
+  const commonText = text.common;
 
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";

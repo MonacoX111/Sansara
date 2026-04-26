@@ -20,7 +20,7 @@ export default function HomeTab({
 }: Props) {
   const text = t[lang || "en"] || t.en;
 
-  const handleGlow = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleGlow = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
     e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
@@ -28,6 +28,71 @@ export default function HomeTab({
 
   const topElo =
     players.length > 0 ? Math.max(...players.map((p) => p.elo || 0)) : 0;
+  const recentMatches = [...matches].sort((a, b) => b.id - a.id).slice(0, 5);
+
+  const getMatchSide = (match: Match, side: "left" | "right") => {
+    const isTeamMatch = match.matchType === "team";
+    const id = isTeamMatch
+      ? side === "left"
+        ? match.team1
+        : match.team2
+      : side === "left"
+      ? match.player1
+      : match.player2;
+
+    const entity = isTeamMatch
+      ? teams.find((team) => team.id === id)
+      : players.find((player) => player.id === id);
+
+    if (!entity) {
+      return isTeamMatch
+        ? side === "left"
+          ? text.generalPage.team1
+          : text.generalPage.team2
+        : side === "left"
+        ? text.generalPage.player1
+        : text.generalPage.player2;
+    }
+
+    return "name" in entity ? entity.name : entity.nickname;
+  };
+
+  const quickLinks: {
+    tab: TabKey;
+    label: string;
+    description: string;
+    count: number;
+    accent: string;
+  }[] = [
+    {
+      tab: "players",
+      label: text.nav.players,
+      description: text.quickPlayersDescription,
+      count: players.length,
+      accent: "01",
+    },
+    {
+      tab: "teams",
+      label: text.nav.teams,
+      description: text.quickTeamsDescription,
+      count: teams.length,
+      accent: "02",
+    },
+    {
+      tab: "tournaments",
+      label: text.nav.tournaments,
+      description: text.quickTournamentsDescription,
+      count: tournaments.length,
+      accent: "03",
+    },
+    {
+      tab: "leaderboard",
+      label: text.nav.leaderboard,
+      description: text.quickLeaderboardDescription,
+      count: topElo,
+      accent: "04",
+    },
+  ];
 
   return (
     <section className="welcome-page">
@@ -49,17 +114,19 @@ export default function HomeTab({
 
             <button
               className="secondary-btn"
-              onClick={() => setActiveTab("leaderboard")}
+              onClick={() => setActiveTab("players")}
             >
-              {text.leaderboard}
+              {text.viewTopPlayers}
             </button>
           </div>
         </div>
 
         <div className="welcome-right">
-          <div className="welcome-preview-card main">
+          <div className="welcome-preview-card main" onMouseMove={handleGlow}>
             <span>{text.platform}</span>
-            <strong>{players.length}</strong>
+            <strong>
+              {players.length} {text.platformPlayers}
+            </strong>
             <p>
               {teams.length} {text.teamsLabel} · {matches.length}{" "}
               {text.matchesLabel}
@@ -67,12 +134,12 @@ export default function HomeTab({
           </div>
 
           <div className="welcome-preview-grid">
-            <div className="welcome-mini-card">
+            <div className="welcome-mini-card" onMouseMove={handleGlow}>
               <span>{text.tournaments}</span>
               <strong>{tournaments.length}</strong>
             </div>
 
-            <div className="welcome-mini-card">
+            <div className="welcome-mini-card" onMouseMove={handleGlow}>
               <span>{text.topElo}</span>
               <strong>{topElo}</strong>
             </div>
@@ -80,26 +147,106 @@ export default function HomeTab({
         </div>
       </div>
 
+      <div className="welcome-section">
+        <div className="welcome-section-head">
+          <span>{text.quickNavigation}</span>
+          <p>{text.quickNavigationSubtitle}</p>
+        </div>
+
+        <div className="welcome-nav-grid">
+          {quickLinks.map((item) => (
+            <button
+              key={item.tab}
+              type="button"
+              className={`welcome-nav-card ${
+                item.tab === "tournaments" ? "welcome-nav-card-primary" : ""
+              }`}
+              onMouseMove={handleGlow}
+              onClick={() => setActiveTab(item.tab)}
+            >
+              <div className="welcome-nav-card-top">
+                <span>{item.label}</span>
+                <small>{item.accent}</small>
+              </div>
+
+              <div className="welcome-nav-card-main">
+                <strong>{item.count}</strong>
+                <i aria-hidden="true">→</i>
+              </div>
+
+              <p>{item.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="welcome-section">
+        <div className="welcome-section-head">
+          <span>{text.recentActivity}</span>
+          <p>{text.recentActivitySubtitle}</p>
+        </div>
+
+        {recentMatches.length === 0 ? (
+          <div className="welcome-empty">{text.noRecentActivity}</div>
+        ) : (
+          <div className="welcome-activity-list">
+            {recentMatches.map((match) => {
+              const tournament = tournaments.find(
+                (item) => item.id === match.tournamentId
+              );
+              const leftName = getMatchSide(match, "left");
+              const rightName = getMatchSide(match, "right");
+
+              return (
+                <div
+                  key={match.id}
+                  className="welcome-activity-row"
+                  onMouseMove={handleGlow}
+                >
+                  <div className="welcome-activity-main">
+                    <span className="welcome-activity-status">
+                      {match.status}
+                    </span>
+                    <strong>
+                      {leftName} {text.common.vs} {rightName}
+                    </strong>
+                    <p>
+                      {tournament?.title || text.generalPage.noTournament}
+                      <span>{match.date || text.common.tbd}</span>
+                    </p>
+                  </div>
+
+                  <div className="welcome-activity-meta">
+                    <span>{match.score || "—"}</span>
+                    <small>{match.round || text.common.match}</small>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="welcome-feature-grid">
-        <div className="welcome-feature-card">
+        <div className="welcome-feature-card" onMouseMove={handleGlow}>
           <span>01</span>
           <strong>{text.f1}</strong>
           <p>{text.f1d}</p>
         </div>
 
-        <div className="welcome-feature-card">
+        <div className="welcome-feature-card" onMouseMove={handleGlow}>
           <span>02</span>
           <strong>{text.f2}</strong>
           <p>{text.f2d}</p>
         </div>
 
-        <div className="welcome-feature-card">
+        <div className="welcome-feature-card" onMouseMove={handleGlow}>
           <span>03</span>
           <strong>{text.f3}</strong>
           <p>{text.f3d}</p>
         </div>
 
-        <div className="welcome-feature-card">
+        <div className="welcome-feature-card" onMouseMove={handleGlow}>
           <span>04</span>
           <strong>{text.f4}</strong>
           <p>{text.f4d}</p>

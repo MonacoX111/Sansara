@@ -9,12 +9,23 @@ export const t = {
 
     explore: "Explore tournaments",
     leaderboard: "View leaderboard",
+    viewTopPlayers: "View top players",
 
     platform: "Platform",
+    platformPlayers: "players",
     tournaments: "Tournaments",
     topElo: "Top ELO",
     teamsLabel: "teams",
     matchesLabel: "matches",
+    quickNavigation: "Quick Navigation",
+    quickNavigationSubtitle: "Jump straight into the main tournament tools.",
+    quickPlayersDescription: "Browse players, ELO, achievements and match history.",
+    quickTeamsDescription: "Review team rosters, wins and recent form.",
+    quickTournamentsDescription: "Open brackets, formats, results and history.",
+    quickLeaderboardDescription: "See the current ranking leader and top ELO.",
+    recentActivity: "Recent Activity",
+    recentActivitySubtitle: "Latest matches across the platform.",
+    noRecentActivity: "No recent activity yet.",
 
 
 
@@ -391,12 +402,23 @@ nav: {
 
     explore: "Переглянути турніри",
     leaderboard: "Рейтинг гравців",
+    viewTopPlayers: "Переглянути топ гравців",
 
     platform: "Платформа",
+    platformPlayers: "гравців",
     tournaments: "Турніри",
     topElo: "Топ ELO",
     teamsLabel: "команд",
     matchesLabel: "матчів",
+    quickNavigation: "Швидка навігація",
+    quickNavigationSubtitle: "Переходьте одразу до основних турнірних інструментів.",
+    quickPlayersDescription: "Переглядайте гравців, ELO, досягнення та історію матчів.",
+    quickTeamsDescription: "Оглядайте склади команд, перемоги та останню форму.",
+    quickTournamentsDescription: "Відкривайте сітки, формати, результати та історію.",
+    quickLeaderboardDescription: "Дивіться поточного лідера рейтингу та топ ELO.",
+    recentActivity: "Остання активність",
+    recentActivitySubtitle: "Найновіші матчі на платформі.",
+    noRecentActivity: "Останньої активності поки немає.",
 
 admin: {
   players: "Гравці (адмін)",
