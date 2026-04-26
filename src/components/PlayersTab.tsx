@@ -1,4 +1,5 @@
 import { Achievement, Match, Player, Team, Tournament } from "../types";
+import { Lang, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
 type Props = {
@@ -17,7 +18,8 @@ type Props = {
   setTeamFilter: (value: string) => void;
   sortMode: string;
   setSortMode: (value: string) => void;
-  gamesList: { id: string; name: string; icon: string }[];
+gamesList: { id: string; name: string; icon: string }[];
+lang: Lang;
 };
 
 export default function PlayersTab({
@@ -37,7 +39,12 @@ export default function PlayersTab({
   sortMode,
   setSortMode,
   gamesList,
+    lang,
 }: Props) {
+
+const text = t[lang] || t.en;
+const playerText = text.playersPage;
+
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
 
@@ -149,7 +156,7 @@ export default function PlayersTab({
           className="input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Пошук по ніку або грі"
+placeholder={playerText.searchPlaceholder}
         />
 
         <select
@@ -157,7 +164,7 @@ export default function PlayersTab({
           value={gameFilter}
           onChange={(e) => setGameFilter(e.target.value)}
         >
-          <option value="all">All games</option>
+          <option value="all">{playerText.allGames}</option>
           {gamesList.map((game) => (
             <option key={game.id} value={game.name}>
               {game.name}
@@ -170,7 +177,7 @@ export default function PlayersTab({
           value={teamFilter}
           onChange={(e) => setTeamFilter(e.target.value)}
         >
-          <option value="all">All teams</option>
+          <option value="all">{playerText.allTeams}</option>
           {teams.map((team) => (
             <option key={team.id} value={String(team.id)}>
               {team.name}
@@ -183,16 +190,16 @@ export default function PlayersTab({
           value={sortMode}
           onChange={(e) => setSortMode(e.target.value)}
         >
-          <option value="elo">Sort by ELO</option>
-          <option value="wins">Sort by wins</option>
-          <option value="earnings">Sort by earnings</option>
-          <option value="name">Sort by name</option>
+<option value="elo">{playerText.sortByElo}</option>
+<option value="wins">{playerText.sortByWins}</option>
+<option value="earnings">{playerText.sortByEarnings}</option>
+<option value="name">{playerText.sortByName}</option>
         </select>
       </div>
 
       <div className="two-col">
         <div className="panel">
-          <h2 className="panel-title">Players directory</h2>
+          <h2 className="panel-title">{playerText.directory}</h2>
 
           <div className="player-grid">
             {filteredPlayers.map((player) => {
@@ -234,7 +241,7 @@ export default function PlayersTab({
                         <div className="player-name">
                           {player.nickname}{" "}
                           {player.isFeatured ? (
-                            <span className="pill featured-pill">Featured</span>
+                            <span className="pill featured-pill">{playerText.featured}</span>
                           ) : null}
                         </div>
                         <span className="pill light">#{player.rank}</span>
@@ -244,14 +251,14 @@ export default function PlayersTab({
 
                   <div className="player-info-box">
                     <div className="player-info-row">
-                      <span className="info-label">Team</span>
+                      <span className="info-label">{playerText.team}</span>
                       <span className="info-value">
-                        {teamName || "Без команди"}
+                        {teamName || playerText.noTeam}
                       </span>
                     </div>
 
                     <div className="player-info-row column">
-                      <span className="info-label">Games</span>
+                      <span className="info-label">{playerText.games}</span>
 
                       <div className="tag-row compact player-games-row">
                         {player.games.length > 0 ? (
@@ -261,13 +268,13 @@ export default function PlayersTab({
                             </span>
                           ))
                         ) : (
-                          <span className="muted small">Немає ігор</span>
+                          <span className="muted small">{playerText.noGames}</span>
                         )}
                       </div>
                     </div>
 
                     <div className="player-info-row column">
-                      <span className="info-label">Achievements</span>
+                      <span className="info-label">{playerText.achievements}</span>
 
                       {previewAchievements.length > 0 ? (
                         <div className="tag-row compact">
@@ -288,7 +295,7 @@ export default function PlayersTab({
                           ) : null}
                         </div>
                       ) : (
-                        <span className="muted small">Немає досягнень</span>
+                        <span className="muted small">{playerText.noAchievements}</span>
                       )}
                     </div>
                   </div>
@@ -306,7 +313,7 @@ export default function PlayersTab({
 
         {selectedPlayer && (
           <div className="panel">
-            <h2 className="panel-title">Player profile</h2>
+            <h2 className="panel-title">{playerText.profile}</h2>
 
             <div className="profile-head">
               <img
@@ -338,7 +345,7 @@ export default function PlayersTab({
                         );
                       }}
                     >
-                      <span className="info-label">Team</span>
+                      <span className="info-label">{playerText.team}</span>
 
                       <div className="profile-team-main">
                         {selectedPlayer.teamId > 0 &&
@@ -364,7 +371,7 @@ export default function PlayersTab({
                   </div>
 
                   <div className="profile-info-row column">
-                    <span className="info-label">Games</span>
+                    <span className="info-label">{playerText.games}</span>
 
                     <div className="profile-games-enhanced">
                       {selectedPlayer.games.length > 0 ? (
@@ -374,7 +381,7 @@ export default function PlayersTab({
                           </span>
                         ))
                       ) : (
-                        <span className="muted small">Немає ігор</span>
+                        <span className="muted small">{playerText.noGames}</span>
                       )}
                     </div>
                   </div>
@@ -394,7 +401,7 @@ export default function PlayersTab({
                         );
                       }}
                     >
-                      <span className="info-label">Achievements</span>
+                      <span className="info-label">{playerText.achievements}</span>
                       <span className="profile-mini-stat-value">
                         {playerAchievements.length}
                       </span>
@@ -414,34 +421,34 @@ export default function PlayersTab({
                         );
                       }}
                     >
-                      <span className="info-label">Tournaments</span>
-                      <span className="profile-mini-stat-value">
-                        {playerTournaments.length}
-                      </span>
+<span className="info-label">{playerText.tournaments}</span>
+<span className="profile-mini-stat-value">
+  {playerTournaments.length}
+</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="stats-grid">
-              <StatCard title="ELO" value={selectedPlayer.elo} />
-              <StatCard title="Wins" value={selectedPlayer.wins} />
-              <StatCard
-                title="Tournaments won"
-                value={selectedPlayer.tournamentsWon}
-              />
-              <StatCard
-                title="Earnings"
-                value={`${selectedPlayer.earnings} ₴`}
-              />
-            </div>
+<div className="stats-grid">
+  <StatCard title="ELO" value={selectedPlayer.elo} />
+  <StatCard title={playerText.wins} value={selectedPlayer.wins} />
+  <StatCard
+    title={playerText.tournamentsWon}
+    value={selectedPlayer.tournamentsWon}
+  />
+  <StatCard
+    title={playerText.earnings}
+    value={`${selectedPlayer.earnings} ₴`}
+  />
+</div>
 
-            <div className="section-block">
-              <h4>Achievements</h4>
-              {playerAchievements.length === 0 ? (
-                <p className="muted">Досягнень поки немає.</p>
-              ) : (
+<div className="section-block">
+  <h4>{playerText.achievements}</h4>
+  {playerAchievements.length === 0 ? (
+    <p className="muted">{playerText.noAchievements}</p>
+  ) : (
                 <div className="achievement-grid">
                   {playerAchievements.map((achievement) => (
                     <div
@@ -478,12 +485,12 @@ export default function PlayersTab({
               )}
             </div>
 
-            <div className="section-block">
-              <h4>Tournament history</h4>
+<div className="section-block">
+  <h4>{playerText.tournamentHistory}</h4>
 
-              {playerTournamentHistory.length === 0 ? (
-                <p className="muted">Не брав участі у турнірах.</p>
-              ) : (
+  {playerTournamentHistory.length === 0 ? (
+    <p className="muted">{playerText.noTournamentHistory}</p>
+  ) : (
                 <div className="list-col">
                   {playerTournamentHistory.map((tournament) => (
                     <div
@@ -513,12 +520,12 @@ export default function PlayersTab({
                         </div>
 
                         <div className="tag-row">
-                          <span className="pill light">
-                            Place: {String(tournament.place)}
-                          </span>
-                          {tournament.isWinner ? (
-                            <span className="pill green">Winner</span>
-                          ) : null}
+<span className="pill light">
+  {playerText.place}: {String(tournament.place)}
+</span>
+{tournament.isWinner ? (
+  <span className="pill green">{playerText.winner}</span>
+) : null}
                           {tournament.isMvp ? (
                             <span className="pill gold">MVP</span>
                           ) : null}
@@ -530,12 +537,12 @@ export default function PlayersTab({
               )}
             </div>
 
-            <div className="section-block">
-              <h4>Recent matches</h4>
+<div className="section-block">
+  <h4>{playerText.recentMatches}</h4>
 
-              {playerMatches.length === 0 ? (
-                <p className="muted">Не брав участі у матчах.</p>
-              ) : (
+  {playerMatches.length === 0 ? (
+    <p className="muted">{playerText.noRecentMatches}</p>
+  ) : (
                 <div className="list-col">
                   {playerMatches.map((match) => (
                     <div

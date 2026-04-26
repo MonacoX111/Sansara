@@ -157,6 +157,7 @@ export type GameItem = {
 
 export type TabKey =
   | "home"
+  | "general"
   | "players"
   | "teams"
   | "tournaments"

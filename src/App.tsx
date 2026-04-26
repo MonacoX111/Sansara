@@ -3,6 +3,7 @@ import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
 import TeamsTab from "./components/TeamsTab";
 import TournamentsTab from "./components/TournamentsTab";
+import HomeTab from "./components/HomeTab";
 import LeaderboardTab from "./components/LeaderboardTab";
 import AdminTab from "./components/AdminTab";
 import "./styles.css";
@@ -35,7 +36,6 @@ import {
   syncTeamPlayers,
   writeStorage,
 } from "./utils";
-import StatCard from "./components/StatCard";
 import { isFirebaseConfigured } from "./firebase";
 import {
   deleteItem,
@@ -444,6 +444,14 @@ const handleGlow = useMouseGlow();
   );
 
   const [activeTab, setActiveTab] = useState<TabKey>("home");
+
+  const [lang, setLang] = useState<"en" | "ua">(() => {
+  return (localStorage.getItem("lang") as "en" | "ua") || "en";
+});
+
+useEffect(() => {
+  localStorage.setItem("lang", lang);
+}, [lang]);
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(1);
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
@@ -2182,49 +2190,54 @@ const deleteAchievement = async (achievementId: number) => {
   return (
     <div className="page">
       <div className="container">
-<div className="hero hero-premium">
-  <div className="hero-premium-content">
-    <p className="hero-kicker">Tournaments esports hub</p>
 
-    <h1 className="hero-title hero-premium-title">
-      Sansara Control Center
-    </h1>
+<div className="topbar-actions">
+<Tabs
+  active={activeTab}
+  onChange={setActiveTab}
+  showAdmin={isAdmin}
+  lang={lang}
+/>
 
-    <p className="hero-premium-subtitle">
-      Manage players, teams, tournaments and matches in one premium dashboard.
-    </p>
-
-    <div className="hero-premium-actions">
-      <span className="hero-status-pill">
-        {firebaseReady ? "● Firestore active" : "● Connecting..."}
-      </span>
-      <span className="hero-admin-pill">Ctrl + Shift + A Admin</span>
+  <div className="topbar-right">
+    <div className="lang-switch">
+<button
+  type="button"
+  className={lang === "en" ? "active" : ""}
+  onClick={() => setLang("en")}
+>
+        EN
+      </button>
+<button
+  type="button"
+  className={lang === "ua" ? "active" : ""}
+  onClick={() => setLang("ua")}
+>
+        UA
+      </button>
     </div>
-  </div>
 
-  <div className="hero-stats hero-premium-stats">
-    <StatCard title="Players" value={players.length} />
-    <StatCard title="Teams" value={teams.length} />
-    <StatCard title="Matches" value={matches.length} />
-    <StatCard title="Top ELO" value={Math.max(...players.map((p) => p.elo), 0)} />
+    {isAdmin && (
+      <button className="secondary-btn" onClick={handleAdminLogout}>
+        Logout admin
+      </button>
+    )}
   </div>
 </div>
 
-        <div className="topbar-actions">
-          <Tabs
-            active={activeTab}
-            onChange={setActiveTab}
-            showAdmin={isAdmin}
-          />
+{activeTab === "home" && (
+<HomeTab
+  key={lang}
+  players={players}
+  teams={teams}
+  tournaments={tournaments}
+  matches={matches}
+  setActiveTab={setActiveTab}
+  lang={lang}
+/>
+)}
 
-          {isAdmin && (
-            <button className="secondary-btn" onClick={handleAdminLogout}>
-              Logout admin
-            </button>
-          )}
-        </div>
-
-        {activeTab === "home" && (
+{activeTab === "general" && (
           <section className="home-announcement-page">
             {!homeAnnouncement.isVisible ? (
               <div className="panel">
@@ -2817,24 +2830,25 @@ onMouseMove={handleGlow}
         )}
 
         {activeTab === "players" && (
-          <PlayersTab
-            players={players}
-            teams={teams}
-            matches={matches}
-            tournaments={tournaments}
-            achievements={achievements}
-            selectedPlayerId={selectedPlayerId}
-            setSelectedPlayerId={setSelectedPlayerId}
-            search={search}
-            setSearch={setSearch}
-            gameFilter={gameFilter}
-            setGameFilter={setGameFilter}
-            teamFilter={teamFilter}
-            setTeamFilter={setTeamFilter}
-            sortMode={sortMode}
-            setSortMode={setSortMode}
-            gamesList={gamesList}
-          />
+<PlayersTab
+  players={players}
+  teams={teams}
+  matches={matches}
+  tournaments={tournaments}
+  achievements={achievements}
+  selectedPlayerId={selectedPlayerId}
+  setSelectedPlayerId={setSelectedPlayerId}
+  search={search}
+  setSearch={setSearch}
+  gameFilter={gameFilter}
+  setGameFilter={setGameFilter}
+  teamFilter={teamFilter}
+  setTeamFilter={setTeamFilter}
+  sortMode={sortMode}
+  setSortMode={setSortMode}
+  gamesList={gamesList}
+  lang={lang}
+/>
         )}
 
         {activeTab === "teams" && (
