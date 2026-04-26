@@ -223,21 +223,151 @@ button {
 }
 
 .tab-btn {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.03);
+  background-size: 140% 140%;
+  background-position: 0% 50%;
   color: var(--text);
   padding: 11px 16px;
   border-radius: 14px;
   cursor: pointer;
   text-transform: capitalize;
   font-weight: 600;
+  transform: translateY(0) scale(1);
+  box-shadow: 0 0 0 rgba(255, 59, 95, 0);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background-position 0.32s ease,
+    background 0.32s ease,
+    box-shadow 0.22s ease,
+    color 0.22s ease;
+}
+
+.tab-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.16), transparent 58%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.tab-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background-position: 100% 50%;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    0 0 22px rgba(255, 59, 95, 0.08);
+}
+
+.tab-btn:hover::before {
+  opacity: 1;
+}
+
+.tab-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .tab-btn-active {
-  background: linear-gradient(90deg, var(--red), var(--red-2));
+  background:
+    linear-gradient(90deg, var(--red), var(--red-2), #ff6b86);
+  background-size: 180% 180%;
   color: white;
-  border-color: transparent;
-  box-shadow: var(--shadow-red);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    var(--shadow-red),
+    0 12px 34px rgba(255, 23, 68, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  animation: tabActiveBreath 3.2s ease-in-out infinite;
+}
+
+.tab-btn-active:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.22),
+    0 0 32px rgba(255, 59, 95, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.tab-btn-active:active {
+  transform: translateY(0) scale(0.96);
+}
+
+body .lang-switch button {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.018)),
+    rgba(0, 0, 0, 0.4);
+  transform: translateY(0) scale(1);
+  box-shadow: 0 0 0 rgba(255, 59, 95, 0);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.28s ease,
+    box-shadow 0.22s ease;
+}
+
+body .lang-switch button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.2),
+    0 0 18px rgba(255, 59, 95, 0.1);
+}
+
+body .lang-switch button:active {
+  transform: translateY(0) scale(0.96);
+}
+
+body .lang-switch button.active {
+  background: linear-gradient(90deg, var(--red), var(--red-2));
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 22px rgba(255, 59, 95, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+body .lang-switch button.active:hover {
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.2),
+    0 0 28px rgba(255, 59, 95, 0.24);
+}
+
+@keyframes tabActiveBreath {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    box-shadow:
+      var(--shadow-red),
+      0 12px 34px rgba(255, 23, 68, 0.14),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    box-shadow:
+      0 0 30px rgba(255, 59, 95, 0.28),
+      0 14px 36px rgba(255, 23, 68, 0.16),
+      0 0 0 1px rgba(255, 255, 255, 0.11) inset;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-btn,
+  body .lang-switch button {
+    transition-duration: 0.01ms;
+  }
+
+  .tab-btn-active {
+    animation: none;
+  }
 }
 
 .toolbar {
