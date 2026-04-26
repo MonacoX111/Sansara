@@ -670,13 +670,47 @@ useEffect(() => {
   if (bracketRef.current && resizeObserver) {
     resizeObserver.observe(bracketRef.current);
   }
+
+  let mutationFrame = 0;
+  let mutationTimer = 0;
+  const mutationObserver =
+    typeof MutationObserver === "undefined"
+      ? null
+      : new MutationObserver((mutations) => {
+          const hasRelevantChange = mutations.some((mutation) => {
+            const target = mutation.target as Node;
+            if (target.nodeType !== Node.ELEMENT_NODE) return false;
+            const element = target as Element;
+            if (element.closest("svg.bracket-svg-lines")) return false;
+            return true;
+          });
+
+          if (!hasRelevantChange) return;
+
+          window.clearTimeout(mutationTimer);
+          window.cancelAnimationFrame(mutationFrame);
+          mutationTimer = window.setTimeout(() => {
+            mutationFrame = window.requestAnimationFrame(buildLines);
+          }, 120);
+        });
+
+  if (bracketRef.current && mutationObserver) {
+    mutationObserver.observe(bracketRef.current, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
   window.addEventListener("resize", buildLines);
 
   return () => {
     window.cancelAnimationFrame(frame);
     window.cancelAnimationFrame(resizeFrame);
+    window.cancelAnimationFrame(mutationFrame);
     window.clearTimeout(timer);
+    window.clearTimeout(mutationTimer);
     resizeObserver?.disconnect();
+    mutationObserver?.disconnect();
     window.removeEventListener("resize", buildLines);
   };
 }, [selectedTournamentId, matches]);

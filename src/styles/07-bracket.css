@@ -181,12 +181,10 @@
   position: relative;
   overflow: visible;
   padding: 12px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.085);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
-    rgba(10, 14, 22, 0.72);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: rgba(10, 14, 22, 0.78);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
@@ -195,10 +193,10 @@
 
 .bracket-match-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 59, 95, 0.32);
+  border-color: rgba(255, 59, 95, 0.28);
   box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.26),
-    0 0 22px rgba(255, 59, 95, 0.12);
+    0 10px 22px rgba(0, 0, 0, 0.28),
+    0 0 14px rgba(255, 59, 95, 0.08);
 }
 
 .bracket-match-top {
@@ -214,15 +212,12 @@
 }
 
 .bracket-series-card {
-  border-radius: 18px !important;
-  border: 1px solid rgba(255, 255, 255, 0.13) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 59, 95, 0.09), rgba(67, 208, 255, 0.045)),
-    rgba(9, 12, 18, 0.82) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(11, 14, 20, 0.88) !important;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.035) inset,
-    0 18px 36px rgba(0, 0, 0, 0.35),
-    0 0 22px rgba(255, 59, 95, 0.08) !important;
+    0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+    0 8px 20px rgba(0, 0, 0, 0.32) !important;
   animation: fadeInUp 0.4s ease;
   transition:
     transform 0.22s ease,
@@ -396,7 +391,7 @@
 
 .bracket-svg-lines path {
   fill: none;
-  stroke: rgba(148, 163, 184, 0.32) !important;
+  stroke: rgba(148, 163, 184, 0.22) !important;
   stroke-width: 1.6 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
@@ -659,15 +654,14 @@
   opacity: 0;
 
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 34%),
-    linear-gradient(135deg, rgba(255, 59, 95, 0.16), rgba(67, 208, 255, 0.1));
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 38%);
 
   transition: opacity 0.25s ease;
   z-index: -1;
 }
 
 .bracket-series-card:hover::after {
-  opacity: 1;
+  opacity: 0.55;
 }
 
 /* ===== CHAMPION ROUTE ===== */

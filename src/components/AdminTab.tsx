@@ -28,6 +28,7 @@ type PlayerForm = {
   elo: number;
   bio: string;
   isFeatured: boolean;
+  avatar: string;
 };
 
 type TeamForm = {
@@ -133,7 +134,6 @@ type Props = {
   matchForm: MatchForm;
   setMatchForm: Dispatch<SetStateAction<MatchForm>>;
 
-  handlePlayerAvatarUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   handleTeamLogoUpload: (event: ChangeEvent<HTMLInputElement>) => void;
 
   savePlayer: () => void;
@@ -311,7 +311,6 @@ export default function AdminTab({
   setTournamentForm,
   matchForm,
   setMatchForm,
-  handlePlayerAvatarUpload,
   handleTeamLogoUpload,
   savePlayer,
   addPlayer,
@@ -341,6 +340,25 @@ reorderMatch,
     const text = t[lang] || t.en;
     const adminText = text.admin;
     const commonText = text.common;
+
+    const quickNavText =
+      lang === "ua"
+        ? {
+            players: "Гравці",
+            teams: "Команди",
+            tournaments: "Турніри",
+            general: "Загальне",
+            matches: "Матчі",
+            achievements: "Досягнення",
+          }
+        : {
+            players: "Players",
+            teams: "Teams",
+            tournaments: "Tournaments",
+            general: "General",
+            matches: "Matches",
+            achievements: "Achievements",
+          };
     
   const safeAchievementPlayerIds = (achievement: Achievement) =>
     Array.isArray(achievement.playerIds) ? achievement.playerIds : [];
@@ -653,9 +671,62 @@ reorderMatch,
     }));
   };
 
+  const scrollToAdminSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="admin-wrap">
-      <div className="two-col reverse">
+      <nav className="admin-quick-nav" aria-label="Admin sections">
+        <div className="admin-quick-nav-inner">
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-players")}
+          >
+            {quickNavText.players}
+          </button>
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-teams")}
+          >
+            {quickNavText.teams}
+          </button>
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-tournaments")}
+          >
+            {quickNavText.tournaments}
+          </button>
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-general")}
+          >
+            {quickNavText.general}
+          </button>
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-matches")}
+          >
+            {quickNavText.matches}
+          </button>
+          <button
+            type="button"
+            className="admin-quick-nav-btn"
+            onClick={() => scrollToAdminSection("admin-section-achievements")}
+          >
+            {quickNavText.achievements}
+          </button>
+        </div>
+      </nav>
+
+      <div id="admin-section-players" className="two-col reverse">
         <div className="panel">
           <h2 className="panel-title">{adminText.players}</h2>
 
@@ -886,11 +957,32 @@ reorderMatch,
             <div className="field-block">
               <label className="field-label">{adminText.avatar}</label>
               <input
+                type="text"
                 className="input"
-                type="file"
-                accept="image/*"
-                onChange={handlePlayerAvatarUpload}
+                placeholder="Avatar URL"
+                value={playerForm.avatar || ""}
+                onChange={(e) =>
+                  setPlayerForm((prev) => ({
+                    ...prev,
+                    avatar: e.target.value,
+                  }))
+                }
               />
+
+              {playerForm.avatar ? (
+                <img
+                  src={playerForm.avatar}
+                  alt={adminText.avatar}
+                  style={{
+                    marginTop: 10,
+                    width: 88,
+                    height: 88,
+                    objectFit: "cover",
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                  }}
+                />
+              ) : null}
             </div>
 
 <div className="btn-row">
@@ -908,7 +1000,7 @@ reorderMatch,
         </div>
       </div>
 
-      <div className="two-col reverse">
+      <div id="admin-section-teams" className="two-col reverse">
         <div className="panel">
           <h2 className="panel-title">{adminText.teams}</h2>
 
@@ -1081,7 +1173,7 @@ reorderMatch,
         </div>
       </div>
 
-      <div className="two-col reverse">
+      <div id="admin-section-tournaments" className="two-col reverse">
         <div className="panel">
           <h2 className="panel-title">{adminText.tournaments}</h2>
 
@@ -1800,7 +1892,7 @@ reorderMatch,
         </div>
       </div>
 
-      <div className="two-col reverse">
+      <div id="admin-section-general" className="two-col reverse">
         <div className="panel">
           <h2 className="panel-title">{adminText.homeAnnouncement}</h2>
 
@@ -2018,7 +2110,7 @@ reorderMatch,
         </div>
       </div>
 
-      <div className="two-col">
+      <div id="admin-section-matches" className="two-col">
         <div className="panel">
           <h2 className="panel-title">{adminText.matches}</h2>
 
@@ -2559,7 +2651,7 @@ game: nextTournament?.game || "",
           </div>
         </div>
       </div>
-      <div className="panel">
+      <div id="admin-section-achievements" className="panel">
         <h2 className="panel-title">{adminText.achievements}</h2>
 
         <div className="list-col admin-scroll-list">

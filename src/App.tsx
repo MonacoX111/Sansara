@@ -59,6 +59,7 @@ type PlayerForm = {
   elo: number;
   bio: string;
   isFeatured: boolean;
+  avatar: string;
 };
 
 type TeamForm = {
@@ -147,6 +148,7 @@ const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
   elo: 1000,
   bio: "",
   isFeatured: false,
+  avatar: "",
 });
 
 const createEmptyTeamForm = (): TeamForm => ({
@@ -459,6 +461,44 @@ useEffect(() => {
   localStorage.setItem("lang", lang);
 }, [lang]);
 
+const [showScrollTop, setShowScrollTop] = useState(false);
+
+useEffect(() => {
+  const onScroll = () => {
+    setShowScrollTop(window.scrollY > 280);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  return () => window.removeEventListener("scroll", onScroll);
+}, []);
+
+const [isLanguageSwitching, setIsLanguageSwitching] = useState(false);
+const langTimerRef = useRef<number | null>(null);
+
+const switchLanguage = (next: "en" | "ua") => {
+  if (next === lang) return;
+  if (langTimerRef.current !== null) {
+    window.clearTimeout(langTimerRef.current);
+  }
+  setIsLanguageSwitching(true);
+  langTimerRef.current = window.setTimeout(() => {
+    setLang(next);
+    langTimerRef.current = window.setTimeout(() => {
+      setIsLanguageSwitching(false);
+      langTimerRef.current = null;
+    }, 180);
+  }, 140);
+};
+
+useEffect(() => {
+  return () => {
+    if (langTimerRef.current !== null) {
+      window.clearTimeout(langTimerRef.current);
+      langTimerRef.current = null;
+    }
+  };
+}, []);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(1);
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
   const [selectedTournamentId, setSelectedTournamentId] = useState<number>(0);
@@ -759,6 +799,7 @@ useEffect(() => {
       elo: selectedPlayer.elo,
       bio: selectedPlayer.bio,
       isFeatured: Boolean(selectedPlayer.isFeatured),
+      avatar: selectedPlayer.avatar || "",
     });
   }, [selectedPlayer, teams, players.length]);
 
@@ -970,39 +1011,6 @@ tournamentId: safeTournamentId,
       console.error("Failed to save home announcement:", error);
     }
   };
-  const handlePlayerAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !selectedPlayer) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      if (!result) return;
-
-      const updatedPlayer: Player = {
-        ...selectedPlayer,
-        avatar: result,
-      };
-
-      setPlayers((prev) =>
-        prev.map((player) =>
-          player.id === selectedPlayer.id ? updatedPlayer : player
-        )
-      );
-
-      try {
-        if (isFirebaseConfigured) {
-          await saveItem("players", updatedPlayer);
-        }
-      } catch (error) {
-        console.error("Failed to save player avatar:", error);
-      }
-    };
-
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  };
-
   const handleTeamLogoUpload = (_event: ChangeEvent<HTMLInputElement>) => {
     alert(
       "Logo upload via file is disabled. Paste a logo URL in the team form."
@@ -1026,6 +1034,7 @@ tournamentId: safeTournamentId,
       bio: playerForm.bio,
       isFeatured: Boolean(playerForm.isFeatured),
       rank: selectedPlayer.rank,
+      avatar: playerForm.avatar || achievementPlaceholder("P"),
     };
 
     const nextPlayers = recalculatePlayerRanks(
@@ -2202,7 +2211,7 @@ const deleteAchievement = async (achievementId: number) => {
 
   return (
     <div className="page">
-      <div className="container">
+      <div className={`container ${isLanguageSwitching ? "language-transitioning" : ""}`}>
 
 <div className="topbar-actions">
 <Tabs
@@ -2217,14 +2226,14 @@ const deleteAchievement = async (achievementId: number) => {
 <button
   type="button"
   className={lang === "en" ? "active" : ""}
-  onClick={() => setLang("en")}
+  onClick={() => switchLanguage("en")}
 >
         EN
       </button>
 <button
   type="button"
   className={lang === "ua" ? "active" : ""}
-  onClick={() => setLang("ua")}
+  onClick={() => switchLanguage("ua")}
 >
         UA
       </button>
@@ -2348,7 +2357,6 @@ const deleteAchievement = async (achievementId: number) => {
             setTournamentForm={setTournamentForm}
             matchForm={matchForm}
             setMatchForm={setMatchForm}
-            handlePlayerAvatarUpload={handlePlayerAvatarUpload}
             handleTeamLogoUpload={handleTeamLogoUpload}
             savePlayer={savePlayer}
             addPlayer={addPlayer}
@@ -2390,9 +2398,11 @@ lang={lang}
   </div>
 ) : null}
 
-        {showAdminLogin && (
-          <div
-            className="admin-overlay"
+      </div>
+
+      {showAdminLogin && (
+        <div
+          className="admin-overlay"
             onClick={() => {
               setShowAdminLogin(false);
               setAdminPassword("");
@@ -2439,8 +2449,16 @@ lang={lang}
               </div>
             </div>
           </div>
-        )}
-      </div>
+      )}
+
+      <button
+        type="button"
+        aria-label="Scroll to top"
+        className={`scroll-top-btn ${showScrollTop ? "scroll-top-btn-visible" : ""}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        <span aria-hidden="true">↑</span>
+      </button>
     </div>
   );
 }

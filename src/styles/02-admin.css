@@ -842,3 +842,130 @@
     transform: translateY(8px);
   }
 }
+
+/* ===== ADMIN QUICK NAVIGATION ===== */
+
+.admin-quick-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin: 0 0 4px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
+.admin-quick-nav::before,
+.admin-quick-nav::after {
+  display: none !important;
+}
+
+.admin-quick-nav-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0 6px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 59, 95, 0.5) transparent;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-quick-nav-inner::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-quick-nav-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-quick-nav-inner::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(255, 59, 95, 0.6), rgba(67, 208, 255, 0.45));
+  border-radius: 999px;
+}
+
+.admin-quick-nav-btn {
+  flex: 0 0 auto;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(14, 18, 26, 0.6);
+  color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: capitalize;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.admin-quick-nav-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 59, 95, 0.45);
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.18), rgba(67, 208, 255, 0.08)),
+    rgba(14, 18, 26, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.18) inset,
+    0 6px 18px rgba(255, 59, 95, 0.18);
+  transform: translateY(-1px);
+}
+
+.admin-quick-nav-btn:active {
+  transform: translateY(0);
+}
+
+.admin-quick-nav-btn:focus-visible {
+  outline: none;
+  border-color: rgba(67, 208, 255, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(67, 208, 255, 0.3) inset,
+    0 0 0 3px rgba(67, 208, 255, 0.18);
+}
+
+#admin-section-players,
+#admin-section-teams,
+#admin-section-tournaments,
+#admin-section-general,
+#admin-section-matches,
+#admin-section-achievements {
+  scroll-margin-top: 84px;
+}
+
+@media (max-width: 720px) {
+  .admin-quick-nav {
+    margin: 0 0 4px !important;
+    padding: 0 !important;
+  }
+
+  .admin-quick-nav-btn {
+    padding: 9px 14px;
+  }
+
+  #admin-section-players,
+  #admin-section-teams,
+  #admin-section-tournaments,
+  #admin-section-general,
+  #admin-section-matches,
+  #admin-section-achievements {
+    scroll-margin-top: 72px;
+  }
+}
