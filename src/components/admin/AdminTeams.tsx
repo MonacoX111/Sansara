@@ -1,6 +1,40 @@
-import { MatchStatus, TournamentStatus } from "../../types";
+import { Dispatch, ReactElement, SetStateAction } from "react";
+import { Team } from "../../types";
 
-type Props = Record<string, any>;
+type TeamForm = {
+  name: string;
+  logo: string;
+  games: string;
+  wins: number;
+  earnings: number;
+  description: string;
+  isFeatured: boolean;
+};
+
+type MultiGamePickerProps = {
+  value: string;
+  onChange: (value: string) => void;
+};
+
+type ConfirmDeleteState = {
+  open: boolean;
+  type: "player" | "team" | "tournament" | "match" | "achievement" | null;
+  achievementId?: number;
+};
+
+type Props = {
+  adminText: Record<string, string>;
+  commonText: Record<string, string>;
+  MultiGamePicker: (props: MultiGamePickerProps) => ReactElement;
+  setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  teams: Team[];
+  selectedTeamId: number;
+  setSelectedTeamId: (id: number) => void;
+  teamForm: TeamForm;
+  setTeamForm: Dispatch<SetStateAction<TeamForm>>;
+  saveTeam: () => void;
+  addTeam: () => void;
+};
 
 export default function AdminTeams(props: Props) {
   const {

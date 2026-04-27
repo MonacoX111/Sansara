@@ -1,6 +1,99 @@
-import { MatchStatus, TournamentStatus } from "../../types";
+import { Dispatch, ReactElement, SetStateAction } from "react";
+import {
+  Match,
+  MatchStage,
+  MatchStatus,
+  ParticipantType,
+  Player,
+  Team,
+  Tournament,
+} from "../../types";
 
-type Props = Record<string, any>;
+const matchStatusOptions: MatchStatus[] = [
+  "scheduled",
+  "ongoing",
+  "completed",
+  "cancelled",
+];
+
+type MatchForm = {
+  game: string;
+  matchType: Extract<ParticipantType, "player" | "team">;
+  player1: number;
+  player2: number;
+  team1: number;
+  team2: number;
+  score: string;
+  winnerId: number;
+  winnerTeamId: number;
+  tournamentId: number;
+  date: string;
+  status: MatchStatus;
+  round: string;
+  stage: MatchStage;
+  groupName: string;
+  roundLabel: string;
+  seriesId?: string;
+  nextSeriesId?: string;
+  bestOf: number;
+  notes: string;
+  eloApplied: boolean;
+};
+
+type SelectValue = number | string;
+
+type SelectOption = {
+  value: SelectValue;
+  label: string;
+};
+
+type PremiumSelectProps = {
+  value: SelectValue;
+  options: SelectOption[];
+  placeholder: string;
+  onChange: (value: SelectValue) => void;
+  disabled?: boolean;
+};
+
+type ConfirmDeleteState = {
+  open: boolean;
+  type: "player" | "team" | "tournament" | "match" | "achievement" | null;
+  achievementId?: number;
+};
+
+type WinnerOption = {
+  id: number;
+  name: string;
+};
+
+type Props = {
+  adminText: Record<string, string>;
+  commonText: Record<string, string>;
+  PremiumSelect: (props: PremiumSelectProps) => ReactElement;
+  setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  tournaments: Tournament[];
+  matches: Match[];
+  selectedMatchId: number;
+  setSelectedMatchId: (id: number) => void;
+  matchForm: MatchForm;
+  setMatchForm: Dispatch<SetStateAction<MatchForm>>;
+  saveMatch: () => void;
+  addMatch: (tournamentId?: number) => void;
+  reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
+  autoGenerateBracket: (tournamentId: number) => void;
+  matchTournamentFilterId: number;
+  setMatchTournamentFilterId: (id: number) => void;
+  selectedMatchTournament: Tournament | null;
+  availablePlayer1Options: Player[];
+  availablePlayer2Options: Player[];
+  selectedWinnerOptions: WinnerOption[];
+  availableTeam1Options: Team[];
+  availableTeam2Options: Team[];
+  selectedWinnerTeamOptions: WinnerOption[];
+  getPlayerName: (id: number) => string;
+  getTeamName: (id: number) => string;
+  getTournamentName: (id: number) => string;
+};
 
 export default function AdminMatches(props: Props) {
   const {
@@ -170,7 +263,7 @@ game: nextTournament?.game || "",
                   { value: "team", label: adminText.teamVsTeam },
                 ]}
                 onChange={(value) =>
-                  setMatchForm((prev) => ({
+                  setMatchForm((prev: MatchForm) => ({
                     ...prev,
                     matchType: value as "player" | "team",
                     player1: 0,
@@ -205,7 +298,7 @@ game: nextTournament?.game || "",
                   placeholder={adminText.game}
                   value={matchForm.game}
                   onChange={(e) =>
-                    setMatchForm((prev) => ({
+                    setMatchForm((prev: MatchForm) => ({
                       ...prev,
                       game: e.target.value,
                     }))
@@ -220,7 +313,7 @@ game: nextTournament?.game || "",
                   type="date"
                   value={matchForm.date}
                   onChange={(e) =>
-                    setMatchForm((prev) => ({
+                    setMatchForm((prev: MatchForm) => ({
                       ...prev,
                       date: e.target.value,
                     }))
@@ -248,7 +341,7 @@ game: nextTournament?.game || "",
                           ? matchForm.winnerId
                           : 0;
 
-                      setMatchForm((prev) => ({
+                      setMatchForm((prev: MatchForm) => ({
                         ...prev,
                         player1: nextPlayer1,
                         winnerId: nextWinnerId,
@@ -274,7 +367,7 @@ game: nextTournament?.game || "",
                           ? matchForm.winnerId
                           : 0;
 
-                      setMatchForm((prev) => ({
+                      setMatchForm((prev: MatchForm) => ({
                         ...prev,
                         player2: nextPlayer2,
                         winnerId: nextWinnerId,
@@ -302,7 +395,7 @@ game: nextTournament?.game || "",
         ? matchForm.winnerTeamId
         : 0;
 
-    setMatchForm((prev) => ({
+    setMatchForm((prev: MatchForm) => ({
       ...prev,
       team1: nextTeam1,
       winnerTeamId: nextWinnerTeamId,
@@ -328,7 +421,7 @@ game: nextTournament?.game || "",
         ? matchForm.winnerTeamId
         : 0;
 
-    setMatchForm((prev) => ({
+    setMatchForm((prev: MatchForm) => ({
       ...prev,
       team2: nextTeam2,
       winnerTeamId: nextWinnerTeamId,
@@ -346,7 +439,7 @@ game: nextTournament?.game || "",
                 placeholder="2:1"
                 value={matchForm.score}
                 onChange={(e) =>
-                  setMatchForm((prev) => ({
+                  setMatchForm((prev: MatchForm) => ({
                     ...prev,
                     score: e.target.value,
                   }))
@@ -371,7 +464,7 @@ game: nextTournament?.game || "",
                     label: player.name,
                   }))}
                   onChange={(value) =>
-                    setMatchForm((prev) => ({
+                    setMatchForm((prev: MatchForm) => ({
                       ...prev,
                       winnerId: Number(value),
                     }))
@@ -395,7 +488,7 @@ game: nextTournament?.game || "",
     label: team.name,
   }))}
   onChange={(value) =>
-    setMatchForm((prev) => ({
+    setMatchForm((prev: MatchForm) => ({
       ...prev,
       winnerTeamId: Number(value),
     }))
@@ -415,7 +508,7 @@ game: nextTournament?.game || "",
         label: status,
       }))}
       onChange={(value) =>
-        setMatchForm((prev) => ({
+        setMatchForm((prev: MatchForm) => ({
           ...prev,
           status: value as MatchStatus,
         }))
@@ -435,7 +528,7 @@ game: nextTournament?.game || "",
         { value: "showmatch", label: adminText.showmatchStage },
       ]}
       onChange={(value) =>
-        setMatchForm((prev) => ({
+        setMatchForm((prev: MatchForm) => ({
           ...prev,
           stage: value as "group" | "playoff" | "final" | "showmatch",
           groupName: value === "group" ? prev.groupName : "",
@@ -457,7 +550,7 @@ game: nextTournament?.game || "",
       label: group.name,
     }))}
     onChange={(value) =>
-      setMatchForm((prev) => ({
+      setMatchForm((prev: MatchForm) => ({
         ...prev,
         groupName: String(value),
       }))
@@ -472,7 +565,7 @@ game: nextTournament?.game || "",
       placeholder={adminText.roundLabelPlaceholder}
       value={matchForm.roundLabel}
       onChange={(e) =>
-        setMatchForm((prev) => ({
+        setMatchForm((prev: MatchForm) => ({
           ...prev,
           roundLabel: e.target.value,
           round: e.target.value,
@@ -491,7 +584,7 @@ game: nextTournament?.game || "",
     placeholder={adminText.nextSeriesPlaceholder}
     value={matchForm.nextSeriesId || ""}
     onChange={(e) =>
-      setMatchForm((prev) => ({
+      setMatchForm((prev: MatchForm) => ({
         ...prev,
         nextSeriesId: e.target.value,
       }))
@@ -503,7 +596,7 @@ game: nextTournament?.game || "",
     placeholder={adminText.seriesIdPlaceholder}
     value={matchForm.seriesId || ""}
     onChange={(e) =>
-      setMatchForm((prev) => ({
+      setMatchForm((prev: MatchForm) => ({
         ...prev,
         seriesId: e.target.value,
       }))
@@ -520,7 +613,7 @@ game: nextTournament?.game || "",
                   min={1}
                   value={matchForm.bestOf}
                   onChange={(e) =>
-                    setMatchForm((prev) => ({
+                    setMatchForm((prev: MatchForm) => ({
                       ...prev,
                       bestOf: Number(e.target.value),
                     }))
@@ -534,7 +627,7 @@ game: nextTournament?.game || "",
                     type="checkbox"
                     checked={matchForm.eloApplied}
                     onChange={(e) =>
-                      setMatchForm((prev) => ({
+                      setMatchForm((prev: MatchForm) => ({
                         ...prev,
                         eloApplied: e.target.checked,
                       }))
@@ -552,7 +645,7 @@ game: nextTournament?.game || "",
                 placeholder={adminText.notes}
                 value={matchForm.notes}
                 onChange={(e) =>
-                  setMatchForm((prev) => ({
+                  setMatchForm((prev: MatchForm) => ({
                     ...prev,
                     notes: e.target.value,
                   }))

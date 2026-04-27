@@ -1,6 +1,111 @@
-import { MatchStatus, TournamentStatus } from "../../types";
+import {
+  ChangeEvent,
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+} from "react";
 
-type Props = Record<string, any>;
+import {
+  Placement,
+  Player,
+  Team,
+  Tournament,
+  TournamentGroup,
+  TournamentStatus,
+} from "../../types";
+
+type SelectValue = number | string;
+
+type SelectOption = {
+  value: SelectValue;
+  label: string;
+};
+
+type PremiumSelectProps = {
+  value: SelectValue;
+  options: SelectOption[];
+  placeholder: string;
+  onChange: (value: SelectValue) => void;
+  disabled?: boolean;
+};
+
+type ConfirmDeleteState = {
+  open: boolean;
+  type: "player" | "team" | "tournament" | "match" | "achievement" | null;
+  achievementId?: number;
+};
+
+type TournamentForm = {
+  title: string;
+  game: string;
+  type: string;
+  format: string;
+  status: TournamentStatus;
+  date: string;
+  prize: string;
+  description: string;
+  imageUrl: string;
+  participantType: "player" | "team" | "squad";
+  participantIds: number[];
+  groups: TournamentGroup[];
+  winnerId?: number;
+  winnerTeamId?: number;
+  winnerSquadIds?: number[];
+  mvpId?: number;
+  placements: Placement[];
+  isPublished: boolean;
+};
+
+const tournamentStatusOptions: TournamentStatus[] = [
+  "draft",
+  "upcoming",
+  "ongoing",
+  "completed",
+  "finished",
+];
+
+type Props = {
+  adminText: Record<string, string>;
+  commonText: Record<string, string>;
+  PremiumSelect: (props: PremiumSelectProps) => ReactElement;
+  setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+
+  players: Player[];
+  teams: Team[];
+  tournaments: Tournament[];
+
+  selectedTournamentId: number;
+  tournamentForm: TournamentForm;
+  setTournamentForm: Dispatch<SetStateAction<TournamentForm>>;
+
+  saveTournament: () => void;
+  addTournament: () => void;
+  reorderTournament: (direction: "up" | "down") => void;
+  handleTournamentImageUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleTournamentSelect: (id: number) => void;
+
+  orderedTournaments: Tournament[];
+  safeTournamentParticipantIds: number[];
+
+  selectedTournamentPlayers: Player[];
+  selectedTournamentTeams: Team[];
+  selectedTournamentMvpPlayers: Player[];
+
+selectedTournamentWinnerId: number | string;
+selectedTournamentWinnerTeamId: number | string;
+selectedTournamentMvpId: number | string;
+
+  toggleTournamentParticipant: (id: number) => void;
+  addTournamentGroup: () => void;
+  updateTournamentGroupName: (groupId: string, name: string) => void;
+  deleteTournamentGroup: (groupId: string) => void;
+  toggleTournamentGroupParticipant: (
+    groupId: string,
+    participantId: number
+  ) => void;
+
+  getPlayerName: (id: number) => string;
+};
 
 export default function AdminTournaments(props: Props) {
   const {

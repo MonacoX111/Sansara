@@ -824,6 +824,7 @@ const adminAchievementsProps = {
       <AdminMatches {...adminMatchesProps} />
       <AdminAchievements {...adminAchievementsProps} />
 
+      {confirmDelete.open ? (
         <div className="confirm-overlay">
           <div className="confirm-modal">
             <h3>{adminText.confirmDeletion}</h3>
@@ -863,6 +864,7 @@ const adminAchievementsProps = {
             </div>
           </div>
         </div>
+      ) : null}
     </div>
   );
 }

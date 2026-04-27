@@ -45,6 +45,15 @@ import {
   loadCollection,
   saveItem,
 } from "./firebaseDb";
+import { generateBracketMatches } from "./domain/match/bracketGeneration";
+import {
+  getFallbackMatchOrder,
+  getTopOrderForNewMatch,
+  normalizeMatches,
+  reorderMatchByOrder,
+} from "./domain/match/matchOrdering";
+import { progressMatchWinner } from "./domain/match/matchProgression";
+import { validateMatchWinner } from "./domain/match/matchValidation";
 
 type PlayerForm = {
   nickname: string;
@@ -322,25 +331,6 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
           }))
       : [],
     isPublished: Boolean(tournament.isPublished),
-  }));
-
-const normalizeMatches = (items: Match[]): Match[] =>
-  items.map((match, index) => ({
-    ...match,
-    order: typeof match.order === "number" ? match.order : index,
-    score: match.score || "",
-    winnerId: Number(match.winnerId || 0),
-    tournamentId: Number(match.tournamentId || 0),
-    status: match.status || "scheduled",
-    seriesId: match.seriesId || "",
-    nextSeriesId: match.nextSeriesId || "",
-round: match.round || "",
-stage: match.stage || "group",
-groupName: match.groupName || "",
-roundLabel: match.roundLabel || "",
-bestOf: Number(match.bestOf || 1),
-    notes: match.notes || "",
-    eloApplied: Boolean(match.eloApplied),
   }));
 
 const normalizeAchievements = (items: Achievement[]): Achievement[] =>
@@ -1602,10 +1592,7 @@ roundLabel: "",
     order:
       typeof baseMatch.order === "number"
         ? baseMatch.order
-        : matches.filter(
-            (match) =>
-              Number(match.tournamentId || 0) === Number(matchForm.tournamentId || 0)
-          ).length,
+        : getFallbackMatchOrder(matches, Number(matchForm.tournamentId || 0)),
     seriesId: matchForm.seriesId || "",
     nextSeriesId: matchForm.nextSeriesId || "",
     game: matchForm.game,
@@ -1629,93 +1616,30 @@ roundLabel: "",
     eloApplied: Boolean(matchForm.eloApplied),
   };
 
-  if (
-    updatedMatch.matchType === "player" &&
-    updatedMatch.winnerId &&
-    updatedMatch.winnerId !== updatedMatch.player1 &&
-    updatedMatch.winnerId !== updatedMatch.player2
-  ) {
-    console.error("Invalid match winner: winnerId must be player1 or player2");
-    showToast("Invalid match winner", "danger");
+  const validation = validateMatchWinner(updatedMatch);
+
+  if (!validation.valid) {
+    console.error(validation.logMessage);
+    showToast(validation.message, "danger");
     return;
   }
 
-  if (
-    updatedMatch.matchType === "team" &&
-    updatedMatch.winnerTeamId &&
-    updatedMatch.winnerTeamId !== updatedMatch.team1 &&
-    updatedMatch.winnerTeamId !== updatedMatch.team2
-  ) {
-    console.error("Invalid match winner: winnerTeamId must be team1 or team2");
-    showToast("Invalid match winner", "danger");
-    return;
-  }
-
-  setMatches((prev) => {
-    const exists = prev.some((match) => match.id === updatedMatch.id);
-
-    return exists
-      ? prev.map((match) =>
-          match.id === updatedMatch.id ? updatedMatch : match
-        )
-      : [...prev, updatedMatch];
+  const progressionResult = progressMatchWinner({
+    matches,
+    currentMatch: updatedMatch,
   });
 
-// 🔥 AUTO BRACKET PROGRESSION
-setMatches((prev) => {
-  let nextMatches = [...prev];
-
-  const currentMatch = updatedMatch;
-
-  // якщо є переможець і nextSeriesId
-  if (
-    currentMatch.nextSeriesId &&
-    (currentMatch.winnerId || currentMatch.winnerTeamId)
-  ) {
-    const nextMatchIndex = nextMatches.findIndex(
-      (m) => m.seriesId === currentMatch.nextSeriesId
-    );
-
-    if (nextMatchIndex !== -1) {
-      const nextMatch = nextMatches[nextMatchIndex];
-
-      // визначаємо winner
-      const winnerPlayer = currentMatch.winnerId;
-      const winnerTeam = currentMatch.winnerTeamId;
-
-      // вставка в слот 1 або 2
-      if (nextMatch.matchType === "player") {
-        if (!nextMatch.player1) {
-          nextMatch.player1 = winnerPlayer;
-        } else if (!nextMatch.player2) {
-          nextMatch.player2 = winnerPlayer;
-        }
-      } else {
-        if (!nextMatch.team1) {
-          nextMatch.team1 = winnerTeam;
-        } else if (!nextMatch.team2) {
-          nextMatch.team2 = winnerTeam;
-        }
-      }
-
-      nextMatches[nextMatchIndex] = { ...nextMatch };
-    }
-  }
-
-  const exists = nextMatches.some((m) => m.id === updatedMatch.id);
-
-  return exists
-    ? nextMatches.map((m) =>
-        m.id === updatedMatch.id ? updatedMatch : m
-      )
-    : [...nextMatches, updatedMatch];
-});
+  setMatches(progressionResult.matches);
 
   setSelectedMatchId(updatedMatch.id);
 
   try {
     if (isFirebaseConfigured) {
-      await saveItem("matches", updatedMatch);
+      await Promise.all(
+        progressionResult.affectedMatches.map((match) =>
+          saveItem("matches", match)
+        )
+      );
     }
 
     showToast("Match saved");
@@ -1731,15 +1655,7 @@ setMatches((prev) => {
       tournaments.find(
         (tournament) => tournament.id === selectedTournamentId
       ) || null;
-    const tournamentMatchOrders = matches
-      .filter(
-        (match) => Number(match.tournamentId || 0) === selectedTournamentId
-      )
-      .map((match) => match.order ?? match.id);
-    const nextOrder =
-      tournamentMatchOrders.length > 0
-        ? Math.min(...tournamentMatchOrders) - 1
-        : 0;
+    const nextOrder = getTopOrderForNewMatch(matches, selectedTournamentId);
 
     const newMatch: Match = {
       seriesId: "",
@@ -1806,51 +1722,25 @@ bestOf: 1,
   };
 
 const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
-  const selectedTournamentId = Number(tournamentId || 0);
-  const visibleMatches = [...matches]
-    .filter(
-      (match) => Number(match.tournamentId || 0) === selectedTournamentId
-    )
-    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
-
-  const currentIndex = visibleMatches.findIndex(
-    (match) => match.id === selectedMatchId
-  );
-
-  if (currentIndex === -1) return;
-  if (direction === "up" && currentIndex === 0) return;
-  if (direction === "down" && currentIndex === visibleMatches.length - 1) return;
-
-  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-
-  const currentMatch = visibleMatches[currentIndex];
-  const targetMatch = visibleMatches[targetIndex];
-
-  const updatedCurrentMatch = {
-    ...currentMatch,
-    order: targetMatch.order ?? targetMatch.id,
-  };
-
-  const updatedTargetMatch = {
-    ...targetMatch,
-    order: currentMatch.order ?? currentMatch.id,
-  };
-
-  const nextMatches = matches.map((match) => {
-    if (match.id === currentMatch.id) return updatedCurrentMatch;
-    if (match.id === targetMatch.id) return updatedTargetMatch;
-    return match;
+  const reorderResult = reorderMatchByOrder({
+    matches,
+    selectedMatchId,
+    direction,
+    tournamentId,
   });
 
-  setMatches(nextMatches);
-  setSelectedMatchId(currentMatch.id);
+  if (!reorderResult) return;
+
+  setMatches(reorderResult.matches);
+  setSelectedMatchId(reorderResult.selectedMatchId);
 
   try {
     if (isFirebaseConfigured) {
-      await Promise.all([
-        saveItem("matches", updatedCurrentMatch),
-        saveItem("matches", updatedTargetMatch),
-      ]);
+      await Promise.all(
+        reorderResult.updatedMatches.map((match) =>
+          saveItem("matches", match)
+        )
+      );
     }
 
     showToast("Match order updated");
@@ -1892,258 +1782,19 @@ const deleteMatch = async () => {
 };
 
 const autoGenerateBracket = async (tournamentId: number) => {
-  if (!tournamentId) {
-    showToast("Select tournament first", "warning");
+  const bracketResult = generateBracketMatches({ matches, tournamentId });
+
+  if (!bracketResult.ok) {
+    showToast(bracketResult.message, "warning");
     return;
   }
 
-  const tournamentMatches = matches
-    .filter((match) => match.tournamentId === tournamentId)
-    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
-
-  if (tournamentMatches.length === 0) {
-    showToast("No matches found for this tournament", "warning");
-    return;
-  }
-
-  const getParticipantKey = (match: Match) => {
-    const firstId =
-      match.matchType === "team"
-        ? Number(match.team1 || 0)
-        : Number(match.player1 || 0);
-
-    const secondId =
-      match.matchType === "team"
-        ? Number(match.team2 || 0)
-        : Number(match.player2 || 0);
-
-    return [firstId, secondId].sort((a, b) => a - b).join("-");
-  };
-
-  const getRoundKey = (match: Match) =>
-    (match.roundLabel || match.round || "auto").trim().toLowerCase();
-
-  const seriesMap = new Map<string, Match[]>();
-
-  tournamentMatches.forEach((match) => {
-    const key = `${getRoundKey(match)}-${getParticipantKey(match)}`;
-    const current = seriesMap.get(key) || [];
-    seriesMap.set(key, [...current, match]);
-  });
-
-const seriesGroups = Array.from(seriesMap.values()).sort(
-    (a, b) => (a[0].order ?? a[0].id) - (b[0].order ?? b[0].id)
-  );
-
-  const getBracketPlan = (seriesCount: number) => {
-    if (seriesCount === 3) {
-      return [
-        {
-          seriesId: "SF1",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "SF2",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "F1",
-          nextSeriesId: "",
-          roundLabel: "Final",
-          stage: "final",
-        },
-      ] as const;
-    }
-
-    if (seriesCount === 7) {
-      return [
-        {
-          seriesId: "QF1",
-          nextSeriesId: "SF1",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF2",
-          nextSeriesId: "SF1",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF3",
-          nextSeriesId: "SF2",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF4",
-          nextSeriesId: "SF2",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "SF1",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "SF2",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "F1",
-          nextSeriesId: "",
-          roundLabel: "Final",
-          stage: "final",
-        },
-      ] as const;
-    }
-
-    if (seriesCount === 15) {
-      return [
-        {
-          seriesId: "R16-1",
-          nextSeriesId: "QF1",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-2",
-          nextSeriesId: "QF1",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-3",
-          nextSeriesId: "QF2",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-4",
-          nextSeriesId: "QF2",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-5",
-          nextSeriesId: "QF3",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-6",
-          nextSeriesId: "QF3",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-7",
-          nextSeriesId: "QF4",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "R16-8",
-          nextSeriesId: "QF4",
-          roundLabel: "1/8 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF1",
-          nextSeriesId: "SF1",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF2",
-          nextSeriesId: "SF1",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF3",
-          nextSeriesId: "SF2",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "QF4",
-          nextSeriesId: "SF2",
-          roundLabel: "1/4 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "SF1",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "SF2",
-          nextSeriesId: "F1",
-          roundLabel: "1/2 Final",
-          stage: "playoff",
-        },
-        {
-          seriesId: "F1",
-          nextSeriesId: "",
-          roundLabel: "Final",
-          stage: "final",
-        },
-      ] as const;
-    }
-
-    return null;
-  };
-
-  const bracketPlan = getBracketPlan(seriesGroups.length);
-
-  if (!bracketPlan) {
-    showToast(
-      `Supported playoff sizes: 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series. Found ${seriesGroups.length}`,
-      "warning"
-    );
-    return;
-  }
-
-  const updatedMatches: Match[] = [];
-
-  const nextMatches = matches.map((match) => {
-    const groupIndex = seriesGroups.findIndex((group) =>
-      group.some((groupMatch) => groupMatch.id === match.id)
-    );
-
-    if (groupIndex === -1) return match;
-
-    const plan = bracketPlan[groupIndex];
-
-    const updatedMatch: Match = {
-      ...match,
-      stage: plan.stage,
-      round: plan.roundLabel,
-      roundLabel: plan.roundLabel,
-      seriesId: plan.seriesId,
-      nextSeriesId: plan.nextSeriesId,
-    };
-
-    updatedMatches.push(updatedMatch);
-    return updatedMatch;
-  });
-
-  setMatches(nextMatches);
+  setMatches(bracketResult.matches);
 
   try {
     if (isFirebaseConfigured) {
       await Promise.all(
-        updatedMatches.map((match) => saveItem("matches", match))
+        bracketResult.updatedMatches.map((match) => saveItem("matches", match))
       );
     }
 

@@ -1,6 +1,41 @@
-import { MatchStatus, TournamentStatus } from "../../types";
+import {
+  ChangeEvent,
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+} from "react";
+import { HomeAnnouncement, Player, Team, Tournament } from "../../types";
 
-type Props = Record<string, any>;
+type HomeAnnouncementForm = HomeAnnouncement;
+
+type SelectValue = number | string;
+
+type SelectOption = {
+  value: SelectValue;
+  label: string;
+};
+
+type PremiumSelectProps = {
+  value: SelectValue;
+  options: SelectOption[];
+  placeholder: string;
+  onChange: (value: SelectValue) => void;
+  disabled?: boolean;
+};
+
+type Props = {
+  adminText: Record<string, string>;
+  PremiumSelect: (props: PremiumSelectProps) => ReactElement;
+  players: Player[];
+  teams: Team[];
+  tournaments: Tournament[];
+  homeAnnouncementForm: HomeAnnouncementForm;
+  setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
+  saveHomeAnnouncement: () => void;
+  handleHomeAnnouncementImageChange: (
+    event: ChangeEvent<HTMLInputElement>
+  ) => void;
+};
 
 export default function AdminGeneral(props: Props) {
   const {

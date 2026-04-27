@@ -1,6 +1,66 @@
-import { MatchStatus, TournamentStatus } from "../../types";
+import { Dispatch, ReactElement, SetStateAction } from "react";
+import { Player, Team } from "../../types";
 
-type Props = Record<string, any>;
+type PlayerForm = {
+  nickname: string;
+  fullName: string;
+  teamId: number;
+  games: string;
+  wins: number;
+  losses: number;
+  earnings: number;
+  tournamentsWon: number;
+  rank: number;
+  elo: number;
+  bio: string;
+  isFeatured: boolean;
+  avatar: string;
+};
+
+type SelectValue = number | string;
+
+type SelectOption = {
+  value: SelectValue;
+  label: string;
+};
+
+type PremiumSelectProps = {
+  value: SelectValue;
+  options: SelectOption[];
+  placeholder: string;
+  onChange: (value: SelectValue) => void;
+  disabled?: boolean;
+};
+
+type MultiGamePickerProps = {
+  value: string;
+  onChange: (value: string) => void;
+};
+
+type ConfirmDeleteState = {
+  open: boolean;
+  type: "player" | "team" | "tournament" | "match" | "achievement" | null;
+  achievementId?: number;
+};
+
+type Props = {
+  adminText: Record<string, string>;
+  commonText: Record<string, string>;
+  PremiumSelect: (props: PremiumSelectProps) => ReactElement;
+  MultiGamePicker: (props: MultiGamePickerProps) => ReactElement;
+  setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  players: Player[];
+  teams: Team[];
+  selectedPlayerId: number;
+  setSelectedPlayerId: (id: number) => void;
+  playerForm: PlayerForm;
+  setPlayerForm: Dispatch<SetStateAction<PlayerForm>>;
+  savePlayer: () => void;
+  addPlayer: () => void;
+  playerAdminSearch: string;
+  setPlayerAdminSearch: Dispatch<SetStateAction<string>>;
+  filteredAdminPlayers: Player[];
+};
 
 export default function AdminPlayers(props: Props) {
   const {
