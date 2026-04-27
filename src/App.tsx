@@ -1,4 +1,5 @@
 ﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
@@ -364,8 +365,40 @@ tournamentId:
   isVisible: typeof item?.isVisible === "boolean" ? item.isVisible : true,
 });
 
+const getTabFromPath = (pathname: string): TabKey => {
+  const firstSegment = pathname.split("/").filter(Boolean)[0];
+
+  if (firstSegment === "players") return "players";
+  if (firstSegment === "teams") return "teams";
+  if (firstSegment === "tournaments") return "tournaments";
+  if (firstSegment === "leaderboard") return "leaderboard";
+  if (firstSegment === "admin") return "admin";
+  if (firstSegment === "general") return "general";
+
+  return "home";
+};
+
+const getPathForTab = (tab: TabKey): string => {
+  if (tab === "home") return "/";
+  if (tab === "general") return "/general";
+  return `/${tab}`;
+};
+
+const getRouteEntityId = (
+  pathname: string,
+  segment: "players" | "teams" | "tournaments"
+): number | null => {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] !== segment || !parts[1]) return null;
+
+  const id = Number(parts[1]);
+  return Number.isFinite(id) && id > 0 ? id : null;
+};
+
 export default function App() {
   const ADMIN_PASSWORD = "monaco123";
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.style.setProperty("--x", "50%");
@@ -442,7 +475,9 @@ const handleGlow = useMouseGlow();
     () => normalizeHomeAnnouncement(fallbackHomeAnnouncement)
   );
 
-  const [activeTab, setActiveTab] = useState<TabKey>("home");
+  const [activeTab, setActiveTab] = useState<TabKey>(() =>
+    getTabFromPath(location.pathname)
+  );
 
   const [lang, setLang] = useState<"en" | "ua">(() => {
   return (localStorage.getItem("lang") as "en" | "ua") || "en";
@@ -496,6 +531,28 @@ useEffect(() => {
   const [selectedMatchId, setSelectedMatchId] = useState<number>(1);
   const [selectedAchievementId, setSelectedAchievementId] = useState<number>(1);
 
+  useEffect(() => {
+    const nextTab = getTabFromPath(location.pathname);
+    setActiveTab((currentTab) => (currentTab === nextTab ? currentTab : nextTab));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const playerId = getRouteEntityId(location.pathname, "players");
+    if (playerId !== null) {
+      setSelectedPlayerId(playerId);
+    }
+
+    const teamId = getRouteEntityId(location.pathname, "teams");
+    if (teamId !== null) {
+      setSelectedTeamId(teamId);
+    }
+
+    const tournamentId = getRouteEntityId(location.pathname, "tournaments");
+    if (tournamentId !== null) {
+      setSelectedTournamentId(tournamentId);
+    }
+  }, [location.pathname]);
+
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("all");
   const [teamFilter, setTeamFilter] = useState("all");
@@ -523,6 +580,12 @@ const [toast, setToast] = useState<{
   action?: () => void;
   actionLabel?: string;
 } | null>(null);
+
+useEffect(() => {
+  if (location.pathname === "/admin" && !isAdmin) {
+    setShowAdminLogin(true);
+  }
+}, [isAdmin, location.pathname]);
 
 const toastTimerRef = useRef<number | null>(null);
 
@@ -941,10 +1004,35 @@ tournamentId:
     });
   }, [homeAnnouncement]);
 
+  const navigateToTab = (tab: TabKey) => {
+    setActiveTab(tab);
+    const nextPath = getPathForTab(tab);
+
+    if (location.pathname !== nextPath) {
+      navigate(nextPath);
+    }
+  };
+
+  const navigateToPlayer = (playerId: number) => {
+    setSelectedPlayerId(playerId);
+    navigate(playerId > 0 ? `/players/${playerId}` : "/players");
+  };
+
+  const navigateToTeam = (teamId: number) => {
+    setSelectedTeamId(teamId);
+    navigate(teamId > 0 ? `/teams/${teamId}` : "/teams");
+  };
+
+  const navigateToTournament = (tournamentId: number | null) => {
+    const nextTournamentId = tournamentId || 0;
+    setSelectedTournamentId(nextTournamentId);
+    navigate(nextTournamentId > 0 ? `/tournaments/${nextTournamentId}` : "/tournaments");
+  };
+
   const handleAdminLogin = () => {
     if (adminPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
-      setActiveTab("admin");
+      navigateToTab("admin");
       setShowAdminLogin(false);
       setAdminPassword("");
       setAdminError("");
@@ -956,12 +1044,11 @@ tournamentId:
 
   const handleAdminLogout = () => {
     setIsAdmin(false);
-    setActiveTab("players");
+    navigateToTab("players");
   };
 
   const openPlayerProfile = (playerId: number) => {
-    setSelectedPlayerId(playerId);
-    setActiveTab("players");
+    navigateToPlayer(playerId);
   };
 
   const saveHomeAnnouncement = async () => {
@@ -1909,7 +1996,7 @@ const deleteAchievement = async (achievementId: number) => {
 <div className="topbar-actions">
 <Tabs
   active={activeTab}
-  onChange={setActiveTab}
+  onChange={navigateToTab}
   showAdmin={isAdmin}
   lang={lang}
 />
@@ -1972,7 +2059,7 @@ const deleteAchievement = async (achievementId: number) => {
   teams={teams}
   tournaments={tournaments}
   matches={matches}
-  setActiveTab={setActiveTab}
+  setActiveTab={navigateToTab}
   lang={lang}
 />
 )}
@@ -1985,7 +2072,7 @@ const deleteAchievement = async (achievementId: number) => {
     tournaments={tournaments}
     matches={matches}
     setSelectedTournamentId={setSelectedTournamentId}
-    setActiveTab={setActiveTab}
+    setActiveTab={navigateToTab}
     lang={lang}
     handleGlow={handleGlow}
   />
@@ -1999,7 +2086,7 @@ const deleteAchievement = async (achievementId: number) => {
   tournaments={tournaments}
   achievements={achievements}
   selectedPlayerId={selectedPlayerId}
-  setSelectedPlayerId={setSelectedPlayerId}
+  setSelectedPlayerId={navigateToPlayer}
   search={search}
   setSearch={setSearch}
   gameFilter={gameFilter}
@@ -2020,7 +2107,7 @@ const deleteAchievement = async (achievementId: number) => {
     tournaments={tournaments}
     matches={matches}
     selectedTeamId={selectedTeamId}
-    setSelectedTeamId={setSelectedTeamId}
+    setSelectedTeamId={navigateToTeam}
     lang={lang}
   />
 )}
@@ -2031,6 +2118,8 @@ const deleteAchievement = async (achievementId: number) => {
   players={players}
   teams={teams}
   matches={matches}
+  selectedTournamentId={selectedTournamentId || null}
+  setSelectedTournamentId={navigateToTournament}
   lang={lang}
 />
         )}

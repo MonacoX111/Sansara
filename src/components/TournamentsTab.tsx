@@ -7,6 +7,8 @@ type Props = {
   players: Player[];
   teams: Team[];
   matches: Match[];
+  selectedTournamentId?: number | null;
+  setSelectedTournamentId?: (id: number | null) => void;
   lang: Lang;
 };
 
@@ -15,13 +17,21 @@ export default function TournamentsTab({
   players,
   teams,
   matches,
+  selectedTournamentId: externalSelectedTournamentId,
+  setSelectedTournamentId: externalSetSelectedTournamentId,
   lang,
 }: Props) {
   const text = t[lang] || t.en;
   const tournamentText = text.tournamentsPage;
-  const [selectedTournamentId, setSelectedTournamentId] = useState<
+  const [localSelectedTournamentId, setLocalSelectedTournamentId] = useState<
     number | null
   >(null);
+  const selectedTournamentId =
+    externalSelectedTournamentId !== undefined
+      ? externalSelectedTournamentId
+      : localSelectedTournamentId;
+  const setSelectedTournamentId =
+    externalSetSelectedTournamentId || setLocalSelectedTournamentId;
 
   const selectedTournament = useMemo(
     () =>
