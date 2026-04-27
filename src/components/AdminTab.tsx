@@ -25,6 +25,7 @@ type PlayerForm = {
   nickname: string;
   fullName: string;
   teamId: number;
+  teamHistory: NonNullable<Player["teamHistory"]>;
   games: string;
   wins: number;
   losses: number;
@@ -346,26 +347,15 @@ reorderMatch,
     const text = t[lang] || t.en;
     const adminText = text.admin;
     const commonText = text.common;
+    const quickNavText = {
+      players: text.nav.players,
+      teams: text.nav.teams,
+      tournaments: text.nav.tournaments,
+      general: text.nav.general,
+      matches: adminText.quickMatches,
+      achievements: adminText.quickAchievements,
+    };
 
-    const quickNavText =
-      lang === "ua"
-        ? {
-            players: "Гравці",
-            teams: "Команди",
-            tournaments: "Турніри",
-            general: "Загальне",
-            matches: "Матчі",
-            achievements: "Досягнення",
-          }
-        : {
-            players: "Players",
-            teams: "Teams",
-            tournaments: "Tournaments",
-            general: "General",
-            matches: "Matches",
-            achievements: "Achievements",
-          };
-    
   const safeAchievementPlayerIds = (achievement: Achievement) =>
     Array.isArray(achievement.playerIds) ? achievement.playerIds : [];
 
@@ -806,7 +796,7 @@ const adminAchievementsProps = {
 
   return (
     <div className="admin-wrap">
-      <nav className="admin-quick-nav" aria-label="Admin sections">
+      <nav className="admin-quick-nav" aria-label={adminText.adminSections}>
         <div className="admin-quick-nav-inner">
           <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-players")}>{quickNavText.players}</button>
           <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-teams")}>{quickNavText.teams}</button>

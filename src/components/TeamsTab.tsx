@@ -1,4 +1,5 @@
 import { Match, Player, Team, Tournament } from "../types";
+import { getPlayersForHistoricalTeam } from "../domain/player/playerTeams";
 import { Lang, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
@@ -29,6 +30,10 @@ export default function TeamsTab({
   const teamPlayers = players.filter(
     (player) => player.teamId === selectedTeamId
   );
+  const historicalTeamPlayers = getPlayersForHistoricalTeam(
+    selectedTeamId,
+    players
+  ).filter((player) => player.teamId !== selectedTeamId);
 
   const wonTournaments = tournaments.filter(
     (tournament) => tournament.winnerTeamId === selectedTeamId
@@ -201,6 +206,39 @@ return teamText.loss;
               </div>
             ) : (
               <div className="empty-block">{teamText.noPlayersAdded}</div>
+            )}
+          </div>
+
+          <div className="section-block">
+            <h4>{teamText.historicalPlayers}</h4>
+
+            {historicalTeamPlayers.length > 0 ? (
+              <div className="team-roster-list">
+                {historicalTeamPlayers.map((player) => (
+                  <div key={player.id} className="team-roster-card">
+                    {player.avatar ? (
+                      <img
+                        src={player.avatar}
+                        alt={player.nickname}
+                        className="team-roster-avatar"
+                      />
+                    ) : (
+                      <div className="team-roster-avatar-placeholder">
+                        {player.nickname.charAt(0)}
+                      </div>
+                    )}
+
+                    <div className="team-roster-content">
+                      <div className="team-roster-name">{player.nickname}</div>
+                      <div className="team-roster-sub">
+                        {teamText.elo}: {player.elo} â€¢ {teamText.wins}: {player.wins}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-block">{teamText.noHistoricalPlayers}</div>
             )}
           </div>
 

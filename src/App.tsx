@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
@@ -39,6 +39,10 @@ import {
   syncTeamPlayers,
   writeStorage,
 } from "./utils";
+import {
+  handleSpotlightMove,
+  handleSpotlightMoveCapture,
+} from "./utils/spotlight";
 import { isFirebaseConfigured } from "./firebase";
 import {
   deleteItem,
@@ -60,6 +64,7 @@ type PlayerForm = {
   nickname: string;
   fullName: string;
   teamId: number;
+  teamHistory: NonNullable<Player["teamHistory"]>;
   games: string;
   wins: number;
   losses: number;
@@ -122,7 +127,7 @@ type MatchForm = {
   roundLabel: string;
 
   seriesId?: string;
-  nextSeriesId?: string; // ✅ ОСЬ ЦЕ ГОЛОВНЕ
+  nextSeriesId?: string; // ? ??? ?? ???????
 
   bestOf: number;
   notes: string;
@@ -149,6 +154,7 @@ const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
   nickname: "",
   fullName: "",
   teamId: 0,
+  teamHistory: [],
   games: "",
   wins: 0,
   losses: 0,
@@ -160,6 +166,34 @@ const createEmptyPlayerForm = (nextRank = 1): PlayerForm => ({
   isFeatured: false,
   avatar: "",
 });
+
+const normalizePlayerTeamHistory = (
+  player: Player,
+  currentTeamId: number
+): NonNullable<Player["teamHistory"]> => {
+  const seen = new Set<number>();
+  const rawHistory = Array.isArray(player.teamHistory) ? player.teamHistory : [];
+  const history =
+    rawHistory.length > 0
+      ? rawHistory
+      : currentTeamId
+      ? [{ teamId: currentTeamId, isCurrent: true }]
+      : [];
+
+  return history
+    .map((item) => ({
+      teamId: Number(item.teamId || 0),
+      from: item.from,
+      to: item.to,
+      isCurrent:
+        Boolean(item.isCurrent) || Number(item.teamId || 0) === currentTeamId,
+    }))
+    .filter((item) => {
+      if (!item.teamId || seen.has(item.teamId)) return false;
+      seen.add(item.teamId);
+      return true;
+    });
+};
 
 const createEmptyTeamForm = (): TeamForm => ({
   name: "",
@@ -405,28 +439,7 @@ export default function App() {
     document.documentElement.style.setProperty("--y", "50%");
   }, []);
 
-const useMouseGlow = () => {
-  let frame = 0;
-
-  return (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget;
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-
-    if (frame) return;
-
-    frame = requestAnimationFrame(() => {
-      const rect = target.getBoundingClientRect();
-
-      target.style.setProperty("--x", `${clientX - rect.left}px`);
-      target.style.setProperty("--y", `${clientY - rect.top}px`);
-
-      frame = 0;
-    });
-  };
-};
-
-const handleGlow = useMouseGlow();
+const handleGlow = handleSpotlightMove;
 
   const fallbackPlayers = useMemo(
     () => readStorage("tm_players", initialPlayers),
@@ -844,6 +857,10 @@ useEffect(() => {
       nickname: selectedPlayer.nickname,
       fullName: selectedPlayer.fullName,
       teamId: getSafeTeamId(selectedPlayer.teamId),
+      teamHistory: normalizePlayerTeamHistory(
+        selectedPlayer,
+        getSafeTeamId(selectedPlayer.teamId)
+      ),
       games: selectedPlayer.games.join(", "),
       wins: selectedPlayer.wins,
       losses: selectedPlayer.losses,
@@ -1084,14 +1101,14 @@ tournamentId: safeTournamentId,
       if (isFirebaseConfigured) {
         await saveItem("homeAnnouncement", nextHomeAnnouncement);
       }
-      showToast("Home announcement saved");
+      showToast(commonText.homeAnnouncementSaved);
     } catch (error) {
       console.error("Failed to save home announcement:", error);
     }
   };
   const handleTeamLogoUpload = (_event: ChangeEvent<HTMLInputElement>) => {
     alert(
-      "Logo upload via file is disabled. Paste a logo URL in the team form."
+      text.admin.logoUploadDisabled
     );
   };
 
@@ -1103,6 +1120,13 @@ tournamentId: safeTournamentId,
       nickname: playerForm.nickname,
       fullName: playerForm.fullName,
       teamId: getSafeTeamId(Number(playerForm.teamId)),
+      teamHistory: normalizePlayerTeamHistory(
+        {
+          ...selectedPlayer,
+          teamHistory: playerForm.teamHistory,
+        },
+        getSafeTeamId(Number(playerForm.teamId))
+      ),
       games: parseList(playerForm.games),
       wins: Number(playerForm.wins),
       losses: Number(playerForm.losses),
@@ -1133,7 +1157,7 @@ try {
     await saveItem("players", savedPlayer);
   }
 
-  showToast("Player saved");
+  showToast(commonText.playerSaved);
     } catch (error) {
       console.error("Failed to save player:", error);
     }
@@ -1146,6 +1170,7 @@ try {
       fullName: "",
       avatar: achievementPlaceholder("P"),
       teamId: 0,
+      teamHistory: [],
       games: [],
       wins: 0,
       losses: 0,
@@ -1165,7 +1190,7 @@ setTeams(nextTeams);
 setSelectedPlayerId(newPlayer.id);
 setPlayerForm(createEmptyPlayerForm(nextPlayers.length + 1));
 
-showToast("Player added");
+showToast(commonText.playerAdded);
 
 try {
 if (isFirebaseConfigured) {
@@ -1250,7 +1275,7 @@ if (isFirebaseConfigured) {
   }, 3000);
 
   showToast(
-    "Player deleted",
+    commonText.playerDeleted,
     "danger",
     () => {
       window.clearTimeout(deleteTimer);
@@ -1260,7 +1285,7 @@ if (isFirebaseConfigured) {
       setAchievements(backupAchievements);
       setMatches(backupMatches);
     },
-    "Undo"
+    commonText.undo
   );
 };
 
@@ -1287,7 +1312,7 @@ if (isFirebaseConfigured) {
         await saveItem("teams", updatedTeam);
       }
 
-      showToast("Team saved");
+      showToast(commonText.teamSaved);
     } catch (error) {
       console.error("Failed to save team:", error);
     }
@@ -1310,7 +1335,7 @@ setTeams((prev) => [...prev, newTeam]);
 setSelectedTeamId(newTeam.id);
 setTeamForm(createEmptyTeamForm());
 
-showToast("Team added");
+showToast(commonText.teamAdded);
 
 try {
       if (isFirebaseConfigured) {
@@ -1360,7 +1385,7 @@ if (isFirebaseConfigured) {
   }, 3000);
 
   showToast(
-    "Team deleted",
+    commonText.teamDeleted,
     "danger",
     () => {
       window.clearTimeout(deleteTimer);
@@ -1368,7 +1393,7 @@ if (isFirebaseConfigured) {
       setTeams(backupTeams);
       setTournaments(backupTournaments);
     },
-    "Undo"
+    commonText.undo
   );
 };
 
@@ -1454,7 +1479,7 @@ if (isFirebaseConfigured) {
     setTournaments(safeTournaments);
     writeStorage("tm_tournaments", safeTournaments);
 
-    showToast("Tournament saved");
+    showToast(commonText.tournamentSaved);
 
     try {
 if (isFirebaseConfigured) {
@@ -1536,7 +1561,7 @@ if (isFirebaseConfigured) {
       isPublished: false,
     });
 
-    showToast("Tournament added");
+    showToast(commonText.tournamentAdded);
     try {
 if (isFirebaseConfigured) {
   await saveItem("tournaments", newTournament);
@@ -1593,7 +1618,7 @@ if (isFirebaseConfigured) {
   }, 3000);
 
   showToast(
-    "Tournament deleted",
+    commonText.tournamentDeleted,
     "danger",
     () => {
       window.clearTimeout(deleteTimer);
@@ -1601,7 +1626,7 @@ if (isFirebaseConfigured) {
       setMatches(backupMatches);
       writeStorage("tm_tournaments", backupTournaments);
     },
-    "Undo"
+    commonText.undo
   );
 };
 
@@ -1643,7 +1668,7 @@ if (isFirebaseConfigured) {
   );
 }
 
-      showToast("Tournament order updated");
+      showToast(commonText.tournamentOrderUpdated);
     } catch (error) {
       console.error("Failed to reorder tournaments:", error);
     }
@@ -1707,7 +1732,7 @@ roundLabel: "",
 
   if (!validation.valid) {
     console.error(validation.logMessage);
-    showToast(validation.message, "danger");
+    showToast(commonText.invalidMatchWinner, "danger");
     return;
   }
 
@@ -1729,10 +1754,10 @@ roundLabel: "",
       );
     }
 
-    showToast("Match saved");
+    showToast(commonText.matchSaved);
   } catch (error) {
     console.error("Failed to save match:", error);
-    showToast("Failed to save match", "danger");
+    showToast(commonText.matchSaveFailed, "danger");
   }
 };
 
@@ -1798,7 +1823,7 @@ bestOf: 1,
       eloApplied: false,
     });
 
-    showToast("Match added");
+    showToast(commonText.matchAdded);
     try {
       if (isFirebaseConfigured) {
         await saveItem("matches", newMatch);
@@ -1830,10 +1855,10 @@ const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
       );
     }
 
-    showToast("Match order updated");
+    showToast(commonText.matchOrderUpdated);
   } catch (error) {
     console.error("Failed to reorder matches:", error);
-    showToast("Failed to reorder matches", "danger");
+    showToast(commonText.matchReorderFailed, "danger");
   }
 };
 
@@ -1858,13 +1883,13 @@ const deleteMatch = async () => {
   }, 3000);
 
   showToast(
-    "Match deleted",
+    commonText.matchDeleted,
     "danger",
     () => {
       window.clearTimeout(deleteTimer);
       setMatches(backupMatches);
     },
-    "Undo"
+    commonText.undo
   );
 };
 
@@ -1872,7 +1897,13 @@ const autoGenerateBracket = async (tournamentId: number) => {
   const bracketResult = generateBracketMatches({ matches, tournamentId });
 
   if (!bracketResult.ok) {
-    showToast(bracketResult.message, "warning");
+    const bracketMessage =
+      bracketResult.reason === "missing_tournament"
+        ? commonText.selectTournamentFirst
+        : bracketResult.reason === "no_matches"
+        ? commonText.noMatchesForTournament
+        : commonText.unsupportedBracketSize;
+    showToast(bracketMessage, "warning");
     return;
   }
 
@@ -1885,10 +1916,10 @@ const autoGenerateBracket = async (tournamentId: number) => {
       );
     }
 
-    showToast("Bracket generated automatically");
+    showToast(commonText.bracketGenerated);
   } catch (error) {
     console.error("Failed to save generated bracket:", error);
-    showToast("Bracket generated, but Firebase save failed", "warning");
+    showToast(commonText.bracketFirebaseFailed, "warning");
   }
 };
 
@@ -1921,7 +1952,7 @@ const autoGenerateBracket = async (tournamentId: number) => {
         await saveItem("achievements", updatedAchievement);
       }
 
-showToast("Achievement saved");
+showToast(commonText.achievementSaved);
     } catch (error) {
       console.error("Failed to save achievement:", error);
     }
@@ -1939,7 +1970,7 @@ showToast("Achievement saved");
 setAchievements((prev) => [...prev, newAchievement]);
 setSelectedAchievementId(newAchievement.id);
 
-showToast("Achievement added");
+showToast(commonText.achievementAdded);
 
 try {
       if (isFirebaseConfigured) {
@@ -1975,14 +2006,14 @@ const deleteAchievement = async (achievementId: number) => {
   }, 3000);
 
   showToast(
-    "Achievement deleted",
+    commonText.achievementDeleted,
     "danger",
     () => {
       window.clearTimeout(deleteTimer);
       setAchievements(backupAchievements);
       setSelectedAchievementId(backupSelectedAchievementId);
     },
-    "Undo"
+    commonText.undo
   );
 };
 
@@ -1990,7 +2021,7 @@ const deleteAchievement = async (achievementId: number) => {
   const commonText = text.common;
 
   return (
-    <div className="page">
+    <div className="page" onMouseMoveCapture={handleSpotlightMoveCapture}>
       <div className={`container ${isLanguageSwitching ? "language-transitioning" : ""}`}>
 
 <div className="topbar-actions">
@@ -2260,11 +2291,11 @@ lang={lang}
 
       <button
         type="button"
-        aria-label="Scroll to top"
+        aria-label={commonText.scrollToTop}
         className={`scroll-top-btn ${showScrollTop ? "scroll-top-btn-visible" : ""}`}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
-        <span aria-hidden="true">↑</span>
+        <span aria-hidden="true">?</span>
       </button>
     </div>
   );

@@ -5,6 +5,7 @@ type PlayerForm = {
   nickname: string;
   fullName: string;
   teamId: number;
+  teamHistory: NonNullable<Player["teamHistory"]>;
   games: string;
   wins: number;
   losses: number;
@@ -81,6 +82,23 @@ export default function AdminPlayers(props: Props) {
     setPlayerAdminSearch,
     filteredAdminPlayers,
   } = props;
+
+  const toggleHistoricalTeam = (teamId: number) => {
+    setPlayerForm((prev) => {
+      const exists = prev.teamHistory.some((item) => item.teamId === teamId);
+      const nextHistory = exists
+        ? prev.teamHistory.filter((item) => item.teamId !== teamId)
+        : [...prev.teamHistory, { teamId }];
+
+      return {
+        ...prev,
+        teamHistory: nextHistory.map((item) => ({
+          ...item,
+          isCurrent: item.teamId === prev.teamId || item.isCurrent,
+        })),
+      };
+    });
+  };
 
   return (
       <div id="admin-section-players" className="two-col reverse">
@@ -210,6 +228,26 @@ export default function AdminPlayers(props: Props) {
             </div>
 
             <div className="field-block">
+              <label className="field-label">
+                {adminText.teamHistory}
+              </label>
+              <div className="historical-team-picker">
+                {teams.map((team) => (
+                  <label key={team.id} className="field-label checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={playerForm.teamHistory.some(
+                        (item) => item.teamId === team.id
+                      )}
+                      onChange={() => toggleHistoricalTeam(team.id)}
+                    />
+                    {team.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="field-block">
               <label className="field-label">{adminText.games}</label>
               <MultiGamePicker
                 value={playerForm.games}
@@ -316,7 +354,7 @@ export default function AdminPlayers(props: Props) {
               <input
                 type="text"
                 className="input"
-                placeholder="Avatar URL"
+                placeholder={adminText.avatarUrlPlaceholder}
                 value={playerForm.avatar || ""}
                 onChange={(e) =>
                   setPlayerForm((prev) => ({

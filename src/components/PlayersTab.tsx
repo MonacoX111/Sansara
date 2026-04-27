@@ -6,6 +6,10 @@ import {
   getPlayerStreak,
   getPlayerWinRate,
 } from "../domain/player/playerStats";
+import {
+  getPlayerCurrentTeam,
+  getPlayerTeamHistory,
+} from "../domain/player/playerTeams";
 import { Lang, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
@@ -52,28 +56,6 @@ export default function PlayersTab({
   const text = t[lang] || t.en;
   const playerText = text.playersPage;
   const commonText = text.common;
-  const proText =
-    lang === "ua"
-      ? {
-          totalMatches: "Усього матчів",
-          winRate: "Відсоток перемог",
-          losses: "Поразки",
-          currentStreak: "Поточна серія",
-          opponent: "Суперник",
-          win: "Перемога",
-          loss: "Поразка",
-          pending: "Очікується",
-        }
-      : {
-          totalMatches: "Total matches",
-          winRate: "Win rate",
-          losses: "Losses",
-          currentStreak: "Current streak",
-          opponent: "Opponent",
-          win: "Win",
-          loss: "Loss",
-          pending: "Pending",
-        };
 
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
@@ -88,6 +70,12 @@ export default function PlayersTab({
 
   const selectedPlayer =
     players.find((player) => player.id === selectedPlayerId) || null;
+  const selectedPlayerCurrentTeam = selectedPlayer
+    ? getPlayerCurrentTeam(selectedPlayer, teams)
+    : null;
+  const selectedPlayerTeamHistory = selectedPlayer
+    ? getPlayerTeamHistory(selectedPlayer, teams)
+    : [];
 
   const playerTournaments = selectedPlayer
     ? tournaments.filter((tournament) => {
@@ -293,7 +281,7 @@ placeholder={playerText.searchPlaceholder}
 
                   <div className="player-info-box">
                     <div className="player-info-row">
-                      <span className="info-label">{playerText.team}</span>
+                      <span className="info-label">{playerText.currentTeam}</span>
                       <span className="info-value">
                         {teamName || playerText.noTeam}
                       </span>
@@ -394,11 +382,10 @@ placeholder={playerText.searchPlaceholder}
                       <span className="info-label">{playerText.team}</span>
 
                       <div className="profile-team-main">
-                        {selectedPlayer.teamId > 0 &&
-                        getTeamLogo(selectedPlayer.teamId) ? (
+                        {selectedPlayerCurrentTeam?.logo ? (
                           <img
-                            src={getTeamLogo(selectedPlayer.teamId)}
-                            alt={getTeamName(selectedPlayer.teamId)}
+                            src={selectedPlayerCurrentTeam.logo}
+                            alt={selectedPlayerCurrentTeam.name}
                             className="profile-team-logo"
                           />
                         ) : (
@@ -410,8 +397,7 @@ placeholder={playerText.searchPlaceholder}
                         )}
 
                         <span className="profile-primary-value">
-                          {getTeamName(selectedPlayer.teamId) ||
-                            playerText.noTeam}
+                          {selectedPlayerCurrentTeam?.name || playerText.noTeam}
                         </span>
                       </div>
                     </div>
@@ -478,13 +464,45 @@ placeholder={playerText.searchPlaceholder}
               </div>
             </div>
 
+<div className="section-block">
+  <h4>{playerText.teamHistory}</h4>
+
+  {selectedPlayerTeamHistory.length === 0 ? (
+    <p className="muted">{playerText.noTeam}</p>
+  ) : (
+                <div className="team-history-list">
+                  {selectedPlayerTeamHistory.map((item) => (
+                    <div key={item.teamId} className="team-history-card">
+                      <div className="team-history-top">
+                        <div className="team-history-title">
+                          {item.team?.name || playerText.unknownTeam}
+                        </div>
+                        {item.isCurrent ? (
+                          <span className="pill green">
+                            {playerText.currentTeam}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {(item.from || item.to) ? (
+                        <div className="team-history-meta">
+                          <span>{item.from || "-"}</span>
+                          <span>{item.to || playerText.currentTeam}</span>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
 <div className="stats-grid">
-  <StatCard title={proText.totalMatches} value={playerMatches.length} />
-  <StatCard title={proText.winRate} value={`${playerWinRate}%`} />
+  <StatCard title={playerText.totalMatches} value={playerMatches.length} />
+  <StatCard title={playerText.winRate} value={`${playerWinRate}%`} />
   <StatCard title={playerText.elo} value={selectedPlayer.elo} />
   <StatCard title={playerText.wins} value={playerWins} />
-  <StatCard title={proText.losses} value={playerLosses} />
-  <StatCard title={proText.currentStreak} value={playerStreak.label} />
+  <StatCard title={playerText.losses} value={playerLosses} />
+  <StatCard title={playerText.currentStreak} value={playerStreak.label} />
   <StatCard
     title={playerText.tournamentsWon}
     value={selectedPlayer.tournamentsWon}
@@ -618,15 +636,15 @@ placeholder={playerText.searchPlaceholder}
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">
-                            {proText.opponent}: {opponentName}
+                            {playerText.opponent}: {opponentName}
                             <span
                               className={`pill player-result-pill player-result-${result}`}
                             >
                               {result === "win"
-                                ? proText.win
+                                ? playerText.win
                                 : result === "loss"
-                                ? proText.loss
-                                : proText.pending}
+                                ? playerText.loss
+                                : playerText.pending}
                             </span>
                           </div>
                           <div className="muted small">

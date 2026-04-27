@@ -51,6 +51,12 @@ export type Player = {
   fullName: string;
   avatar: string;
   teamId: number;
+  teamHistory?: {
+    teamId: number;
+    from?: string;
+    to?: string;
+    isCurrent?: boolean;
+  }[];
   games: string[];
   wins: number;
   losses: number;
