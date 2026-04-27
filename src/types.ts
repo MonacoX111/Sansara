@@ -22,7 +22,12 @@ export type TournamentGroup = {
   participantIds: number[];
 };
 
-export type TournamentStatus = "draft" | "upcoming" | "ongoing" | "completed";
+export type TournamentStatus =
+  | "draft"
+  | "upcoming"
+  | "ongoing"
+  | "completed"
+  | "finished";
 
 export type MatchStatus = "scheduled" | "ongoing" | "completed" | "cancelled";
 

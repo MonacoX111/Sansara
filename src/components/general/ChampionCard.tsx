@@ -23,7 +23,8 @@ export default function ChampionCard({
   const generalText = text.generalPage;
   const commonText = text.common;
   const completedTournaments = tournaments.filter(
-    (tournament) => tournament.status === "completed"
+    (tournament) =>
+      tournament.status === "completed" || tournament.status === "finished"
   );
 
   if (completedTournaments.length === 0) {
@@ -34,8 +35,20 @@ export default function ChampionCard({
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )[0];
 
+  const finalMatch =
+    matches.find(
+      (match) =>
+        match.tournamentId === lastTournament.id &&
+        (String(match.stage || "").toLowerCase() === "final" ||
+          String(match.roundLabel || "").trim().toLowerCase() === "final")
+    ) || null;
+
   const winner =
-    lastTournament.participantType === "team"
+    finalMatch?.matchType === "team"
+      ? teams.find((team) => team.id === finalMatch.winnerTeamId)
+      : finalMatch
+      ? players.find((player) => player.id === finalMatch.winnerId)
+      : lastTournament.participantType === "team"
       ? teams.find((team) => team.id === lastTournament.winnerTeamId)
       : lastTournament.participantType === "squad"
       ? {
@@ -58,29 +71,8 @@ export default function ChampionCard({
       : winner.avatar
     : "";
 
-  const tournamentCompletedMatches = matches.filter(
-    (match) =>
-      match.tournamentId === lastTournament.id && match.status === "completed"
-  );
-
-  const explicitFinalMatch = tournamentCompletedMatches.find(
-    (match) =>
-      (match.round || "").toLowerCase().includes("final") &&
-      !(match.round || "").toLowerCase().includes("semi")
-  );
-
-  const winnerLastMatch = [...tournamentCompletedMatches]
-    .filter((match) =>
-      lastTournament.participantType === "team"
-        ? match.winnerTeamId === lastTournament.winnerTeamId
-        : match.winnerId === lastTournament.winnerId
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-
-  const finalMatch = explicitFinalMatch || winnerLastMatch || null;
-
   const opponent =
-    finalMatch && lastTournament.participantType === "team"
+    finalMatch?.matchType === "team"
       ? teams.find(
           (team) =>
             team.id !== finalMatch.winnerTeamId &&
