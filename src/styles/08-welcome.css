@@ -3,6 +3,7 @@
 .welcome-page {
   display: grid;
   gap: 30px;
+  width: 100%;
   animation: welcomePageIn 0.45s ease both;
 }
 
@@ -288,9 +289,7 @@
 .welcome-section {
   display: grid;
   gap: 18px;
-  max-width: 1180px;
   width: 100%;
-  margin-inline: auto;
 }
 
 .welcome-section-head {
@@ -338,6 +337,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 16px;
+  width: 100%;
 }
 
 .welcome-nav-card {
@@ -491,6 +491,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  width: 100%;
 }
 
 .welcome-activity-row {
@@ -500,6 +501,7 @@
   align-items: stretch;
   justify-content: space-between;
   gap: 14px;
+  width: 100%;
   min-height: 112px;
   padding: 17px;
   border-color: rgba(92, 145, 190, 0.18);
