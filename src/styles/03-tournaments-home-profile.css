@@ -587,8 +587,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
-  border-radius: 20px;
+  gap: 32px;
+  min-height: 210px;
+  padding: 34px 36px;
+  border-radius: 24px;
   border: 1px solid rgba(255, 190, 61, 0.34);
   background: linear-gradient(
     135deg,
@@ -635,58 +637,67 @@ background: linear-gradient(
 }
 
 .champion-card-upgraded {
-  gap: 20px;
+  gap: 34px;
 }
 
 .champion-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 24px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .champion-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  justify-content: center;
+  gap: 10px;
   text-align: right;
-  min-width: 180px;
+  min-width: 280px;
+  align-self: stretch;
+  padding-left: 28px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.champion-avatar {
-  width: 48px;
-  height: 48px;
+.champion-avatar,
+.champion-avatar-placeholder {
+  width: 86px;
+  height: 86px;
+  flex: 0 0 86px;
   border-radius: 50%;
-  object-fit: cover;
   border: 2px solid rgba(255, 190, 61, 0.5);
 }
 
+.champion-avatar {
+  object-fit: cover;
+}
+
 .champion-avatar-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 32px;
 }
 
 .champion-name {
-  font-weight: 800;
-  font-size: 18px;
+  font-weight: 950;
+  font-size: 34px;
+  line-height: 1;
+  color: #ffffff;
 }
 
 .champion-tournament-badge {
-  margin-top: 8px;
-  font-size: 13px;
+  margin-top: 14px;
+  font-size: 15px;
   color: #ffffff;
   font-weight: 800;
   letter-spacing: 0.01em;
   width: fit-content;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
@@ -698,10 +709,10 @@ background: linear-gradient(
 }
 
 .champion-meta-row {
-  margin-top: 10px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -709,10 +720,10 @@ background: linear-gradient(
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
   color: #ffffff;
-  padding: 7px 12px;
+  padding: 9px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -722,10 +733,10 @@ background: linear-gradient(
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #d5dceb;
-  padding: 7px 12px;
+  padding: 9px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -740,30 +751,31 @@ background: linear-gradient(
 }
 
 .champion-score-label {
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .champion-score-big {
-  font-size: 34px;
-  line-height: 1;
-  font-weight: 900;
+  font-size: 76px;
+  line-height: 0.9;
+  font-weight: 950;
   color: var(--gold);
-  text-shadow: 0 0 20px rgba(255, 190, 61, 0.2);
+  text-shadow: 0 0 22px rgba(255, 190, 61, 0.2);
 }
 
 .champion-opponent-pill {
-  margin-top: 4px;
+  margin-top: 2px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   width: fit-content;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 800;
   color: #ffffff;
-  padding: 7px 12px;
+  padding: 10px 16px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -771,7 +783,8 @@ background: linear-gradient(
 }
 
 .champion-badge {
-  font-size: 28px;
+  font-size: 46px;
+  line-height: 1;
 }
 .mvp-card {
   position: relative;
@@ -890,12 +903,50 @@ background: linear-gradient(
   .champion-card-upgraded {
     flex-direction: column;
     align-items: flex-start;
+    min-height: 0;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .champion-left {
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
   }
 
   .champion-right {
     align-items: flex-start;
     text-align: left;
     min-width: 0;
+    width: 100%;
+    align-self: stretch;
+    padding-top: 22px;
+    padding-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 0;
+  }
+
+  .champion-avatar,
+  .champion-avatar-placeholder {
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+  }
+
+  .champion-avatar-placeholder {
+    font-size: 26px;
+  }
+
+  .champion-name {
+    font-size: 28px;
+  }
+
+  .champion-score-big {
+    font-size: 58px;
+  }
+
+  .champion-opponent-pill {
+    align-self: flex-start;
   }
 }
 .champion-final {
