@@ -294,9 +294,10 @@
 
 .welcome-section-head {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
 }
 
 .welcome-section-head span {
@@ -305,17 +306,25 @@
   font-weight: 900;
 }
 
-.welcome-section-head p {
-  margin: 0;
-  max-width: 420px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.045);
-  color: rgba(224, 237, 250, 0.7);
+.welcome-info-label {
+  display: block;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  color: rgba(255, 255, 255, 0.68);
   font-size: 14px;
-  line-height: 1.5;
-  text-align: right;
+  line-height: 1.6;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  pointer-events: none;
 }
 
 .welcome-activity-section .welcome-section-head {
@@ -327,10 +336,8 @@
   text-shadow: 0 0 22px rgba(92, 145, 190, 0.2);
 }
 
-.welcome-activity-section .welcome-section-head p {
-  border: 1px solid rgba(92, 145, 190, 0.18);
-  background: rgba(92, 145, 190, 0.075);
-  color: rgba(224, 237, 250, 0.76);
+.welcome-activity-section .welcome-info-label {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .welcome-nav-grid {
@@ -742,15 +749,11 @@
     align-items: flex-start;
   }
 
-  .welcome-section-head {
-    flex-direction: column;
-  }
-
   .welcome-activity-row {
     grid-template-columns: 1fr;
   }
 
-  .welcome-section-head p,
+  .welcome-info-label,
   .welcome-activity-meta {
     text-align: left;
   }
@@ -776,6 +779,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .topbar-right {
@@ -786,16 +790,19 @@
 
 .lang-switch {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
 .lang-switch button {
-  padding: 6px 10px;
-  border-radius: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.2);
   background: rgba(0,0,0,0.4);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   transition: 0.2s;
 }

@@ -2058,21 +2058,7 @@ const deleteAchievement = async (achievementId: number) => {
       aria-label="Instagram"
       title="Instagram"
     >
-      <svg width="18" height="18" viewBox="2 2 20 20" aria-hidden="true">
-        <defs>
-          <linearGradient id="ig-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#feda75" />
-            <stop offset="25%" stopColor="#fa7e1e" />
-            <stop offset="50%" stopColor="#d62976" />
-            <stop offset="75%" stopColor="#962fbf" />
-            <stop offset="100%" stopColor="#4f5bd5" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M7 2C4.23858 2 2 4.23858 2 7V17C2 19.7614 4.23858 22 7 22H17C19.7614 22 22 19.7614 22 17V7C22 4.23858 19.7614 2 17 2H7ZM12 7C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12C7 9.23858 9.23858 7 12 7ZM18 6.5C18.8284 6.5 19.5 5.82843 19.5 5C19.5 4.17157 18.8284 3.5 18 3.5C17.1716 3.5 16.5 4.17157 16.5 5C16.5 5.82843 17.1716 6.5 18 6.5Z"
-          fill="url(#ig-gradient)"
-        />
-      </svg>
+      Instagram
     </a>
 
     {isAdmin && (

@@ -157,7 +157,7 @@ onClick={() => setActiveTab("leaderboard")}
       <div className="welcome-section">
         <div className="welcome-section-head">
           <span>{text.quickNavigation}</span>
-          <p>{text.quickNavigationSubtitle}</p>
+          <p className="welcome-info-label">{text.quickNavigationSubtitle}</p>
         </div>
 
         <div className="welcome-nav-grid">
@@ -190,7 +190,7 @@ onClick={() => setActiveTab("leaderboard")}
       <div className="welcome-section welcome-activity-section">
         <div className="welcome-section-head">
           <span>{text.recentActivity}</span>
-          <p>{text.recentActivitySubtitle}</p>
+          <p className="welcome-info-label">{text.recentActivitySubtitle}</p>
         </div>
 
         {recentMatches.length === 0 ? (
