@@ -1996,6 +1996,41 @@ background: linear-gradient(
   border-radius: 20px;
 }
 
+.achievement-card-pro {
+  align-items: flex-start;
+  background:
+    linear-gradient(135deg, rgba(255, 190, 61, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+}
+
+.achievement-rank {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.player-result-pill {
+  min-width: 72px;
+  justify-content: center;
+}
+
+.player-result-win {
+  background: rgba(49, 208, 127, 0.18);
+  color: #73f0aa;
+  border-color: rgba(49, 208, 127, 0.2);
+}
+
+.player-result-loss {
+  background: rgba(255, 59, 95, 0.16);
+  color: #ff8aa0;
+  border-color: rgba(255, 59, 95, 0.2);
+}
+
+.player-result-pending {
+  background: rgba(67, 208, 255, 0.14);
+  color: #8be3ff;
+  border-color: rgba(67, 208, 255, 0.2);
+}
+
 @media (max-width: 900px) {
   .profile-head {
     flex-direction: column;

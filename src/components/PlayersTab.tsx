@@ -1,4 +1,11 @@
 import { Achievement, Match, Player, Team, Tournament } from "../types";
+import {
+  getPlayerMatchResult,
+  getPlayerMatches,
+  getPlayerRecentMatches,
+  getPlayerStreak,
+  getPlayerWinRate,
+} from "../domain/player/playerStats";
 import { Lang, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
@@ -45,15 +52,34 @@ export default function PlayersTab({
   const text = t[lang] || t.en;
   const playerText = text.playersPage;
   const commonText = text.common;
+  const proText =
+    lang === "ua"
+      ? {
+          totalMatches: "Усього матчів",
+          winRate: "Відсоток перемог",
+          losses: "Поразки",
+          currentStreak: "Поточна серія",
+          opponent: "Суперник",
+          win: "Перемога",
+          loss: "Поразка",
+          pending: "Очікується",
+        }
+      : {
+          totalMatches: "Total matches",
+          winRate: "Win rate",
+          losses: "Losses",
+          currentStreak: "Current streak",
+          opponent: "Opponent",
+          win: "Win",
+          loss: "Loss",
+          pending: "Pending",
+        };
 
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
 
   const getTeamLogo = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.logo || "";
-
-  const getPlayerName = (playerId: number) =>
-    players.find((p) => p.id === playerId)?.nickname || playerText.unknown;
 
   const getPlayerAchievements = (playerId: number) =>
     achievements.filter((achievement) =>
@@ -101,12 +127,27 @@ export default function PlayersTab({
       return a.nickname.localeCompare(b.nickname);
     });
 
-  const playerMatches = matches
-    .filter(
-      (match) =>
-        match.player1 === selectedPlayerId || match.player2 === selectedPlayerId
-    )
-    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
+  const playerMatches = getPlayerMatches(matches, selectedPlayerId).sort(
+    (a, b) => (a.order ?? a.id) - (b.order ?? b.id)
+  );
+  const playerRecentMatches = getPlayerRecentMatches({
+    matches,
+    players,
+    tournaments,
+    playerId: selectedPlayerId,
+    limit: 6,
+    unknownPlayerLabel: playerText.unknown,
+    friendlyMatchLabel: playerText.friendlyMatch,
+  });
+  const playerDecidedMatches = playerMatches.filter(
+    (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending"
+  );
+  const playerWins = playerDecidedMatches.filter(
+    (match) => getPlayerMatchResult(match, selectedPlayerId) === "win"
+  ).length;
+  const playerLosses = playerDecidedMatches.length - playerWins;
+  const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId);
+  const playerStreak = getPlayerStreak(playerMatches, selectedPlayerId);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
 
@@ -438,8 +479,12 @@ placeholder={playerText.searchPlaceholder}
             </div>
 
 <div className="stats-grid">
+  <StatCard title={proText.totalMatches} value={playerMatches.length} />
+  <StatCard title={proText.winRate} value={`${playerWinRate}%`} />
   <StatCard title={playerText.elo} value={selectedPlayer.elo} />
-  <StatCard title={playerText.wins} value={selectedPlayer.wins} />
+  <StatCard title={playerText.wins} value={playerWins} />
+  <StatCard title={proText.losses} value={playerLosses} />
+  <StatCard title={proText.currentStreak} value={playerStreak.label} />
   <StatCard
     title={playerText.tournamentsWon}
     value={selectedPlayer.tournamentsWon}
@@ -456,10 +501,10 @@ placeholder={playerText.searchPlaceholder}
     <p className="muted">{playerText.noAchievements}</p>
   ) : (
                 <div className="achievement-grid">
-                  {playerAchievements.map((achievement) => (
+                  {playerAchievements.map((achievement, index) => (
                     <div
                       key={achievement.id}
-                      className="achievement-card"
+                      className="achievement-card achievement-card-pro"
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         e.currentTarget.style.setProperty(
@@ -480,6 +525,9 @@ placeholder={playerText.searchPlaceholder}
                       <div>
                         <div className="achievement-title">
                           {achievement.title}
+                          <span className="pill gold achievement-rank">
+                            #{index + 1}
+                          </span>
                         </div>
                         <div className="muted small">
                           {achievement.description}
@@ -546,11 +594,12 @@ placeholder={playerText.searchPlaceholder}
 <div className="section-block">
   <h4>{playerText.recentMatches}</h4>
 
-  {playerMatches.length === 0 ? (
+  {playerRecentMatches.length === 0 ? (
     <p className="muted">{playerText.noRecentMatches}</p>
   ) : (
                 <div className="list-col">
-                  {playerMatches.map((match) => (
+                  {playerRecentMatches.map(
+                    ({ match, opponentName, result, tournamentName }) => (
                     <div
                       key={match.id}
                       className="simple-card"
@@ -569,19 +618,25 @@ placeholder={playerText.searchPlaceholder}
                       <div className="row-between">
                         <div>
                           <div className="achievement-title">
-                            {getPlayerName(match.player1 || 0)} {playerText.vs}{" "}
-                            {getPlayerName(match.player2 || 0)}
+                            {proText.opponent}: {opponentName}
+                            <span
+                              className={`pill player-result-pill player-result-${result}`}
+                            >
+                              {result === "win"
+                                ? proText.win
+                                : result === "loss"
+                                ? proText.loss
+                                : proText.pending}
+                            </span>
                           </div>
                           <div className="muted small">
                             {match.game} •{" "}
-                            {tournaments.find(
-                              (t) => t.id === match.tournamentId
-                            )?.title || playerText.friendlyMatch}
+                            {tournamentName}
                           </div>
                         </div>
 
                         <div className="right-block">
-                          <div className="score">{match.score}</div>
+                          <div className="score">{match.score || "-"}</div>
                           <div className="muted small">{match.date}</div>
                         </div>
                       </div>
@@ -608,7 +663,8 @@ placeholder={playerText.searchPlaceholder}
                         ) : null}
                       </div>
                     </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
             </div>
