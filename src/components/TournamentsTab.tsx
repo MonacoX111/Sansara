@@ -463,7 +463,11 @@ const playoffRoundSeries = Object.entries(playoffRounds)
   .map(([roundName, seriesMap]) => ({
     roundName,
     series: Object.values(seriesMap)
-      .map((seriesMatches) => [...seriesMatches].sort((a, b) => a.id - b.id))
+      .map((seriesMatches) =>
+        [...seriesMatches].sort(
+          (a, b) => (a.order ?? a.id) - (b.order ?? b.id)
+        )
+      )
       .sort((a, b) => {
         const aKey = getSeriesKey(a[0] || ({} as Match));
         const bKey = getSeriesKey(b[0] || ({} as Match));
@@ -481,7 +485,11 @@ const finalSeries = Object.values(
     return acc;
   }, {} as Record<string, Match[]>)
 )
-  .map((seriesMatches) => [...seriesMatches].sort((a, b) => a.id - b.id))
+  .map((seriesMatches) =>
+    [...seriesMatches].sort(
+      (a, b) => (a.order ?? a.id) - (b.order ?? b.id)
+    )
+  )
   .sort((a, b) => {
     const aKey = getSeriesKey(a[0] || ({} as Match));
     const bKey = getSeriesKey(b[0] || ({} as Match));

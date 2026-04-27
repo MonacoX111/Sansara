@@ -28,7 +28,9 @@ export default function HomeTab({
 
   const topElo =
     players.length > 0 ? Math.max(...players.map((p) => p.elo || 0)) : 0;
-  const recentMatches = [...matches].sort((a, b) => b.id - a.id).slice(0, 5);
+  const recentMatches = [...matches]
+    .sort((a, b) => (b.order ?? b.id) - (a.order ?? a.id))
+    .slice(0, 5);
 
   const getMatchSide = (match: Match, side: "left" | "right") => {
     const isTeamMatch = match.matchType === "team";

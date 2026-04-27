@@ -94,6 +94,7 @@ export type Tournament = {
 
 export type Match = {
   id: number;
+  order?: number;
   game: string;
 
   // режим матчу

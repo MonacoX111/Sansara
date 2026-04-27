@@ -325,8 +325,9 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
   }));
 
 const normalizeMatches = (items: Match[]): Match[] =>
-  items.map((match) => ({
+  items.map((match, index) => ({
     ...match,
+    order: typeof match.order === "number" ? match.order : index,
     score: match.score || "",
     winnerId: Number(match.winnerId || 0),
     tournamentId: Number(match.tournamentId || 0),
@@ -1598,6 +1599,13 @@ roundLabel: "",
 
   const updatedMatch: Match = {
     ...baseMatch,
+    order:
+      typeof baseMatch.order === "number"
+        ? baseMatch.order
+        : matches.filter(
+            (match) =>
+              Number(match.tournamentId || 0) === Number(matchForm.tournamentId || 0)
+          ).length,
     seriesId: matchForm.seriesId || "",
     nextSeriesId: matchForm.nextSeriesId || "",
     game: matchForm.game,
@@ -1620,6 +1628,28 @@ roundLabel: "",
     notes: matchForm.notes,
     eloApplied: Boolean(matchForm.eloApplied),
   };
+
+  if (
+    updatedMatch.matchType === "player" &&
+    updatedMatch.winnerId &&
+    updatedMatch.winnerId !== updatedMatch.player1 &&
+    updatedMatch.winnerId !== updatedMatch.player2
+  ) {
+    console.error("Invalid match winner: winnerId must be player1 or player2");
+    showToast("Invalid match winner", "danger");
+    return;
+  }
+
+  if (
+    updatedMatch.matchType === "team" &&
+    updatedMatch.winnerTeamId &&
+    updatedMatch.winnerTeamId !== updatedMatch.team1 &&
+    updatedMatch.winnerTeamId !== updatedMatch.team2
+  ) {
+    console.error("Invalid match winner: winnerTeamId must be team1 or team2");
+    showToast("Invalid match winner", "danger");
+    return;
+  }
 
   setMatches((prev) => {
     const exists = prev.some((match) => match.id === updatedMatch.id);
@@ -1715,6 +1745,9 @@ setMatches((prev) => {
       score: "",
       winnerId: 0,
       winnerTeamId: 0,
+      order: matches.filter(
+        (match) => Number(match.tournamentId || 0) === Number(tournamentId || 0)
+      ).length,
       tournamentId: Number(tournamentId || 0),
       date: "",
       status: "scheduled",
@@ -1765,11 +1798,12 @@ bestOf: 1,
   };
 
 const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
+  const selectedTournamentId = Number(tournamentId || 0);
   const visibleMatches = [...matches]
-    .filter((match) =>
-      tournamentId ? match.tournamentId === tournamentId : match.tournamentId === 0
+    .filter(
+      (match) => Number(match.tournamentId || 0) === selectedTournamentId
     )
-    .sort((a, b) => b.id - a.id);
+    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
 
   const currentIndex = visibleMatches.findIndex(
     (match) => match.id === selectedMatchId
@@ -1786,22 +1820,22 @@ const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
 
   const updatedCurrentMatch = {
     ...currentMatch,
-    id: targetMatch.id,
+    order: targetMatch.order ?? targetMatch.id,
   };
 
   const updatedTargetMatch = {
     ...targetMatch,
-    id: currentMatch.id,
+    order: currentMatch.order ?? currentMatch.id,
   };
 
   const nextMatches = matches.map((match) => {
-    if (match.id === currentMatch.id) return updatedTargetMatch;
-    if (match.id === targetMatch.id) return updatedCurrentMatch;
+    if (match.id === currentMatch.id) return updatedCurrentMatch;
+    if (match.id === targetMatch.id) return updatedTargetMatch;
     return match;
   });
 
   setMatches(nextMatches);
-  setSelectedMatchId(updatedCurrentMatch.id);
+  setSelectedMatchId(currentMatch.id);
 
   try {
     if (isFirebaseConfigured) {
@@ -1857,7 +1891,7 @@ const autoGenerateBracket = async (tournamentId: number) => {
 
   const tournamentMatches = matches
     .filter((match) => match.tournamentId === tournamentId)
-    .sort((a, b) => a.id - b.id);
+    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
 
   if (tournamentMatches.length === 0) {
     showToast("No matches found for this tournament", "warning");

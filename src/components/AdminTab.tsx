@@ -2205,7 +2205,7 @@ game: nextTournament?.game || "",
                   ? match.tournamentId === matchTournamentFilterId
                   : match.tournamentId === 0
               )
-              .sort((a, b) => b.id - a.id)
+              .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
               .map((match) => (
                 <button
                   key={match.id}
