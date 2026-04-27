@@ -23,6 +23,12 @@ const getWinnerForMatchType = (match: Match, matchType: Match["matchType"]) =>
     ? Number(match.winnerTeamId || 0)
     : Number(match.winnerId || 0);
 
+const getParticipantKeys = (matchType: Match["matchType"]) => ({
+  firstKey: matchType === "team" ? "team1" : "player1",
+  secondKey: matchType === "team" ? "team2" : "player2",
+  winnerKey: matchType === "team" ? "winnerTeamId" : "winnerId",
+});
+
 const reconcileNextMatchParticipant = ({
   nextMatch,
   oldWinnerId,
@@ -32,8 +38,7 @@ const reconcileNextMatchParticipant = ({
   oldWinnerId: number;
   newWinnerId: number;
 }): Match => {
-  const firstKey = nextMatch.matchType === "team" ? "team1" : "player1";
-  const secondKey = nextMatch.matchType === "team" ? "team2" : "player2";
+  const { firstKey, secondKey } = getParticipantKeys(nextMatch.matchType);
   const firstValue = Number(nextMatch[firstKey] || 0);
   const secondValue = Number(nextMatch[secondKey] || 0);
 
@@ -77,6 +82,40 @@ const reconcileNextMatchParticipant = ({
     ...nextMatch,
     [firstKey]: nextFirstValue,
     [secondKey]: nextSecondValue,
+  };
+};
+
+const removeStaleParticipantFromMatch = ({
+  match,
+  staleParticipantId,
+}: {
+  match: Match;
+  staleParticipantId: number;
+}): Match => {
+  if (staleParticipantId <= 0) return match;
+
+  const { firstKey, secondKey, winnerKey } = getParticipantKeys(match.matchType);
+  const firstValue = Number(match[firstKey] || 0);
+  const secondValue = Number(match[secondKey] || 0);
+  const winnerValue = Number(match[winnerKey] || 0);
+
+  const nextFirstValue = firstValue === staleParticipantId ? 0 : firstValue;
+  const nextSecondValue = secondValue === staleParticipantId ? 0 : secondValue;
+  const nextWinnerValue = winnerValue === staleParticipantId ? 0 : winnerValue;
+
+  if (
+    nextFirstValue === firstValue &&
+    nextSecondValue === secondValue &&
+    nextWinnerValue === winnerValue
+  ) {
+    return match;
+  }
+
+  return {
+    ...match,
+    [firstKey]: nextFirstValue,
+    [secondKey]: nextSecondValue,
+    [winnerKey]: nextWinnerValue,
   };
 };
 
@@ -125,11 +164,22 @@ export const progressMatchWinner = ({
         ? getWinnerForMatchType(currentMatch, nextMatch.matchType)
         : 0;
 
-    const updatedNextMatch = reconcileNextMatchParticipant({
+    let updatedNextMatch = reconcileNextMatchParticipant({
       nextMatch,
       oldWinnerId,
       newWinnerId,
     });
+    const shouldClearNextWinner =
+      oldWinnerId > 0 &&
+      oldWinnerId !== newWinnerId &&
+      getWinnerForMatchType(nextMatch, nextMatch.matchType) === oldWinnerId;
+
+    if (shouldClearNextWinner) {
+      updatedNextMatch = removeStaleParticipantFromMatch({
+        match: updatedNextMatch,
+        staleParticipantId: oldWinnerId,
+      });
+    }
 
     if (updatedNextMatch === nextMatch) return;
 
@@ -137,6 +187,50 @@ export const progressMatchWinner = ({
       match.id === updatedNextMatch.id ? updatedNextMatch : match
     );
     affectedMatches.push(updatedNextMatch);
+
+    if (
+      oldWinnerId <= 0 ||
+      oldWinnerId === newWinnerId ||
+      getWinnerForMatchType(nextMatch, nextMatch.matchType) !== oldWinnerId
+    ) {
+      return;
+    }
+
+    let staleParticipantId = oldWinnerId;
+    let currentCascadeMatch = updatedNextMatch;
+    const visitedSeriesIds = new Set<string>();
+
+    while (currentCascadeMatch.nextSeriesId) {
+      if (visitedSeriesIds.has(currentCascadeMatch.nextSeriesId)) break;
+      visitedSeriesIds.add(currentCascadeMatch.nextSeriesId);
+
+      const downstreamMatch = nextMatches.find(
+        (match) => match.seriesId === currentCascadeMatch.nextSeriesId
+      );
+
+      if (!downstreamMatch) break;
+
+      const updatedDownstreamMatch = removeStaleParticipantFromMatch({
+        match: downstreamMatch,
+        staleParticipantId,
+      });
+
+      if (updatedDownstreamMatch === downstreamMatch) break;
+
+      nextMatches = nextMatches.map((match) =>
+        match.id === updatedDownstreamMatch.id ? updatedDownstreamMatch : match
+      );
+      affectedMatches.push(updatedDownstreamMatch);
+
+      if (
+        getWinnerForMatchType(downstreamMatch, downstreamMatch.matchType) !==
+        staleParticipantId
+      ) {
+        break;
+      }
+
+      currentCascadeMatch = updatedDownstreamMatch;
+    }
   });
 
   return {
