@@ -33,7 +33,7 @@ export default function RecentResults({
       ) : (
         <div className="list-col">
           {[...completedMatches]
-            .sort((a, b) => (b.order ?? b.id) - (a.order ?? a.id))
+            .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
             .slice(0, 5)
             .map((match) => {
               const tournament = tournaments.find(

@@ -106,7 +106,7 @@ export default function PlayersTab({
       (match) =>
         match.player1 === selectedPlayerId || match.player2 === selectedPlayerId
     )
-    .sort((a, b) => (b.order ?? b.id) - (a.order ?? a.id));
+    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id));
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
 

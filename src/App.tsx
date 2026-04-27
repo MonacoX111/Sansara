@@ -1931,8 +1931,8 @@ const autoGenerateBracket = async (tournamentId: number) => {
     seriesMap.set(key, [...current, match]);
   });
 
-  const seriesGroups = Array.from(seriesMap.values()).sort(
-    (a, b) => a[0].id - b[0].id
+const seriesGroups = Array.from(seriesMap.values()).sort(
+    (a, b) => (a[0].order ?? a[0].id) - (b[0].order ?? b[0].id)
   );
 
   const getBracketPlan = (seriesCount: number) => {
