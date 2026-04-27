@@ -7,6 +7,7 @@ import {
   getPlayerWinRate,
 } from "../domain/player/playerStats";
 import {
+  getPlayerAllTeamIds,
   getPlayerCurrentTeam,
   getPlayerTeamHistory,
 } from "../domain/player/playerTeams";
@@ -76,15 +77,61 @@ export default function PlayersTab({
   const selectedPlayerTeamHistory = selectedPlayer
     ? getPlayerTeamHistory(selectedPlayer, teams)
     : [];
+  const selectedPlayerTeamIds = selectedPlayer
+    ? getPlayerAllTeamIds(selectedPlayer)
+    : [];
+  const selectedPlayerTeamIdSet = new Set(selectedPlayerTeamIds);
+
+  const getTournamentPlacementForSelectedPlayer = (tournament: Tournament) => {
+    if (!Array.isArray(tournament.placements)) return undefined;
+
+    return tournament.placements.find(
+      (item) =>
+        Number(item.playerId) === Number(selectedPlayerId) ||
+        (typeof item.teamId === "number" &&
+          selectedPlayerTeamIdSet.has(Number(item.teamId)))
+    );
+  };
+
+  const isSelectedPlayerTournament = (tournament: Tournament) => {
+    if (!selectedPlayer) return false;
+
+    const participantIds = Array.isArray(tournament.participantIds)
+      ? tournament.participantIds.map((id) => Number(id))
+      : [];
+    const placement = getTournamentPlacementForSelectedPlayer(tournament);
+    const participatedDirectly =
+      tournament.participantType === "player" &&
+      participantIds.includes(Number(selectedPlayer.id));
+    const participatedByTeam =
+      tournament.participantType === "team" &&
+      participantIds.some((teamId) => selectedPlayerTeamIdSet.has(teamId));
+    const wonDirectly = Number(tournament.winnerId) === Number(selectedPlayer.id);
+    const wonByTeam =
+      typeof tournament.winnerTeamId === "number" &&
+      selectedPlayerTeamIdSet.has(Number(tournament.winnerTeamId));
+
+    return (
+      participatedDirectly ||
+      participatedByTeam ||
+      Boolean(placement) ||
+      wonDirectly ||
+      wonByTeam
+    );
+  };
+
+  const compareTournamentsLatestFirst = (a: Tournament, b: Tournament) => {
+    const aTime = Date.parse(a.date);
+    const bTime = Date.parse(b.date);
+    const dateDiff =
+      (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+
+    if (dateDiff !== 0) return dateDiff;
+    return (a.order ?? a.id) - (b.order ?? b.id);
+  };
 
   const playerTournaments = selectedPlayer
-    ? tournaments.filter((tournament) => {
-        if (!Array.isArray(tournament.participantIds)) return false;
-
-        return tournament.participantIds
-          .map((id) => Number(id))
-          .includes(Number(selectedPlayer.id));
-      })
+    ? tournaments.filter(isSelectedPlayerTournament)
     : [];
 
   const filteredPlayers = [...players]
@@ -140,40 +187,25 @@ export default function PlayersTab({
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
 
   const playerTournamentHistory = tournaments
+    .filter(isSelectedPlayerTournament)
+    .sort(compareTournamentsLatestFirst)
     .map((tournament) => {
-      const placement = Array.isArray(tournament.placements)
-        ? tournament.placements.find(
-            (item) => Number(item.playerId) === Number(selectedPlayerId)
-          )
-        : undefined;
-
-      const participantIds = Array.isArray(tournament.participantIds)
-        ? tournament.participantIds.map((id) => Number(id))
-        : [];
-
-      const participatedByParticipantIds = participantIds.includes(
-        Number(selectedPlayerId)
-      );
-
-      const participatedByMatches = playerMatches.some(
-        (match) => match.tournamentId === tournament.id
-      );
-
-      const participated =
-        participatedByParticipantIds ||
-        Boolean(placement) ||
-        participatedByMatches;
-
-      if (!participated) return null;
+      const placement = getTournamentPlacementForSelectedPlayer(tournament);
 
       return {
         ...tournament,
         place: placement?.place || "—",
-        isWinner: Number(tournament.winnerId) === Number(selectedPlayerId),
+        isWinner:
+          Number(tournament.winnerId) === Number(selectedPlayerId) ||
+          (typeof tournament.winnerTeamId === "number" &&
+            selectedPlayerTeamIdSet.has(Number(tournament.winnerTeamId))),
         isMvp: Number(tournament.mvpId) === Number(selectedPlayerId),
       };
     })
-    .filter(Boolean) as (Tournament & {
+    .filter(
+      (tournament, index, items) =>
+        items.findIndex((item) => item.id === tournament.id) === index
+    ) as (Tournament & {
     place: number | string;
     isWinner: boolean;
     isMvp: boolean;
