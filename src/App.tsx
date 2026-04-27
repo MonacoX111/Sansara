@@ -1726,10 +1726,20 @@ setMatches((prev) => {
 };
 
   const addMatch = async (tournamentId = 0) => {
+    const selectedTournamentId = Number(tournamentId || 0);
     const selectedMatchTournament =
       tournaments.find(
-        (tournament) => tournament.id === Number(tournamentId)
+        (tournament) => tournament.id === selectedTournamentId
       ) || null;
+    const tournamentMatchOrders = matches
+      .filter(
+        (match) => Number(match.tournamentId || 0) === selectedTournamentId
+      )
+      .map((match) => match.order ?? match.id);
+    const nextOrder =
+      tournamentMatchOrders.length > 0
+        ? Math.min(...tournamentMatchOrders) - 1
+        : 0;
 
     const newMatch: Match = {
       seriesId: "",
@@ -1745,10 +1755,8 @@ setMatches((prev) => {
       score: "",
       winnerId: 0,
       winnerTeamId: 0,
-      order: matches.filter(
-        (match) => Number(match.tournamentId || 0) === Number(tournamentId || 0)
-      ).length,
-      tournamentId: Number(tournamentId || 0),
+      order: nextOrder,
+      tournamentId: selectedTournamentId,
       date: "",
       status: "scheduled",
 round: "",
@@ -1775,7 +1783,7 @@ bestOf: 1,
       score: "",
       winnerId: 0,
       winnerTeamId: 0,
-      tournamentId: Number(tournamentId || 0),
+      tournamentId: selectedTournamentId,
       date: "",
       status: "scheduled",
 round: "",
