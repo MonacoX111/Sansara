@@ -559,6 +559,82 @@
   gap: 16px;
 }
 
+.admin-wrap .picker-grid {
+  gap: 10px;
+}
+
+.admin-wrap .picker-btn {
+  position: relative;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 999px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
+    rgba(14, 18, 26, 0.62);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.018) inset,
+    0 8px 20px rgba(0, 0, 0, 0.14);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.admin-wrap .picker-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 59, 95, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.15), rgba(67, 208, 255, 0.06)),
+    rgba(14, 18, 26, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.14) inset,
+    0 8px 20px rgba(255, 59, 95, 0.12);
+}
+
+.admin-wrap .picker-btn-active {
+  color: #ffffff;
+  border-color: rgba(255, 59, 95, 0.62);
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.24), rgba(67, 208, 255, 0.1)),
+    rgba(18, 22, 32, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.2) inset,
+    0 0 22px rgba(255, 59, 95, 0.18);
+}
+
+.admin-wrap .picker-btn input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-wrap label.picker-btn::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.admin-wrap label.picker-btn-active::before {
+  border-color: rgba(255, 59, 95, 0.72);
+  background:
+    radial-gradient(circle at center, #ff3b5f 0 38%, transparent 42%),
+    rgba(255, 59, 95, 0.14);
+  box-shadow:
+    0 0 0 3px rgba(255, 59, 95, 0.1),
+    0 0 18px rgba(255, 59, 95, 0.18);
+}
+
 .admin-scroll-list {
   max-height: 720px;
   overflow-y: auto;
@@ -575,6 +651,93 @@
   min-height: 46px;
 }
 
+.admin-wrap .admin-premium-select-trigger {
+  min-height: 48px;
+  border-radius: 16px;
+  border-color: rgba(255, 59, 95, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    rgba(12, 16, 24, 0.88);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 10px 24px rgba(0, 0, 0, 0.16);
+}
+
+.admin-wrap .admin-premium-select-menu {
+  border-radius: 18px;
+  border-color: rgba(255, 59, 95, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(10, 14, 22, 0.98);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 18px 44px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(255, 59, 95, 0.12);
+}
+
+.admin-wrap .admin-premium-select-option {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.admin-wrap .input,
+.admin-wrap .textarea,
+.admin-wrap select.input,
+.admin-wrap input[type="number"].input,
+.admin-wrap input[type="date"].input {
+  min-height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(12, 16, 24, 0.86);
+  color: var(--text);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.018) inset,
+    0 10px 24px rgba(0, 0, 0, 0.16);
+}
+
+.admin-wrap .input::placeholder,
+.admin-wrap .textarea::placeholder {
+  color: rgba(214, 220, 232, 0.42);
+}
+
+.admin-wrap .input:hover,
+.admin-wrap .textarea:hover,
+.admin-wrap select.input:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.024)),
+    rgba(15, 20, 30, 0.94);
+}
+
+.admin-wrap .input:focus,
+.admin-wrap .textarea:focus,
+.admin-wrap select.input:focus {
+  border-color: rgba(255, 59, 95, 0.62);
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.09), rgba(67, 208, 255, 0.05)),
+    rgba(15, 19, 29, 0.98);
+  box-shadow:
+    0 0 0 3px rgba(255, 59, 95, 0.12),
+    0 0 24px rgba(255, 59, 95, 0.14),
+    0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.admin-wrap input[type="number"].input {
+  -moz-appearance: textfield;
+}
+
+.admin-wrap input[type="number"].input::-webkit-outer-spin-button,
+.admin-wrap input[type="number"].input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.admin-wrap input[type="date"].input {
+  color-scheme: dark;
+}
+
 /* === MATCH ADMIN === */
 
 .checkbox-label {
@@ -583,11 +746,67 @@
   gap: 10px;
   color: var(--text);
   cursor: pointer;
+  width: fit-content;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
+    rgba(14, 18, 26, 0.62);
+  font-weight: 700;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  display: grid;
+  place-content: center;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.checkbox-label input[type="checkbox"]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 4px;
+  transform: scale(0);
+  background: linear-gradient(135deg, #ff3b5f, #43d0ff);
+  transition: transform 0.18s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+  border-color: rgba(255, 59, 95, 0.72);
+  background: rgba(255, 59, 95, 0.14);
+  box-shadow:
+    0 0 0 3px rgba(255, 59, 95, 0.1),
+    0 0 18px rgba(255, 59, 95, 0.18);
+}
+
+.checkbox-label input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.checkbox-label:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 59, 95, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 59, 95, 0.14), rgba(67, 208, 255, 0.06)),
+    rgba(14, 18, 26, 0.92);
 }
 
 .historical-team-picker {

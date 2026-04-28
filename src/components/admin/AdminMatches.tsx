@@ -37,7 +37,6 @@ type MatchForm = {
   nextSeriesId?: string;
   bestOf: number;
   notes: string;
-  eloApplied: boolean;
 };
 
 type SelectValue = number | string;
@@ -173,7 +172,6 @@ game: nextTournament?.game || "",
                   round: "",
                   bestOf: 1,
                   notes: "",
-                  eloApplied: false,
                 });
               }}
             />
@@ -604,38 +602,20 @@ game: nextTournament?.game || "",
   />
 </div>
 
-            <div className="form-grid two">
-              <div className="field-block">
-                <label className="field-label">{adminText.bestOf}</label>
-                <input
-                  className="input"
-                  type="number"
-                  min={1}
-                  value={matchForm.bestOf}
-                  onChange={(e) =>
-                    setMatchForm((prev: MatchForm) => ({
-                      ...prev,
-                      bestOf: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="field-block">
-                <label className="field-label checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={matchForm.eloApplied}
-                    onChange={(e) =>
-                      setMatchForm((prev: MatchForm) => ({
-                        ...prev,
-                        eloApplied: e.target.checked,
-                      }))
-                    }
-                  />
-                  <span>{adminText.eloApplied}</span>
-                </label>
-              </div>
+            <div className="field-block">
+              <label className="field-label">{adminText.bestOf}</label>
+              <input
+                className="input"
+                type="number"
+                min={1}
+                value={matchForm.bestOf}
+                onChange={(e) =>
+                  setMatchForm((prev: MatchForm) => ({
+                    ...prev,
+                    bestOf: Number(e.target.value),
+                  }))
+                }
+              />
             </div>
 
             <div className="field-block">

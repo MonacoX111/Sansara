@@ -134,7 +134,6 @@ type MatchForm = {
 
   bestOf: number;
   notes: string;
-  eloApplied: boolean;
 };
 
 type HomeAnnouncementForm = {
@@ -251,7 +250,6 @@ groupName: "",
 roundLabel: "",
 bestOf: 1,
   notes: "",
-  eloApplied: false,
 });
 
 const createEmptyHomeAnnouncementForm = (): HomeAnnouncementForm => ({
@@ -1083,7 +1081,6 @@ groupName: selectedMatch.groupName || "",
 roundLabel: selectedMatch.roundLabel || "",
 bestOf: selectedMatch.bestOf,
       notes: selectedMatch.notes,
-      eloApplied: Boolean(selectedMatch.eloApplied),
     });
   }, [selectedMatch]);
 
@@ -1937,7 +1934,7 @@ roundLabel: "",
     roundLabel: matchForm.roundLabel || "",
     bestOf: Number(matchForm.bestOf || 1),
     notes: matchForm.notes,
-    eloApplied: Boolean(matchForm.eloApplied),
+    eloApplied: false,
   };
 
   const validation = validateMatchWinner(updatedMatch);
@@ -2005,7 +2002,6 @@ groupName: "",
 roundLabel: "",
 bestOf: 1,
       notes: "",
-      eloApplied: false,
     };
 
     setMatches((prev) => [...prev, newMatch]);
@@ -2032,7 +2028,6 @@ groupName: "",
 roundLabel: "",
 bestOf: 1,
       notes: "",
-      eloApplied: false,
     });
 
     showToast(commonText.matchAdded);

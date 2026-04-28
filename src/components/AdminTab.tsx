@@ -102,7 +102,6 @@ type MatchForm = {
 
   bestOf: number;
   notes: string;
-  eloApplied: boolean;
 };
 
 type HomeAnnouncementForm = HomeAnnouncement;
