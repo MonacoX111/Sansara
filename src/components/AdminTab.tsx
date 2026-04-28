@@ -114,7 +114,7 @@ type Props = {
   achievements: Achievement[];
   homeAnnouncementForm: HomeAnnouncementForm;
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
-  saveHomeAnnouncement: () => void;
+  saveHomeAnnouncement: () => void | Promise<void>;
 
   selectedPlayerId: number;
   setSelectedPlayerId: (id: number) => void;
@@ -371,13 +371,6 @@ reorderMatch,
   const isAdminActionLoading = (key: string) =>
     Boolean(adminActionLoading[key] || adminActionLoadingRef.current[key]);
 
-const ADMIN_ACTION_LOCK_MS = 3000;
-
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-
 const runAdminAction = async (
   key: string,
   action: () => void | Promise<void>
@@ -392,7 +385,6 @@ const runAdminAction = async (
 
   try {
     await action();
-    await wait(ADMIN_ACTION_LOCK_MS);
   } finally {
     const nextLoading = { ...adminActionLoadingRef.current };
     delete nextLoading[key];
@@ -732,8 +724,14 @@ const adminPlayersProps = {
   setSelectedPlayerId,
   playerForm,
   setPlayerForm,
-  savePlayer: () => runAdminAction("save-player", savePlayer),
-  addPlayer: () => runAdminAction("create-player", addPlayer),
+  savePlayer: () =>
+    runAdminAction("save-player", async () => {
+      await savePlayer();
+    }),
+  addPlayer: () =>
+    runAdminAction("create-player", async () => {
+      await addPlayer();
+    }),
   playerAdminSearch,
   setPlayerAdminSearch,
   filteredAdminPlayers,
@@ -750,8 +748,14 @@ const adminTeamsProps = {
   setSelectedTeamId,
   teamForm,
   setTeamForm,
-  saveTeam: () => runAdminAction("save-team", saveTeam),
-  addTeam: () => runAdminAction("create-team", addTeam),
+  saveTeam: () =>
+    runAdminAction("save-team", async () => {
+      await saveTeam();
+    }),
+  addTeam: () =>
+    runAdminAction("create-team", async () => {
+      await addTeam();
+    }),
 };
 
 const adminTournamentsProps = {
@@ -766,8 +770,14 @@ const adminTournamentsProps = {
   selectedTournamentId,
   tournamentForm,
   setTournamentForm,
-  saveTournament: () => runAdminAction("save-tournament", saveTournament),
-  addTournament: () => runAdminAction("create-tournament", addTournament),
+  saveTournament: () =>
+    runAdminAction("save-tournament", async () => {
+      await saveTournament();
+    }),
+  addTournament: () =>
+    runAdminAction("create-tournament", async () => {
+      await addTournament();
+    }),
   reorderTournament,
   handleTournamentImageUpload,
   handleTournamentSelect,
@@ -797,7 +807,9 @@ const adminGeneralProps = {
   homeAnnouncementForm,
   setHomeAnnouncementForm,
   saveHomeAnnouncement: () =>
-    runAdminAction("save-home-announcement", saveHomeAnnouncement),
+    runAdminAction("save-home-announcement", async () => {
+      await saveHomeAnnouncement();
+    }),
   isAdminActionLoading,
   handleHomeAnnouncementImageChange,
 };
@@ -814,9 +826,14 @@ const adminMatchesProps = {
   setSelectedMatchId,
   matchForm,
   setMatchForm,
-  saveMatch: () => runAdminAction("save-match", saveMatch),
+  saveMatch: () =>
+    runAdminAction("save-match", async () => {
+      await saveMatch();
+    }),
   addMatch: (tournamentId?: number) =>
-    runAdminAction("create-match", () => addMatch(tournamentId)),
+    runAdminAction("create-match", async () => {
+      await addMatch(tournamentId);
+    }),
   reorderMatch,
   autoGenerateBracket,
   matchTournamentFilterId,
@@ -842,7 +859,10 @@ const adminAchievementsProps = {
   selectedAchievementId,
   setSelectedAchievementId,
   saveAchievement,
-  addAchievement: () => runAdminAction("create-achievement", addAchievement),
+  addAchievement: () =>
+    runAdminAction("create-achievement", async () => {
+      await addAchievement();
+    }),
   deleteAchievement,
   safeAchievementPlayerIds,
   toggleAchievementPlayer,

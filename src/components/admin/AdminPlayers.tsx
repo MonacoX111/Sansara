@@ -57,8 +57,8 @@ type Props = {
   setSelectedPlayerId: (id: number) => void;
   playerForm: PlayerForm;
   setPlayerForm: Dispatch<SetStateAction<PlayerForm>>;
-  savePlayer: () => void;
-  addPlayer: () => void;
+  savePlayer: () => void | Promise<void>;
+  addPlayer: () => void | Promise<void>;
   playerAdminSearch: string;
   setPlayerAdminSearch: Dispatch<SetStateAction<string>>;
   filteredAdminPlayers: Player[];

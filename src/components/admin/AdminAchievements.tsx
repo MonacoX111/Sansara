@@ -15,9 +15,12 @@ type Props = {
   achievements: Achievement[];
   selectedAchievementId: number;
   setSelectedAchievementId: (id: number) => void;
-  saveAchievement: (id: number, updates: Partial<Achievement>) => void;
-  addAchievement: () => void;
-  deleteAchievement: (id: number) => void;
+  saveAchievement: (
+    id: number,
+    updates: Partial<Achievement>
+  ) => void | Promise<void>;
+  addAchievement: () => void | Promise<void>;
+  deleteAchievement: (id: number) => void | Promise<void>;
   safeAchievementPlayerIds: (achievement: Achievement) => number[];
   toggleAchievementPlayer: (achievement: Achievement, playerId: number) => void;
   selectedAchievement: Achievement | null;

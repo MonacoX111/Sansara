@@ -33,8 +33,8 @@ type Props = {
   setSelectedTeamId: (id: number) => void;
   teamForm: TeamForm;
   setTeamForm: Dispatch<SetStateAction<TeamForm>>;
-  saveTeam: () => void;
-  addTeam: () => void;
+  saveTeam: () => void | Promise<void>;
+  addTeam: () => void | Promise<void>;
 };
 
 export default function AdminTeams(props: Props) {

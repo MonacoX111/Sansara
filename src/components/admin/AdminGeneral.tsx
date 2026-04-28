@@ -31,7 +31,7 @@ type Props = {
   tournaments: Tournament[];
   homeAnnouncementForm: HomeAnnouncementForm;
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
-  saveHomeAnnouncement: () => void;
+  saveHomeAnnouncement: () => void | Promise<void>;
   isAdminActionLoading: (key: string) => boolean;
   handleHomeAnnouncementImageChange: (
     event: ChangeEvent<HTMLInputElement>

@@ -82,8 +82,8 @@ type Props = {
   tournamentForm: TournamentForm;
   setTournamentForm: Dispatch<SetStateAction<TournamentForm>>;
 
-  saveTournament: () => void;
-  addTournament: () => void;
+  saveTournament: () => void | Promise<void>;
+  addTournament: () => void | Promise<void>;
   reorderTournament: (direction: "up" | "down") => void;
   handleTournamentImageUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   handleTournamentSelect: (id: number) => void;

@@ -77,8 +77,8 @@ type Props = {
   setSelectedMatchId: (id: number) => void;
   matchForm: MatchForm;
   setMatchForm: Dispatch<SetStateAction<MatchForm>>;
-  saveMatch: () => void;
-  addMatch: (tournamentId?: number) => void;
+  saveMatch: () => void | Promise<void>;
+  addMatch: (tournamentId?: number) => void | Promise<void>;
   reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
   autoGenerateBracket: (tournamentId: number) => void;
   matchTournamentFilterId: number;
