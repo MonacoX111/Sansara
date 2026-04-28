@@ -733,6 +733,10 @@ placeholder={playerText.searchPlaceholder}
   ) : (
                 <div className="list-col">
                   {playerTournamentHistory.map((tournament) => {
+                    const placementTone = getPlacementTier(tournament.place);
+                    const placementToneClass = placementTone
+                      ? `player-placement-pill--${placementTone}`
+                      : "";
                     const placementCardClass =
                       getTournamentPlacementCardClass(tournament.place);
                     const placementBadgeClass = getPlacementBadgeClass(
@@ -779,26 +783,30 @@ placeholder={playerText.searchPlaceholder}
                           <span
                             className={
                               placementBadgeClass
-                                ? `pill light ${placementBadgeClass}`
+                                ? `pill light ${placementBadgeClass} ${placementToneClass}`
                                 : "pill player-meta-pill"
                             }
                           >
                             {playerText.place}: {String(tournament.place)}
                           </span>
-                          {tournament.isWinner ? (
-                            <span className="pill green badge-winner">
+                          {tournament.isWinner && placementTone !== "gold" ? (
+                            <span
+                              className={`pill green badge-winner ${placementToneClass}`}
+                            >
                               {playerText.winner}
                             </span>
                           ) : null}
                           {tournament.isMvp ? (
-                            <span className="pill gold badge-mvp">
+                            <span
+                              className={`pill gold badge-mvp ${placementToneClass}`}
+                            >
                               {playerText.mvp}
                             </span>
                           ) : null}
                           {tournament.eloEntries.map((item) => (
                             <span
                               key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
-                              className={getEloGainBadgeClass(item.elo)}
+                              className={`${getEloGainBadgeClass(item.elo)} ${placementToneClass}`}
                             >
                               +{item.elo} ELO
                             </span>
@@ -806,7 +814,7 @@ placeholder={playerText.searchPlaceholder}
                           {tournament.eloEntries.map((item) => (
                             <span
                               key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-source`}
-                              className="pill player-meta-pill"
+                              className={`pill player-meta-pill ${placementToneClass}`}
                             >
                               {item.sourceType === "player"
                                 ? playerText.solo
@@ -821,7 +829,9 @@ placeholder={playerText.searchPlaceholder}
                               item.sourceType === "team" &&
                               item.teamName === tournament.playedTeamName
                           ) ? (
-                            <span className="pill player-meta-pill">
+                            <span
+                              className={`pill player-meta-pill ${placementToneClass}`}
+                            >
                               {playerText.team}: {tournament.playedTeamName}
                             </span>
                           ) : null}

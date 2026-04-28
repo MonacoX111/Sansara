@@ -2164,6 +2164,45 @@ background: linear-gradient(
   box-shadow: 0 0 14px rgba(180, 83, 9, 0.18);
 }
 
+.player-tournament-card--gold .player-placement-pill--gold,
+.player-tournament-card--silver .player-placement-pill--silver,
+.player-tournament-card--bronze .player-placement-pill--bronze {
+  animation: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.player-tournament-card--gold .player-placement-pill--gold {
+  border: 1px solid rgba(250, 204, 21, 0.44);
+  background: rgba(250, 204, 21, 0.16);
+  color: #fde68a;
+}
+
+.player-tournament-card--silver .player-placement-pill--silver {
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  background: rgba(226, 232, 240, 0.13);
+  color: #e2e8f0;
+}
+
+.player-tournament-card--bronze .player-placement-pill--bronze {
+  border: 1px solid rgba(180, 83, 9, 0.44);
+  background: rgba(180, 83, 9, 0.16);
+  color: #fdba74;
+}
+
+.player-tournament-card--gold .player-placement-pill--gold:hover,
+.player-tournament-card--silver .player-placement-pill--silver:hover,
+.player-tournament-card--bronze .player-placement-pill--bronze:hover {
+  box-shadow: none;
+  filter: none;
+}
+
+.player-tournament-card--gold .pill.light.player-placement-pill--gold,
+.player-tournament-card--silver .pill.light.player-placement-pill--silver,
+.player-tournament-card--bronze .pill.light.player-placement-pill--bronze {
+  box-shadow: none;
+}
+
 @keyframes playerTournamentPlacementShimmer {
   0% {
     transform: translateX(-135%) skewX(-18deg);
