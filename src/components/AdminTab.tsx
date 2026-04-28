@@ -646,39 +646,9 @@ const runAdminAction = async (
     });
   };
 
-  const toggleAchievementPlayer = (
-    achievement: Achievement,
-    playerId: number
-  ) => {
-    const currentIds = safeAchievementPlayerIds(achievement);
-    const isSelected = currentIds.includes(playerId);
-
-    const nextPlayerIds = isSelected
-      ? currentIds.filter((id) => id !== playerId)
-      : [...currentIds, playerId];
-
-    saveAchievement(achievement.id, { playerIds: nextPlayerIds });
-  };
-
   const handleTournamentSelect = (tournamentId: number) => {
     setSelectedTournamentId(tournamentId);
   };
-  const handleAchievementImageUpload =
-    (achievementId: number) => (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = typeof reader.result === "string" ? reader.result : "";
-        if (!result) return;
-
-        saveAchievement(achievementId, { image: result });
-      };
-
-      reader.readAsDataURL(file);
-      event.target.value = "";
-    };
 
   const handleTournamentImageUpload = (
     event: ChangeEvent<HTMLInputElement>
@@ -854,6 +824,7 @@ const adminAchievementsProps = {
   adminText,
   setConfirmDelete,
   isAdminActionLoading,
+  runAdminAction,
   players,
   achievements,
   selectedAchievementId,
@@ -865,7 +836,6 @@ const adminAchievementsProps = {
     }),
   deleteAchievement,
   safeAchievementPlayerIds,
-  toggleAchievementPlayer,
   selectedAchievement,
 };
 
