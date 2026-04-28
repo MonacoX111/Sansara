@@ -60,7 +60,10 @@ import {
 } from "./domain/match/matchOrdering";
 import { progressMatchWinner } from "./domain/match/matchProgression";
 import { validateMatchWinner } from "./domain/match/matchValidation";
-import { applyTournamentPlacementElo } from "./domain/player/playerElo";
+import {
+  applyTournamentPlacementElo,
+  recalculateAllPlayersElo,
+} from "./domain/player/playerElo";
 
 type PlayerForm = {
   nickname: string;
@@ -1712,6 +1715,7 @@ const deleteTournament = async () => {
 
   const backupTournaments = tournaments;
   const backupMatches = matches;
+  const backupPlayers = players;
 
   const nextTournaments = tournaments.filter(
     (tournament) => tournament.id !== deletedId
@@ -1734,9 +1738,23 @@ const deleteTournament = async () => {
         : tournament.imageUrl || "",
   }));
 
+  const recalculatedPlayers = recalculateAllPlayersElo(
+    players,
+    safeTournaments
+  );
+  const changedPlayers = recalculatedPlayers.filter((player) => {
+    const previous = players.find((item) => item.id === player.id);
+    return (
+      previous &&
+      (previous.elo !== player.elo || previous.rank !== player.rank)
+    );
+  });
+
   setTournaments(safeTournaments);
   setMatches(nextMatches);
+  setPlayers(recalculatedPlayers);
   writeStorage("tm_tournaments", safeTournaments);
+  writeStorage("tm_players", recalculatedPlayers);
 
   const deleteTimer = window.setTimeout(async () => {
     try {
@@ -1744,6 +1762,7 @@ if (isFirebaseConfigured) {
   await Promise.all([
     deleteItem("tournaments", deletedId),
     deleteItemsBatch("matches", deletedMatchIds),
+    ...changedPlayers.map((player) => saveItem("players", player)),
   ]);
 }
     } catch (error) {
@@ -1758,7 +1777,9 @@ if (isFirebaseConfigured) {
       window.clearTimeout(deleteTimer);
       setTournaments(backupTournaments);
       setMatches(backupMatches);
+      setPlayers(backupPlayers);
       writeStorage("tm_tournaments", backupTournaments);
+      writeStorage("tm_players", backupPlayers);
     },
     commonText.undo
   );

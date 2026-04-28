@@ -8,6 +8,8 @@ type ApplyTournamentPlacementEloResult = {
   applied: boolean;
 };
 
+export const BASE_ELO = 1000;
+
 const isFinishedTournament = (tournament: Tournament) =>
   tournament.status === "finished" || tournament.status === "completed";
 
@@ -91,4 +93,22 @@ export const applyTournamentPlacementElo = (
     },
     applied: true,
   };
+};
+
+export const recalculateAllPlayersElo = (
+  players: Player[],
+  tournaments: Tournament[]
+): Player[] => {
+  const reset = players.map((player) => ({ ...player, elo: BASE_ELO }));
+
+  return tournaments
+    .filter(isFinishedTournament)
+    .reduce<Player[]>(
+      (acc, tournament) =>
+        applyTournamentPlacementElo(acc, {
+          ...tournament,
+          eloApplied: false,
+        }).players,
+      reset
+    );
 };
