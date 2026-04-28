@@ -81,7 +81,6 @@ export default function AdminAchievements(props: Props) {
     setAchievementForm(
       buildAchievementForm(selectedAchievement, safeAchievementPlayerIds)
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAchievement?.id]);
 
   const saveAchievementKey = selectedAchievement
