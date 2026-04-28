@@ -282,6 +282,12 @@ export default function PlayersTab({
     isMvp: boolean;
   })[];
 
+  const getEloGainBadgeClass = (elo: number) => {
+    if (elo >= 200) return "elo-gain-badge elo-gain-badge--major";
+    if (elo >= 100) return "elo-gain-badge elo-gain-badge--medium";
+    return "elo-gain-badge elo-gain-badge--small";
+  };
+
   return (
     <>
       <div className="toolbar">
@@ -701,15 +707,19 @@ placeholder={playerText.searchPlaceholder}
                             {playerText.place}: {String(tournament.place)}
                           </span>
                           {tournament.isWinner ? (
-                            <span className="pill green">{playerText.winner}</span>
+                            <span className="pill green badge-winner">
+                              {playerText.winner}
+                            </span>
                           ) : null}
                           {tournament.isMvp ? (
-                            <span className="pill gold">{playerText.mvp}</span>
+                            <span className="pill gold badge-mvp">
+                              {playerText.mvp}
+                            </span>
                           ) : null}
                           {tournament.eloEntries.map((item) => (
                             <span
                               key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
-                              className="pill green"
+                              className={getEloGainBadgeClass(item.elo)}
                             >
                               +{item.elo} ELO
                             </span>

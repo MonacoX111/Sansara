@@ -578,6 +578,159 @@ body .lang-switch button.active:hover {
   color: #ffd77a;
   border-color: rgba(255, 190, 61, 0.18);
 }
+
+.badge-winner {
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 14px rgba(49, 208, 127, 0.2);
+  animation: winnerBadgeBreath 3.4s ease-in-out infinite;
+}
+
+.badge-mvp {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 61, 0.1) inset,
+    0 0 16px rgba(255, 190, 61, 0.22);
+}
+
+.badge-mvp::after {
+  content: "";
+  position: absolute;
+  inset: -40% -70%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.36) 50%,
+    transparent 64%
+  );
+  transform: translateX(-130%) skewX(-18deg);
+  animation: mvpBadgeSweep 3.8s linear infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes winnerBadgeBreath {
+  0%,
+  100% {
+    opacity: 0.9;
+    box-shadow:
+      0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+      0 0 12px rgba(49, 208, 127, 0.16);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px rgba(49, 208, 127, 0.14) inset,
+      0 0 18px rgba(49, 208, 127, 0.26);
+  }
+}
+
+@keyframes mvpBadgeSweep {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(130%) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-winner,
+  .badge-mvp::after {
+    animation: none;
+  }
+}
+
+.elo-gain-badge {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(49, 208, 127, 0.28);
+  background:
+    linear-gradient(135deg, rgba(49, 208, 127, 0.22), rgba(67, 208, 255, 0.08)),
+    rgba(12, 18, 24, 0.78);
+  color: #91ffc1;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.08) inset,
+    0 0 14px rgba(49, 208, 127, 0.2);
+  animation: eloGainFloat 3.4s ease-in-out infinite;
+}
+
+.elo-gain-badge::after {
+  content: "";
+  position: absolute;
+  inset: -45% -70%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%) skewX(-18deg);
+  animation: eloGainSweep 3.8s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.elo-gain-badge--major {
+  border-color: rgba(255, 190, 61, 0.58);
+  background:
+    linear-gradient(135deg, rgba(255, 190, 61, 0.28), rgba(49, 208, 127, 0.14)),
+    rgba(20, 16, 8, 0.82);
+  color: #ffe39a;
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 61, 0.16) inset,
+    0 0 20px rgba(255, 190, 61, 0.26);
+}
+
+.elo-gain-badge--medium {
+  border-color: rgba(49, 208, 127, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.12) inset,
+    0 0 18px rgba(49, 208, 127, 0.22);
+}
+
+.elo-gain-badge--small {
+  opacity: 0.92;
+  animation-duration: 4.2s;
+}
+
+@keyframes eloGainFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes eloGainSweep {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(130%) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .elo-gain-badge,
+  .elo-gain-badge::after {
+    animation: none;
+  }
+}
 .pill.featured-pill {
   background: rgba(255, 59, 95, 0.14);
   color: #ff4d6d;
