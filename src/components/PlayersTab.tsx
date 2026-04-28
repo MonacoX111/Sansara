@@ -39,6 +39,7 @@ type Props = {
   sortMode: string;
   setSortMode: (value: string) => void;
   gamesList: { id: string; name: string; icon: string }[];
+  onOpenTeam?: (teamId: number) => void;
   onOpenTournament?: (tournamentId: number) => void;
   lang: Lang;
 };
@@ -60,6 +61,7 @@ export default function PlayersTab({
   sortMode,
   setSortMode,
   gamesList,
+  onOpenTeam,
   onOpenTournament,
   lang = "en",
 }: Props) {
@@ -586,8 +588,34 @@ placeholder={playerText.searchPlaceholder}
     <p className="muted">{playerText.noTeam}</p>
   ) : (
                 <div className="team-history-list">
-                  {selectedPlayerTeamHistory.map((item) => (
-                    <div key={item.teamId} className="team-history-card">
+                  {selectedPlayerTeamHistory.map((item) => {
+                    const teamId = Number(item.teamId);
+                    const canOpenTeam = Number.isFinite(teamId) && teamId > 0;
+
+                    return (
+                    <div
+                      key={item.teamId}
+                      className={`team-history-card ${
+                        canOpenTeam ? "team-history-click-card" : ""
+                      }`}
+                      role={canOpenTeam ? "button" : undefined}
+                      tabIndex={canOpenTeam ? 0 : undefined}
+                      aria-label={
+                        canOpenTeam
+                          ? `Open ${item.team?.name || playerText.unknownTeam}`
+                          : undefined
+                      }
+                      onClick={() => {
+                        if (!canOpenTeam) return;
+                        onOpenTeam?.(teamId);
+                      }}
+                      onKeyDown={(event) => {
+                        if (!canOpenTeam) return;
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        onOpenTeam?.(teamId);
+                      }}
+                    >
                       <div className="team-history-top">
                         <div className="team-history-title">
                           {item.team?.name || playerText.unknownTeam}
@@ -606,7 +634,8 @@ placeholder={playerText.searchPlaceholder}
                         </div>
                       ) : null}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

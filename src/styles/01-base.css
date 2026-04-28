@@ -843,7 +843,8 @@ body .lang-switch button.active:hover {
   word-break: break-word;
 }
 
-.tournament-history-click-card {
+.tournament-history-click-card,
+.team-history-click-card {
   cursor: pointer;
   transition:
     transform 0.24s ease,
@@ -852,7 +853,9 @@ body .lang-switch button.active:hover {
 }
 
 .tournament-history-click-card:hover,
-.tournament-history-click-card:focus-visible {
+.tournament-history-click-card:focus-visible,
+.team-history-click-card:hover,
+.team-history-click-card:focus-visible {
   border-color: rgba(255, 190, 61, 0.22);
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.28),
@@ -869,6 +872,18 @@ body .lang-switch button.active:hover {
 
 .tournament-history-click-card:hover .tournament-history-open-title,
 .tournament-history-click-card:focus-visible .tournament-history-open-title {
+  color: #ffd77a;
+  text-shadow: 0 0 14px rgba(255, 190, 61, 0.24);
+}
+
+.team-history-click-card .team-history-title {
+  transition:
+    color 0.22s ease,
+    text-shadow 0.22s ease;
+}
+
+.team-history-click-card:hover .team-history-title,
+.team-history-click-card:focus-visible .team-history-title {
   color: #ffd77a;
   text-shadow: 0 0 14px rgba(255, 190, 61, 0.24);
 }

@@ -1143,6 +1143,14 @@ tournamentId:
     navigateToPlayer(playerId);
   };
 
+  const openTeamFromPlayerProfile = (teamId: number) => {
+    navigateToTeam(teamId);
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+
   const openTournamentFromPlayerProfile = (tournamentId: number) => {
     navigateToTournament(tournamentId);
 
@@ -2336,6 +2344,7 @@ const deleteAchievement = async (achievementId: number) => {
   sortMode={sortMode}
   setSortMode={setSortMode}
   gamesList={gamesList}
+  onOpenTeam={openTeamFromPlayerProfile}
   onOpenTournament={openTournamentFromPlayerProfile}
   lang={lang}
 />
