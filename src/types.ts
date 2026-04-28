@@ -95,6 +95,7 @@ export type Tournament = {
   mvpId?: number;
   placements: Placement[];
 
+  eloApplied?: boolean;
   isPublished: boolean;
 };
 

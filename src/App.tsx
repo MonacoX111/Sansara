@@ -59,6 +59,7 @@ import {
 } from "./domain/match/matchOrdering";
 import { progressMatchWinner } from "./domain/match/matchProgression";
 import { validateMatchWinner } from "./domain/match/matchValidation";
+import { applyTournamentPlacementElo } from "./domain/player/playerElo";
 
 type PlayerForm = {
   nickname: string;
@@ -365,6 +366,10 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
               typeof item.teamId === "number" ? Number(item.teamId) : undefined,
           }))
       : [],
+    eloApplied:
+      typeof tournament.eloApplied === "boolean"
+        ? tournament.eloApplied
+        : undefined,
     isPublished: Boolean(tournament.isPublished),
   }));
 
@@ -1523,11 +1528,29 @@ if (isFirebaseConfigured) {
               typeof item.teamId === "number" ? Number(item.teamId) : undefined,
           }))
         : [],
+      eloApplied:
+        typeof selectedTournament?.eloApplied === "boolean"
+          ? selectedTournament.eloApplied
+          : undefined,
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
+    const eloResult = applyTournamentPlacementElo(players, updatedTournament);
+    const tournamentToSave = eloResult.tournament;
+    const nextPlayers = eloResult.players;
+    const changedPlayers = eloResult.applied
+      ? nextPlayers.filter((player) => {
+          const previousPlayer = players.find((item) => item.id === player.id);
+          return (
+            previousPlayer &&
+            (previousPlayer.elo !== player.elo ||
+              previousPlayer.rank !== player.rank)
+          );
+        })
+      : [];
+
     const nextTournaments = tournaments.map((tournament) =>
-      tournament.id === selectedTournamentId ? updatedTournament : tournament
+      tournament.id === selectedTournamentId ? tournamentToSave : tournament
     );
 
     const safeTournaments = nextTournaments.map((tournament) => ({
@@ -1542,15 +1565,25 @@ if (isFirebaseConfigured) {
     setTournaments(safeTournaments);
     writeStorage("tm_tournaments", safeTournaments);
 
+    if (eloResult.applied) {
+      setPlayers(nextPlayers);
+      writeStorage("tm_players", nextPlayers);
+    }
+
     showToast(commonText.tournamentSaved);
 
     try {
 if (isFirebaseConfigured) {
   const safeTournament =
-    safeTournaments.find((tournament) => tournament.id === updatedTournament.id) ||
-    updatedTournament;
+    safeTournaments.find((tournament) => tournament.id === tournamentToSave.id) ||
+    tournamentToSave;
 
   await saveItem("tournaments", safeTournament);
+  if (changedPlayers.length > 0) {
+    await Promise.all(
+      changedPlayers.map((player) => saveItem("players", player))
+    );
+  }
 }
     } catch (error) {
       console.error("Failed to save tournament:", error);
@@ -1585,6 +1618,7 @@ if (isFirebaseConfigured) {
       winnerSquadIds: [],
       mvpId: 0,
       placements: [],
+      eloApplied: false,
       isPublished: false,
     };
 

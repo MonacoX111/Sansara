@@ -11,6 +11,10 @@ import {
   getPlayerCurrentTeam,
   getPlayerTeamHistory,
 } from "../domain/player/playerTeams";
+import {
+  getPlayerTournamentEloHistory,
+  getPlayerTotalTournamentEloBonus,
+} from "../domain/player/playerEloHistory";
 import { Lang, t } from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
@@ -186,6 +190,22 @@ export default function PlayersTab({
   const playerStreak = getPlayerStreak(playerMatches, selectedPlayerId);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
+  const playerEloHistory = selectedPlayer
+    ? getPlayerTournamentEloHistory(
+        selectedPlayer,
+        tournaments,
+        teams,
+        players
+      )
+    : [];
+  const playerTournamentEloBonus = selectedPlayer
+    ? getPlayerTotalTournamentEloBonus(
+        selectedPlayer,
+        tournaments,
+        teams,
+        players
+      )
+    : 0;
 
   const playerTournamentHistory = tournaments
     .filter(isSelectedPlayerTournament)
@@ -549,6 +569,61 @@ placeholder={playerText.searchPlaceholder}
     value={`${selectedPlayer.earnings} ₴`}
   />
 </div>
+
+<div className="section-block">
+  <div className="row-between">
+    <h4>{playerText.eloHistory}</h4>
+    <span className="pill light">+{playerTournamentEloBonus} ELO</span>
+  </div>
+
+  {playerEloHistory.length === 0 ? (
+    <p className="muted">{playerText.noEloHistory}</p>
+  ) : (
+                <div className="list-col">
+                  {playerEloHistory.map((item) => (
+                    <div
+                      key={`${item.tournamentId}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
+                      className="simple-card"
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        e.currentTarget.style.setProperty(
+                          "--x",
+                          `${e.clientX - rect.left}px`
+                        );
+                        e.currentTarget.style.setProperty(
+                          "--y",
+                          `${e.clientY - rect.top}px`
+                        );
+                      }}
+                    >
+                      <div className="row-between">
+                        <div>
+                          <div className="achievement-title">
+                            {item.tournamentTitle}
+                          </div>
+                          <div className="muted small">{item.date || "â€”"}</div>
+                        </div>
+
+                        <div className="tag-row">
+                          <span className="pill light">
+                            {playerText.place}: {item.placement}
+                          </span>
+                          <span className="pill green">+{item.elo} ELO</span>
+                          <span className="pill">
+                            {item.sourceType === "player"
+                              ? playerText.solo
+                              : playerText.teamPlacement}
+                          </span>
+                          {item.teamName ? (
+                            <span className="pill light">{item.teamName}</span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
 <div className="section-block">
   <h4>{playerText.achievements}</h4>
