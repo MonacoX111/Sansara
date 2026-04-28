@@ -10,6 +10,7 @@ import {
   Tournament,
   TournamentGroup,
   TournamentStatus,
+  TournamentTeamRoster,
 } from "../types";
 import { gamesList } from "../data";
 import { parseList } from "../utils";
@@ -62,6 +63,7 @@ type TournamentForm = {
 
   participantType: "player" | "team" | "squad";
   participantIds: number[];
+  teamRosters?: TournamentTeamRoster[];
   groups: TournamentGroup[];
   winnerId?: number;
   winnerTeamId?: number;
@@ -454,10 +456,31 @@ reorderMatch,
               : [],
           }))
         : [];
+      const safeTeamRosters = Array.isArray(prev.teamRosters)
+        ? prev.teamRosters
+        : [];
+      const nextTeamRosters =
+        prev.participantType === "team"
+          ? nextParticipantIds.map((teamId) => {
+              const existingRoster = safeTeamRosters.find(
+                (roster) => Number(roster.teamId) === Number(teamId)
+              );
+
+              return existingRoster
+                ? {
+                    teamId,
+                    playerIds: Array.isArray(existingRoster.playerIds)
+                      ? existingRoster.playerIds.map(Number)
+                      : [],
+                  }
+                : { teamId, playerIds: [] };
+            })
+          : undefined;
 
       return {
         ...prev,
         participantIds: nextParticipantIds,
+        teamRosters: nextTeamRosters,
         groups: nextGroups,
         winnerId: undefined,
         winnerTeamId: undefined,
@@ -467,6 +490,51 @@ reorderMatch,
             )
           : [],
         mvpId: undefined,
+      };
+    });
+  };
+
+  const toggleTournamentRosterPlayer = (teamId: number, playerId: number) => {
+    setTournamentForm((prev) => {
+      const currentRosters = Array.isArray(prev.teamRosters)
+        ? prev.teamRosters
+        : [];
+      const safeParticipantIds = Array.isArray(prev.participantIds)
+        ? prev.participantIds.map(Number)
+        : [];
+      const hasRoster = currentRosters.some(
+        (roster) => Number(roster.teamId) === Number(teamId)
+      );
+      const baseRosters = hasRoster
+        ? currentRosters
+        : [...currentRosters, { teamId, playerIds: [] }];
+
+      return {
+        ...prev,
+        teamRosters: baseRosters
+          .filter((roster) => safeParticipantIds.includes(Number(roster.teamId)))
+          .map((roster) => {
+            if (Number(roster.teamId) !== Number(teamId)) {
+              return {
+                teamId: Number(roster.teamId),
+                playerIds: Array.isArray(roster.playerIds)
+                  ? roster.playerIds.map(Number)
+                  : [],
+              };
+            }
+
+            const currentPlayerIds = Array.isArray(roster.playerIds)
+              ? roster.playerIds.map(Number)
+              : [];
+            const nextPlayerIds = currentPlayerIds.includes(playerId)
+              ? currentPlayerIds.filter((id) => id !== playerId)
+              : [...currentPlayerIds, playerId];
+
+            return {
+              teamId: Number(roster.teamId),
+              playerIds: nextPlayerIds,
+            };
+          }),
       };
     });
   };
@@ -665,6 +733,7 @@ const adminTournamentsProps = {
   updateTournamentGroupName,
   deleteTournamentGroup,
   toggleTournamentGroupParticipant,
+  toggleTournamentRosterPlayer,
   getPlayerName,
 };
 

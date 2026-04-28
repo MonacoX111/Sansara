@@ -1,5 +1,6 @@
 import { Player, Tournament } from "../../types";
 import { getPlacementEloBonus } from "./playerEloHistory";
+import { getTournamentRosterPlayerIds } from "../tournament/tournamentRosters";
 
 type ApplyTournamentPlacementEloResult = {
   players: Player[];
@@ -31,34 +32,40 @@ export const applyTournamentPlacementElo = (
   players: Player[],
   tournament: Tournament
 ): ApplyTournamentPlacementEloResult => {
-  if (!isFinishedTournament(tournament) || tournament.eloApplied !== false) {
+  if (!isFinishedTournament(tournament) || tournament.eloApplied === true) {
     return { players, tournament, applied: false };
   }
 
   const eloByPlayerId = new Map<number, number>();
 
-  tournament.placements.forEach((placement) => {
-    const bonus = getPlacementEloBonus(Number(placement.place));
-    if (bonus <= 0) return;
+  (Array.isArray(tournament.placements) ? tournament.placements : []).forEach(
+    (placement) => {
+      const bonus = getPlacementEloBonus(Number(placement.place));
+      if (bonus <= 0) return;
 
-    if (typeof placement.playerId === "number") {
-      const playerId = Number(placement.playerId);
-      eloByPlayerId.set(playerId, (eloByPlayerId.get(playerId) || 0) + bonus);
-      return;
-    }
+      if (typeof placement.playerId === "number" && Number(placement.playerId) > 0) {
+        const playerId = Number(placement.playerId);
+        eloByPlayerId.set(playerId, (eloByPlayerId.get(playerId) || 0) + bonus);
+        return;
+      }
 
-    if (typeof placement.teamId === "number") {
-      const teamId = Number(placement.teamId);
-      players
-        .filter((player) => Number(player.teamId) === teamId)
-        .forEach((player) => {
+      if (typeof placement.teamId === "number" && Number(placement.teamId) > 0) {
+        const teamId = Number(placement.teamId);
+        const rosterPlayerIds = getTournamentRosterPlayerIds(
+          tournament,
+          teamId,
+          players
+        ).playerIds;
+
+        rosterPlayerIds.forEach((playerId) => {
           eloByPlayerId.set(
-            player.id,
-            (eloByPlayerId.get(player.id) || 0) + bonus
+            playerId,
+            (eloByPlayerId.get(playerId) || 0) + bonus
           );
         });
+      }
     }
-  });
+  );
 
   if (eloByPlayerId.size === 0) {
     return { players, tournament, applied: false };

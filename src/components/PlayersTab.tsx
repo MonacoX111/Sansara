@@ -13,8 +13,11 @@ import {
 } from "../domain/player/playerTeams";
 import {
   getPlayerTournamentEloHistory,
-  getPlayerTotalTournamentEloBonus,
 } from "../domain/player/playerEloHistory";
+import {
+  getTournamentTeamRoster,
+  isPlayerInTournamentTeamRoster,
+} from "../domain/tournament/tournamentRosters";
 import { Lang, t } from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
@@ -87,6 +90,44 @@ export default function PlayersTab({
     : [];
   const selectedPlayerTeamIdSet = new Set(selectedPlayerTeamIds);
 
+  const isSelectedPlayerInTournamentTeam = (
+    tournament: Tournament,
+    teamId: number
+  ) => {
+    const roster = getTournamentTeamRoster(tournament, teamId);
+
+    if (roster) {
+      return isPlayerInTournamentTeamRoster(
+        tournament,
+        teamId,
+        selectedPlayerId,
+        players
+      );
+    }
+
+    return selectedPlayerTeamIdSet.has(Number(teamId));
+  };
+
+  const getSelectedPlayerTournamentTeamId = (tournament: Tournament) => {
+    if (tournament.participantType !== "team") return undefined;
+
+    const roster = Array.isArray(tournament.teamRosters)
+      ? tournament.teamRosters.find((item) =>
+          Array.isArray(item.playerIds)
+            ? item.playerIds.map(Number).includes(Number(selectedPlayerId))
+            : false
+        )
+      : undefined;
+
+    if (roster) return Number(roster.teamId);
+
+    const participantIds = Array.isArray(tournament.participantIds)
+      ? tournament.participantIds.map(Number)
+      : [];
+
+    return participantIds.find((teamId) => selectedPlayerTeamIdSet.has(teamId));
+  };
+
   const getTournamentPlacementForSelectedPlayer = (tournament: Tournament) => {
     if (!Array.isArray(tournament.placements)) return undefined;
 
@@ -94,7 +135,7 @@ export default function PlayersTab({
       (item) =>
         Number(item.playerId) === Number(selectedPlayerId) ||
         (typeof item.teamId === "number" &&
-          selectedPlayerTeamIdSet.has(Number(item.teamId)))
+          isSelectedPlayerInTournamentTeam(tournament, Number(item.teamId)))
     );
   };
 
@@ -110,11 +151,16 @@ export default function PlayersTab({
       participantIds.includes(Number(selectedPlayer.id));
     const participatedByTeam =
       tournament.participantType === "team" &&
-      participantIds.some((teamId) => selectedPlayerTeamIdSet.has(teamId));
+      participantIds.some((teamId) =>
+        isSelectedPlayerInTournamentTeam(tournament, teamId)
+      );
     const wonDirectly = Number(tournament.winnerId) === Number(selectedPlayer.id);
     const wonByTeam =
       typeof tournament.winnerTeamId === "number" &&
-      selectedPlayerTeamIdSet.has(Number(tournament.winnerTeamId));
+      isSelectedPlayerInTournamentTeam(
+        tournament,
+        Number(tournament.winnerTeamId)
+      );
 
     return (
       participatedDirectly ||
@@ -198,28 +244,30 @@ export default function PlayersTab({
         players
       )
     : [];
-  const playerTournamentEloBonus = selectedPlayer
-    ? getPlayerTotalTournamentEloBonus(
-        selectedPlayer,
-        tournaments,
-        teams,
-        players
-      )
-    : 0;
-
   const playerTournamentHistory = tournaments
     .filter(isSelectedPlayerTournament)
     .sort(compareTournamentsLatestFirst)
     .map((tournament) => {
       const placement = getTournamentPlacementForSelectedPlayer(tournament);
+      const playedTeamId = getSelectedPlayerTournamentTeamId(tournament);
 
       return {
         ...tournament,
         place: placement?.place || "—",
+        playedTeamName:
+          typeof playedTeamId === "number"
+            ? getTeamName(playedTeamId) || playerText.unknownTeam
+            : undefined,
+        eloEntries: playerEloHistory.filter(
+          (item) => item.tournamentId === tournament.id
+        ),
         isWinner:
           Number(tournament.winnerId) === Number(selectedPlayerId) ||
           (typeof tournament.winnerTeamId === "number" &&
-            selectedPlayerTeamIdSet.has(Number(tournament.winnerTeamId))),
+            isSelectedPlayerInTournamentTeam(
+              tournament,
+              Number(tournament.winnerTeamId)
+            )),
         isMvp: Number(tournament.mvpId) === Number(selectedPlayerId),
       };
     })
@@ -228,6 +276,8 @@ export default function PlayersTab({
         items.findIndex((item) => item.id === tournament.id) === index
     ) as (Tournament & {
     place: number | string;
+    playedTeamName?: string;
+    eloEntries: typeof playerEloHistory;
     isWinner: boolean;
     isMvp: boolean;
   })[];
@@ -570,60 +620,6 @@ placeholder={playerText.searchPlaceholder}
   />
 </div>
 
-<div className="section-block">
-  <div className="row-between">
-    <h4>{playerText.eloHistory}</h4>
-    <span className="pill light">+{playerTournamentEloBonus} ELO</span>
-  </div>
-
-  {playerEloHistory.length === 0 ? (
-    <p className="muted">{playerText.noEloHistory}</p>
-  ) : (
-                <div className="list-col">
-                  {playerEloHistory.map((item) => (
-                    <div
-                      key={`${item.tournamentId}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
-                      className="simple-card"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-                      <div className="row-between">
-                        <div>
-                          <div className="achievement-title">
-                            {item.tournamentTitle}
-                          </div>
-                          <div className="muted small">{item.date || "â€”"}</div>
-                        </div>
-
-                        <div className="tag-row">
-                          <span className="pill light">
-                            {playerText.place}: {item.placement}
-                          </span>
-                          <span className="pill green">+{item.elo} ELO</span>
-                          <span className="pill">
-                            {item.sourceType === "player"
-                              ? playerText.solo
-                              : playerText.teamPlacement}
-                          </span>
-                          {item.teamName ? (
-                            <span className="pill light">{item.teamName}</span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
 <div className="section-block">
   <h4>{playerText.achievements}</h4>
@@ -701,14 +697,44 @@ placeholder={playerText.searchPlaceholder}
                         </div>
 
                         <div className="tag-row">
-<span className="pill light">
-  {playerText.place}: {String(tournament.place)}
-</span>
-{tournament.isWinner ? (
-  <span className="pill green">{playerText.winner}</span>
-) : null}
+                          <span className="pill light">
+                            {playerText.place}: {String(tournament.place)}
+                          </span>
+                          {tournament.isWinner ? (
+                            <span className="pill green">{playerText.winner}</span>
+                          ) : null}
                           {tournament.isMvp ? (
                             <span className="pill gold">{playerText.mvp}</span>
+                          ) : null}
+                          {tournament.eloEntries.map((item) => (
+                            <span
+                              key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
+                              className="pill green"
+                            >
+                              +{item.elo} ELO
+                            </span>
+                          ))}
+                          {tournament.eloEntries.map((item) => (
+                            <span
+                              key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-source`}
+                              className="pill light"
+                            >
+                              {item.sourceType === "player"
+                                ? playerText.solo
+                                : playerText.teamPlacement}
+                              {item.teamName ? `: ${item.teamName}` : ""}
+                            </span>
+                          ))}
+                          {tournament.participantType === "team" &&
+                          tournament.playedTeamName &&
+                          !tournament.eloEntries.some(
+                            (item) =>
+                              item.sourceType === "team" &&
+                              item.teamName === tournament.playedTeamName
+                          ) ? (
+                            <span className="pill light">
+                              {playerText.team}: {tournament.playedTeamName}
+                            </span>
                           ) : null}
                         </div>
                       </div>

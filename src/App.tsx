@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
@@ -31,6 +31,7 @@ import {
   Tournament,
   TournamentGroup,
   TournamentStatus,
+  TournamentTeamRoster,
 } from "./types";
 import {
   getNextId,
@@ -100,6 +101,7 @@ type TournamentForm = {
   imageUrl: string;
   participantType: "player" | "team" | "squad";
   participantIds: number[];
+  teamRosters?: TournamentTeamRoster[];
   groups: TournamentGroup[];
   winnerId?: number;
   winnerTeamId?: number;
@@ -218,6 +220,7 @@ const createEmptyTournamentForm = (): TournamentForm => ({
   imageUrl: "",
   participantType: "player",
   participantIds: [],
+  teamRosters: [],
   groups: [],
   winnerId: undefined,
   winnerTeamId: undefined,
@@ -331,6 +334,16 @@ const normalizeTournaments = (items: Tournament[]): Tournament[] =>
     participantIds: Array.isArray(tournament.participantIds)
       ? tournament.participantIds.map(Number)
       : [],
+    teamRosters: Array.isArray(tournament.teamRosters)
+      ? tournament.teamRosters
+          .filter((roster) => roster && typeof roster.teamId === "number")
+          .map((roster) => ({
+            teamId: Number(roster.teamId),
+            playerIds: Array.isArray(roster.playerIds)
+              ? roster.playerIds.map(Number)
+              : [],
+          }))
+: [],
     groups: Array.isArray(tournament.groups)
       ? tournament.groups.map((group, groupIndex) => ({
           id: group.id || `group-${groupIndex + 1}`,
@@ -984,6 +997,14 @@ useEffect(() => {
       participantIds: Array.isArray(selectedTournament.participantIds)
         ? selectedTournament.participantIds.map(Number)
         : [],
+      teamRosters: Array.isArray(selectedTournament.teamRosters)
+        ? selectedTournament.teamRosters.map((roster) => ({
+            teamId: Number(roster.teamId),
+            playerIds: Array.isArray(roster.playerIds)
+              ? roster.playerIds.map(Number)
+              : [],
+          }))
+        : [],
       groups: Array.isArray(selectedTournament.groups)
         ? selectedTournament.groups.map((group, groupIndex) => ({
             id: group.id || `group-${groupIndex + 1}`,
@@ -1487,6 +1508,20 @@ if (isFirebaseConfigured) {
       participantIds: Array.isArray(tournamentForm.participantIds)
         ? tournamentForm.participantIds.map(Number)
         : [],
+      teamRosters:
+        tournamentForm.participantType === "team" &&
+        Array.isArray(tournamentForm.teamRosters)
+          ? tournamentForm.teamRosters
+              .filter((roster) =>
+                tournamentForm.participantIds.includes(Number(roster.teamId))
+              )
+              .map((roster) => ({
+                teamId: Number(roster.teamId),
+                playerIds: Array.isArray(roster.playerIds)
+                  ? roster.playerIds.map(Number)
+                  : [],
+              }))
+          : undefined,
       groups: Array.isArray(tournamentForm.groups)
         ? tournamentForm.groups.map((group, groupIndex) => ({
             id: group.id || `group-${groupIndex + 1}`,
@@ -1612,6 +1647,7 @@ if (isFirebaseConfigured) {
       description: "",
       participantType: "player",
       participantIds: [],
+      teamRosters: [],
       groups: [],
       winnerId: 0,
       winnerTeamId: 0,
@@ -1649,6 +1685,7 @@ if (isFirebaseConfigured) {
       imageUrl: "",
       participantType: "player",
       participantIds: [],
+      teamRosters: [],
       groups: [],
       winnerId: undefined,
       winnerTeamId: undefined,

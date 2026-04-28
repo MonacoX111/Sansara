@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Match, Player, Team, Tournament } from "../types";
 import { Lang, t } from "../utils/translations";
+import { getTournamentRosterPlayerIds } from "../domain/tournament/tournamentRosters";
 
 type Props = {
   tournaments: Tournament[];
@@ -1865,9 +1866,17 @@ return (
   {tournamentText.roster}
 </div>
 
-                              {team?.players?.length ? (
+                              {(() => {
+                                const rosterLookup = getTournamentRosterPlayerIds(
+                                  selectedTournament,
+                                  participant.id,
+                                  players
+                                );
+                                const rosterPlayerIds = rosterLookup.playerIds;
+
+                                return rosterPlayerIds.length ? (
                                 <div className="participant-roster-list">
-                                  {team.players.map((playerId) => {
+                                  {rosterPlayerIds.map((playerId) => {
                                     const rosterPlayer = players.find(
                                       (item) => item.id === playerId
                                     );
@@ -1900,12 +1909,19 @@ return (
                                       </div>
                                     );
                                   })}
+                                  {rosterLookup.isFallback ? (
+                                    <div className="muted small">
+                                      {tournamentText.currentRosterFallback ||
+                                        "Current roster fallback"}
+                                    </div>
+                                  ) : null}
                                 </div>
-                              ) : (
+                                ) : (
                                 <div className="participant-roster-empty">
                                   {tournamentText.noPlayersInRoster}
                                 </div>
-                              )}
+                                );
+                              })()}
                             </div>
                           </div>
                         );

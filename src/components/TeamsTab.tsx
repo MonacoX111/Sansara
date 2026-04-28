@@ -231,7 +231,7 @@ return teamText.loss;
                     <div className="team-roster-content">
                       <div className="team-roster-name">{player.nickname}</div>
                       <div className="team-roster-sub">
-                        {teamText.elo}: {player.elo} â€¢ {teamText.wins}: {player.wins}
+                        {teamText.elo}: {player.elo} • {teamText.wins}: {player.wins}
                       </div>
                     </div>
                   </div>

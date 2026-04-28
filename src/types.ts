@@ -22,6 +22,11 @@ export type TournamentGroup = {
   participantIds: number[];
 };
 
+export type TournamentTeamRoster = {
+  teamId: number;
+  playerIds: number[];
+};
+
 export type TournamentStatus =
   | "draft"
   | "upcoming"
@@ -86,6 +91,7 @@ export type Tournament = {
   participantIds: number[];
 
   // групи турніру
+  teamRosters?: TournamentTeamRoster[];
   groups?: TournamentGroup[];
 
   // результати

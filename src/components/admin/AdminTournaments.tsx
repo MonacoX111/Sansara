@@ -4,6 +4,7 @@ import {
   ReactElement,
   SetStateAction,
 } from "react";
+import { getPlayersForHistoricalTeam } from "../../domain/player/playerTeams";
 
 import {
   Placement,
@@ -12,6 +13,7 @@ import {
   Tournament,
   TournamentGroup,
   TournamentStatus,
+  TournamentTeamRoster,
 } from "../../types";
 
 type SelectValue = number | string;
@@ -47,6 +49,7 @@ type TournamentForm = {
   imageUrl: string;
   participantType: "player" | "team" | "squad";
   participantIds: number[];
+  teamRosters?: TournamentTeamRoster[];
   groups: TournamentGroup[];
   winnerId?: number;
   winnerTeamId?: number;
@@ -103,6 +106,7 @@ selectedTournamentMvpId: number | string;
     groupId: string,
     participantId: number
   ) => void;
+  toggleTournamentRosterPlayer: (teamId: number, playerId: number) => void;
 
   getPlayerName: (id: number) => string;
 };
@@ -137,6 +141,7 @@ export default function AdminTournaments(props: Props) {
     updateTournamentGroupName,
     deleteTournamentGroup,
     toggleTournamentGroupParticipant,
+    toggleTournamentRosterPlayer,
     getPlayerName,
   } = props;
 
@@ -248,6 +253,7 @@ export default function AdminTournaments(props: Props) {
                       ...prev,
                       participantType: value as "player" | "team" | "squad",
                       participantIds: [],
+                      teamRosters: value === "team" ? [] : undefined,
                       winnerId: undefined,
                       winnerTeamId: undefined,
                       winnerSquadIds: [],
@@ -452,9 +458,116 @@ export default function AdminTournaments(props: Props) {
                   ? selectedTournamentPlayers
                       .map((player) => player.nickname)
                       .join(", ")
-                  : adminText.noParticipantsSelected}
+                : adminText.noParticipantsSelected}
               </div>
             </div>
+
+            {tournamentForm.participantType === "team" &&
+            selectedTournamentTeams.length > 0 ? (
+              <div className="field-block">
+                <label className="field-label">
+                  {adminText.tournamentTeamRosters || "Tournament team rosters"}
+                </label>
+
+                <div className="form-col">
+                  {selectedTournamentTeams.map((team) => {
+                    const roster = Array.isArray(tournamentForm.teamRosters)
+                      ? tournamentForm.teamRosters.find(
+                          (item) => Number(item.teamId) === Number(team.id)
+                        )
+                      : undefined;
+                    const selectedRosterPlayerIds = new Set(
+                      Array.isArray(roster?.playerIds)
+                        ? roster.playerIds.map(Number)
+                        : []
+                    );
+                    const eligiblePlayers = getPlayersForHistoricalTeam(
+                      team.id,
+                      players
+                    );
+                    const eligiblePlayerIds = new Set(
+                      eligiblePlayers.map((player) => player.id)
+                    );
+                    const selectedIneligiblePlayerIds = Array.from(
+                      selectedRosterPlayerIds
+                    ).filter((playerId) => !eligiblePlayerIds.has(playerId));
+
+                    return (
+                      <div key={`roster-${team.id}`} className="simple-card">
+                        <div className="row-between">
+                          <div>
+                            <div className="achievement-title">{team.name}</div>
+                            <div className="muted small">
+                              {adminText.rosterPlayersSelected ||
+                                "Roster players selected"}
+                              : {selectedRosterPlayerIds.size}
+                            </div>
+                          </div>
+                        </div>
+
+                        {eligiblePlayers.length > 0 ? (
+                          <div className="picker-grid compact-grid">
+                            {eligiblePlayers.map((player) => {
+                            const isSelected = selectedRosterPlayerIds.has(
+                              player.id
+                            );
+
+                            return (
+                              <label
+                                key={`roster-${team.id}-${player.id}`}
+                                className={`picker-btn compact ${
+                                  isSelected ? "picker-btn-active" : ""
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    toggleTournamentRosterPlayer(
+                                      team.id,
+                                      player.id
+                                    )
+                                  }
+                                />
+                                <span>{player.nickname}</span>
+                              </label>
+                            );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="muted small">
+                            {adminText.noEligibleRosterPlayers ||
+                              "No eligible players for this team"}
+                          </div>
+                        )}
+
+                        {selectedIneligiblePlayerIds.length > 0 ? (
+                          <div className="tag-row compact">
+                            {selectedIneligiblePlayerIds.map((playerId) => {
+                              const selectedPlayer = players.find(
+                                (player) => player.id === playerId
+                              );
+
+                              return (
+                                <span
+                                  key={`ineligible-${team.id}-${playerId}`}
+                                  className="pill light"
+                                >
+                                  {selectedPlayer?.nickname ||
+                                    adminText.unknownPlayer ||
+                                    "Unknown"}{" "}
+                                  / not eligible
+                                </span>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
 
             {(tournamentForm.format === "groups_playoff" ||
               tournamentForm.format === "groups_only" ||

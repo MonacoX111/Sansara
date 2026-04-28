@@ -1,4 +1,5 @@
 import { Player, Team, Tournament } from "../../types";
+import { getTournamentRosterPlayerIds } from "../tournament/tournamentRosters";
 
 export type PlayerTournamentEloHistoryItem = {
   tournamentId: number;
@@ -7,6 +8,7 @@ export type PlayerTournamentEloHistoryItem = {
   placement: number;
   elo: number;
   sourceType: "player" | "team";
+  rosterSource?: "snapshot" | "fallback";
   teamId?: number;
   teamName?: string;
 };
@@ -51,12 +53,6 @@ export const getPlayerTournamentEloHistory = (
   players: Player[]
 ): PlayerTournamentEloHistoryItem[] => {
   const playerId = Number(player.id);
-  const currentPlayer = players.find((item) => Number(item.id) === playerId);
-  const currentTeamId =
-    typeof currentPlayer?.teamId === "number"
-      ? Number(currentPlayer.teamId)
-      : Number(player.teamId || 0);
-  const currentTeamIds = new Set(currentTeamId > 0 ? [currentTeamId] : []);
 
   return tournaments
     .flatMap((tournament) =>
@@ -80,7 +76,12 @@ export const getPlayerTournamentEloHistory = (
 
           if (typeof placement.teamId === "number") {
             const teamId = Number(placement.teamId);
-            if (!currentTeamIds.has(teamId)) return null;
+            const rosterLookup = getTournamentRosterPlayerIds(
+              tournament,
+              teamId,
+              players
+            );
+            if (!rosterLookup.playerIds.includes(playerId)) return null;
 
             return {
               tournamentId: tournament.id,
@@ -89,6 +90,7 @@ export const getPlayerTournamentEloHistory = (
               placement: Number(placement.place),
               elo,
               sourceType: "team" as const,
+              rosterSource: rosterLookup.isFallback ? "fallback" : "snapshot",
               teamId,
               teamName: getTeamName(teams, teamId),
             };
