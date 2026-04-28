@@ -2489,13 +2489,59 @@ background: linear-gradient(
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.team-history-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.team-history-logo,
+.team-history-logo-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  flex: 0 0 34px;
+}
+
+.team-history-logo {
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.team-history-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
 .team-history-title {
   font-size: 16px;
   font-weight: 800;
   color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .team-history-meta {
@@ -2504,6 +2550,16 @@ background: linear-gradient(
   gap: 10px;
   color: var(--muted);
   font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .team-history-top {
+    align-items: flex-start;
+  }
+
+  .team-history-actions {
+    gap: 6px;
+  }
 }
 .tournament-history-card {
   position: relative;

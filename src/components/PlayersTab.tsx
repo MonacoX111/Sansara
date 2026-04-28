@@ -635,22 +635,39 @@ placeholder={playerText.searchPlaceholder}
                       }}
                     >
                       <div className="team-history-top">
-                        <div className="team-history-title">
-                          {item.team?.name || playerText.unknownTeam}
+                        <div className="team-history-main">
+                          {item.team?.logo ? (
+                            <img
+                              src={item.team.logo}
+                              alt={item.team.name}
+                              className="team-history-logo"
+                            />
+                          ) : (
+                            <div className="team-history-logo-placeholder">
+                              {(item.team?.name || playerText.unknownTeam).charAt(
+                                0
+                              )}
+                            </div>
+                          )}
+                          <div className="team-history-title">
+                            {item.team?.name || playerText.unknownTeam}
+                          </div>
                         </div>
-                        {item.isCurrent ? (
-                          <span className="pill green">
-                            {playerText.currentTeam}
-                          </span>
-                        ) : null}
-                        {canOpenTeam ? (
-                          <span
-                            className="click-card-arrow"
-                            aria-hidden="true"
-                          >
-                            &gt;
-                          </span>
-                        ) : null}
+                        <div className="team-history-actions">
+                          {item.isCurrent ? (
+                            <span className="pill green">
+                              {playerText.currentTeam}
+                            </span>
+                          ) : null}
+                          {canOpenTeam ? (
+                            <span
+                              className="click-card-arrow"
+                              aria-hidden="true"
+                            >
+                              &gt;
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
 
                       {(item.from || item.to) ? (
