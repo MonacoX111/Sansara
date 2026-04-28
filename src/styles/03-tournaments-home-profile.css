@@ -1501,11 +1501,11 @@ background: linear-gradient(
 }
 
 .overview-stat-card.type::after {
-  background: rgba(49, 208, 127, 0.8);
+  background: rgba(var(--color-success-green-rgb), 0.8);
 }
 
 .overview-stat-card.format::after {
-  background: rgba(255, 59, 95, 0.8);
+  background: rgba(var(--color-brand-red-rgb), 0.8);
 }
 
 .overview-stat-card.status::after {
@@ -2007,36 +2007,36 @@ background: linear-gradient(
 }
 
 .player-tournament-card--gold {
-  border-color: rgba(250, 204, 21, 0.36);
+  border-color: rgba(var(--color-placement-gold-rgb), 0.36);
   background:
-    radial-gradient(circle at 18% 16%, rgba(250, 204, 21, 0.14), transparent 34%),
-    linear-gradient(135deg, rgba(250, 204, 21, 0.1), transparent 42%),
+    radial-gradient(circle at 18% 16%, rgba(var(--color-placement-gold-rgb), 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(var(--color-placement-gold-rgb), 0.1), transparent 42%),
     rgba(255, 255, 255, 0.035);
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
-    0 0 24px rgba(250, 204, 21, 0.14);
+    0 0 0 1px rgba(var(--color-placement-gold-rgb), 0.08) inset,
+    0 0 24px rgba(var(--color-placement-gold-rgb), 0.14);
 }
 
 .player-tournament-card--silver {
-  border-color: rgba(226, 232, 240, 0.34);
+  border-color: rgba(var(--color-placement-silver-rgb), 0.34);
   background:
-    radial-gradient(circle at 18% 16%, rgba(226, 232, 240, 0.12), transparent 34%),
-    linear-gradient(135deg, rgba(226, 232, 240, 0.08), transparent 42%),
+    radial-gradient(circle at 18% 16%, rgba(var(--color-placement-silver-rgb), 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(var(--color-placement-silver-rgb), 0.08), transparent 42%),
     rgba(255, 255, 255, 0.035);
   box-shadow:
-    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
-    0 0 22px rgba(226, 232, 240, 0.12);
+    0 0 0 1px rgba(var(--color-placement-silver-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-silver-rgb), 0.12);
 }
 
 .player-tournament-card--bronze {
-  border-color: rgba(180, 83, 9, 0.38);
+  border-color: rgba(var(--color-placement-bronze-rgb), 0.38);
   background:
-    radial-gradient(circle at 18% 16%, rgba(180, 83, 9, 0.16), transparent 34%),
-    linear-gradient(135deg, rgba(180, 83, 9, 0.1), transparent 42%),
+    radial-gradient(circle at 18% 16%, rgba(var(--color-placement-bronze-rgb), 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(var(--color-placement-bronze-rgb), 0.1), transparent 42%),
     rgba(255, 255, 255, 0.035);
   box-shadow:
-    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
-    0 0 22px rgba(180, 83, 9, 0.14);
+    0 0 0 1px rgba(var(--color-placement-bronze-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-bronze-rgb), 0.14);
 }
 
 .player-tournament-card--gold::after,
@@ -2050,7 +2050,7 @@ background: linear-gradient(
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(250, 204, 21, 0.34),
+    rgba(var(--color-placement-gold-rgb), 0.34),
     transparent
   );
 }
@@ -2059,7 +2059,7 @@ background: linear-gradient(
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(226, 232, 240, 0.3),
+    rgba(var(--color-placement-silver-rgb), 0.3),
     transparent
   );
 }
@@ -2068,33 +2068,33 @@ background: linear-gradient(
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(180, 83, 9, 0.32),
+    rgba(var(--color-placement-bronze-rgb), 0.32),
     transparent
   );
 }
 
 .player-tournament-card--gold:hover,
 .player-tournament-card--gold:focus-visible {
-  border-color: rgba(250, 204, 21, 0.42);
+  border-color: rgba(var(--color-placement-gold-rgb), 0.42);
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
-    0 0 24px rgba(250, 204, 21, 0.14);
+    0 0 0 1px rgba(var(--color-placement-gold-rgb), 0.08) inset,
+    0 0 24px rgba(var(--color-placement-gold-rgb), 0.14);
 }
 
 .player-tournament-card--silver:hover,
 .player-tournament-card--silver:focus-visible {
-  border-color: rgba(226, 232, 240, 0.4);
+  border-color: rgba(var(--color-placement-silver-rgb), 0.4);
   box-shadow:
-    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
-    0 0 22px rgba(226, 232, 240, 0.12);
+    0 0 0 1px rgba(var(--color-placement-silver-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-silver-rgb), 0.12);
 }
 
 .player-tournament-card--bronze:hover,
 .player-tournament-card--bronze:focus-visible {
-  border-color: rgba(180, 83, 9, 0.44);
+  border-color: rgba(var(--color-placement-bronze-rgb), 0.44);
   box-shadow:
-    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
-    0 0 22px rgba(180, 83, 9, 0.14);
+    0 0 0 1px rgba(var(--color-placement-bronze-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-bronze-rgb), 0.14);
 }
 
 .player-tournament-card--gold .elo-gain-badge,
@@ -2143,25 +2143,44 @@ background: linear-gradient(
   filter: none;
 }
 
+.player-tournament-card--gold .elo-gain-badge:hover,
+.player-tournament-card--silver .elo-gain-badge:hover,
+.player-tournament-card--bronze .elo-gain-badge:hover {
+  animation: none;
+  transform: translateY(-1px) scale(1.01);
+}
+
+.player-tournament-card--gold .tag-row .pill:hover,
+.player-tournament-card--gold .tag-row .elo-gain-badge:hover,
+.player-tournament-card--silver .tag-row .pill:hover,
+.player-tournament-card--silver .tag-row .elo-gain-badge:hover,
+.player-tournament-card--bronze .tag-row .pill:hover,
+.player-tournament-card--bronze .tag-row .elo-gain-badge:hover {
+  animation: none;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: none;
+  filter: none;
+}
+
 .pill.light.placement-badge--gold {
-  border: 1px solid rgba(250, 204, 21, 0.48);
-  background: rgba(250, 204, 21, 0.18);
+  border: 1px solid rgba(var(--color-placement-gold-rgb), 0.48);
+  background: rgba(var(--color-placement-gold-rgb), 0.18);
   color: #fde68a;
-  box-shadow: 0 0 14px rgba(250, 204, 21, 0.2);
+  box-shadow: 0 0 14px rgba(var(--color-placement-gold-rgb), 0.2);
 }
 
 .pill.light.placement-badge--silver {
-  border: 1px solid rgba(226, 232, 240, 0.44);
-  background: rgba(226, 232, 240, 0.14);
+  border: 1px solid rgba(var(--color-placement-silver-rgb), 0.44);
+  background: rgba(var(--color-placement-silver-rgb), 0.14);
   color: #e2e8f0;
-  box-shadow: 0 0 14px rgba(226, 232, 240, 0.16);
+  box-shadow: 0 0 14px rgba(var(--color-placement-silver-rgb), 0.16);
 }
 
 .pill.light.placement-badge--bronze {
-  border: 1px solid rgba(180, 83, 9, 0.5);
-  background: rgba(180, 83, 9, 0.18);
+  border: 1px solid rgba(var(--color-placement-bronze-rgb), 0.5);
+  background: rgba(var(--color-placement-bronze-rgb), 0.18);
   color: #fdba74;
-  box-shadow: 0 0 14px rgba(180, 83, 9, 0.18);
+  box-shadow: 0 0 14px rgba(var(--color-placement-bronze-rgb), 0.18);
 }
 
 .player-tournament-card--gold .player-placement-pill--gold,
@@ -2173,20 +2192,20 @@ background: linear-gradient(
 }
 
 .player-tournament-card--gold .player-placement-pill--gold {
-  border: 1px solid rgba(250, 204, 21, 0.44);
-  background: rgba(250, 204, 21, 0.16);
+  border: 1px solid rgba(var(--color-placement-gold-rgb), 0.44);
+  background: rgba(var(--color-placement-gold-rgb), 0.16);
   color: #fde68a;
 }
 
 .player-tournament-card--silver .player-placement-pill--silver {
-  border: 1px solid rgba(226, 232, 240, 0.4);
-  background: rgba(226, 232, 240, 0.13);
+  border: 1px solid rgba(var(--color-placement-silver-rgb), 0.4);
+  background: rgba(var(--color-placement-silver-rgb), 0.13);
   color: #e2e8f0;
 }
 
 .player-tournament-card--bronze .player-placement-pill--bronze {
-  border: 1px solid rgba(180, 83, 9, 0.44);
-  background: rgba(180, 83, 9, 0.16);
+  border: 1px solid rgba(var(--color-placement-bronze-rgb), 0.44);
+  background: rgba(var(--color-placement-bronze-rgb), 0.16);
   color: #fdba74;
 }
 
@@ -2233,13 +2252,13 @@ background: linear-gradient(
 
 .achievement-card-pro {
   align-items: flex-start;
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  border: 1px solid rgba(var(--color-achievement-purple-rgb), 0.35);
   background:
-    radial-gradient(circle at 18% 18%, rgba(168, 85, 247, 0.2), transparent 34%),
+    radial-gradient(circle at 18% 18%, rgba(var(--color-achievement-purple-rgb), 0.2), transparent 34%),
     linear-gradient(135deg, rgba(139, 92, 246, 0.14), transparent 38%),
     linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.025));
   box-shadow:
-    0 0 20px rgba(168, 85, 247, 0.25),
+    0 0 20px rgba(var(--color-achievement-purple-rgb), 0.25),
     0 0 40px rgba(139, 92, 246, 0.15);
   transition:
     transform 0.28s ease,
@@ -2252,9 +2271,9 @@ background: linear-gradient(
     linear-gradient(
       120deg,
       rgba(124, 58, 237, 0.18),
-      rgba(168, 85, 247, 0.35),
+      rgba(var(--color-achievement-purple-rgb), 0.35),
       rgba(139, 92, 246, 0.22),
-      rgba(168, 85, 247, 0.35),
+      rgba(var(--color-achievement-purple-rgb), 0.35),
       rgba(124, 58, 237, 0.18)
     );
   background-size: 260% 260%;
@@ -2280,7 +2299,7 @@ background: linear-gradient(
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(168, 85, 247, 0.35),
+    rgba(var(--color-achievement-purple-rgb), 0.35),
     transparent
   );
   opacity: 0.32;
@@ -2290,9 +2309,9 @@ background: linear-gradient(
 }
 
 .achievement-card-pro:hover {
-  border-color: rgba(168, 85, 247, 0.52);
+  border-color: rgba(var(--color-achievement-purple-rgb), 0.52);
   box-shadow:
-    0 0 24px rgba(168, 85, 247, 0.32),
+    0 0 24px rgba(var(--color-achievement-purple-rgb), 0.32),
     0 0 48px rgba(139, 92, 246, 0.2);
   transform: translateY(-2px);
 }
@@ -2334,15 +2353,15 @@ background: linear-gradient(
 }
 
 .player-result-win {
-  background: rgba(49, 208, 127, 0.18);
+  background: rgba(var(--color-success-green-rgb), 0.18);
   color: #73f0aa;
-  border-color: rgba(49, 208, 127, 0.2);
+  border-color: rgba(var(--color-success-green-rgb), 0.2);
 }
 
 .player-result-loss {
-  background: rgba(255, 59, 95, 0.16);
+  background: rgba(var(--color-brand-red-rgb), 0.16);
   color: #ff8aa0;
-  border-color: rgba(255, 59, 95, 0.2);
+  border-color: rgba(var(--color-brand-red-rgb), 0.2);
 }
 
 .player-result-pending {

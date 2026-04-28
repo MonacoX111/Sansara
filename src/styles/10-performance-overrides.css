@@ -135,28 +135,28 @@ body::before {
 .team-history-click-card:focus-visible {
   outline: 2px solid var(--focus-ring) !important;
   outline-offset: 3px;
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.25) !important;
+  box-shadow: 0 0 20px rgba(var(--color-brand-red-rgb), 0.25) !important;
 }
 
 .player-tournament-card--gold {
-  border-color: rgba(250, 204, 21, 0.36) !important;
+  border-color: rgba(var(--color-placement-gold-rgb), 0.36) !important;
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
-    0 0 24px rgba(250, 204, 21, 0.14) !important;
+    0 0 0 1px rgba(var(--color-placement-gold-rgb), 0.08) inset,
+    0 0 24px rgba(var(--color-placement-gold-rgb), 0.14) !important;
 }
 
 .player-tournament-card--silver {
-  border-color: rgba(226, 232, 240, 0.34) !important;
+  border-color: rgba(var(--color-placement-silver-rgb), 0.34) !important;
   box-shadow:
-    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
-    0 0 22px rgba(226, 232, 240, 0.12) !important;
+    0 0 0 1px rgba(var(--color-placement-silver-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-silver-rgb), 0.12) !important;
 }
 
 .player-tournament-card--bronze {
-  border-color: rgba(180, 83, 9, 0.38) !important;
+  border-color: rgba(var(--color-placement-bronze-rgb), 0.38) !important;
   box-shadow:
-    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
-    0 0 22px rgba(180, 83, 9, 0.14) !important;
+    0 0 0 1px rgba(var(--color-placement-bronze-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-bronze-rgb), 0.14) !important;
 }
 
 .player-tournament-card--gold::before,
@@ -179,50 +179,50 @@ body::before {
 
 .player-tournament-card--gold:hover,
 .player-tournament-card--gold:focus-visible {
-  border-color: rgba(250, 204, 21, 0.42) !important;
+  border-color: rgba(var(--color-placement-gold-rgb), 0.42) !important;
   outline-color: var(--focus-ring);
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
-    0 0 24px rgba(250, 204, 21, 0.14) !important;
+    0 0 0 1px rgba(var(--color-placement-gold-rgb), 0.08) inset,
+    0 0 24px rgba(var(--color-placement-gold-rgb), 0.14) !important;
 }
 
 .player-tournament-card--silver:hover,
 .player-tournament-card--silver:focus-visible {
-  border-color: rgba(226, 232, 240, 0.4) !important;
+  border-color: rgba(var(--color-placement-silver-rgb), 0.4) !important;
   outline-color: var(--focus-ring);
   box-shadow:
-    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
-    0 0 22px rgba(226, 232, 240, 0.12) !important;
+    0 0 0 1px rgba(var(--color-placement-silver-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-silver-rgb), 0.12) !important;
 }
 
 .player-tournament-card--bronze:hover,
 .player-tournament-card--bronze:focus-visible {
-  border-color: rgba(180, 83, 9, 0.44) !important;
+  border-color: rgba(var(--color-placement-bronze-rgb), 0.44) !important;
   outline-color: var(--focus-ring);
   box-shadow:
-    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
-    0 0 22px rgba(180, 83, 9, 0.14) !important;
+    0 0 0 1px rgba(var(--color-placement-bronze-rgb), 0.08) inset,
+    0 0 22px rgba(var(--color-placement-bronze-rgb), 0.14) !important;
 }
 
 .player-tournament-card--gold:hover .click-card-arrow,
 .player-tournament-card--gold:focus-visible .click-card-arrow {
   color: #fde68a;
-  border-color: rgba(250, 204, 21, 0.28);
-  background: rgba(250, 204, 21, 0.08);
+  border-color: rgba(var(--color-placement-gold-rgb), 0.28);
+  background: rgba(var(--color-placement-gold-rgb), 0.08);
 }
 
 .player-tournament-card--silver:hover .click-card-arrow,
 .player-tournament-card--silver:focus-visible .click-card-arrow {
   color: #e2e8f0;
-  border-color: rgba(226, 232, 240, 0.26);
-  background: rgba(226, 232, 240, 0.07);
+  border-color: rgba(var(--color-placement-silver-rgb), 0.26);
+  background: rgba(var(--color-placement-silver-rgb), 0.07);
 }
 
 .player-tournament-card--bronze:hover .click-card-arrow,
 .player-tournament-card--bronze:focus-visible .click-card-arrow {
   color: #fdba74;
-  border-color: rgba(180, 83, 9, 0.3);
-  background: rgba(180, 83, 9, 0.08);
+  border-color: rgba(var(--color-placement-bronze-rgb), 0.3);
+  background: rgba(var(--color-placement-bronze-rgb), 0.08);
 }
 
 .primary-btn:disabled,
