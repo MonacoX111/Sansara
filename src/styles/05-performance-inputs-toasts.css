@@ -20,13 +20,15 @@
   animation: none;
 }
 
-.admin-list-btn-featured::after,
 .leader-top::after {
   animation-play-state: paused;
 }
 
-.admin-list-btn-featured:hover::after,
 .leader-top:hover::after {
+  animation-play-state: running;
+}
+
+.admin-list-btn-featured::after {
   animation-play-state: running;
 }
 

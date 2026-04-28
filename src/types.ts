@@ -136,7 +136,7 @@ export type Match = {
   round: string;
   bestOf: number;
   notes: string;
-  eloApplied: boolean;
+eloApplied?: boolean;
 
   // нове для турнірної структури
   stage?: MatchStage;
