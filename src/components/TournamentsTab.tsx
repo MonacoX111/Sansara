@@ -978,7 +978,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
         {selectedTournament ? (
           <button
             type="button"
-            className="ghost-btn"
+            className="ghost-btn tournament-back-btn"
             onClick={() => setSelectedTournamentId(null)}
           >
             {tournamentText.backToList}

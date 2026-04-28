@@ -20,6 +20,7 @@ import AdminTournaments from "./admin/AdminTournaments";
 import AdminMatches from "./admin/AdminMatches";
 import AdminAchievements from "./admin/AdminAchievements";
 import AdminGeneral from "./admin/AdminGeneral";
+import PremiumSelect from "./ui/PremiumSelect";
 
 type PlayerForm = {
   nickname: string;
@@ -218,76 +219,6 @@ function MultiGamePicker({
   );
 }
 
-function PremiumSelect({
-  value,
-  options,
-  placeholder,
-  onChange,
-  disabled = false,
-}: {
-  value: number | string;
-  options: { value: number | string; label: string }[];
-  placeholder: string;
-  onChange: (value: number | string) => void;
-  disabled?: boolean;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedOption = options.find(
-    (option) => String(option.value) === String(value)
-  );
-
-  return (
-    <div className="admin-premium-select">
-      <button
-        type="button"
-        className={`admin-premium-select-trigger ${
-          isOpen ? "admin-premium-select-trigger-open" : ""
-        }`}
-        onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        disabled={disabled}
-      >
-        <span>{selectedOption?.label || placeholder}</span>
-        <span className="admin-premium-select-arrow">⌄</span>
-      </button>
-
-      {isOpen && !disabled ? (
-        <div className="admin-premium-select-menu">
-          <button
-            type="button"
-            className={`admin-premium-select-option ${
-              !selectedOption ? "admin-premium-select-option-active" : ""
-            }`}
-            onClick={() => {
-              onChange(0);
-              setIsOpen(false);
-            }}
-          >
-            {placeholder}
-          </button>
-
-          {options.map((option) => (
-            <button
-              key={String(option.value)}
-              type="button"
-              className={`admin-premium-select-option ${
-                String(value) === String(option.value)
-                  ? "admin-premium-select-option-active"
-                  : ""
-              }`}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 export default function AdminTab({
   lang,

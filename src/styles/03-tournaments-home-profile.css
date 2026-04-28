@@ -26,6 +26,7 @@
 .tournament-public-view {
   display: grid;
   gap: 20px;
+  margin-top: 12px;
 }
 
 .tournament-hero {
@@ -206,6 +207,15 @@
   padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
+}
+
+.tournament-back-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
 }
 
 /* === RESPONSIVE === */

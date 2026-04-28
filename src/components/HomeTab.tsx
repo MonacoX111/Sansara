@@ -129,7 +129,13 @@ onClick={() => setActiveTab("leaderboard")}
         </div>
 
         <div className="welcome-right">
-          <div className="welcome-preview-card main" onMouseMove={handleGlow}>
+          <button
+            type="button"
+            className="welcome-preview-card welcome-stat-card main"
+            onMouseMove={handleGlow}
+            onClick={() => setActiveTab("players")}
+            aria-label="Open players"
+          >
             <span>{text.platform}</span>
             <strong>
               {players.length} {text.platformPlayers}
@@ -138,18 +144,30 @@ onClick={() => setActiveTab("leaderboard")}
               {teams.length} {text.teamsLabel} · {tournaments.length}{" "}
               {text.tournamentsLabel}
             </p>
-          </div>
+          </button>
 
           <div className="welcome-preview-grid">
-            <div className="welcome-mini-card" onMouseMove={handleGlow}>
+            <button
+              type="button"
+              className="welcome-mini-card welcome-stat-card"
+              onMouseMove={handleGlow}
+              onClick={() => setActiveTab("tournaments")}
+              aria-label="Open tournaments"
+            >
               <span>{text.tournaments}</span>
               <strong>{tournaments.length}</strong>
-            </div>
+            </button>
 
-            <div className="welcome-mini-card" onMouseMove={handleGlow}>
+            <button
+              type="button"
+              className="welcome-mini-card welcome-stat-card"
+              onMouseMove={handleGlow}
+              onClick={() => setActiveTab("leaderboard")}
+              aria-label="Open leaderboard"
+            >
               <span>{text.topElo}</span>
               <strong>{topElo}</strong>
-            </div>
+            </button>
           </div>
         </div>
       </div>

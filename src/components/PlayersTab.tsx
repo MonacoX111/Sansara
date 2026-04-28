@@ -12,6 +12,7 @@ import {
   getPlayerTeamHistory,
 } from "../domain/player/playerTeams";
 import { Lang, t } from "../utils/translations";
+import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
 
 type Props = {
@@ -221,42 +222,46 @@ export default function PlayersTab({
 placeholder={playerText.searchPlaceholder}
         />
 
-        <select
-          className="input"
+        <PremiumSelect
           value={gameFilter}
-          onChange={(e) => setGameFilter(e.target.value)}
-        >
-          <option value="all">{playerText.allGames}</option>
-          {gamesList.map((game) => (
-            <option key={game.id} value={game.name}>
-              {game.name}
-            </option>
-          ))}
-        </select>
+          placeholder={playerText.allGames}
+          includePlaceholderOption={false}
+          options={[
+            { value: "all", label: playerText.allGames },
+            ...gamesList.map((game) => ({
+              value: game.name,
+              label: game.name,
+            })),
+          ]}
+          onChange={(value) => setGameFilter(String(value))}
+        />
 
-        <select
-          className="input"
+        <PremiumSelect
           value={teamFilter}
-          onChange={(e) => setTeamFilter(e.target.value)}
-        >
-          <option value="all">{playerText.allTeams}</option>
-          {teams.map((team) => (
-            <option key={team.id} value={String(team.id)}>
-              {team.name}
-            </option>
-          ))}
-        </select>
+          placeholder={playerText.allTeams}
+          includePlaceholderOption={false}
+          options={[
+            { value: "all", label: playerText.allTeams },
+            ...teams.map((team) => ({
+              value: String(team.id),
+              label: team.name,
+            })),
+          ]}
+          onChange={(value) => setTeamFilter(String(value))}
+        />
 
-        <select
-          className="input"
+        <PremiumSelect
           value={sortMode}
-          onChange={(e) => setSortMode(e.target.value)}
-        >
-<option value="elo">{playerText.sortByElo}</option>
-<option value="wins">{playerText.sortByWins}</option>
-<option value="earnings">{playerText.sortByEarnings}</option>
-<option value="name">{playerText.sortByName}</option>
-        </select>
+          placeholder={playerText.sortByElo}
+          includePlaceholderOption={false}
+          options={[
+            { value: "elo", label: playerText.sortByElo },
+            { value: "wins", label: playerText.sortByWins },
+            { value: "earnings", label: playerText.sortByEarnings },
+            { value: "name", label: playerText.sortByName },
+          ]}
+          onChange={(value) => setSortMode(String(value))}
+        />
       </div>
 
       <div className="two-col">
@@ -551,7 +556,7 @@ placeholder={playerText.searchPlaceholder}
     <p className="muted">{playerText.noAchievements}</p>
   ) : (
                 <div className="achievement-grid">
-                  {playerAchievements.map((achievement, index) => (
+                  {playerAchievements.map((achievement) => (
                     <div
                       key={achievement.id}
                       className="achievement-card achievement-card-pro"
@@ -575,9 +580,6 @@ placeholder={playerText.searchPlaceholder}
                       <div>
                         <div className="achievement-title">
                           {achievement.title}
-                          <span className="pill gold achievement-rank">
-                            #{index + 1}
-                          </span>
                         </div>
                         <div className="muted small">
                           {achievement.description}
