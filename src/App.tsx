@@ -1143,6 +1143,14 @@ tournamentId:
     navigateToPlayer(playerId);
   };
 
+  const openTournamentFromPlayerProfile = (tournamentId: number) => {
+    navigateToTournament(tournamentId);
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+
   const saveHomeAnnouncement = async () => {
     const safeTournamentId =
       typeof homeAnnouncementForm.tournamentId === "number" &&
@@ -2328,6 +2336,7 @@ const deleteAchievement = async (achievementId: number) => {
   sortMode={sortMode}
   setSortMode={setSortMode}
   gamesList={gamesList}
+  onOpenTournament={openTournamentFromPlayerProfile}
   lang={lang}
 />
         )}

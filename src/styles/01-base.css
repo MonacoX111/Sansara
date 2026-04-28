@@ -559,6 +559,20 @@ body .lang-switch button.active:hover {
   color: #ebedf2;
   font-size: 12px;
   border: 1px solid rgba(255, 255, 255, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    filter 0.25s ease;
+}
+
+.pill:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.18),
+    0 0 14px rgba(255, 255, 255, 0.08);
 }
 
 .pill.light {
@@ -586,6 +600,10 @@ body .lang-switch button.active:hover {
   animation: winnerBadgeBreath 3.4s ease-in-out infinite;
 }
 
+.badge-winner:hover {
+  filter: drop-shadow(0 0 10px rgba(49, 208, 127, 0.32));
+}
+
 .badge-mvp {
   position: relative;
   overflow: hidden;
@@ -610,6 +628,12 @@ body .lang-switch button.active:hover {
   transform: translateX(-130%) skewX(-18deg);
   animation: mvpBadgeSweep 3.8s linear infinite;
   mix-blend-mode: screen;
+  opacity: 0.78;
+  transition: opacity 0.25s ease;
+}
+
+.badge-mvp:hover::after {
+  opacity: 1;
 }
 
 @keyframes winnerBadgeBreath {
@@ -664,6 +688,20 @@ body .lang-switch button.active:hover {
     0 0 0 1px rgba(49, 208, 127, 0.08) inset,
     0 0 14px rgba(49, 208, 127, 0.2);
   animation: eloGainFloat 3.4s ease-in-out infinite;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    filter 0.25s ease;
+}
+
+.elo-gain-badge:hover {
+  border-color: rgba(49, 208, 127, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(49, 208, 127, 0.16) inset,
+    0 0 22px rgba(49, 208, 127, 0.3),
+    0 8px 18px rgba(0, 0, 0, 0.16);
+  filter: brightness(1.08);
 }
 
 .elo-gain-badge::after {
@@ -803,6 +841,36 @@ body .lang-switch button.active:hover {
   font-weight: 700;
   line-height: 1.25;
   word-break: break-word;
+}
+
+.tournament-history-click-card {
+  cursor: pointer;
+  transition:
+    transform 0.24s ease,
+    border-color 0.24s ease,
+    box-shadow 0.24s ease;
+}
+
+.tournament-history-click-card:hover,
+.tournament-history-click-card:focus-visible {
+  border-color: rgba(255, 190, 61, 0.22);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(255, 190, 61, 0.12);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.tournament-history-open-title {
+  transition:
+    color 0.22s ease,
+    text-shadow 0.22s ease;
+}
+
+.tournament-history-click-card:hover .tournament-history-open-title,
+.tournament-history-click-card:focus-visible .tournament-history-open-title {
+  color: #ffd77a;
+  text-shadow: 0 0 14px rgba(255, 190, 61, 0.24);
 }
 
 .right-block {

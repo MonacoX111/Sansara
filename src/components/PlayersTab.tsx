@@ -39,6 +39,7 @@ type Props = {
   sortMode: string;
   setSortMode: (value: string) => void;
   gamesList: { id: string; name: string; icon: string }[];
+  onOpenTournament?: (tournamentId: number) => void;
   lang: Lang;
 };
 
@@ -59,6 +60,7 @@ export default function PlayersTab({
   sortMode,
   setSortMode,
   gamesList,
+  onOpenTournament,
   lang = "en",
 }: Props) {
 
@@ -678,7 +680,16 @@ placeholder={playerText.searchPlaceholder}
                   {playerTournamentHistory.map((tournament) => (
                     <div
                       key={tournament.id}
-                      className="simple-card"
+                      className="simple-card tournament-history-click-card"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Open ${tournament.title}`}
+                      onClick={() => onOpenTournament?.(tournament.id)}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        onOpenTournament?.(tournament.id);
+                      }}
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         e.currentTarget.style.setProperty(
@@ -693,7 +704,7 @@ placeholder={playerText.searchPlaceholder}
                     >
                       <div className="row-between">
                         <div>
-                          <div className="achievement-title">
+                          <div className="achievement-title tournament-history-open-title">
                             {tournament.title}
                           </div>
                           <div className="muted small">
