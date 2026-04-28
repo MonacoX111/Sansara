@@ -34,7 +34,7 @@ export const applyTournamentPlacementElo = (
   players: Player[],
   tournament: Tournament
 ): ApplyTournamentPlacementEloResult => {
-  if (!isFinishedTournament(tournament) || tournament.eloApplied === true) {
+  if (!isFinishedTournament(tournament)) {
     return { players, tournament, applied: false };
   }
 
@@ -73,17 +73,15 @@ export const applyTournamentPlacementElo = (
     return { players, tournament, applied: false };
   }
 
-  const nextPlayers = recalculatePlayerRanks(
-    players.map((player) => {
-      const bonus = eloByPlayerId.get(player.id) || 0;
-      if (bonus <= 0) return player;
+  const nextPlayers = players.map((player) => {
+    const bonus = eloByPlayerId.get(player.id) || 0;
+    if (bonus <= 0) return player;
 
-      return {
-        ...player,
-        elo: Number(player.elo || 0) + bonus,
-      };
-    })
-  );
+    return {
+      ...player,
+      elo: Number(player.elo || 0) + bonus,
+    };
+  });
 
   return {
     players: nextPlayers,
@@ -99,12 +97,15 @@ export const recalculateAllPlayersElo = (
   players: Player[],
   tournaments: Tournament[]
 ): Player[] => {
-  const reset = players.map((player) => ({
-    ...player,
-    elo: typeof player.baseElo === "number" ? player.baseElo : BASE_ELO,
-  }));
+  const reset = players.map((player) => {
+    const base =
+      typeof player.baseElo === "number" ? player.baseElo : BASE_ELO;
+    const adjustment =
+      typeof player.eloAdjustment === "number" ? player.eloAdjustment : 0;
+    return { ...player, elo: base + adjustment };
+  });
 
-  return tournaments
+  const accumulated = tournaments
     .filter(isFinishedTournament)
     .reduce<Player[]>(
       (acc, tournament) =>
@@ -114,4 +115,6 @@ export const recalculateAllPlayersElo = (
         }).players,
       reset
     );
+
+  return recalculatePlayerRanks(accumulated);
 };

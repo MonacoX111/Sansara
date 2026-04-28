@@ -1573,10 +1573,64 @@ if (isFirebaseConfigured) {
     const isFinished =
       updatedTournament.status === "completed" ||
       updatedTournament.status === "finished";
-    const tournamentToSave: Tournament = {
-      ...updatedTournament,
-      eloApplied: isFinished ? true : Boolean(updatedTournament.eloApplied),
+
+let updatedTournamentWithRoster = updatedTournament;
+
+if (
+  isFinished &&
+  updatedTournament.participantType === "team" &&
+  Array.isArray(updatedTournament.placements)
+) {
+  const existingRosters = Array.isArray(updatedTournament.teamRosters)
+    ? updatedTournament.teamRosters
+    : [];
+
+const teamIdsFromPlacements = updatedTournament.placements
+  .map((placement) => Number(placement.teamId ?? 0))
+  .filter((teamId) => !Number.isNaN(teamId) && teamId > 0);
+
+  const uniqueTeamIds = [...new Set(teamIdsFromPlacements)];
+
+  const frozenRosters = uniqueTeamIds.map((teamId) => {
+    const existing = existingRosters.find(
+      (roster) => Number(roster.teamId) === teamId
+    );
+
+    if (
+      existing &&
+      Array.isArray(existing.playerIds) &&
+      existing.playerIds.length > 0
+    ) {
+      return {
+        teamId,
+        playerIds: existing.playerIds.map(Number),
+      };
+    }
+
+    const playerIds = players
+      .filter((player) => Number(player.teamId) === teamId)
+      .map((player) => Number(player.id));
+
+    if (playerIds.length === 0) {
+console.warn("ELO: Empty roster for team", teamId, updatedTournament.id);
+    }
+
+    return {
+      teamId,
+      playerIds,
     };
+  });
+
+  updatedTournamentWithRoster = {
+    ...updatedTournament,
+    teamRosters: frozenRosters,
+  };
+}
+
+const tournamentToSave: Tournament = {
+  ...updatedTournamentWithRoster,
+  eloApplied: isFinished ? true : Boolean(updatedTournament.eloApplied),
+};
 
     const nextTournaments = tournaments.map((tournament) =>
       tournament.id === selectedTournamentId ? tournamentToSave : tournament

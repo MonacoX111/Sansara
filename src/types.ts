@@ -70,6 +70,7 @@ export type Player = {
   rank: number;
   elo: number;
   baseElo?: number;
+  eloAdjustment?: number;
   bio: string;
   isFeatured?: boolean;
 };
