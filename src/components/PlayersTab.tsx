@@ -292,6 +292,24 @@ export default function PlayersTab({
     return "elo-gain-badge elo-gain-badge--small";
   };
 
+  const getPlacementTier = (place: number | string) => {
+    const numericPlace = Number(place);
+    if (numericPlace === 1) return "gold";
+    if (numericPlace === 2) return "silver";
+    if (numericPlace === 3) return "bronze";
+    return "";
+  };
+
+  const getTournamentPlacementCardClass = (place: number | string) => {
+    const tier = getPlacementTier(place);
+    return tier ? `player-tournament-card--${tier}` : "";
+  };
+
+  const getPlacementBadgeClass = (place: number | string) => {
+    const tier = getPlacementTier(place);
+    return tier ? `placement-badge--${tier}` : "";
+  };
+
   return (
     <>
       <div className="toolbar">
@@ -706,10 +724,17 @@ placeholder={playerText.searchPlaceholder}
     <p className="muted">{playerText.noTournamentHistory}</p>
   ) : (
                 <div className="list-col">
-                  {playerTournamentHistory.map((tournament) => (
+                  {playerTournamentHistory.map((tournament) => {
+                    const placementCardClass =
+                      getTournamentPlacementCardClass(tournament.place);
+                    const placementBadgeClass = getPlacementBadgeClass(
+                      tournament.place
+                    );
+
+                    return (
                     <div
                       key={tournament.id}
-                      className="simple-card tournament-history-click-card"
+                      className={`simple-card tournament-history-click-card ${placementCardClass}`}
                       role="button"
                       tabIndex={0}
                       aria-label={`Open ${tournament.title}`}
@@ -743,7 +768,7 @@ placeholder={playerText.searchPlaceholder}
                         </div>
 
                         <div className="tag-row">
-                          <span className="pill light">
+                          <span className={`pill light ${placementBadgeClass}`}>
                             {playerText.place}: {String(tournament.place)}
                           </span>
                           {tournament.isWinner ? (
@@ -789,7 +814,8 @@ placeholder={playerText.searchPlaceholder}
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

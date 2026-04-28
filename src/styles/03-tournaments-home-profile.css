@@ -1995,6 +1995,153 @@ background: linear-gradient(
   box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 
+.player-tournament-card--gold,
+.player-tournament-card--silver,
+.player-tournament-card--bronze {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.player-tournament-card--gold {
+  border-color: rgba(250, 204, 21, 0.36);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(250, 204, 21, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(250, 204, 21, 0.1), transparent 42%),
+    rgba(255, 255, 255, 0.035);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
+    0 0 24px rgba(250, 204, 21, 0.14);
+}
+
+.player-tournament-card--silver {
+  border-color: rgba(226, 232, 240, 0.34);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(226, 232, 240, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(226, 232, 240, 0.08), transparent 42%),
+    rgba(255, 255, 255, 0.035);
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
+    0 0 22px rgba(226, 232, 240, 0.12);
+}
+
+.player-tournament-card--bronze {
+  border-color: rgba(180, 83, 9, 0.38);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(180, 83, 9, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(180, 83, 9, 0.1), transparent 42%),
+    rgba(255, 255, 255, 0.035);
+  box-shadow:
+    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
+    0 0 22px rgba(180, 83, 9, 0.14);
+}
+
+.player-tournament-card--gold::after,
+.player-tournament-card--silver::after,
+.player-tournament-card--bronze::after {
+  content: "";
+  position: absolute;
+  inset: -35% -70%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.28;
+  transform: translateX(-135%) skewX(-18deg);
+  animation: playerTournamentPlacementShimmer 7.2s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.player-tournament-card--gold::after {
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(250, 204, 21, 0.34),
+    transparent
+  );
+}
+
+.player-tournament-card--silver::after {
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(226, 232, 240, 0.3),
+    transparent
+  );
+}
+
+.player-tournament-card--bronze::after {
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(180, 83, 9, 0.32),
+    transparent
+  );
+}
+
+.player-tournament-card--gold:hover,
+.player-tournament-card--gold:focus-visible {
+  border-color: rgba(250, 204, 21, 0.54);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.12) inset,
+    0 0 32px rgba(250, 204, 21, 0.2);
+}
+
+.player-tournament-card--silver:hover,
+.player-tournament-card--silver:focus-visible {
+  border-color: rgba(226, 232, 240, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.12) inset,
+    0 0 30px rgba(226, 232, 240, 0.18);
+}
+
+.player-tournament-card--bronze:hover,
+.player-tournament-card--bronze:focus-visible {
+  border-color: rgba(180, 83, 9, 0.56);
+  box-shadow:
+    0 0 0 1px rgba(180, 83, 9, 0.12) inset,
+    0 0 30px rgba(180, 83, 9, 0.2);
+}
+
+.pill.light.placement-badge--gold {
+  border: 1px solid rgba(250, 204, 21, 0.48);
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.2);
+}
+
+.pill.light.placement-badge--silver {
+  border: 1px solid rgba(226, 232, 240, 0.44);
+  background: rgba(226, 232, 240, 0.14);
+  color: #e2e8f0;
+  box-shadow: 0 0 14px rgba(226, 232, 240, 0.16);
+}
+
+.pill.light.placement-badge--bronze {
+  border: 1px solid rgba(180, 83, 9, 0.5);
+  background: rgba(180, 83, 9, 0.18);
+  color: #fdba74;
+  box-shadow: 0 0 14px rgba(180, 83, 9, 0.18);
+}
+
+@keyframes playerTournamentPlacementShimmer {
+  0% {
+    transform: translateX(-135%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(135%) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-tournament-card--gold::after,
+  .player-tournament-card--silver::after,
+  .player-tournament-card--bronze::after {
+    animation: none;
+  }
+}
+
 .stats-grid {
   margin-top: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
