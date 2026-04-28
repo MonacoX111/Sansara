@@ -796,23 +796,27 @@ const adminAchievementsProps = {
 
   return (
     <div className="admin-wrap">
-      <nav className="admin-quick-nav" aria-label={adminText.adminSections}>
-        <div className="admin-quick-nav-inner">
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-players")}>{quickNavText.players}</button>
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-teams")}>{quickNavText.teams}</button>
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-tournaments")}>{quickNavText.tournaments}</button>
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-general")}>{quickNavText.general}</button>
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-matches")}>{quickNavText.matches}</button>
-          <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-achievements")}>{quickNavText.achievements}</button>
-        </div>
-      </nav>
+      <div className="admin-layout">
+        <nav className="admin-quick-nav" aria-label={adminText.adminSections}>
+          <div className="admin-quick-nav-inner">
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-players")}>{quickNavText.players}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-teams")}>{quickNavText.teams}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-tournaments")}>{quickNavText.tournaments}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-general")}>{quickNavText.general}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-matches")}>{quickNavText.matches}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-achievements")}>{quickNavText.achievements}</button>
+          </div>
+        </nav>
 
-      <AdminPlayers {...adminPlayersProps} />
-      <AdminTeams {...adminTeamsProps} />
-      <AdminTournaments {...adminTournamentsProps} />
-      <AdminGeneral {...adminGeneralProps} />
-      <AdminMatches {...adminMatchesProps} />
-      <AdminAchievements {...adminAchievementsProps} />
+        <div className="admin-content">
+          <AdminPlayers {...adminPlayersProps} />
+          <AdminTeams {...adminTeamsProps} />
+          <AdminTournaments {...adminTournamentsProps} />
+          <AdminGeneral {...adminGeneralProps} />
+          <AdminMatches {...adminMatchesProps} />
+          <AdminAchievements {...adminAchievementsProps} />
+        </div>
+      </div>
 
       {confirmDelete.open ? (
         <div className="confirm-overlay">
