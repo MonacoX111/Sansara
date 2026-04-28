@@ -79,8 +79,8 @@ type Props = {
   setMatchForm: Dispatch<SetStateAction<MatchForm>>;
   saveMatch: () => void | Promise<void>;
   addMatch: (tournamentId?: number) => void | Promise<void>;
-  reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
-  autoGenerateBracket: (tournamentId: number) => void;
+  reorderMatch: (direction: "up" | "down", tournamentId: number) => void | Promise<void>;
+  autoGenerateBracket: (tournamentId: number) => void | Promise<void>;
   matchTournamentFilterId: number;
   setMatchTournamentFilterId: (id: number) => void;
   selectedMatchTournament: Tournament | null;
@@ -191,28 +191,41 @@ game: nextTournament?.game || "",
 
 <button
   className="primary-btn auto-bracket-btn"
-  disabled={!matchTournamentFilterId}
+  disabled={
+    !matchTournamentFilterId ||
+    isAdminActionLoading(`auto-bracket-${matchTournamentFilterId}`)
+  }
   onClick={() => autoGenerateBracket(matchTournamentFilterId)}
 >
-  {adminText.autoGenerateBracket}
+  {isAdminActionLoading(`auto-bracket-${matchTournamentFilterId}`)
+    ? "Generating..."
+    : adminText.autoGenerateBracket}
 </button>
 </div>
 
 <div className="btn-row">
   <button
     className="secondary-btn"
-    disabled={!selectedMatchId}
+    disabled={
+      !selectedMatchId || isAdminActionLoading("reorder-match-up")
+    }
     onClick={() => reorderMatch("up", matchTournamentFilterId)}
   >
-    {adminText.moveUp}
+    {isAdminActionLoading("reorder-match-up")
+      ? "Updating..."
+      : adminText.moveUp}
   </button>
 
   <button
     className="secondary-btn"
-    disabled={!selectedMatchId}
+    disabled={
+      !selectedMatchId || isAdminActionLoading("reorder-match-down")
+    }
     onClick={() => reorderMatch("down", matchTournamentFilterId)}
   >
-    {adminText.moveDown}
+    {isAdminActionLoading("reorder-match-down")
+      ? "Updating..."
+      : adminText.moveDown}
   </button>
 </div>
 

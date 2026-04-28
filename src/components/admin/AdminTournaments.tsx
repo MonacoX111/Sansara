@@ -84,7 +84,7 @@ type Props = {
 
   saveTournament: () => void | Promise<void>;
   addTournament: () => void | Promise<void>;
-  reorderTournament: (direction: "up" | "down") => void;
+  reorderTournament: (direction: "up" | "down") => void | Promise<void>;
   handleTournamentImageUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   handleTournamentSelect: (id: number) => void;
 
@@ -182,11 +182,14 @@ export default function AdminTournaments(props: Props) {
                 disabled={
                   orderedTournaments.findIndex(
                     (tournament) => tournament.id === selectedTournamentId
-                  ) <= 0
+                  ) <= 0 ||
+                  isAdminActionLoading("reorder-tournament-up")
                 }
                 onClick={() => reorderTournament("up")}
               >
-                {adminText.moveUp}
+                {isAdminActionLoading("reorder-tournament-up")
+                  ? "Updating..."
+                  : adminText.moveUp}
               </button>
 
               <button
@@ -198,11 +201,14 @@ export default function AdminTournaments(props: Props) {
                   orderedTournaments.findIndex(
                     (tournament) => tournament.id === selectedTournamentId
                   ) >=
-                    orderedTournaments.length - 1
+                    orderedTournaments.length - 1 ||
+                  isAdminActionLoading("reorder-tournament-down")
                 }
                 onClick={() => reorderTournament("down")}
               >
-                {adminText.moveDown}
+                {isAdminActionLoading("reorder-tournament-down")
+                  ? "Updating..."
+                  : adminText.moveDown}
               </button>
             </div>
           </div>

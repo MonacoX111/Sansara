@@ -156,12 +156,12 @@ type Props = {
   saveTournament: () => void | Promise<void>;
   addTournament: () => void | Promise<void>;
   deleteTournament: () => void | Promise<void>;
-  reorderTournament: (direction: "up" | "down") => void;
+  reorderTournament: (direction: "up" | "down") => void | Promise<void>;
 
 saveMatch: () => void | Promise<void>;
 addMatch: (tournamentId?: number) => void | Promise<void>;
 deleteMatch: () => void | Promise<void>;
-reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
+reorderMatch: (direction: "up" | "down", tournamentId: number) => void | Promise<void>;
 
   saveAchievement: (
     id: number,
@@ -170,7 +170,7 @@ reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
   addAchievement: () => void | Promise<void>;
   deleteAchievement: (id: number) => void | Promise<void>;
   selectedAchievement: Achievement | null;
-autoGenerateBracket: (tournamentId: number) => void;
+autoGenerateBracket: (tournamentId: number) => void | Promise<void>;
 lang: "en" | "ua";
 };
 
@@ -748,7 +748,10 @@ const adminTournamentsProps = {
     runAdminAction("create-tournament", async () => {
       await addTournament();
     }),
-  reorderTournament,
+  reorderTournament: (direction: "up" | "down") =>
+    runAdminAction(`reorder-tournament-${direction}`, async () => {
+      await reorderTournament(direction);
+    }),
   handleTournamentImageUpload,
   handleTournamentSelect,
   orderedTournaments,
@@ -804,8 +807,14 @@ const adminMatchesProps = {
     runAdminAction("create-match", async () => {
       await addMatch(tournamentId);
     }),
-  reorderMatch,
-  autoGenerateBracket,
+  reorderMatch: (direction: "up" | "down", tournamentId: number) =>
+    runAdminAction(`reorder-match-${direction}`, async () => {
+      await reorderMatch(direction, tournamentId);
+    }),
+  autoGenerateBracket: (tournamentId: number) =>
+    runAdminAction(`auto-bracket-${tournamentId}`, async () => {
+      await autoGenerateBracket(tournamentId);
+    }),
   matchTournamentFilterId,
   setMatchTournamentFilterId,
   selectedMatchTournament,
@@ -894,28 +903,29 @@ const adminAchievementsProps = {
                 onClick={() => {
                   if (!confirmDeleteActionKey) return;
 
+                  const pendingDelete = confirmDelete;
+                  setConfirmDelete({ open: false, type: null });
+
                   runAdminAction(confirmDeleteActionKey, async () => {
-                    if (confirmDelete.type === "player") {
+                    if (pendingDelete.type === "player") {
                       await deletePlayer();
                     }
-                    if (confirmDelete.type === "team") {
+                    if (pendingDelete.type === "team") {
                       await deleteTeam();
                     }
-                    if (confirmDelete.type === "tournament") {
+                    if (pendingDelete.type === "tournament") {
                       await deleteTournament();
                     }
-                    if (confirmDelete.type === "match") {
+                    if (pendingDelete.type === "match") {
                       await deleteMatch();
                     }
 
                     if (
-                      confirmDelete.type === "achievement" &&
-                      typeof confirmDelete.achievementId === "number"
+                      pendingDelete.type === "achievement" &&
+                      typeof pendingDelete.achievementId === "number"
                     ) {
-                      await deleteAchievement(confirmDelete.achievementId);
+                      await deleteAchievement(pendingDelete.achievementId);
                     }
-
-                    setConfirmDelete({ open: false, type: null });
                   });
                 }}
               >
