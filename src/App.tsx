@@ -60,10 +60,7 @@ import {
 } from "./domain/match/matchOrdering";
 import { progressMatchWinner } from "./domain/match/matchProgression";
 import { validateMatchWinner } from "./domain/match/matchValidation";
-import {
-  applyTournamentPlacementElo,
-  recalculateAllPlayersElo,
-} from "./domain/player/playerElo";
+import { recalculateAllPlayersElo } from "./domain/player/playerElo";
 
 type PlayerForm = {
   nickname: string;
@@ -1573,19 +1570,13 @@ if (isFirebaseConfigured) {
       isPublished: Boolean(tournamentForm.isPublished),
     };
 
-    const eloResult = applyTournamentPlacementElo(players, updatedTournament);
-    const tournamentToSave = eloResult.tournament;
-    const nextPlayers = eloResult.players;
-    const changedPlayers = eloResult.applied
-      ? nextPlayers.filter((player) => {
-          const previousPlayer = players.find((item) => item.id === player.id);
-          return (
-            previousPlayer &&
-            (previousPlayer.elo !== player.elo ||
-              previousPlayer.rank !== player.rank)
-          );
-        })
-      : [];
+    const isFinished =
+      updatedTournament.status === "completed" ||
+      updatedTournament.status === "finished";
+    const tournamentToSave: Tournament = {
+      ...updatedTournament,
+      eloApplied: isFinished ? true : Boolean(updatedTournament.eloApplied),
+    };
 
     const nextTournaments = tournaments.map((tournament) =>
       tournament.id === selectedTournamentId ? tournamentToSave : tournament
@@ -1600,12 +1591,24 @@ if (isFirebaseConfigured) {
           : tournament.imageUrl || "",
     }));
 
+    const recalculatedPlayers = recalculateAllPlayersElo(
+      players,
+      safeTournaments
+    );
+    const changedPlayers = recalculatedPlayers.filter((player) => {
+      const previous = players.find((item) => item.id === player.id);
+      return (
+        previous &&
+        (previous.elo !== player.elo || previous.rank !== player.rank)
+      );
+    });
+
     setTournaments(safeTournaments);
     writeStorage("tm_tournaments", safeTournaments);
 
-    if (eloResult.applied) {
-      setPlayers(nextPlayers);
-      writeStorage("tm_players", nextPlayers);
+    if (changedPlayers.length > 0) {
+      setPlayers(recalculatedPlayers);
+      writeStorage("tm_players", recalculatedPlayers);
     }
 
     showToast(commonText.tournamentSaved);

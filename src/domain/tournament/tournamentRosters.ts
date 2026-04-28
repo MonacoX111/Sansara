@@ -22,14 +22,13 @@ export const getTournamentRosterPlayerIds = (
   players: Player[] = []
 ): TournamentRosterLookup => {
   const snapshot = getTournamentTeamRoster(tournament, teamId);
+  const snapshotIds =
+    snapshot && Array.isArray(snapshot.playerIds)
+      ? snapshot.playerIds.map(Number)
+      : [];
 
-  if (snapshot) {
-    return {
-      playerIds: Array.isArray(snapshot.playerIds)
-        ? snapshot.playerIds.map(Number)
-        : [],
-      isFallback: false,
-    };
+  if (snapshotIds.length > 0) {
+    return { playerIds: snapshotIds, isFallback: false };
   }
 
   return {

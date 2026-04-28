@@ -99,7 +99,10 @@ export const recalculateAllPlayersElo = (
   players: Player[],
   tournaments: Tournament[]
 ): Player[] => {
-  const reset = players.map((player) => ({ ...player, elo: BASE_ELO }));
+  const reset = players.map((player) => ({
+    ...player,
+    elo: typeof player.baseElo === "number" ? player.baseElo : BASE_ELO,
+  }));
 
   return tournaments
     .filter(isFinishedTournament)

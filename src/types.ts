@@ -69,6 +69,7 @@ export type Player = {
   tournamentsWon: number;
   rank: number;
   elo: number;
+  baseElo?: number;
   bio: string;
   isFeatured?: boolean;
 };
