@@ -118,7 +118,7 @@ export default function AdminPlayers(props: Props) {
 
             <div className="list-col admin-scroll-list">
               <button
-                className="secondary-btn add-list-btn add-player-btn-top"
+                className="secondary-btn add-list-btn admin-create-btn"
                 onClick={addPlayer}
               >
                 {adminText.addPlayer}

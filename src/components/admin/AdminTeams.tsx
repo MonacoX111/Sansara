@@ -58,7 +58,7 @@ export default function AdminTeams(props: Props) {
 
           <div className="list-col admin-scroll-list">
             <button
-              className="secondary-btn add-list-btn add-team-btn-top"
+              className="secondary-btn add-list-btn admin-create-btn"
               onClick={addTeam}
             >
               {adminText.addTeam}

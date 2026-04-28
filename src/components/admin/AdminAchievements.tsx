@@ -45,7 +45,7 @@ export default function AdminAchievements(props: Props) {
 
         <div className="list-col admin-scroll-list">
           <button
-            className="secondary-btn add-list-btn add-achievement-btn-top"
+            className="secondary-btn add-list-btn admin-create-btn"
             onClick={addAchievement}
           >
             {adminText.addAchievement}

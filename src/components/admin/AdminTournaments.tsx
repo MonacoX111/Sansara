@@ -165,7 +165,7 @@ export default function AdminTournaments(props: Props) {
             </div>
 
             <button
-              className="secondary-btn add-list-btn add-tournament-btn-top"
+              className="secondary-btn add-list-btn admin-create-btn"
               onClick={addTournament}
             >
               {adminText.addTournament}
@@ -578,7 +578,7 @@ export default function AdminTournaments(props: Props) {
                   <label className="field-label">{adminText.groupsSetup}</label>
                   <button
                     type="button"
-                    className="secondary-btn"
+                    className="secondary-btn admin-create-btn admin-create-btn-inline"
                     onClick={addTournamentGroup}
                   >
                     {adminText.addGroup}
