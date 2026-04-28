@@ -559,17 +559,6 @@ const handleGlow = handleSpotlightMove;
 
   const [lang, setLang] = useState<"en" | "ua">("en");
 
-const [showScrollTop, setShowScrollTop] = useState(false);
-
-useEffect(() => {
-  const onScroll = () => {
-    setShowScrollTop(window.scrollY > 280);
-  };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-  return () => window.removeEventListener("scroll", onScroll);
-}, []);
-
 const [isLanguageSwitching, setIsLanguageSwitching] = useState(false);
 const langTimerRef = useRef<number | null>(null);
 
@@ -2489,14 +2478,6 @@ lang={lang}
           </div>
       )}
 
-      <button
-        type="button"
-        aria-label={commonText.scrollToTop}
-        className={`scroll-top-btn ${showScrollTop ? "scroll-top-btn-visible" : ""}`}
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      >
-        <span aria-hidden="true">?</span>
-      </button>
     </div>
   );
 }

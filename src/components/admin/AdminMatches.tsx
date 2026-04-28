@@ -177,8 +177,8 @@ game: nextTournament?.game || "",
             />
           </div>
 
-          <div className="list-col admin-scroll-list">
-<div className="btn-row">
+          <div className="list-col admin-scroll-list admin-spacing-top">
+<div className="btn-row admin-create-sticky-row">
   <button
     className="secondary-btn add-list-btn admin-create-btn"
     onClick={() => addMatch(matchTournamentFilterId)}

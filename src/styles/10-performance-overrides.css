@@ -55,8 +55,7 @@ body::before {
 .tournament-history-meta-pill,
 .tournament-history-prize-pill,
 .tournament-history-stat,
-.tournament-history-prize,
-.scroll-top-btn {
+.tournament-history-prize {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -73,18 +72,6 @@ body::before {
 .tournament-history-meta-pill,
 .tournament-history-stat {
   background: rgba(13, 16, 24, 0.88) !important;
-}
-
-.scroll-top-btn {
-  background:
-    linear-gradient(135deg, rgba(255, 59, 95, 0.28), rgba(67, 208, 255, 0.14)),
-    rgba(10, 12, 18, 0.94) !important;
-}
-
-.scroll-top-btn:hover {
-  background:
-    linear-gradient(135deg, rgba(255, 59, 95, 0.38), rgba(67, 208, 255, 0.18)),
-    rgba(10, 12, 18, 0.98) !important;
 }
 
 /* 2. Kill animated filter:blur (re-rasterized every frame of shimmer animation) */

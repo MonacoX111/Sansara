@@ -300,24 +300,81 @@
 .secondary-btn,
 .danger-btn,
 .ghost-btn,
-.tab-btn {
+.tab-btn,
+.admin-quick-nav-btn,
+.admin-create-btn,
+.picker-btn,
+.checkbox-label,
+.admin-premium-select-trigger,
+.admin-premium-select-option {
   position: relative;
   overflow: hidden;
 }
 
-/* ===== PRIMARY BUTTON (MAIN GLOW) ===== */
-.primary-btn::before {
+/* ===== SHARED CURSOR SPOTLIGHT ===== */
+.primary-btn::before,
+.secondary-btn::before,
+.danger-btn::before,
+.ghost-btn::before,
+.tab-btn::before,
+.admin-quick-nav-btn::before,
+.admin-create-btn::before,
+.admin-premium-select-trigger::before,
+.admin-premium-select-option::before {
   content: "";
   position: absolute;
-  inset: -40%;
-  background: radial-gradient(circle, rgba(255, 59, 95, 0.35), transparent 60%);
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0.08) 30%,
+    transparent 70%
+  );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.22s ease;
   pointer-events: none;
 }
 
-.primary-btn:hover::before {
+.primary-btn:hover::before,
+.secondary-btn:hover::before,
+.danger-btn:hover::before,
+.ghost-btn:hover::before,
+.tab-btn:hover::before,
+.admin-quick-nav-btn:hover::before,
+.admin-create-btn:hover::before,
+.admin-premium-select-trigger:hover::before,
+.admin-premium-select-option:hover::before {
   opacity: 1;
+}
+
+.picker-btn::after,
+.checkbox-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    180px circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.07) 30%,
+    transparent 70%
+  );
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+
+.picker-btn:hover::after,
+.checkbox-label:hover::after {
+  opacity: 1;
+}
+
+.picker-btn > *,
+.checkbox-label > * {
+  position: relative;
+  z-index: 2;
 }
 
 .primary-btn:hover {
@@ -358,24 +415,6 @@
 }
 
 /* ===== GHOST BUTTON (SOFT ENERGY) ===== */
-.ghost-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.ghost-btn:hover::before {
-  opacity: 1;
-}
-
 .ghost-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), 0 6px 14px rgba(0, 0, 0, 0.18);
@@ -395,7 +434,7 @@
 
 /* ===== RIPPLE CLICK EFFECT ===== */
 .primary-btn::after,
-.secondary-btn::after,
+.secondary-btn:not(.admin-create-btn)::after,
 .ghost-btn::after,
 .danger-btn::after {
   content: "";
@@ -410,7 +449,7 @@
 }
 
 .primary-btn:active::after,
-.secondary-btn:active::after,
+.secondary-btn:not(.admin-create-btn):active::after,
 .ghost-btn:active::after,
 .danger-btn:active::after {
   width: 140%;
