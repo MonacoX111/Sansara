@@ -224,7 +224,7 @@ export default function PlayersTab({
     limit: 6,
     unknownPlayerLabel: playerText.unknown,
     friendlyMatchLabel: playerText.friendlyMatch,
-  });
+  }).reverse();
   const playerDecidedMatches = playerMatches.filter(
     (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending"
   );
