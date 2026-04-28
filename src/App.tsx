@@ -429,15 +429,64 @@ const getRouteEntityId = (
   return Number.isFinite(id) && id > 0 ? id : null;
 };
 
+const isRouteListPath = (
+  pathname: string,
+  segment: "players" | "teams" | "tournaments"
+): boolean => {
+  const parts = pathname.split("/").filter(Boolean);
+  return parts.length === 1 && parts[0] === segment;
+};
+
+const unsafeUiStorageKeys = [
+  "lang",
+  "activeTab",
+  "selectedPlayerId",
+  "selectedTeamId",
+  "selectedTournamentId",
+  "selectedMatchId",
+  "selectedAchievementId",
+  "playerFilter",
+  "gameFilter",
+  "teamFilter",
+  "sortMode",
+];
+
+const clearUnsafeUiStorage = () => {
+  try {
+    unsafeUiStorageKeys.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // Ignore storage access failures; UI state should still remain in memory only.
+  }
+};
+
+const isBrowserReload = (): boolean => {
+  const navigationEntry = performance.getEntriesByType("navigation")[0] as
+    | PerformanceNavigationTiming
+    | undefined;
+
+  return navigationEntry?.type === "reload";
+};
+
 export default function App() {
   const ADMIN_PASSWORD = "monaco123";
   const location = useLocation();
   const navigate = useNavigate();
+  const didCheckReloadRedirectRef = useRef(false);
 
   useEffect(() => {
+    clearUnsafeUiStorage();
     document.documentElement.style.setProperty("--x", "50%");
     document.documentElement.style.setProperty("--y", "50%");
   }, []);
+
+  useEffect(() => {
+    if (didCheckReloadRedirectRef.current) return;
+    didCheckReloadRedirectRef.current = true;
+
+    if (isBrowserReload() && location.pathname !== "/") {
+      navigate("/", { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
 const handleGlow = handleSpotlightMove;
 
@@ -492,13 +541,7 @@ const handleGlow = handleSpotlightMove;
     getTabFromPath(location.pathname)
   );
 
-  const [lang, setLang] = useState<"en" | "ua">(() => {
-  return (localStorage.getItem("lang") as "en" | "ua") || "en";
-});
-
-useEffect(() => {
-  localStorage.setItem("lang", lang);
-}, [lang]);
+  const [lang, setLang] = useState<"en" | "ua">("en");
 
 const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -538,11 +581,17 @@ useEffect(() => {
   };
 }, []);
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<number>(1);
-  const [selectedTeamId, setSelectedTeamId] = useState<number>(1);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<number>(0);
-  const [selectedMatchId, setSelectedMatchId] = useState<number>(1);
-  const [selectedAchievementId, setSelectedAchievementId] = useState<number>(1);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number>(
+    () => getRouteEntityId(location.pathname, "players") || 0
+  );
+  const [selectedTeamId, setSelectedTeamId] = useState<number>(
+    () => getRouteEntityId(location.pathname, "teams") || 0
+  );
+  const [selectedTournamentId, setSelectedTournamentId] = useState<number>(
+    () => getRouteEntityId(location.pathname, "tournaments") || 0
+  );
+  const [selectedMatchId, setSelectedMatchId] = useState<number>(0);
+  const [selectedAchievementId, setSelectedAchievementId] = useState<number>(0);
 
   useEffect(() => {
     const nextTab = getTabFromPath(location.pathname);
@@ -551,17 +600,23 @@ useEffect(() => {
 
   useEffect(() => {
     const playerId = getRouteEntityId(location.pathname, "players");
-    if (playerId !== null) {
+    if (isRouteListPath(location.pathname, "players")) {
+      setSelectedPlayerId(0);
+    } else if (playerId !== null) {
       setSelectedPlayerId(playerId);
     }
 
     const teamId = getRouteEntityId(location.pathname, "teams");
-    if (teamId !== null) {
+    if (isRouteListPath(location.pathname, "teams")) {
+      setSelectedTeamId(0);
+    } else if (teamId !== null) {
       setSelectedTeamId(teamId);
     }
 
     const tournamentId = getRouteEntityId(location.pathname, "tournaments");
-    if (tournamentId !== null) {
+    if (isRouteListPath(location.pathname, "tournaments")) {
+      setSelectedTournamentId(0);
+    } else if (tournamentId !== null) {
       setSelectedTournamentId(tournamentId);
     }
   }, [location.pathname]);
@@ -784,8 +839,12 @@ useEffect(() => {
       return;
     }
 
+    if (selectedPlayerId === 0) {
+      return;
+    }
+
     if (!players.some((player) => player.id === selectedPlayerId)) {
-      setSelectedPlayerId(players[0].id);
+      setSelectedPlayerId(0);
     }
   }, [players, selectedPlayerId]);
 
@@ -795,8 +854,12 @@ useEffect(() => {
       return;
     }
 
+    if (selectedTeamId === 0) {
+      return;
+    }
+
     if (!teams.some((team) => team.id === selectedTeamId)) {
-      setSelectedTeamId(teams[0].id);
+      setSelectedTeamId(0);
     }
   }, [teams, selectedTeamId]);
 
@@ -2019,6 +2082,13 @@ const deleteAchievement = async (achievementId: number) => {
 
   const text = t[lang] || t.en;
   const commonText = text.common;
+  const routeTournamentId = getRouteEntityId(location.pathname, "tournaments");
+  const publicSelectedTournamentId = isRouteListPath(
+    location.pathname,
+    "tournaments"
+  )
+    ? null
+    : routeTournamentId;
 
   return (
     <div className="page" onMouseMoveCapture={handleSpotlightMoveCapture}>
@@ -2135,7 +2205,7 @@ const deleteAchievement = async (achievementId: number) => {
   players={players}
   teams={teams}
   matches={matches}
-  selectedTournamentId={selectedTournamentId || null}
+  selectedTournamentId={publicSelectedTournamentId}
   setSelectedTournamentId={navigateToTournament}
   lang={lang}
 />
