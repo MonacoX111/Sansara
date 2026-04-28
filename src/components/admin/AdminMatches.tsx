@@ -70,6 +70,7 @@ type Props = {
   commonText: Record<string, string>;
   PremiumSelect: (props: PremiumSelectProps) => ReactElement;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  isAdminActionLoading: (key: string) => boolean;
   tournaments: Tournament[];
   matches: Match[];
   selectedMatchId: number;
@@ -100,6 +101,7 @@ export default function AdminMatches(props: Props) {
     commonText,
     PremiumSelect,
     setConfirmDelete,
+    isAdminActionLoading,
     tournaments,
     matches,
     selectedMatchId,
@@ -181,9 +183,10 @@ game: nextTournament?.game || "",
 <div className="btn-row admin-create-sticky-row">
   <button
     className="secondary-btn add-list-btn admin-create-btn"
+    disabled={isAdminActionLoading("create-match")}
     onClick={() => addMatch(matchTournamentFilterId)}
   >
-    {adminText.addMatch}
+    {isAdminActionLoading("create-match") ? "Creating..." : adminText.addMatch}
   </button>
 
 <button
@@ -634,8 +637,12 @@ game: nextTournament?.game || "",
             </div>
 
             <div className="btn-row">
-<button className="primary-btn" onClick={saveMatch}>
-  {commonText.save}
+<button
+  className="primary-btn"
+  disabled={isAdminActionLoading("save-match")}
+  onClick={saveMatch}
+>
+  {isAdminActionLoading("save-match") ? "Saving..." : commonText.save}
 </button>
 <button
   className="danger-btn"

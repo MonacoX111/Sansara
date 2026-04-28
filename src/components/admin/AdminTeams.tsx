@@ -27,6 +27,7 @@ type Props = {
   commonText: Record<string, string>;
   MultiGamePicker: (props: MultiGamePickerProps) => ReactElement;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  isAdminActionLoading: (key: string) => boolean;
   teams: Team[];
   selectedTeamId: number;
   setSelectedTeamId: (id: number) => void;
@@ -42,6 +43,7 @@ export default function AdminTeams(props: Props) {
     commonText,
     MultiGamePicker,
     setConfirmDelete,
+    isAdminActionLoading,
     teams,
     selectedTeamId,
     setSelectedTeamId,
@@ -59,9 +61,12 @@ export default function AdminTeams(props: Props) {
           <div className="list-col admin-scroll-list">
             <button
               className="secondary-btn add-list-btn admin-create-btn"
+              disabled={isAdminActionLoading("create-team")}
               onClick={addTeam}
             >
-              {adminText.addTeam}
+              {isAdminActionLoading("create-team")
+                ? "Creating..."
+                : adminText.addTeam}
             </button>
 
             {[...teams]
@@ -211,8 +216,12 @@ export default function AdminTeams(props: Props) {
             </div>
 
 <div className="btn-row">
-  <button className="primary-btn" onClick={saveTeam}>
-    {commonText.save}
+  <button
+    className="primary-btn"
+    disabled={isAdminActionLoading("save-team")}
+    onClick={saveTeam}
+  >
+    {isAdminActionLoading("save-team") ? "Saving..." : commonText.save}
   </button>
   <button
     className="danger-btn"

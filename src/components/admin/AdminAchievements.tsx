@@ -10,6 +10,7 @@ type ConfirmDeleteState = {
 type Props = {
   adminText: Record<string, string>;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  isAdminActionLoading: (key: string) => boolean;
   players: Player[];
   achievements: Achievement[];
   selectedAchievementId: number;
@@ -26,6 +27,7 @@ export default function AdminAchievements(props: Props) {
   const {
     adminText,
     setConfirmDelete,
+    isAdminActionLoading,
     players,
     achievements,
     selectedAchievementId,
@@ -46,9 +48,12 @@ export default function AdminAchievements(props: Props) {
         <div className="list-col admin-scroll-list">
           <button
             className="secondary-btn add-list-btn admin-create-btn"
+            disabled={isAdminActionLoading("create-achievement")}
             onClick={addAchievement}
           >
-            {adminText.addAchievement}
+            {isAdminActionLoading("create-achievement")
+              ? "Creating..."
+              : adminText.addAchievement}
           </button>
 
           {achievements.map((achievement: Achievement) => (

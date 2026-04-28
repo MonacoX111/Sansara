@@ -116,3 +116,17 @@ body::before {
 .team-history-card:hover {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36) !important;
 }
+
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.danger-btn:disabled,
+.ghost-btn:disabled,
+.admin-create-btn:disabled,
+.add-list-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  filter: grayscale(0.18);
+  box-shadow: none !important;
+}

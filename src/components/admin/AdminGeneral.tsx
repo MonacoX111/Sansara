@@ -32,6 +32,7 @@ type Props = {
   homeAnnouncementForm: HomeAnnouncementForm;
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
   saveHomeAnnouncement: () => void;
+  isAdminActionLoading: (key: string) => boolean;
   handleHomeAnnouncementImageChange: (
     event: ChangeEvent<HTMLInputElement>
   ) => void;
@@ -47,6 +48,7 @@ export default function AdminGeneral(props: Props) {
     homeAnnouncementForm,
     setHomeAnnouncementForm,
     saveHomeAnnouncement,
+    isAdminActionLoading,
     handleHomeAnnouncementImageChange,
   } = props;
 
@@ -261,8 +263,14 @@ export default function AdminGeneral(props: Props) {
             </div>
 
             <div className="btn-row">
-              <button className="primary-btn" onClick={saveHomeAnnouncement}>
-                {adminText.saveHomeAnnouncement}
+              <button
+                className="primary-btn"
+                disabled={isAdminActionLoading("save-home-announcement")}
+                onClick={saveHomeAnnouncement}
+              >
+                {isAdminActionLoading("save-home-announcement")
+                  ? "Saving..."
+                  : adminText.saveHomeAnnouncement}
               </button>
             </div>
           </div>

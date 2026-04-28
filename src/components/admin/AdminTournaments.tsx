@@ -72,6 +72,7 @@ type Props = {
   commonText: Record<string, string>;
   PremiumSelect: (props: PremiumSelectProps) => ReactElement;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
+  isAdminActionLoading: (key: string) => boolean;
 
   players: Player[];
   teams: Team[];
@@ -117,6 +118,7 @@ export default function AdminTournaments(props: Props) {
     commonText,
     PremiumSelect,
     setConfirmDelete,
+    isAdminActionLoading,
     players,
     teams,
     tournaments,
@@ -166,9 +168,12 @@ export default function AdminTournaments(props: Props) {
 
             <button
               className="secondary-btn add-list-btn admin-create-btn"
+              disabled={isAdminActionLoading("create-tournament")}
               onClick={addTournament}
             >
-              {adminText.addTournament}
+              {isAdminActionLoading("create-tournament")
+                ? "Creating..."
+                : adminText.addTournament}
             </button>
 
             <div className="btn-row">
@@ -959,8 +964,12 @@ export default function AdminTournaments(props: Props) {
             </div>
 
             <div className="btn-row">
-<button className="primary-btn" onClick={saveTournament}>
-  {commonText.save}
+<button
+  className="primary-btn"
+  disabled={isAdminActionLoading("save-tournament")}
+  onClick={saveTournament}
+>
+  {isAdminActionLoading("save-tournament") ? "Saving..." : commonText.save}
 </button>
 <button
   className="danger-btn"

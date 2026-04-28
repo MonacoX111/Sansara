@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useRef, useState } from "react";
 import {
   Achievement,
   HomeAnnouncement,
@@ -145,27 +145,30 @@ type Props = {
 
   handleTeamLogoUpload: (event: ChangeEvent<HTMLInputElement>) => void;
 
-  savePlayer: () => void;
-  addPlayer: () => void;
-  deletePlayer: () => void;
+  savePlayer: () => void | Promise<void>;
+  addPlayer: () => void | Promise<void>;
+  deletePlayer: () => void | Promise<void>;
 
-  saveTeam: () => void;
-  addTeam: () => void;
-  deleteTeam: () => void;
+  saveTeam: () => void | Promise<void>;
+  addTeam: () => void | Promise<void>;
+  deleteTeam: () => void | Promise<void>;
 
-  saveTournament: () => void;
-  addTournament: () => void;
-  deleteTournament: () => void;
+  saveTournament: () => void | Promise<void>;
+  addTournament: () => void | Promise<void>;
+  deleteTournament: () => void | Promise<void>;
   reorderTournament: (direction: "up" | "down") => void;
 
-saveMatch: () => void;
-addMatch: (tournamentId?: number) => void;
-deleteMatch: () => void;
+saveMatch: () => void | Promise<void>;
+addMatch: (tournamentId?: number) => void | Promise<void>;
+deleteMatch: () => void | Promise<void>;
 reorderMatch: (direction: "up" | "down", tournamentId: number) => void;
 
-  saveAchievement: (id: number, updates: Partial<Achievement>) => void;
-  addAchievement: () => void;
-  deleteAchievement: (id: number) => void;
+  saveAchievement: (
+    id: number,
+    updates: Partial<Achievement>
+  ) => void | Promise<void>;
+  addAchievement: () => void | Promise<void>;
+  deleteAchievement: (id: number) => void | Promise<void>;
   selectedAchievement: Achievement | null;
 autoGenerateBracket: (tournamentId: number) => void;
 lang: "en" | "ua";
@@ -360,6 +363,48 @@ reorderMatch,
     open: false,
     type: null,
   });
+  const [adminActionLoading, setAdminActionLoading] = useState<
+    Record<string, boolean>
+  >({});
+  const adminActionLoadingRef = useRef<Record<string, boolean>>({});
+
+  const isAdminActionLoading = (key: string) =>
+    Boolean(adminActionLoading[key] || adminActionLoadingRef.current[key]);
+
+const ADMIN_ACTION_LOCK_MS = 3000;
+
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+
+const runAdminAction = async (
+  key: string,
+  action: () => void | Promise<void>
+) => {
+  if (adminActionLoadingRef.current[key]) return;
+
+  adminActionLoadingRef.current = {
+    ...adminActionLoadingRef.current,
+    [key]: true,
+  };
+  setAdminActionLoading((prev) => ({ ...prev, [key]: true }));
+
+  try {
+    await action();
+    await wait(ADMIN_ACTION_LOCK_MS);
+  } finally {
+    const nextLoading = { ...adminActionLoadingRef.current };
+    delete nextLoading[key];
+    adminActionLoadingRef.current = nextLoading;
+
+    setAdminActionLoading((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+};
 
   const selectedMatchTournament =
     tournaments.find(
@@ -670,20 +715,25 @@ reorderMatch,
     if (!element) return;
     element.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  const confirmDeleteActionKey = confirmDelete.type
+    ? `delete-${confirmDelete.type}`
+    : "";
+
 const adminPlayersProps = {
   adminText,
   commonText,
   PremiumSelect,
   MultiGamePicker,
   setConfirmDelete,
+  isAdminActionLoading,
   players,
   teams,
   selectedPlayerId,
   setSelectedPlayerId,
   playerForm,
   setPlayerForm,
-  savePlayer,
-  addPlayer,
+  savePlayer: () => runAdminAction("save-player", savePlayer),
+  addPlayer: () => runAdminAction("create-player", addPlayer),
   playerAdminSearch,
   setPlayerAdminSearch,
   filteredAdminPlayers,
@@ -694,13 +744,14 @@ const adminTeamsProps = {
   commonText,
   MultiGamePicker,
   setConfirmDelete,
+  isAdminActionLoading,
   teams,
   selectedTeamId,
   setSelectedTeamId,
   teamForm,
   setTeamForm,
-  saveTeam,
-  addTeam,
+  saveTeam: () => runAdminAction("save-team", saveTeam),
+  addTeam: () => runAdminAction("create-team", addTeam),
 };
 
 const adminTournamentsProps = {
@@ -708,14 +759,15 @@ const adminTournamentsProps = {
   commonText,
   PremiumSelect,
   setConfirmDelete,
+  isAdminActionLoading,
   players,
   teams,
   tournaments,
   selectedTournamentId,
   tournamentForm,
   setTournamentForm,
-  saveTournament,
-  addTournament,
+  saveTournament: () => runAdminAction("save-tournament", saveTournament),
+  addTournament: () => runAdminAction("create-tournament", addTournament),
   reorderTournament,
   handleTournamentImageUpload,
   handleTournamentSelect,
@@ -744,7 +796,9 @@ const adminGeneralProps = {
   tournaments,
   homeAnnouncementForm,
   setHomeAnnouncementForm,
-  saveHomeAnnouncement,
+  saveHomeAnnouncement: () =>
+    runAdminAction("save-home-announcement", saveHomeAnnouncement),
+  isAdminActionLoading,
   handleHomeAnnouncementImageChange,
 };
 
@@ -753,14 +807,16 @@ const adminMatchesProps = {
   commonText,
   PremiumSelect,
   setConfirmDelete,
+  isAdminActionLoading,
   tournaments,
   matches,
   selectedMatchId,
   setSelectedMatchId,
   matchForm,
   setMatchForm,
-  saveMatch,
-  addMatch,
+  saveMatch: () => runAdminAction("save-match", saveMatch),
+  addMatch: (tournamentId?: number) =>
+    runAdminAction("create-match", () => addMatch(tournamentId)),
   reorderMatch,
   autoGenerateBracket,
   matchTournamentFilterId,
@@ -780,12 +836,13 @@ const adminMatchesProps = {
 const adminAchievementsProps = {
   adminText,
   setConfirmDelete,
+  isAdminActionLoading,
   players,
   achievements,
   selectedAchievementId,
   setSelectedAchievementId,
   saveAchievement,
-  addAchievement,
+  addAchievement: () => runAdminAction("create-achievement", addAchievement),
   deleteAchievement,
   safeAchievementPlayerIds,
   toggleAchievementPlayer,
@@ -829,6 +886,10 @@ const adminAchievementsProps = {
             <div className="confirm-actions">
               <button
                 className="secondary-btn"
+                disabled={Boolean(
+                  confirmDeleteActionKey &&
+                    isAdminActionLoading(confirmDeleteActionKey)
+                )}
                 onClick={() => setConfirmDelete({ open: false, type: null })}
               >
                 {commonText.cancel}
@@ -836,23 +897,42 @@ const adminAchievementsProps = {
 
               <button
                 className="danger-btn"
+                disabled={Boolean(
+                  confirmDeleteActionKey &&
+                    isAdminActionLoading(confirmDeleteActionKey)
+                )}
                 onClick={() => {
-                  if (confirmDelete.type === "player") deletePlayer();
-                  if (confirmDelete.type === "team") deleteTeam();
-                  if (confirmDelete.type === "tournament") deleteTournament();
-                  if (confirmDelete.type === "match") deleteMatch();
+                  if (!confirmDeleteActionKey) return;
 
-                  if (
-                    confirmDelete.type === "achievement" &&
-                    typeof confirmDelete.achievementId === "number"
-                  ) {
-                    deleteAchievement(confirmDelete.achievementId);
-                  }
+                  runAdminAction(confirmDeleteActionKey, async () => {
+                    if (confirmDelete.type === "player") {
+                      await deletePlayer();
+                    }
+                    if (confirmDelete.type === "team") {
+                      await deleteTeam();
+                    }
+                    if (confirmDelete.type === "tournament") {
+                      await deleteTournament();
+                    }
+                    if (confirmDelete.type === "match") {
+                      await deleteMatch();
+                    }
 
-                  setConfirmDelete({ open: false, type: null });
+                    if (
+                      confirmDelete.type === "achievement" &&
+                      typeof confirmDelete.achievementId === "number"
+                    ) {
+                      await deleteAchievement(confirmDelete.achievementId);
+                    }
+
+                    setConfirmDelete({ open: false, type: null });
+                  });
                 }}
               >
-                {commonText.delete}
+                {confirmDeleteActionKey &&
+                isAdminActionLoading(confirmDeleteActionKey)
+                  ? "Deleting..."
+                  : commonText.delete}
               </button>
             </div>
           </div>
