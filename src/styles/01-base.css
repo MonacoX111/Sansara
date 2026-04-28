@@ -15,6 +15,7 @@
   --blue: #43d0ff;
   --gold: #ffbe3d;
   --green: #31d07f;
+  --focus-ring: rgba(244, 63, 94, 0.95);
   --shadow-red: 0 0 24px rgba(255, 59, 95, 0.22);
   --shadow-blue: 0 0 24px rgba(67, 208, 255, 0.16);
 }
@@ -264,11 +265,14 @@ button {
 
 .tab-btn:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(244, 63, 94, 0.32);
+  background:
+    linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(244, 63, 94, 0.045)),
+    rgba(255, 255, 255, 0.035);
   background-position: 100% 50%;
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.2),
-    0 0 22px rgba(255, 59, 95, 0.08);
+    0 0 22px rgba(244, 63, 94, 0.14);
 }
 
 .tab-btn:hover::before {
@@ -281,22 +285,24 @@ button {
 
 .tab-btn-active {
   background:
-    linear-gradient(90deg, var(--red), var(--red-2), #ff6b86);
+    linear-gradient(135deg, rgba(244, 63, 94, 0.92), rgba(255, 23, 68, 0.78));
   background-size: 180% 180%;
   color: white;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(244, 63, 94, 0.58);
   box-shadow:
-    var(--shadow-red),
+    0 0 18px rgba(244, 63, 94, 0.25),
     0 12px 34px rgba(255, 23, 68, 0.14),
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   animation: tabActiveBreath 3.2s ease-in-out infinite;
 }
 
 .tab-btn-active:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(244, 63, 94, 0.72);
+  background:
+    linear-gradient(135deg, rgba(244, 63, 94, 0.98), rgba(255, 23, 68, 0.84));
   box-shadow:
     0 18px 38px rgba(0, 0, 0, 0.22),
-    0 0 32px rgba(255, 59, 95, 0.24),
+    0 0 32px rgba(244, 63, 94, 0.28),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
@@ -581,6 +587,24 @@ body .lang-switch button.active:hover {
   border: none;
 }
 
+.pill.player-meta-pill {
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(235, 237, 242, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+  box-shadow: none;
+}
+
+.pill.player-meta-pill:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.065);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  filter: none;
+}
+
 .pill.green {
   background: rgba(49, 208, 127, 0.18);
   color: #73f0aa;
@@ -799,8 +823,12 @@ body .lang-switch button.active:hover {
 }
 
 .section-block h4 {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+  color: rgba(245, 247, 251, 0.96);
+  letter-spacing: 0.01em;
 }
 
 .achievement-grid {
@@ -860,14 +888,72 @@ body .lang-switch button.active:hover {
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.28),
     0 0 18px rgba(255, 190, 61, 0.12);
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
   transform: translateY(-2px);
 }
 
+.tournament-history-click-card:hover {
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(255, 190, 61, 0.12);
+}
+
+.click-card-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.58;
+  transform: translateX(0);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.tournament-history-click-card:hover .click-card-arrow,
+.tournament-history-click-card:focus-visible .click-card-arrow,
+.team-history-click-card:hover .click-card-arrow,
+.team-history-click-card:focus-visible .click-card-arrow {
+  opacity: 1;
+  color: #ffd77a;
+  border-color: rgba(255, 190, 61, 0.24);
+  background: rgba(255, 190, 61, 0.08);
+  transform: translateX(3px);
+}
+
 .tournament-history-open-title {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+  color: rgba(245, 247, 251, 0.96);
   transition:
     color 0.22s ease,
     text-shadow 0.22s ease;
+}
+
+.tournament-history-click-card .muted.small {
+  margin-top: 4px;
+  color: rgba(154, 164, 178, 0.78);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.tournament-history-click-card .tag-row {
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .tournament-history-click-card:hover .tournament-history-open-title,
@@ -877,9 +963,19 @@ body .lang-switch button.active:hover {
 }
 
 .team-history-click-card .team-history-title {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+  color: rgba(245, 247, 251, 0.96);
   transition:
     color 0.22s ease,
     text-shadow 0.22s ease;
+}
+
+.team-history-click-card .team-history-meta {
+  color: rgba(154, 164, 178, 0.76);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .team-history-click-card:hover .team-history-title,

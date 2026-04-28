@@ -2042,15 +2042,8 @@ background: linear-gradient(
 .player-tournament-card--gold::after,
 .player-tournament-card--silver::after,
 .player-tournament-card--bronze::after {
-  content: "";
-  position: absolute;
-  inset: -35% -70%;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.28;
-  transform: translateX(-135%) skewX(-18deg);
-  animation: playerTournamentPlacementShimmer 7.2s linear infinite;
-  mix-blend-mode: screen;
+  content: none;
+  display: none;
 }
 
 .player-tournament-card--gold::after {
@@ -2082,26 +2075,72 @@ background: linear-gradient(
 
 .player-tournament-card--gold:hover,
 .player-tournament-card--gold:focus-visible {
-  border-color: rgba(250, 204, 21, 0.54);
+  border-color: rgba(250, 204, 21, 0.42);
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.12) inset,
-    0 0 32px rgba(250, 204, 21, 0.2);
+    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
+    0 0 24px rgba(250, 204, 21, 0.14);
 }
 
 .player-tournament-card--silver:hover,
 .player-tournament-card--silver:focus-visible {
-  border-color: rgba(226, 232, 240, 0.5);
+  border-color: rgba(226, 232, 240, 0.4);
   box-shadow:
-    0 0 0 1px rgba(226, 232, 240, 0.12) inset,
-    0 0 30px rgba(226, 232, 240, 0.18);
+    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
+    0 0 22px rgba(226, 232, 240, 0.12);
 }
 
 .player-tournament-card--bronze:hover,
 .player-tournament-card--bronze:focus-visible {
-  border-color: rgba(180, 83, 9, 0.56);
+  border-color: rgba(180, 83, 9, 0.44);
   box-shadow:
-    0 0 0 1px rgba(180, 83, 9, 0.12) inset,
-    0 0 30px rgba(180, 83, 9, 0.2);
+    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
+    0 0 22px rgba(180, 83, 9, 0.14);
+}
+
+.player-tournament-card--gold .elo-gain-badge,
+.player-tournament-card--silver .elo-gain-badge,
+.player-tournament-card--bronze .elo-gain-badge {
+  animation: none;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.82);
+  box-shadow: none;
+  filter: none;
+}
+
+.player-tournament-card--gold .elo-gain-badge::after,
+.player-tournament-card--silver .elo-gain-badge::after,
+.player-tournament-card--bronze .elo-gain-badge::after,
+.player-tournament-card--gold .badge-mvp::after,
+.player-tournament-card--silver .badge-mvp::after,
+.player-tournament-card--bronze .badge-mvp::after {
+  content: none;
+  display: none;
+  animation: none;
+}
+
+.player-tournament-card--gold .badge-winner,
+.player-tournament-card--silver .badge-winner,
+.player-tournament-card--bronze .badge-winner,
+.player-tournament-card--gold .badge-mvp,
+.player-tournament-card--silver .badge-mvp,
+.player-tournament-card--bronze .badge-mvp {
+  animation: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.player-tournament-card--gold .elo-gain-badge:hover,
+.player-tournament-card--silver .elo-gain-badge:hover,
+.player-tournament-card--bronze .elo-gain-badge:hover,
+.player-tournament-card--gold .badge-winner:hover,
+.player-tournament-card--silver .badge-winner:hover,
+.player-tournament-card--bronze .badge-winner:hover,
+.player-tournament-card--gold .badge-mvp:hover,
+.player-tournament-card--silver .badge-mvp:hover,
+.player-tournament-card--bronze .badge-mvp:hover {
+  box-shadow: none;
+  filter: none;
 }
 
 .pill.light.placement-badge--gold {

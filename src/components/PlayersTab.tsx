@@ -643,6 +643,14 @@ placeholder={playerText.searchPlaceholder}
                             {playerText.currentTeam}
                           </span>
                         ) : null}
+                        {canOpenTeam ? (
+                          <span
+                            className="click-card-arrow"
+                            aria-hidden="true"
+                          >
+                            &gt;
+                          </span>
+                        ) : null}
                       </div>
 
                       {(item.from || item.to) ? (
@@ -768,7 +776,13 @@ placeholder={playerText.searchPlaceholder}
                         </div>
 
                         <div className="tag-row">
-                          <span className={`pill light ${placementBadgeClass}`}>
+                          <span
+                            className={
+                              placementBadgeClass
+                                ? `pill light ${placementBadgeClass}`
+                                : "pill player-meta-pill"
+                            }
+                          >
                             {playerText.place}: {String(tournament.place)}
                           </span>
                           {tournament.isWinner ? (
@@ -792,7 +806,7 @@ placeholder={playerText.searchPlaceholder}
                           {tournament.eloEntries.map((item) => (
                             <span
                               key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-source`}
-                              className="pill light"
+                              className="pill player-meta-pill"
                             >
                               {item.sourceType === "player"
                                 ? playerText.solo
@@ -807,11 +821,17 @@ placeholder={playerText.searchPlaceholder}
                               item.sourceType === "team" &&
                               item.teamName === tournament.playedTeamName
                           ) ? (
-                            <span className="pill light">
+                            <span className="pill player-meta-pill">
                               {playerText.team}: {tournament.playedTeamName}
                             </span>
                           ) : null}
                         </div>
+                        <span
+                          className="click-card-arrow"
+                          aria-hidden="true"
+                        >
+                          &gt;
+                        </span>
                       </div>
                     </div>
                     );

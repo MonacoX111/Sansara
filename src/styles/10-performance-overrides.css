@@ -117,6 +117,114 @@ body::before {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36) !important;
 }
 
+:where(
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="tab"],
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px;
+}
+
+.tournament-history-click-card:focus-visible,
+.team-history-click-card:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.25) !important;
+}
+
+.player-tournament-card--gold {
+  border-color: rgba(250, 204, 21, 0.36) !important;
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
+    0 0 24px rgba(250, 204, 21, 0.14) !important;
+}
+
+.player-tournament-card--silver {
+  border-color: rgba(226, 232, 240, 0.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
+    0 0 22px rgba(226, 232, 240, 0.12) !important;
+}
+
+.player-tournament-card--bronze {
+  border-color: rgba(180, 83, 9, 0.38) !important;
+  box-shadow:
+    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
+    0 0 22px rgba(180, 83, 9, 0.14) !important;
+}
+
+.player-tournament-card--gold::before,
+.player-tournament-card--silver::before,
+.player-tournament-card--bronze::before {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  background: none !important;
+}
+
+.player-tournament-card--gold:hover,
+.player-tournament-card--gold:focus-visible,
+.player-tournament-card--silver:hover,
+.player-tournament-card--silver:focus-visible,
+.player-tournament-card--bronze:hover,
+.player-tournament-card--bronze:focus-visible {
+  transform: translateY(-2px);
+}
+
+.player-tournament-card--gold:hover,
+.player-tournament-card--gold:focus-visible {
+  border-color: rgba(250, 204, 21, 0.42) !important;
+  outline-color: var(--focus-ring);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.08) inset,
+    0 0 24px rgba(250, 204, 21, 0.14) !important;
+}
+
+.player-tournament-card--silver:hover,
+.player-tournament-card--silver:focus-visible {
+  border-color: rgba(226, 232, 240, 0.4) !important;
+  outline-color: var(--focus-ring);
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.08) inset,
+    0 0 22px rgba(226, 232, 240, 0.12) !important;
+}
+
+.player-tournament-card--bronze:hover,
+.player-tournament-card--bronze:focus-visible {
+  border-color: rgba(180, 83, 9, 0.44) !important;
+  outline-color: var(--focus-ring);
+  box-shadow:
+    0 0 0 1px rgba(180, 83, 9, 0.08) inset,
+    0 0 22px rgba(180, 83, 9, 0.14) !important;
+}
+
+.player-tournament-card--gold:hover .click-card-arrow,
+.player-tournament-card--gold:focus-visible .click-card-arrow {
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.player-tournament-card--silver:hover .click-card-arrow,
+.player-tournament-card--silver:focus-visible .click-card-arrow {
+  color: #e2e8f0;
+  border-color: rgba(226, 232, 240, 0.26);
+  background: rgba(226, 232, 240, 0.07);
+}
+
+.player-tournament-card--bronze:hover .click-card-arrow,
+.player-tournament-card--bronze:focus-visible .click-card-arrow {
+  color: #fdba74;
+  border-color: rgba(180, 83, 9, 0.3);
+  background: rgba(180, 83, 9, 0.08);
+}
+
 .primary-btn:disabled,
 .secondary-btn:disabled,
 .danger-btn:disabled,
