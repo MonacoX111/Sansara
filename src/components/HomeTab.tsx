@@ -580,7 +580,9 @@ onClick={() => setActiveTab("leaderboard")}
         {recentMatches.length === 0 ? (
           <div className="welcome-empty">{text.recentActivity.noRecentMatches}</div>
         ) : (
-          <div className="welcome-activity-list home-hover-sync-group">
+          <div className="recent-activity-wrapper">
+            <div className="recent-activity-line" />
+            <div className="welcome-activity-list home-hover-sync-group">
             {recentMatches.map((match, index) => {
               const tournament = tournaments.find(
                 (item) => item.id === match.tournamentId
@@ -599,6 +601,7 @@ onClick={() => setActiveTab("leaderboard")}
                   }`}
                   onMouseMove={handleGlow}
                 >
+                  <div className="recent-dot" />
                   <div className="welcome-activity-main">
                     <div className="welcome-activity-topline">
                       <span
@@ -633,6 +636,7 @@ onClick={() => setActiveTab("leaderboard")}
                 </div>
               );
             })}
+            </div>
           </div>
         )}
       </div>
