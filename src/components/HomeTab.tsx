@@ -1,5 +1,10 @@
+import { useMemo } from "react";
 import { Player, Team, Tournament, Match, TabKey } from "../types";
 import { Lang, t } from "../utils/translations";
+import {
+  getBiggestUpset,
+  getHotPlayer,
+} from "../domain/highlights/smartHighlights";
 
 type Props = {
   players: Player[];
@@ -28,6 +33,14 @@ export default function HomeTab({
 
   const topElo =
     players.length > 0 ? Math.max(...players.map((p) => p.elo || 0)) : 0;
+  const biggestUpset = useMemo(
+    () => getBiggestUpset({ matches, players, teams, tournaments }),
+    [matches, players, teams, tournaments]
+  );
+  const hotPlayer = useMemo(
+    () => getHotPlayer({ matches, players, tournaments }),
+    [matches, players, tournaments]
+  );
   const recentMatches = [...matches]
     .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
     .slice(0, 5);
@@ -202,6 +215,114 @@ onClick={() => setActiveTab("leaderboard")}
               <p>{item.description}</p>
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="welcome-section welcome-smart-section">
+        <div className="welcome-section-head">
+          <span>{text.smartHighlights}</span>
+          <p className="welcome-info-label">
+            {text.smartHighlightsSubtitle}
+          </p>
+        </div>
+
+        <div className="welcome-smart-grid">
+          <div className="welcome-smart-highlight-card" onMouseMove={handleGlow}>
+            <div className="welcome-smart-highlight-main">
+              <span className="welcome-smart-kicker">{text.biggestUpset}</span>
+              {biggestUpset ? (
+                <>
+                  <strong>
+                    {biggestUpset.winnerName} {text.common.vs}{" "}
+                    {biggestUpset.loserName}
+                  </strong>
+                  <p>{text.biggestUpsetDescription}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{text.noUpsetFoundYet}</strong>
+                  <p>{text.biggestUpsetDescription}</p>
+                </>
+              )}
+            </div>
+
+            {biggestUpset ? (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff">
+                  +{biggestUpset.eloDifference}
+                  <span>{text.eloDifference}</span>
+                </div>
+                <div className="welcome-upset-details">
+                  <span>
+                    {text.winner}: {biggestUpset.winnerName}
+                  </span>
+                  <span>
+                    {text.loser}: {biggestUpset.loserName}
+                  </span>
+                  <small>
+                    {text.tournament}:{" "}
+                    {biggestUpset.tournamentName ||
+                      text.generalPage.noTournament}
+                  </small>
+                  <small>
+                    {text.score}: {biggestUpset.score || text.noScore}
+                  </small>
+                </div>
+              </div>
+            ) : (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff muted-state">
+                  --
+                  <span>{text.eloDifference}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div
+            className="welcome-smart-highlight-card welcome-smart-highlight-card-fire"
+            onMouseMove={handleGlow}
+          >
+            <div className="welcome-smart-highlight-main">
+              <span className="welcome-smart-kicker">{text.playerOnFire}</span>
+              {hotPlayer ? (
+                <>
+                  <strong>{hotPlayer.player.nickname}</strong>
+                  <p>{text.playerOnFireDescription}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{text.noHotPlayerYet}</strong>
+                  <p>{text.playerOnFireDescription}</p>
+                </>
+              )}
+            </div>
+
+            {hotPlayer ? (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff welcome-fire-streak">
+                  {hotPlayer.streakCount}
+                  <span>{text.winStreak}</span>
+                </div>
+                <div className="welcome-upset-details">
+                  <span>
+                    {hotPlayer.streakCount} {text.winsInARow}
+                  </span>
+                  <small>
+                    {text.tournament}:{" "}
+                    {hotPlayer.tournamentName || text.generalPage.noTournament}
+                  </small>
+                </div>
+              </div>
+            ) : (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff muted-state">
+                  --
+                  <span>{text.winStreak}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

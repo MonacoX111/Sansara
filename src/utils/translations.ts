@@ -27,6 +27,25 @@ export const t = {
     recentActivity: "Recent Activity",
     recentActivitySubtitle: "Latest matches across the platform.",
     noRecentActivity: "No recent activity yet.",
+    smartHighlights: "Smart Highlights",
+    smartHighlightsSubtitle:
+      "Automatically detected storylines from completed matches.",
+    biggestUpset: "Biggest Upset",
+    biggestUpsetDescription:
+      "Lower-rated player defeated a stronger opponent",
+    eloDifference: "ELO difference",
+    noUpsetFoundYet: "No upset found yet",
+    winner: "Winner",
+    loser: "Loser",
+    tournament: "Tournament",
+    score: "Score",
+    noScore: "No score",
+    playerOnFire: "Player on Fire",
+    winStreak: "Win streak",
+    winsInARow: "wins in a row",
+    playerOnFireDescription:
+      "This player is currently on a winning streak",
+    noHotPlayerYet: "No hot player yet",
 
 
 
@@ -476,6 +495,25 @@ nav: {
     recentActivity: "Остання активність",
     recentActivitySubtitle: "Найновіші матчі на платформі.",
     noRecentActivity: "Останньої активності поки немає.",
+    smartHighlights: "Розумні хайлайти",
+    smartHighlightsSubtitle:
+      "Автоматично визначені сюжетні моменти з завершених матчів.",
+    biggestUpset: "Найбільша сенсація",
+    biggestUpsetDescription:
+      "Гравець із нижчим рейтингом переміг сильнішого суперника",
+    eloDifference: "Різниця ELO",
+    noUpsetFoundYet: "Сенсацій поки не знайдено",
+    winner: "Переможець",
+    loser: "Суперник",
+    tournament: "Турнір",
+    score: "Рахунок",
+    noScore: "Без рахунку",
+    playerOnFire: "Гравець у вогні",
+    winStreak: "Серія перемог",
+    winsInARow: "перемог поспіль",
+    playerOnFireDescription:
+      "Цей гравець зараз має переможну серію",
+    noHotPlayerYet: "Гарячого гравця поки немає",
 
 admin: {
   players: "Гравці (адмін)",
