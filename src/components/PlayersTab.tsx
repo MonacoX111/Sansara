@@ -509,52 +509,67 @@ placeholder={playerText.searchPlaceholder}
               />
 
               <div className="profile-main-info">
-                <h3 className="profile-name">{selectedPlayer.nickname}</h3>
+                <div className="profile-identity-row">
+                  <div className="profile-identity-copy">
+                    <h3 className="profile-name">{selectedPlayer.nickname}</h3>
+
+                    {selectedPlayerCurrentTeam ? (
+                      <div className="profile-current-team-chip">
+                        {selectedPlayerCurrentTeam.logo ? (
+                          <img
+                            src={selectedPlayerCurrentTeam.logo}
+                            alt={selectedPlayerCurrentTeam.name}
+                          />
+                        ) : null}
+                        <span>{selectedPlayerCurrentTeam.name}</span>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
 
                 {selectedPlayer.bio ? (
                   <div className="player-role-badge">{selectedPlayer.bio}</div>
                 ) : null}
 
-                <div className="profile-info-box upgraded">
-                  <div className="profile-primary-row">
-                    <div
-                      className="profile-primary-card team-card"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-                      <span className="info-label">{playerText.team}</span>
-
-                      <div className="profile-team-main">
-                        {selectedPlayerCurrentTeam?.logo ? (
-                          <img
-                            src={selectedPlayerCurrentTeam.logo}
-                            alt={selectedPlayerCurrentTeam.name}
-                            className="profile-team-logo"
-                          />
-                        ) : (
-                          <div className="profile-team-logo-placeholder">
-                            {(getTeamName(selectedPlayer.teamId) || "—").charAt(
-                              0
-                            )}
-                          </div>
-                        )}
-
-                        <span className="profile-primary-value">
-                          {selectedPlayerCurrentTeam?.name || playerText.noTeam}
-                        </span>
-                      </div>
-                    </div>
+                <div className="profile-head-stats-bar">
+                  <div className="profile-head-stat profile-head-stat-elo">
+                    <span className="profile-head-stat-label">
+                      {playerText.elo}
+                    </span>
+                    <span className="profile-head-stat-value">
+                      {selectedPlayer.elo}
+                    </span>
                   </div>
 
+                  <div className="profile-head-stat">
+                    <span className="profile-head-stat-label">
+                      {text.admin.rank}
+                    </span>
+                    <span className="profile-head-stat-value">
+                      {selectedPlayer.rank ? `#${selectedPlayer.rank}` : "—"}
+                    </span>
+                  </div>
+
+                  <div className="profile-head-stat">
+                    <span className="profile-head-stat-label">
+                      {playerText.winRate}
+                    </span>
+                    <span className="profile-head-stat-value">
+                      {playerWinRate}%
+                    </span>
+                  </div>
+
+                  <div className="profile-head-stat">
+                    <span className="profile-head-stat-label">
+                      STREAK
+                    </span>
+                    <span className="profile-head-stat-value">
+                      {playerStreak.label}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="profile-info-box upgraded">
                   <div className="profile-info-row column">
                     <span className="info-label">{playerText.games}</span>
 
@@ -702,11 +717,8 @@ placeholder={playerText.searchPlaceholder}
 
 <div className="stats-grid">
   <StatCard title={playerText.totalMatches} value={playerMatches.length} />
-  <StatCard title={playerText.winRate} value={`${playerWinRate}%`} />
-  <StatCard title={playerText.elo} value={selectedPlayer.elo} />
   <StatCard title={playerText.wins} value={playerWins} />
   <StatCard title={playerText.losses} value={playerLosses} />
-  <StatCard title={playerText.currentStreak} value={playerStreak.label} />
   <StatCard
     title={playerText.tournamentsWon}
     value={selectedPlayer.tournamentsWon}
