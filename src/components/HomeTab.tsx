@@ -51,6 +51,41 @@ export default function HomeTab({
     () => getRivalry({ matches, players, teams }),
     [matches, players, teams]
   );
+  const featuredMatchStage =
+    featuredMatch?.match.roundLabel ||
+    featuredMatch?.match.stage ||
+    featuredMatch?.match.round ||
+    text.common.match;
+  const featuredMatchStatus = featuredMatch?.match.status || text.common.tbd;
+  const getFeaturedParticipantVisual = (side: "left" | "right") => {
+    if (!featuredMatch) return null;
+
+    const match = featuredMatch.match;
+    const fallbackName =
+      side === "left"
+        ? featuredMatch.participantAName
+        : featuredMatch.participantBName;
+
+    if (match.matchType === "team") {
+      const teamId = side === "left" ? match.team1 : match.team2;
+      const team = teams.find((item) => item.id === teamId);
+
+      return {
+        name: team?.name || fallbackName,
+        image: team?.logo || "",
+      };
+    }
+
+    const playerId = side === "left" ? match.player1 : match.player2;
+    const player = players.find((item) => item.id === playerId);
+
+    return {
+      name: player?.nickname || fallbackName,
+      image: player?.avatar || "",
+    };
+  };
+  const featuredParticipantA = getFeaturedParticipantVisual("left");
+  const featuredParticipantB = getFeaturedParticipantVisual("right");
   const recentMatches = [...matches]
     .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
     .slice(0, 5);
@@ -81,6 +116,44 @@ export default function HomeTab({
 
     return "name" in entity ? entity.name : entity.nickname;
   };
+
+  const getMatchWinnerName = (match: Match) => {
+    if (match.matchType === "team" && match.winnerTeamId) {
+      return teams.find((team) => team.id === match.winnerTeamId)?.name || "";
+    }
+
+    if (match.winnerId) {
+      return players.find((player) => player.id === match.winnerId)?.nickname || "";
+    }
+
+    return "";
+  };
+
+  const getActivityStatus = (match: Match) => {
+    const status = String(match.status);
+
+    if (status === "ongoing") {
+      return {
+        label: text.recentActivity.live,
+        tone: "live",
+      };
+    }
+
+    if (status === "completed" || status === "finished") {
+      return {
+        label: text.recentActivity.finished,
+        tone: "finished",
+      };
+    }
+
+    return {
+      label: text.recentActivity.upcoming,
+      tone: "upcoming",
+    };
+  };
+
+  const getActivityStage = (match: Match) =>
+    match.roundLabel || match.stage || match.round || text.common.match;
 
   const quickLinks: {
     tab: TabKey;
@@ -338,56 +411,108 @@ onClick={() => setActiveTab("leaderboard")}
           </div>
 
           <div
-            className="welcome-smart-highlight-card home-hover-sync-card"
+            className="welcome-smart-highlight-card smart-highlight-card--featured home-hover-sync-card"
             onMouseMove={handleGlow}
           >
-            <div className="welcome-smart-highlight-main">
-              <span className="welcome-smart-kicker">
-                {text.highlights.featuredMatch}
-              </span>
-              {featuredMatch ? (
-                <>
-                  <strong>
-                    {featuredMatch.participantAName} {text.common.vs}{" "}
-                    {featuredMatch.participantBName}
-                  </strong>
-                  <p>{text.highlights.featuredMatchDesc}</p>
-                </>
-              ) : (
-                <>
-                  <strong>{text.highlights.noFeaturedMatch}</strong>
-                  <p>{text.highlights.featuredMatchDesc}</p>
-                </>
-              )}
+            <div className="featured-left">
+              <div className="welcome-smart-highlight-main">
+                <span className="welcome-smart-kicker">
+                  {text.highlights.featuredMatch}
+                </span>
+                {featuredMatch ? (
+                  <>
+                    <strong>
+                      {featuredMatch.participantAName} {text.common.vs}{" "}
+                      {featuredMatch.participantBName}
+                    </strong>
+                    <span className="welcome-featured-match-subinfo">
+                      {featuredMatchStage} -{" "}
+                      {featuredMatch.tournamentName ||
+                        text.generalPage.noTournament}
+                    </span>
+                    <p>{text.highlights.featuredMatchDesc}</p>
+                  </>
+                ) : (
+                  <>
+                    <strong>{text.highlights.noFeaturedMatch}</strong>
+                    <p>{text.highlights.featuredMatchDesc}</p>
+                  </>
+                )}
+              </div>
+
+              {featuredMatch && featuredParticipantA && featuredParticipantB ? (
+                <div className="featured-vs">
+                  <div className="featured-player">
+                    {featuredParticipantA.image ? (
+                      <img
+                        src={featuredParticipantA.image}
+                        alt={featuredParticipantA.name}
+                      />
+                    ) : (
+                      <div className="featured-player-placeholder">
+                        {featuredParticipantA.name.charAt(0)}
+                      </div>
+                    )}
+                    <span>{featuredParticipantA.name}</span>
+                  </div>
+
+                  <div className="featured-vs-text">
+                    {text.tournamentsPage.vs}
+                  </div>
+
+                  <div className="featured-player">
+                    {featuredParticipantB.image ? (
+                      <img
+                        src={featuredParticipantB.image}
+                        alt={featuredParticipantB.name}
+                      />
+                    ) : (
+                      <div className="featured-player-placeholder">
+                        {featuredParticipantB.name.charAt(0)}
+                      </div>
+                    )}
+                    <span>{featuredParticipantB.name}</span>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
-            {featuredMatch ? (
-              <div className="welcome-smart-highlight-meta">
-                <div className="welcome-upset-diff">
-                  {featuredMatch.score || "--"}
-                  <span>{text.highlights.score}</span>
+            <div className="featured-right">
+              {featuredMatch ? (
+                <div className="featured-right-inner">
+                  <div className="welcome-upset-diff welcome-featured-score">
+                    {featuredMatch.score || "--"}
+                    <span>{text.highlights.score}</span>
+                  </div>
+                  <div className="featured-divider" />
+                  <div className="welcome-upset-details welcome-featured-details featured-meta">
+                    {featuredMatch.winnerName ? (
+                      <span>
+                        {text.highlights.winner}: {featuredMatch.winnerName}
+                      </span>
+                    ) : null}
+                    <small>
+                      {text.admin.stage}: {featuredMatchStage}
+                    </small>
+                    <small>
+                      {text.playersPage.status}: {featuredMatchStatus}
+                    </small>
+                    <small>
+                      {text.highlights.tournament}:{" "}
+                      {featuredMatch.tournamentName ||
+                        text.generalPage.noTournament}
+                    </small>
+                  </div>
                 </div>
-                <div className="welcome-upset-details">
-                  {featuredMatch.winnerName ? (
-                    <span>
-                      {text.highlights.winner}: {featuredMatch.winnerName}
-                    </span>
-                  ) : null}
-                  <small>
-                    {text.highlights.tournament}:{" "}
-                    {featuredMatch.tournamentName ||
-                      text.generalPage.noTournament}
-                  </small>
+              ) : (
+                <div className="featured-right-inner">
+                  <div className="welcome-upset-diff muted-state">
+                    --
+                    <span>{text.highlights.score}</span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="welcome-smart-highlight-meta">
-                <div className="welcome-upset-diff muted-state">
-                  --
-                  <span>{text.highlights.score}</span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div
@@ -448,45 +573,62 @@ onClick={() => setActiveTab("leaderboard")}
 
       <div className="welcome-section welcome-activity-section">
         <div className="welcome-section-head">
-          <span>{text.recentActivity}</span>
+          <span>{text.recentActivity.title}</span>
           <p className="welcome-info-label">{text.recentActivitySubtitle}</p>
         </div>
 
         {recentMatches.length === 0 ? (
-          <div className="welcome-empty">{text.noRecentActivity}</div>
+          <div className="welcome-empty">{text.recentActivity.noRecentMatches}</div>
         ) : (
           <div className="welcome-activity-list home-hover-sync-group">
-            {recentMatches.map((match) => {
+            {recentMatches.map((match, index) => {
               const tournament = tournaments.find(
                 (item) => item.id === match.tournamentId
               );
               const leftName = getMatchSide(match, "left");
               const rightName = getMatchSide(match, "right");
+              const winnerName = getMatchWinnerName(match);
+              const activityStatus = getActivityStatus(match);
+              const activityStage = getActivityStage(match);
 
               return (
                 <div
                   key={match.id}
-                  className="welcome-activity-row home-hover-sync-card"
+                  className={`welcome-activity-row recent-match-card home-hover-sync-card ${
+                    index === 0 ? "recent-match-card--primary" : ""
+                  }`}
                   onMouseMove={handleGlow}
                 >
                   <div className="welcome-activity-main">
-                    <span className="welcome-activity-status">
-                      {match.status}
-                    </span>
+                    <div className="welcome-activity-topline">
+                      <span
+                        className={`welcome-activity-status welcome-activity-status-${activityStatus.tone}`}
+                      >
+                        {activityStatus.label}
+                      </span>
+                      <span className="welcome-activity-context">
+                        {tournament?.title || text.generalPage.noTournament}
+                        <small>
+                          {text.recentActivity.stage}: {activityStage}
+                        </small>
+                      </span>
+                    </div>
                     <strong>
                       {leftName} {text.common.vs} {rightName}
                     </strong>
-                    <p>
-                      {tournament?.title || text.generalPage.noTournament}
-                      <span>{match.date || text.common.tbd}</span>
-                    </p>
+                    {winnerName ? (
+                      <p className="welcome-activity-winner">
+                        {text.recentActivity.winner}:{" "}
+                        <span className="winner">{winnerName}</span>
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="welcome-activity-meta">
                     <div className="welcome-score-badge">
                       <span>{match.score || "—"}</span>
                     </div>
-                    <small>{match.round || text.common.match}</small>
+                    <small>{text.recentActivity.score}</small>
                   </div>
                 </div>
               );
