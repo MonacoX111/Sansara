@@ -2034,6 +2034,74 @@ background: linear-gradient(
   font-size: clamp(30px, 4vw, 36px);
 }
 
+.profile-form-strip {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: -4px 0 16px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.014)),
+    rgba(7, 11, 18, 0.62);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.profile-form-label {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+
+.profile-form-list {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.profile-form-pill {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+  flex: 0 0 24px;
+}
+
+.profile-form-pill-win {
+  color: #bfffd0;
+  border: 1px solid rgba(74, 222, 128, 0.26);
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.profile-form-pill-loss {
+  color: #ffb8c4;
+  border: 1px solid rgba(255, 82, 120, 0.24);
+  background: rgba(255, 82, 120, 0.11);
+}
+
+.profile-form-empty {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .avatar.large {
   width: 72px;
   height: 72px;
@@ -2333,6 +2401,75 @@ background: linear-gradient(
 .player-tournament-card--silver .pill.light.player-placement-pill--silver,
 .player-tournament-card--bronze .pill.light.player-placement-pill--bronze {
   box-shadow: none;
+}
+
+.tournament-history-click-card .tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.player-history-pill {
+  min-height: 27px;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-width: 1px;
+}
+
+.tournament-history-click-card .player-meta-pill.player-history-pill {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    rgba(8, 12, 20, 0.62);
+  color: rgba(255, 255, 255, 0.78);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+.tournament-history-click-card
+  .player-history-pill:not(.player-tournament-elo-toggle):hover {
+  transform: translateY(-1px);
+}
+
+.tournament-history-click-card .player-tournament-pill-team,
+.player-tournament-card--gold .tag-row .player-tournament-pill-team,
+.player-tournament-card--silver .tag-row .player-tournament-pill-team,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-team {
+  border-color: rgba(255, 255, 255, 0.09);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    rgba(8, 12, 20, 0.66);
+  color: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card .player-tournament-pill-team:hover,
+.player-tournament-card--gold .tag-row .player-tournament-pill-team:hover,
+.player-tournament-card--silver .tag-row .player-tournament-pill-team:hover,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-team:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
+    rgba(8, 12, 20, 0.72);
+  color: rgba(255, 255, 255, 0.86);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  filter: none;
 }
 
 @keyframes playerTournamentPlacementShimmer {
@@ -3154,11 +3291,11 @@ background: linear-gradient(
     rgba(8, 13, 20, 0.72);
   color: #9af4b8;
   border-radius: 999px;
-  padding: 4px 10px;
-  min-height: 25px;
+  padding: 5px 10px;
+  min-height: 27px;
   font: inherit;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 850;
   line-height: 1;
   letter-spacing: 0;
   cursor: pointer;
@@ -3230,4 +3367,266 @@ background: linear-gradient(
     align-items: flex-start;
     gap: 6px;
   }
+}
+
+.tournament-history-click-card .player-tournament-pill-team,
+.player-tournament-card .player-tournament-pill-team,
+.player-tournament-card.place-1 .player-tournament-pill-team,
+.player-tournament-card.place-2 .player-tournament-pill-team,
+.player-tournament-card.place-3 .player-tournament-pill-team,
+.player-tournament-card--gold .tag-row .player-tournament-pill-team,
+.player-tournament-card--silver .tag-row .player-tournament-pill-team,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-team {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card .player-tournament-pill-team:hover,
+.player-tournament-card .player-tournament-pill-team:hover,
+.player-tournament-card.place-1 .player-tournament-pill-team:hover,
+.player-tournament-card.place-2 .player-tournament-pill-team:hover,
+.player-tournament-card.place-3 .player-tournament-pill-team:hover,
+.player-tournament-card--gold .tag-row .player-tournament-pill-team:hover,
+.player-tournament-card--silver .tag-row .player-tournament-pill-team:hover,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-team:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.075);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  filter: none;
+}
+
+.tournament-history-click-card .tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.tournament-history-click-card .player-tournament-pill {
+  min-height: 28px;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  box-shadow: none;
+  filter: none;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.tournament-history-click-card .player-tournament-pill-info,
+.player-tournament-card--gold .tag-row .player-tournament-pill-info,
+.player-tournament-card--silver .tag-row .player-tournament-pill-info,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-info {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card .player-tournament-pill-info:hover,
+.player-tournament-card--gold .tag-row .player-tournament-pill-info:hover,
+.player-tournament-card--silver .tag-row .player-tournament-pill-info:hover,
+.player-tournament-card--bronze .tag-row .player-tournament-pill-info:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card .player-tournament-pill-place {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.tournament-history-click-card .player-tournament-pill-place-1 {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: rgba(255, 215, 0, 0.45);
+  color: #ffd76a;
+}
+
+.tournament-history-click-card .player-tournament-pill-place-2 {
+  background: rgba(200, 200, 200, 0.12);
+  border-color: rgba(200, 200, 200, 0.45);
+  color: #e6e6e6;
+}
+
+.tournament-history-click-card .player-tournament-pill-place-3 {
+  background: rgba(205, 127, 50, 0.12);
+  border-color: rgba(205, 127, 50, 0.45);
+  color: #f0b27a;
+}
+
+.tournament-history-click-card .player-tournament-pill-action {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font: inherit;
+}
+
+.tournament-history-click-card .player-tournament-pill-action:hover,
+.tournament-history-click-card .player-tournament-pill-action:focus-visible,
+.tournament-history-click-card
+  .player-tournament-pill-action[aria-expanded="true"] {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  outline: none;
+}
+
+.tournament-history-click-card .player-tournament-pills {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tournament-history-click-card .player-tournament-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tournament-history-click-card .player-tournament-pills-row-info {
+  justify-content: flex-end;
+}
+
+.tournament-history-click-card .player-tournament-pills-row-actions {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .tournament-history-click-card .player-tournament-pills {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .tournament-history-click-card .player-tournament-pills-row-info,
+  .tournament-history-click-card .player-tournament-pills-row-actions {
+    justify-content: flex-start;
+  }
+}
+
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-action,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-info,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-team {
+  border-color: rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde68a;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-action,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-info,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-team {
+  border-color: rgba(226, 232, 240, 0.5);
+  background: rgba(226, 232, 240, 0.12);
+  color: #f8fafc;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-action,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-info,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-team {
+  border-color: rgba(251, 146, 60, 0.55);
+  background: rgba(251, 146, 60, 0.12);
+  color: #fed7aa;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill:hover,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-action:hover,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-action:focus-visible,
+.tournament-history-click-card.player-tournament-card--gold
+  .player-tournament-pill-action[aria-expanded="true"] {
+  transform: translateY(-2px);
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(250, 204, 21, 0.18);
+  color: #fff3b0;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill:hover,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-action:hover,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-action:focus-visible,
+.tournament-history-click-card.player-tournament-card--silver
+  .player-tournament-pill-action[aria-expanded="true"] {
+  transform: translateY(-2px);
+  border-color: rgba(226, 232, 240, 0.68);
+  background: rgba(226, 232, 240, 0.18);
+  color: #ffffff;
+  box-shadow: none;
+  filter: none;
+}
+
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill:hover,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-action:hover,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-action:focus-visible,
+.tournament-history-click-card.player-tournament-card--bronze
+  .player-tournament-pill-action[aria-expanded="true"] {
+  transform: translateY(-2px);
+  border-color: rgba(251, 146, 60, 0.72);
+  background: rgba(251, 146, 60, 0.18);
+  color: #ffedd5;
+  box-shadow: none;
+  filter: none;
 }

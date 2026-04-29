@@ -235,6 +235,9 @@ export default function PlayersTab({
     unknownPlayerLabel: playerText.unknown,
     friendlyMatchLabel: playerText.friendlyMatch,
   }).reverse();
+  const playerFormResults = playerRecentMatches
+    .filter((item) => item.result === "win" || item.result === "loss")
+    .slice(-5);
   const playerDecidedMatches = playerMatches.filter(
     (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending"
   );
@@ -569,6 +572,24 @@ placeholder={playerText.searchPlaceholder}
                   </div>
                 </div>
 
+                <div className="profile-form-strip">
+                  <span className="profile-form-label">FORM</span>
+                  {playerFormResults.length > 0 ? (
+                    <div className="profile-form-list">
+                      {playerFormResults.map((item) => (
+                        <span
+                          key={item.match.id}
+                          className={`profile-form-pill profile-form-pill-${item.result}`}
+                        >
+                          {item.result === "win" ? "W" : "L"}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="profile-form-empty">No matches yet</span>
+                  )}
+                </div>
+
                 <div className="profile-info-box upgraded">
                   <div className="profile-info-row column">
                     <span className="info-label">{playerText.games}</span>
@@ -827,84 +848,90 @@ placeholder={playerText.searchPlaceholder}
                           </div>
                         </div>
 
-                        <div className="tag-row">
-                          <span
-                            className={
-                              placementBadgeClass
-                                ? `pill light ${placementBadgeClass} ${placementToneClass}`
-                                : "pill player-meta-pill"
-                            }
-                          >
-                            {playerText.place}: {String(tournament.place)}
-                          </span>
-                          {tournament.isWinner && placementTone !== "gold" ? (
+                        <div className="player-tournament-pills">
+                          <div className="player-tournament-pills-row player-tournament-pills-row-info">
                             <span
-                              className={`pill green badge-winner ${placementToneClass}`}
+                              className={`player-tournament-pill player-tournament-pill-place ${
+                                placementTone === "gold"
+                                  ? "player-tournament-pill-place-1"
+                                  : placementTone === "silver"
+                                  ? "player-tournament-pill-place-2"
+                                  : placementTone === "bronze"
+                                  ? "player-tournament-pill-place-3"
+                                  : ""
+                              }`}
                             >
-                              {playerText.winner}
+                              {playerText.place}: {String(tournament.place)}
                             </span>
-                          ) : null}
-                          {tournament.isMvp ? (
-                            <span
-                              className={`pill gold badge-mvp ${placementToneClass}`}
-                            >
-                              {playerText.mvp}
-                            </span>
-                          ) : null}
-                          {tournament.eloEntries.map((item) => (
-                            <span
-                              key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
-                              className={`${getEloGainBadgeClass(item.elo)} ${placementToneClass}`}
-                            >
-                              +{item.elo} ELO
-                            </span>
-                          ))}
-                          {tournament.eloEntries.map((item) => (
-                            <span
-                              key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-source`}
-                              className={`pill player-meta-pill ${placementToneClass}`}
-                            >
-                              {item.sourceType === "player"
-                                ? playerText.solo
-                                : playerText.teamPlacement}
-                              {item.teamName ? `: ${item.teamName}` : ""}
-                            </span>
-                          ))}
+                            {tournament.isWinner && placementTone !== "gold" ? (
+                              <span className="player-tournament-pill player-tournament-pill-info">
+                                {playerText.winner}
+                              </span>
+                            ) : null}
+                            {tournament.isMvp ? (
+                              <span className="player-tournament-pill player-tournament-pill-info">
+                                {playerText.mvp}
+                              </span>
+                            ) : null}
+                            {tournament.eloEntries.map((item) => (
+                              <span
+                                key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}`}
+                                className="player-tournament-pill player-tournament-pill-info"
+                              >
+                                +{item.elo} ELO
+                              </span>
+                            ))}
+                            {tournament.eloEntries.map((item) => (
+                              <span
+                                key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-source`}
+                                className={
+                                  item.sourceType === "team"
+                                    ? "player-tournament-pill player-tournament-pill-info player-tournament-pill-team"
+                                    : "player-tournament-pill player-tournament-pill-info"
+                                }
+                              >
+                                {item.sourceType === "player"
+                                  ? playerText.solo
+                                  : item.teamName || playerText.team}
+                              </span>
+                            ))}
+                            {tournament.participantType === "team" &&
+                            tournament.playedTeamName &&
+                            !tournament.eloEntries.some(
+                              (item) =>
+                                item.sourceType === "team" &&
+                                item.teamName === tournament.playedTeamName
+                            ) ? (
+                              <span className="player-tournament-pill player-tournament-pill-info player-tournament-pill-team">
+                                {tournament.playedTeamName}
+                              </span>
+                            ) : null}
+                          </div>
+
                           {tournament.eloEntries.length > 0 ? (
-                            <button
-                              type="button"
-                              className={`player-tournament-elo-toggle ${placementToneClass}`}
-                              aria-expanded={isEloExpanded}
-                              title={
-                                isEloExpanded
-                                  ? playerText.hideEloHistory
-                                  : playerText.showEloHistory
-                              }
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setExpandedEloTournamentId((currentId) =>
-                                  currentId === tournament.id
-                                    ? null
-                                    : tournament.id
-                                );
-                              }}
-                              onKeyDown={(event) => event.stopPropagation()}
-                            >
-                              {playerText.eloHistory}
-                            </button>
-                          ) : null}
-                          {tournament.participantType === "team" &&
-                          tournament.playedTeamName &&
-                          !tournament.eloEntries.some(
-                            (item) =>
-                              item.sourceType === "team" &&
-                              item.teamName === tournament.playedTeamName
-                          ) ? (
-                            <span
-                              className={`pill player-meta-pill ${placementToneClass}`}
-                            >
-                              {playerText.team}: {tournament.playedTeamName}
-                            </span>
+                            <div className="player-tournament-pills-row player-tournament-pills-row-actions">
+                              <button
+                                type="button"
+                                className="player-tournament-pill player-tournament-pill-action"
+                                aria-expanded={isEloExpanded}
+                                title={
+                                  isEloExpanded
+                                    ? playerText.hideEloHistory
+                                    : playerText.showEloHistory
+                                }
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setExpandedEloTournamentId((currentId) =>
+                                    currentId === tournament.id
+                                      ? null
+                                      : tournament.id
+                                  );
+                                }}
+                                onKeyDown={(event) => event.stopPropagation()}
+                              >
+                                {playerText.eloHistory}
+                              </button>
+                            </div>
                           ) : null}
                         </div>
                         <span
