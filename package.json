@@ -19,12 +19,16 @@
   "devDependencies": {
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
-    "typescript": "4.4.4"
+    "typescript": "4.4.4",
+    "vite": "^5.4.21",
+    "vitest": "^1.6.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:cra": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "browserslist": [
