@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Achievement, Match, Player, Team, Tournament } from "../types";
 import {
   getPlayerMatchResult,
@@ -12,8 +13,10 @@ import {
   getPlayerTeamHistory,
 } from "../domain/player/playerTeams";
 import {
+  getPlayerEloTimeline,
   getPlayerTournamentEloHistory,
 } from "../domain/player/playerEloHistory";
+import { BASE_ELO } from "../domain/player/playerElo";
 import {
   getTournamentTeamRoster,
   isPlayerInTournamentTeamRoster,
@@ -69,6 +72,9 @@ export default function PlayersTab({
   const text = t[lang] || t.en;
   const playerText = text.playersPage;
   const commonText = text.common;
+  const [expandedEloTournamentId, setExpandedEloTournamentId] = useState<
+    number | null
+  >(null);
 
   const getTeamName = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.name || "";
@@ -248,6 +254,17 @@ export default function PlayersTab({
         players
       )
     : [];
+  const playerEloTimeline = selectedPlayer
+    ? getPlayerEloTimeline(selectedPlayer, tournaments, teams, players)
+    : [];
+  const playerEloTimelineByTournament = new Map(
+    playerEloTimeline.map((item) => [
+      `${item.tournamentId}-${item.placement}-${item.sourceType}-${
+        item.teamId || "solo"
+      }`,
+      item,
+    ])
+  );
   const playerTournamentHistory = tournaments
     .filter(isSelectedPlayerTournament)
     .sort(compareTournamentsLatestFirst)
@@ -759,6 +776,8 @@ placeholder={playerText.searchPlaceholder}
                     const placementBadgeClass = getPlacementBadgeClass(
                       tournament.place
                     );
+                    const isEloExpanded =
+                      expandedEloTournamentId === tournament.id;
 
                     return (
                     <div
@@ -839,6 +858,29 @@ placeholder={playerText.searchPlaceholder}
                               {item.teamName ? `: ${item.teamName}` : ""}
                             </span>
                           ))}
+                          {tournament.eloEntries.length > 0 ? (
+                            <button
+                              type="button"
+                              className={`player-tournament-elo-toggle ${placementToneClass}`}
+                              aria-expanded={isEloExpanded}
+                              title={
+                                isEloExpanded
+                                  ? playerText.hideEloHistory
+                                  : playerText.showEloHistory
+                              }
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setExpandedEloTournamentId((currentId) =>
+                                  currentId === tournament.id
+                                    ? null
+                                    : tournament.id
+                                );
+                              }}
+                              onKeyDown={(event) => event.stopPropagation()}
+                            >
+                              {playerText.eloHistory}
+                            </button>
+                          ) : null}
                           {tournament.participantType === "team" &&
                           tournament.playedTeamName &&
                           !tournament.eloEntries.some(
@@ -860,6 +902,69 @@ placeholder={playerText.searchPlaceholder}
                           &gt;
                         </span>
                       </div>
+                      {isEloExpanded ? (
+                        <div
+                          className="player-tournament-elo-details"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          {tournament.eloEntries.map((item) => {
+                            const timelineItem =
+                              playerEloTimelineByTournament.get(
+                                `${item.tournamentId}-${item.placement}-${
+                                  item.sourceType
+                                }-${item.teamId || "solo"}`
+                              );
+                            const totalElo =
+                              typeof timelineItem?.totalEloBonus === "number"
+                                ? BASE_ELO + timelineItem.totalEloBonus
+                                : null;
+
+                            return (
+                              <div
+                                key={`${tournament.id}-${item.placement}-${item.sourceType}-${item.teamId || "solo"}-details`}
+                                className="player-tournament-elo-entry"
+                              >
+                                <div className="player-tournament-elo-row">
+                                  <span>{playerText.eloGain}</span>
+                                  <span className="player-tournament-elo-value">
+                                    +{item.elo}
+                                  </span>
+                                </div>
+                                <div className="player-tournament-elo-row">
+                                  <span>{playerText.source}</span>
+                                  <span className="player-tournament-elo-value">
+                                    {item.sourceType === "team"
+                                      ? playerText.teamPlacement
+                                      : playerText.soloPlacement}
+                                  </span>
+                                </div>
+                                {item.teamName ? (
+                                  <div className="player-tournament-elo-row">
+                                    <span>{playerText.team}</span>
+                                    <span className="player-tournament-elo-value">
+                                      {item.teamName}
+                                    </span>
+                                  </div>
+                                ) : null}
+                                <div className="player-tournament-elo-row">
+                                  <span>{playerText.place}</span>
+                                  <span className="player-tournament-elo-value">
+                                    {item.placement}
+                                  </span>
+                                </div>
+                                {totalElo !== null ? (
+                                  <div className="player-tournament-elo-row">
+                                    <span>{playerText.totalElo}</span>
+                                    <span className="player-tournament-elo-value">
+                                      {totalElo}
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : null}
                     </div>
                     );
                   })}

@@ -2838,3 +2838,249 @@ background: linear-gradient(
   color: rgba(255, 255, 255, 0.56);
   line-height: 1.2;
 }
+
+/* ============================================================
+   Player profile — ELO Timeline
+   ============================================================ */
+
+.player-elo-timeline {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.player-elo-timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.player-elo-timeline-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.player-elo-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.85);
+  border: 2px solid rgba(5, 8, 14, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(74, 222, 128, 0.32),
+    0 0 10px rgba(74, 222, 128, 0.32);
+  flex: 0 0 auto;
+  z-index: 2;
+}
+
+.player-elo-dot--gold {
+  background: rgba(var(--color-placement-gold-rgb), 0.95);
+  box-shadow:
+    0 0 0 1px rgba(var(--color-placement-gold-rgb), 0.36),
+    0 0 12px rgba(var(--color-placement-gold-rgb), 0.36);
+}
+
+.player-elo-dot--silver {
+  background: rgba(var(--color-placement-silver-rgb), 0.95);
+  box-shadow:
+    0 0 0 1px rgba(var(--color-placement-silver-rgb), 0.32),
+    0 0 12px rgba(var(--color-placement-silver-rgb), 0.32);
+}
+
+.player-elo-dot--bronze {
+  background: rgba(var(--color-placement-bronze-rgb), 0.95);
+  box-shadow:
+    0 0 0 1px rgba(var(--color-placement-bronze-rgb), 0.36),
+    0 0 12px rgba(var(--color-placement-bronze-rgb), 0.36);
+}
+
+.player-elo-line {
+  flex: 1 1 auto;
+  width: 2px;
+  margin-top: 4px;
+  margin-bottom: -14px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.04)
+  );
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.player-elo-timeline-content {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.012)
+    ),
+    rgba(10, 14, 22, 0.55);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.015);
+  min-width: 0;
+}
+
+.player-elo-timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.player-elo-timeline-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-elo-gain {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 222, 128, 0.32);
+  background: rgba(74, 222, 128, 0.12);
+  color: #86efac;
+  white-space: nowrap;
+}
+
+.player-elo-timeline-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 11.5px;
+}
+
+.player-elo-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  padding: 6px 10px;
+  align-self: flex-start;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.player-elo-total-from {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.player-elo-total-arrow {
+  color: rgba(74, 222, 128, 0.7);
+  font-weight: 700;
+}
+
+.player-elo-total-to {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.player-tournament-elo-toggle {
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  background:
+    linear-gradient(180deg, rgba(74, 222, 128, 0.13), rgba(74, 222, 128, 0.06)),
+    rgba(8, 13, 20, 0.72);
+  color: #9af4b8;
+  border-radius: 999px;
+  padding: 4px 10px;
+  min-height: 25px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.player-tournament-elo-toggle:hover,
+.player-tournament-elo-toggle:focus-visible,
+.player-tournament-elo-toggle[aria-expanded="true"] {
+  border-color: rgba(74, 222, 128, 0.48);
+  background:
+    linear-gradient(180deg, rgba(74, 222, 128, 0.18), rgba(74, 222, 128, 0.08)),
+    rgba(8, 13, 20, 0.86);
+  color: #c6ffd6;
+  outline: none;
+}
+
+.player-tournament-elo-details {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 222, 128, 0.18);
+  background:
+    linear-gradient(90deg, rgba(74, 222, 128, 0.09), transparent 42%),
+    rgba(7, 11, 18, 0.72);
+  display: grid;
+  gap: 8px;
+}
+
+.player-tournament-elo-entry {
+  display: grid;
+  gap: 5px;
+}
+
+.player-tournament-elo-entry + .player-tournament-elo-entry {
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.player-tournament-elo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.player-tournament-elo-value {
+  color: #e8fff0;
+  font-weight: 800;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .player-elo-timeline-item {
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+  }
+
+  .player-elo-timeline-content {
+    padding: 10px 12px;
+  }
+
+  .player-elo-timeline-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
