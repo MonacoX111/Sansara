@@ -19,7 +19,6 @@
   border-radius: 34px;
   border: 1px solid rgba(255, 255, 255, 0.11);
   background:
-    radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 59, 95, 0.24), transparent 34%),
     radial-gradient(circle at 84% 18%, rgba(67, 208, 255, 0.2), transparent 34%),
     radial-gradient(circle at 72% 88%, rgba(255, 190, 61, 0.13), transparent 36%),
     linear-gradient(135deg, rgba(10, 14, 22, 0.98), rgba(44, 24, 82, 0.74), rgba(111, 18, 54, 0.52));
@@ -59,15 +58,33 @@
   z-index: -1;
 }
 
+/* Hero cursor spotlight (hover-only) — uses welcome-noise::before to avoid touching layout */
+.welcome-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(255, 59, 95, 0.24),
+    transparent 34%
+  );
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.welcome-hero:hover .welcome-noise::before {
+  opacity: 1;
+}
+
 .welcome-noise {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.15;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.0053) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.0053) 1px, transparent 1px);
   background-size: 18px 18px;
   mask-image: radial-gradient(circle at 50% 28%, black 0%, transparent 74%);
 }
@@ -381,7 +398,6 @@
   border-radius: 26px;
   border: 1px solid rgba(168, 85, 247, 0.22);
   background:
-    radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(168, 85, 247, 0.16), transparent 34%),
     radial-gradient(circle at 92% 18%, rgba(250, 204, 21, 0.13), transparent 30%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
     rgba(8, 11, 18, 0.68);
@@ -439,7 +455,6 @@
   padding: 30px;
   border-color: rgba(168, 85, 247, 0.32);
   background:
-    radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(168, 85, 247, 0.2), transparent 36%),
     radial-gradient(circle at 92% 18%, rgba(250, 204, 21, 0.16), transparent 32%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.088), rgba(255, 255, 255, 0.028)),
     rgba(8, 11, 18, 0.72);
@@ -689,10 +704,51 @@
   --nav-accent: 250, 204, 21;
   border-color: rgba(250, 204, 21, 0.22);
   background:
-    radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(250, 204, 21, 0.14), transparent 34%),
     radial-gradient(circle at 92% 18%, rgba(255, 59, 95, 0.13), transparent 30%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
     rgba(8, 11, 18, 0.68);
+}
+
+/* === Smart highlight cursor spotlight (hover-only via ::before) === */
+.welcome-smart-highlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(168, 85, 247, 0.16),
+    transparent 34%
+  );
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.welcome-smart-highlight-card:hover::before {
+  opacity: 1;
+}
+
+.welcome-smart-highlight-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-smart-highlight-card-fire::before {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(250, 204, 21, 0.14),
+    transparent 34%
+  );
+}
+
+.smart-highlight-card--featured::before {
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(168, 85, 247, 0.2),
+    transparent 36%
+  );
 }
 
 .welcome-smart-highlight-main {
