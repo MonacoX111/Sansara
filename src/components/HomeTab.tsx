@@ -3,7 +3,9 @@ import { Player, Team, Tournament, Match, TabKey } from "../types";
 import { Lang, t } from "../utils/translations";
 import {
   getBiggestUpset,
+  getFeaturedMatch,
   getHotPlayer,
+  getRivalry,
 } from "../domain/highlights/smartHighlights";
 
 type Props = {
@@ -40,6 +42,14 @@ export default function HomeTab({
   const hotPlayer = useMemo(
     () => getHotPlayer({ matches, players, tournaments }),
     [matches, players, tournaments]
+  );
+  const featuredMatch = useMemo(
+    () => getFeaturedMatch({ matches, players, teams, tournaments }),
+    [matches, players, teams, tournaments]
+  );
+  const rivalry = useMemo(
+    () => getRivalry({ matches, players, teams }),
+    [matches, players, teams]
   );
   const recentMatches = [...matches]
     .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
@@ -141,10 +151,10 @@ onClick={() => setActiveTab("leaderboard")}
           </div>
         </div>
 
-        <div className="welcome-right">
+        <div className="welcome-right home-hover-sync-group">
           <button
             type="button"
-            className="welcome-preview-card welcome-stat-card main"
+            className="welcome-preview-card welcome-stat-card home-hover-sync-card main"
             onMouseMove={handleGlow}
             onClick={() => setActiveTab("players")}
             aria-label="Open players"
@@ -162,7 +172,7 @@ onClick={() => setActiveTab("leaderboard")}
           <div className="welcome-preview-grid">
             <button
               type="button"
-              className="welcome-mini-card welcome-stat-card"
+              className="welcome-mini-card welcome-stat-card home-hover-sync-card"
               onMouseMove={handleGlow}
               onClick={() => setActiveTab("tournaments")}
               aria-label="Open tournaments"
@@ -173,7 +183,7 @@ onClick={() => setActiveTab("leaderboard")}
 
             <button
               type="button"
-              className="welcome-mini-card welcome-stat-card"
+              className="welcome-mini-card welcome-stat-card home-hover-sync-card"
               onMouseMove={handleGlow}
               onClick={() => setActiveTab("leaderboard")}
               aria-label="Open leaderboard"
@@ -191,12 +201,12 @@ onClick={() => setActiveTab("leaderboard")}
           <p className="welcome-info-label">{text.quickNavigationSubtitle}</p>
         </div>
 
-        <div className="welcome-nav-grid">
+        <div className="welcome-nav-grid home-hover-sync-group">
           {quickLinks.map((item) => (
             <button
               key={item.tab}
               type="button"
-              className={`welcome-nav-card ${
+              className={`welcome-nav-card home-hover-sync-card ${
                 item.tab === "tournaments" ? "welcome-nav-card-primary" : ""
               } welcome-nav-card-${item.tone}`}
               onMouseMove={handleGlow}
@@ -226,8 +236,11 @@ onClick={() => setActiveTab("leaderboard")}
           </p>
         </div>
 
-        <div className="welcome-smart-grid">
-          <div className="welcome-smart-highlight-card" onMouseMove={handleGlow}>
+        <div className="welcome-smart-grid home-hover-sync-group">
+          <div
+            className="welcome-smart-highlight-card home-hover-sync-card"
+            onMouseMove={handleGlow}
+          >
             <div className="welcome-smart-highlight-main">
               <span className="welcome-smart-kicker">{text.biggestUpset}</span>
               {biggestUpset ? (
@@ -280,7 +293,7 @@ onClick={() => setActiveTab("leaderboard")}
           </div>
 
           <div
-            className="welcome-smart-highlight-card welcome-smart-highlight-card-fire"
+            className="welcome-smart-highlight-card welcome-smart-highlight-card-fire home-hover-sync-card"
             onMouseMove={handleGlow}
           >
             <div className="welcome-smart-highlight-main">
@@ -323,6 +336,113 @@ onClick={() => setActiveTab("leaderboard")}
               </div>
             )}
           </div>
+
+          <div
+            className="welcome-smart-highlight-card home-hover-sync-card"
+            onMouseMove={handleGlow}
+          >
+            <div className="welcome-smart-highlight-main">
+              <span className="welcome-smart-kicker">
+                {text.highlights.featuredMatch}
+              </span>
+              {featuredMatch ? (
+                <>
+                  <strong>
+                    {featuredMatch.participantAName} {text.common.vs}{" "}
+                    {featuredMatch.participantBName}
+                  </strong>
+                  <p>{text.highlights.featuredMatchDesc}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{text.highlights.noFeaturedMatch}</strong>
+                  <p>{text.highlights.featuredMatchDesc}</p>
+                </>
+              )}
+            </div>
+
+            {featuredMatch ? (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff">
+                  {featuredMatch.score || "--"}
+                  <span>{text.highlights.score}</span>
+                </div>
+                <div className="welcome-upset-details">
+                  {featuredMatch.winnerName ? (
+                    <span>
+                      {text.highlights.winner}: {featuredMatch.winnerName}
+                    </span>
+                  ) : null}
+                  <small>
+                    {text.highlights.tournament}:{" "}
+                    {featuredMatch.tournamentName ||
+                      text.generalPage.noTournament}
+                  </small>
+                </div>
+              </div>
+            ) : (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff muted-state">
+                  --
+                  <span>{text.highlights.score}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div
+            className="welcome-smart-highlight-card home-hover-sync-card"
+            onMouseMove={handleGlow}
+          >
+            <div className="welcome-smart-highlight-main">
+              <span className="welcome-smart-kicker">
+                {text.highlights.rivalry}
+              </span>
+              {rivalry ? (
+                <>
+                  <strong>
+                    {rivalry.participantA.name} {text.common.vs}{" "}
+                    {rivalry.participantB.name}
+                  </strong>
+                  <p>{text.highlights.rivalryDesc}</p>
+                </>
+              ) : (
+                <>
+                  <strong>{text.highlights.noRivalry}</strong>
+                  <p>{text.highlights.rivalryDesc}</p>
+                </>
+              )}
+            </div>
+
+            {rivalry ? (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff">
+                  {rivalry.totalMatches}
+                  <span>{text.highlights.matches}</span>
+                </div>
+                <div className="welcome-upset-details">
+                  <span>
+                    {text.highlights.series}: {rivalry.winsA}-
+                    {rivalry.winsB}
+                  </span>
+                  <small>
+                    {text.highlights.tournament}:{" "}
+                    {tournaments.find(
+                      (tournament) =>
+                        tournament.id === rivalry.lastMatch.tournamentId
+                    )?.title || text.generalPage.noTournament}
+                  </small>
+                </div>
+              </div>
+            ) : (
+              <div className="welcome-smart-highlight-meta">
+                <div className="welcome-upset-diff muted-state">
+                  --
+                  <span>{text.highlights.matches}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -335,7 +455,7 @@ onClick={() => setActiveTab("leaderboard")}
         {recentMatches.length === 0 ? (
           <div className="welcome-empty">{text.noRecentActivity}</div>
         ) : (
-          <div className="welcome-activity-list">
+          <div className="welcome-activity-list home-hover-sync-group">
             {recentMatches.map((match) => {
               const tournament = tournaments.find(
                 (item) => item.id === match.tournamentId
@@ -346,7 +466,7 @@ onClick={() => setActiveTab("leaderboard")}
               return (
                 <div
                   key={match.id}
-                  className="welcome-activity-row"
+                  className="welcome-activity-row home-hover-sync-card"
                   onMouseMove={handleGlow}
                 >
                   <div className="welcome-activity-main">
@@ -375,26 +495,38 @@ onClick={() => setActiveTab("leaderboard")}
         )}
       </div>
 
-      <div className="welcome-feature-grid">
-        <div className="welcome-feature-card" onMouseMove={handleGlow}>
+      <div className="welcome-feature-grid home-hover-sync-group">
+        <div
+          className="welcome-feature-card home-hover-sync-card"
+          onMouseMove={handleGlow}
+        >
           <span>01</span>
           <strong>{text.f1}</strong>
           <p>{text.f1d}</p>
         </div>
 
-        <div className="welcome-feature-card" onMouseMove={handleGlow}>
+        <div
+          className="welcome-feature-card home-hover-sync-card"
+          onMouseMove={handleGlow}
+        >
           <span>02</span>
           <strong>{text.f2}</strong>
           <p>{text.f2d}</p>
         </div>
 
-        <div className="welcome-feature-card" onMouseMove={handleGlow}>
+        <div
+          className="welcome-feature-card home-hover-sync-card"
+          onMouseMove={handleGlow}
+        >
           <span>03</span>
           <strong>{text.f3}</strong>
           <p>{text.f3d}</p>
         </div>
 
-        <div className="welcome-feature-card" onMouseMove={handleGlow}>
+        <div
+          className="welcome-feature-card home-hover-sync-card"
+          onMouseMove={handleGlow}
+        >
           <span>04</span>
           <strong>{text.f4}</strong>
           <p>{text.f4d}</p>

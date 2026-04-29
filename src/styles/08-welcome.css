@@ -360,7 +360,7 @@
 
 .welcome-smart-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
   align-items: stretch;
   width: 100%;
@@ -884,6 +884,34 @@
   font-size: 14px;
 }
 
+/* ===== HOME CARD GROUP HOVER SYNC ===== */
+
+.home-hover-sync-card {
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.home-hover-sync-group:hover .home-hover-sync-card,
+.home-hover-sync-group:focus-within .home-hover-sync-card {
+  opacity: 0.72;
+  transform: scale(0.985);
+}
+
+.home-hover-sync-group:hover .home-hover-sync-card:hover,
+.home-hover-sync-group:focus-within .home-hover-sync-card:focus-visible {
+  z-index: 2;
+  opacity: 1;
+  transform: translateY(-4px) scale(1.01);
+}
+
+.home-hover-sync-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
 @keyframes welcomeAuraRotate {
   from {
     transform: rotate(0deg) scale(1);
@@ -929,6 +957,9 @@
     grid-template-columns: 1fr;
   }
 
+}
+
+@media (max-width: 768px) {
   .welcome-smart-grid {
     grid-template-columns: 1fr;
   }

@@ -9,6 +9,7 @@ import HomeTab from "./components/HomeTab";
 import GeneralTab from "./components/GeneralTab";
 import LeaderboardTab from "./components/LeaderboardTab";
 import AdminTab from "./components/AdminTab";
+import ScrollToTop from "./components/ScrollToTop";
 import "./styles.css";
 import {
   achievementPlaceholder,
@@ -2253,6 +2254,7 @@ const deleteAchievement = async (achievementId: number) => {
 
   return (
     <div className="page" onMouseMoveCapture={handleSpotlightMoveCapture}>
+      <ScrollToTop />
       <div className={`container ${isLanguageSwitching ? "language-transitioning" : ""}`}>
 
 <div className="topbar-actions">

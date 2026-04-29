@@ -46,6 +46,22 @@ export const t = {
     playerOnFireDescription:
       "This player is currently on a winning streak",
     noHotPlayerYet: "No hot player yet",
+    matchOfTheWeek: "Match of the Week",
+    matchOfTheWeekDescription: "The most exciting recent match",
+    noFeaturedMatchYet: "No featured match yet",
+    highlights: {
+      featuredMatch: "Featured Match",
+      featuredMatchDesc: "The most exciting recent match",
+      winner: "Winner",
+      tournament: "Tournament",
+      score: "Score",
+      noFeaturedMatch: "No featured match yet",
+      rivalry: "Rivalry Alert",
+      rivalryDesc: "These participants face each other more than anyone else",
+      matches: "matches",
+      series: "Series",
+      noRivalry: "No rivalry yet",
+    },
 
 
 
@@ -514,6 +530,22 @@ nav: {
     playerOnFireDescription:
       "Цей гравець зараз має переможну серію",
     noHotPlayerYet: "Гарячого гравця поки немає",
+    matchOfTheWeek: "Матч тижня",
+    matchOfTheWeekDescription: "Найцікавіший недавній матч",
+    noFeaturedMatchYet: "Виділеного матчу поки немає",
+    highlights: {
+      featuredMatch: "Головний матч",
+      featuredMatchDesc: "Найцікавіший нещодавній матч",
+      winner: "Переможець",
+      tournament: "Турнір",
+      score: "Рахунок",
+      noFeaturedMatch: "Поки що немає головного матчу",
+      rivalry: "Принципове протистояння",
+      rivalryDesc: "Ці учасники грали між собою найчастіше",
+      matches: "матчів",
+      series: "Серія",
+      noRivalry: "Поки що немає протистояння",
+    },
 
 admin: {
   players: "Гравці (адмін)",
