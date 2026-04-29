@@ -930,6 +930,12 @@ placeholder={playerText.searchPlaceholder}
                                 onKeyDown={(event) => event.stopPropagation()}
                               >
                                 {playerText.eloHistory}
+                                <span
+                                  className="player-tournament-pill-action-indicator"
+                                  aria-hidden="true"
+                                >
+                                  &rsaquo;
+                                </span>
                               </button>
                             </div>
                           ) : null}
