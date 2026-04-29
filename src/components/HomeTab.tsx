@@ -596,9 +596,17 @@ onClick={() => setActiveTab("leaderboard")}
               return (
                 <div
                   key={match.id}
-                  className={`welcome-activity-row recent-match-card home-hover-sync-card ${
-                    index === 0 ? "recent-match-card--primary" : ""
-                  }`}
+                  className={[
+                    "welcome-activity-row",
+                    "recent-match-card",
+                    "home-hover-sync-card",
+                    index === 0 ? "recent-match-card--primary" : "",
+                    index % 2 === 0
+                      ? "recent-match-card--left"
+                      : "recent-match-card--right",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   onMouseMove={handleGlow}
                 >
                   <div className="recent-dot" />

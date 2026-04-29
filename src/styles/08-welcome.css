@@ -1093,26 +1093,108 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.06)
+  );
+
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.08),
+    0 0 16px rgba(255, 255, 255, 0.04);
+
+  border-radius: 2px;
   pointer-events: none;
+}
+
+.welcome-activity-row.recent-match-card {
+  overflow: visible;
 }
 
 .recent-dot {
   position: absolute;
-  left: -18px;
-  top: 24px;
-  width: 8px;
-  height: 8px;
+  top: 28px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--color-success-green);
-  box-shadow: 0 0 12px rgba(var(--color-success-green-rgb), 0.24);
+  border: 2px solid rgba(5, 8, 14, 0.95);
+  box-shadow:
+    0 0 0 2px rgba(var(--color-success-green-rgb), 0.18),
+    0 0 14px rgba(var(--color-success-green-rgb), 0.45);
+  z-index: 5;
+  pointer-events: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    left 180ms ease;
+}
+
+.recent-match-card--left .recent-dot {
+  left: -20px;
+}
+
+.recent-match-card--right .recent-dot {
+  left: -18px;
+}
+
+/* Hover compensation: counteract card translateY(-4px) so dot stays on line */
+.welcome-activity-row.recent-match-card:hover .recent-dot {
+  transform: translateY(4px);
+}
+
+/* Explicit base reset to prevent stuck dim state mid-transition */
+.recent-match-card {
+  opacity: 1;
+  transform: none;
+}
+
+/* Make sure pseudo-elements and dots do not capture hover */
+.recent-match-card::before,
+.recent-match-card::after,
+.recent-dot {
   pointer-events: none;
 }
 
-.recent-match-card--primary .recent-dot {
-  transform: scale(1.4);
-  box-shadow: 0 0 16px rgba(var(--color-success-green-rgb), 0.32);
+/* Cancel legacy parent-hover dim (fired when cursor in gap area, not on card) */
+.welcome-activity-list.home-hover-sync-group:hover .recent-match-card {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cancel :focus-within sync for Recent Activity (cards are non-focusable divs) */
+.welcome-activity-list.home-hover-sync-group:focus-within .recent-match-card {
+  opacity: 1;
+  transform: none;
+}
+
+.welcome-activity-list.home-hover-sync-group:focus-within .recent-match-card:focus-visible {
+  z-index: auto;
+}
+
+/* :has()-based sync: dim siblings ONLY while a card is truly hovered */
+.welcome-activity-list:has(.recent-match-card:hover) .recent-match-card {
+  opacity: 0.72;
+  transform: scale(0.985);
+}
+
+.welcome-activity-list:has(.recent-match-card:hover) .recent-match-card:hover {
+  opacity: 1;
+  transform: translateY(-4px) scale(1.01);
+  z-index: 2;
+}
+
+/* Bigger column gap so right-column dots don't overlap left cards */
+.welcome-activity-list {
+  column-gap: 32px;
+}
+
+/* Subtle line glow when a left-column card is hovered */
+.recent-activity-wrapper:has(.recent-match-card--left:hover) .recent-activity-line {
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.12),
+    0 0 20px rgba(var(--color-success-green-rgb), 0.12);
 }
 
 .welcome-activity-row {
