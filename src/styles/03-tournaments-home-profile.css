@@ -3524,14 +3524,21 @@ background: linear-gradient(
 
 .player-tournament-card-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(180px, 1fr) auto;
   align-items: center;
   gap: 16px;
   min-width: 0;
 }
 
 .player-tournament-info {
-  min-width: 0;
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.player-tournament-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .player-tournament-actions {
@@ -3540,6 +3547,7 @@ background: linear-gradient(
   justify-content: flex-end;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .player-tournament-pills {

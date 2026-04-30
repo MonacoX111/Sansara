@@ -847,7 +847,7 @@ placeholder={playerText.searchPlaceholder}
                     >
                       <div className="player-tournament-card-main">
                         <div className="player-tournament-info">
-                          <div className="achievement-title tournament-history-open-title">
+                          <div className="achievement-title tournament-history-open-title player-tournament-title">
                             {tournament.title}
                           </div>
                           <div className="muted small">
