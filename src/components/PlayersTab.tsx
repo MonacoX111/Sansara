@@ -76,8 +76,12 @@ export default function PlayersTab({
     number | null
   >(null);
 
-  const getTeamName = (teamId: number) =>
-    teams.find((t) => t.id === teamId)?.name || "";
+  const getTeamName = (teamId?: number) =>
+    teams.find((t) => t.id === Number(teamId || 0))?.name || "";
+
+  const getPlayerName = (playerId?: number) =>
+    players.find((player) => player.id === Number(playerId || 0))?.nickname ||
+    playerText.unknown;
 
   const getTeamLogo = (teamId: number) =>
     teams.find((t) => t.id === teamId)?.logo || "";
@@ -1023,12 +1027,22 @@ placeholder={playerText.searchPlaceholder}
   {playerRecentMatches.length === 0 ? (
     <p className="muted">{playerText.noRecentMatches}</p>
   ) : (
-                <div className="list-col">
+                <div className="player-recent-matches">
                   {playerRecentMatches.map(
-                    ({ match, opponentName, result, tournamentName }) => (
+                    ({ match, result, tournamentName }) => {
+                    const firstParticipantName =
+                      match.matchType === "team"
+                        ? getTeamName(match.team1) || playerText.unknownTeam
+                        : getPlayerName(match.player1);
+                    const secondParticipantName =
+                      match.matchType === "team"
+                        ? getTeamName(match.team2) || playerText.unknownTeam
+                        : getPlayerName(match.player2);
+
+                    return (
                     <div
                       key={match.id}
-                      className="simple-card"
+                      className="player-match-row"
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         e.currentTarget.style.setProperty(
@@ -1041,55 +1055,45 @@ placeholder={playerText.searchPlaceholder}
                         );
                       }}
                     >
-                      <div className="row-between">
-                        <div>
-                          <div className="achievement-title">
-                            {playerText.opponent}: {opponentName}
-                            <span
-                              className={`pill player-result-pill player-result-${result}`}
-                            >
-                              {result === "win"
-                                ? playerText.win
-                                : result === "loss"
-                                ? playerText.loss
-                                : playerText.pending}
-                            </span>
-                          </div>
-                          <div className="muted small">
-                            {match.game} •{" "}
-                            {tournamentName}
-                          </div>
-                        </div>
+                      <div className="player-match-left">
+                        <span
+                          className={`player-match-result player-match-result-${result}`}
+                        >
+                          {result === "win"
+                            ? "W"
+                            : result === "loss"
+                            ? "L"
+                            : "-"}
+                        </span>
+                      </div>
 
-                        <div className="right-block">
-                          <div className="score">{match.score || "-"}</div>
-                          <div className="muted small">{match.date}</div>
+                      <div className="player-match-center">
+                        <div className="player-match-title">
+                          <span>{firstParticipantName}</span>
+                          <span className="player-match-vs">{commonText.vs}</span>
+                          <span>{secondParticipantName}</span>
+                        </div>
+                        <div className="player-match-meta">
+                          {match.game}
+                          {match.roundLabel || match.round ? (
+                            <>
+                              {" "}• {match.roundLabel || match.round}
+                            </>
+                          ) : null}
                         </div>
                       </div>
 
-                      <div className="tour-meta">
-                        <div>
-                          <span className="muted">{playerText.status}:</span>{" "}
-                          {match.status || "—"}
+                      <div className="player-match-right">
+                        <div className="player-match-score">
+                          {match.score || "-"}
                         </div>
-                        <div>
-                          <span className="muted">{playerText.round}:</span>{" "}
-                          {match.round || "—"}
+                        <div className="player-match-tournament">
+                          {tournamentName}
                         </div>
-                        <div>
-                          <span className="muted">{playerText.format}:</span>{" "}
-                          {commonText.bestOfShort}
-                          {match.bestOf || 1}
-                        </div>
-                        {match.notes ? (
-                          <div>
-                            <span className="muted">{playerText.notes}:</span>{" "}
-                            {match.notes}
-                          </div>
-                        ) : null}
                       </div>
                     </div>
                     )
+                    }
                   )}
                 </div>
               )}
