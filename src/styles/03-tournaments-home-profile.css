@@ -3537,7 +3537,7 @@ background: linear-gradient(
 }
 
 .tournament-history-click-card .player-tournament-pills-row-actions {
-  justify-content: flex-start;
+  justify-content: flex-end;
   width: 100%;
 }
 
@@ -3547,9 +3547,12 @@ background: linear-gradient(
     width: 100%;
   }
 
-  .tournament-history-click-card .player-tournament-pills-row-info,
-  .tournament-history-click-card .player-tournament-pills-row-actions {
+  .tournament-history-click-card .player-tournament-pills-row-info {
     justify-content: flex-start;
+  }
+
+  .tournament-history-click-card .player-tournament-pills-row-actions {
+    justify-content: flex-end;
   }
 }
 
