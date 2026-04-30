@@ -568,7 +568,7 @@ placeholder={playerText.searchPlaceholder}
 
                   <div className="profile-head-stat">
                     <span className="profile-head-stat-label">
-                      STREAK
+                      {playerText.currentStreak}
                     </span>
                     <span className="profile-head-stat-value">
                       {playerStreak.label}
