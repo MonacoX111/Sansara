@@ -25,6 +25,7 @@ import { Lang, t } from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
 import PlayerProfileHeader from "./player-profile/PlayerProfileHeader";
+import PlayerAchievements from "./player-profile/PlayerAchievements";
 
 type Props = {
   players: Player[];
@@ -628,50 +629,11 @@ placeholder={playerText.searchPlaceholder}
 </div>
 
 
-<div className="section-block">
-  <h4>{playerText.achievements}</h4>
-  {playerAchievements.length === 0 ? (
-    <div className="player-achievement-empty">
-      {playerText.noAchievements}
-    </div>
-  ) : (
-                <div className="player-achievement-grid">
-                  {playerAchievements.map((achievement) => (
-                    <div
-                      key={achievement.id}
-                      className="player-achievement-card"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-                      <img
-                        src={achievement.image}
-                        alt={achievement.title}
-                        className="player-achievement-icon"
-                      />
-                      <div className="player-achievement-content">
-                        <div className="player-achievement-title">
-                          {achievement.title}
-                        </div>
-                        {achievement.description ? (
-                          <div className="player-achievement-description">
-                            {achievement.description}
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+<PlayerAchievements
+  achievements={playerAchievements}
+  title={playerText.achievements}
+  emptyText={playerText.noAchievements}
+/>
 
 <div className="section-block">
   <h4>{playerText.tournamentHistory}</h4>
