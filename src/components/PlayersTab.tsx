@@ -26,6 +26,7 @@ import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
 import PlayerProfileHeader from "./player-profile/PlayerProfileHeader";
 import PlayerAchievements from "./player-profile/PlayerAchievements";
+import PlayerRecentMatches from "./player-profile/PlayerRecentMatches";
 
 type Props = {
   players: Player[];
@@ -241,6 +242,25 @@ export default function PlayersTab({
     unknownPlayerLabel: playerText.unknown,
     friendlyMatchLabel: playerText.friendlyMatch,
   }).reverse();
+  const playerRecentMatchRows = playerRecentMatches.map(
+    ({ match, result, tournamentName }) => ({
+      id: match.id,
+      result,
+      firstParticipantName:
+        match.matchType === "team"
+          ? getTeamName(match.team1) || playerText.unknownTeam
+          : getPlayerName(match.player1),
+      secondParticipantName:
+        match.matchType === "team"
+          ? getTeamName(match.team2) || playerText.unknownTeam
+          : getPlayerName(match.player2),
+      game: match.game,
+      roundLabel: match.roundLabel,
+      round: match.round,
+      score: match.score,
+      tournamentName,
+    })
+  );
   const playerFormResults = playerRecentMatches
     .filter((item) => item.result === "win" || item.result === "loss")
     .slice(-5);
@@ -864,83 +884,12 @@ placeholder={playerText.searchPlaceholder}
               )}
             </div>
 
-<div className="section-block">
-  <h4>{playerText.recentMatches}</h4>
-
-  {playerRecentMatches.length === 0 ? (
-    <p className="muted">{playerText.noRecentMatches}</p>
-  ) : (
-                <div className="player-recent-matches">
-                  {playerRecentMatches.map(
-                    ({ match, result, tournamentName }) => {
-                    const firstParticipantName =
-                      match.matchType === "team"
-                        ? getTeamName(match.team1) || playerText.unknownTeam
-                        : getPlayerName(match.player1);
-                    const secondParticipantName =
-                      match.matchType === "team"
-                        ? getTeamName(match.team2) || playerText.unknownTeam
-                        : getPlayerName(match.player2);
-
-                    return (
-                    <div
-                      key={match.id}
-                      className="player-match-row"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-                      <div className="player-match-left">
-                        <span
-                          className={`player-match-result player-match-result-${result}`}
-                        >
-                          {result === "win"
-                            ? "W"
-                            : result === "loss"
-                            ? "L"
-                            : "-"}
-                        </span>
-                      </div>
-
-                      <div className="player-match-center">
-                        <div className="player-match-title">
-                          <span>{firstParticipantName}</span>
-                          <span className="player-match-vs">{commonText.vs}</span>
-                          <span>{secondParticipantName}</span>
-                        </div>
-                        <div className="player-match-meta">
-                          {match.game}
-                          {match.roundLabel || match.round ? (
-                            <>
-                              {" "}• {match.roundLabel || match.round}
-                            </>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="player-match-right">
-                        <div className="player-match-score">
-                          {match.score || "-"}
-                        </div>
-                        <div className="player-match-tournament">
-                          {tournamentName}
-                        </div>
-                      </div>
-                    </div>
-                    )
-                    }
-                  )}
-                </div>
-              )}
-            </div>
+<PlayerRecentMatches
+  title={playerText.recentMatches}
+  emptyText={playerText.noRecentMatches}
+  vsText={commonText.vs}
+  matches={playerRecentMatchRows}
+/>
           </div>
         )}
       </div>
