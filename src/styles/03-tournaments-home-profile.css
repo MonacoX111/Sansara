@@ -3905,3 +3905,99 @@ background: linear-gradient(
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   Player profile final layout rhythm
+   ============================================================ */
+
+.profile-head,
+.profile-head ~ .section-block,
+.profile-head ~ .stats-grid {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.profile-head ~ .section-block {
+  margin-top: 28px;
+}
+
+.profile-head ~ .stats-grid {
+  margin-top: 28px;
+  gap: 14px;
+}
+
+.profile-head ~ .section-block > h4 {
+  margin: 0 0 14px;
+  color: rgba(245, 247, 251, 0.94);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.profile-info-box.upgraded,
+.profile-head ~ .stats-grid .stat-card,
+.profile-head ~ .section-block .team-history-card,
+.profile-head ~ .section-block .player-achievement-card,
+.profile-head ~ .section-block .tournament-history-click-card,
+.profile-head ~ .section-block .player-match-row,
+.profile-head ~ .section-block .player-achievement-empty {
+  border-radius: 16px;
+  border-color: rgba(255, 255, 255, 0.075);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.018)),
+    rgba(8, 12, 20, 0.64);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.profile-info-box.upgraded {
+  padding: 16px;
+}
+
+.profile-head ~ .section-block .team-history-list,
+.profile-head ~ .section-block .player-achievement-grid,
+.profile-head ~ .section-block .list-col,
+.profile-head ~ .section-block .player-recent-matches {
+  gap: 12px;
+}
+
+.profile-head ~ .section-block .tournament-history-click-card,
+.profile-head ~ .section-block .player-match-row {
+  padding: 14px;
+}
+
+.profile-head ~ .section-block .player-achievement-card {
+  padding: 14px;
+}
+
+.profile-head ~ .section-block .row-between {
+  min-width: 0;
+  gap: 14px;
+}
+
+.profile-head ~ .section-block .achievement-title,
+.profile-head ~ .section-block .tournament-history-open-title,
+.profile-head ~ .section-block .player-match-title {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .profile-head ~ .section-block,
+  .profile-head ~ .stats-grid {
+    margin-top: 24px;
+  }
+
+  .profile-head ~ .section-block > h4 {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .profile-info-box.upgraded,
+  .profile-head ~ .section-block .team-history-card,
+  .profile-head ~ .section-block .player-achievement-card,
+  .profile-head ~ .section-block .tournament-history-click-card,
+  .profile-head ~ .section-block .player-match-row {
+    padding: 12px;
+  }
+}
