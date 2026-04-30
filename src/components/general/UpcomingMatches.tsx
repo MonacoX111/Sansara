@@ -1,9 +1,10 @@
 import type { MouseEvent } from "react";
-import { Match, Player, Team } from "../../types";
-import { Lang, t } from "../../utils/translations";
+import { Match, Player, Team, Tournament } from "../../types";
+import { Lang, getMatchStageLabel, t } from "../../utils/translations";
 
 type Props = {
   matches: Match[];
+  tournaments: Tournament[];
   players: Player[];
   teams: Team[];
   lang: Lang;
@@ -12,6 +13,7 @@ type Props = {
 
 export default function UpcomingMatches({
   matches,
+  tournaments,
   players,
   teams,
   lang,
@@ -20,6 +22,7 @@ export default function UpcomingMatches({
   const text = t[lang] || t.en;
   const generalText = text.generalPage;
   const commonText = text.common;
+  const formatStageLabel = (stage?: string) => getMatchStageLabel(stage, lang);
   const upcomingMatches = matches.filter((match) => match.status !== "completed");
 
   return (
@@ -36,6 +39,9 @@ export default function UpcomingMatches({
             )
             .slice(0, 5)
             .map((match) => {
+              const tournament = tournaments.find(
+                (item) => item.id === match.tournamentId
+              );
               const isTeamMatch = match.matchType === "team";
 
               const leftEntity = isTeamMatch
@@ -77,65 +83,84 @@ export default function UpcomingMatches({
                 : rightEntity && "avatar" in rightEntity
                 ? rightEntity.avatar
                 : "";
+              const matchStage =
+                match.roundLabel ||
+                match.round ||
+                formatStageLabel(match.stage) ||
+                commonText.match;
+              const isFinalStage = String(matchStage)
+                .toLowerCase()
+                .includes("final");
 
               return (
                 <div
                   key={match.id}
-                  className="match-card new"
+                  className="result-card result-card-upcoming"
                   onMouseMove={handleGlow}
+                  style={{
+                    background: tournament?.imageUrl
+                      ? `linear-gradient(
+                                        90deg,
+                                        rgba(5, 7, 14, 0.96) 0%,
+                                        rgba(5, 7, 14, 0.88) 28%,
+                                        rgba(5, 7, 14, 0.76) 52%,
+                                        rgba(5, 7, 14, 0.9) 100%
+                                      ), url(${tournament.imageUrl}) center / cover no-repeat`
+                      : undefined,
+                  }}
                 >
-                  <div className="match-top">
-                    <span className="pill light">
-                      {match.round || commonText.match}
-                    </span>
-                    <span className="pill">
-                      {match.bestOf
-                        ? `${commonText.bestOfShort}${match.bestOf}`
-                        : ""}
-                    </span>
-                  </div>
+                  <div className="result-row">
+                    <div className="result-player-side left">
+                      {leftImage ? (
+                        <img src={leftImage} alt={leftName} className="result-avatar" />
+                      ) : (
+                        <div className="result-avatar-placeholder">
+                          {leftName.charAt(0) || "P"}
+                        </div>
+                      )}
 
-                  <div className="match-center">
-                    <div className="team-side">
-                      <div className="team-side-inner">
-                        {leftImage ? (
-                          <img
-                            src={leftImage}
-                            alt={leftName}
-                            className="match-side-avatar"
-                          />
-                        ) : (
-                          <div className="match-side-avatar-placeholder">
-                            {leftName.charAt(0) || "T"}
-                          </div>
-                        )}
+                      <div className="result-player-name">{leftName}</div>
+                    </div>
 
-                        <div className="team-name">{leftName}</div>
+                    <div className="result-score-wrap">
+                      <div className="result-score result-score-upcoming">
+                        {match.bestOf ? (
+                          <span className="result-score-kicker">
+                            {commonText.bestOfShort}
+                            {match.bestOf}
+                          </span>
+                        ) : null}
+                        <strong>{commonText.vs}</strong>
+                        <span className="result-score-status">{match.status}</span>
                       </div>
                     </div>
 
-                    <div className="vs-big">{commonText.vs}</div>
+                    <div className="result-player-side right">
+                      <div className="result-player-name">{rightName}</div>
 
-                    <div className="team-side">
-                      <div className="team-side-inner team-side-inner-right">
-                        <div className="team-name">{rightName}</div>
-
-                        {rightImage ? (
-                          <img
-                            src={rightImage}
-                            alt={rightName}
-                            className="match-side-avatar"
-                          />
-                        ) : (
-                          <div className="match-side-avatar-placeholder">
-                            {rightName.charAt(0) || "T"}
-                          </div>
-                        )}
-                      </div>
+                      {rightImage ? (
+                        <img src={rightImage} alt={rightName} className="result-avatar" />
+                      ) : (
+                        <div className="result-avatar-placeholder">
+                          {rightName.charAt(0) || "P"}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="match-bottom">{match.date || commonText.tbd}</div>
+                  <div className="result-meta">
+                    <span className={`result-round ${isFinalStage ? "final" : ""}`}>
+                      {matchStage}
+                    </span>
+
+                    <span className="result-date">
+                      {match.date || commonText.tbd}
+                    </span>
+                  </div>
+
+                  <div className="result-tournament">
+                    {tournament?.title || generalText.noTournament}
+                  </div>
                 </div>
               );
             })}

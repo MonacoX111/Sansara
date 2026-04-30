@@ -21,7 +21,7 @@ import {
   getTournamentTeamRoster,
   isPlayerInTournamentTeamRoster,
 } from "../domain/tournament/tournamentRosters";
-import { Lang, t } from "../utils/translations";
+import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
 import PlayerProfileHeader from "./player-profile/PlayerProfileHeader";
@@ -76,6 +76,8 @@ export default function PlayersTab({
   const text = t[lang] || t.en;
   const playerText = text.playersPage;
   const commonText = text.common;
+  const formatTournamentLabel = (format?: string) =>
+    getTournamentFormatLabel(format, lang);
   const [expandedEloTournamentId, setExpandedEloTournamentId] = useState<
     number | null
   >(null);
@@ -430,7 +432,7 @@ export default function PlayersTab({
         id: tournament.id,
         title: tournament.title,
         game: tournament.game,
-        format: tournament.format,
+        format: formatTournamentLabel(tournament.format),
         type: tournament.type,
         place: tournament.place,
         placementTone,

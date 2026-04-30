@@ -74,6 +74,7 @@ export default function GeneralTab({
 
             <UpcomingMatches
               matches={matches}
+              tournaments={tournaments}
               players={players}
               teams={teams}
               lang={lang}

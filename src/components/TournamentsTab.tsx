@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Match, Player, Team, Tournament } from "../types";
-import { Lang, t } from "../utils/translations";
+import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
 import { getTournamentRosterPlayerIds } from "../domain/tournament/tournamentRosters";
 import {
   calculateGroupStandings,
@@ -28,6 +28,8 @@ export default function TournamentsTab({
 }: Props) {
   const text = t[lang] || t.en;
   const tournamentText = text.tournamentsPage;
+  const formatTournamentLabel = (format?: string) =>
+    getTournamentFormatLabel(format, lang);
   const [localSelectedTournamentId, setLocalSelectedTournamentId] = useState<
     number | null
   >(null);
@@ -843,7 +845,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                         </span>
                         {tournament.format ? (
                           <span className="history-meta-pill">
-                            {tournament.format}
+                            {formatTournamentLabel(tournament.format)}
                           </span>
                         ) : null}
                       </div>
@@ -990,7 +992,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 {selectedTournament.format ? (
                   <>
                     <span>•</span>
-                    <span>{selectedTournament.format}</span>
+                    <span>{formatTournamentLabel(selectedTournament.format)}</span>
                   </>
                 ) : null}
               </div>
@@ -1174,10 +1176,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 >
                   <span className="overview-stat-label">{tournamentText.format}</span>
                   <strong className="overview-stat-value">
-{selectedTournament.format
-  ? selectedTournament.format.charAt(0).toUpperCase() +
-    selectedTournament.format.slice(1)
-  : "—"}
+{formatTournamentLabel(selectedTournament.format) || "—"}
                   </strong>
                 </div>
 

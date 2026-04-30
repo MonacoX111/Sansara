@@ -1,6 +1,6 @@
 import { Match, Player, Team, Tournament } from "../types";
 import { getPlayersForHistoricalTeam } from "../domain/player/playerTeams";
-import { Lang, t } from "../utils/translations";
+import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
 type Props = {
@@ -25,6 +25,8 @@ export default function TeamsTab({
   const text = t[lang] || t.en;
   const teamText = text.teamsPage;
   const commonText = text.common;
+  const formatTournamentLabel = (format?: string) =>
+    getTournamentFormatLabel(format, lang);
   const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
 
   const teamPlayers = players.filter(
@@ -273,7 +275,7 @@ return teamText.loss;
                     <div className="team-history-meta">
                       <span>{tournament.game}</span>
                       <span>{tournament.date || teamText.noDate}</span>
-                      <span>{tournament.format}</span>
+                      <span>{formatTournamentLabel(tournament.format)}</span>
                     </div>
                   </div>
                 ))}

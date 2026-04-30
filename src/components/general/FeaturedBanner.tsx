@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 import { HomeAnnouncement, TabKey } from "../../types";
-import { Lang, t } from "../../utils/translations";
+import { Lang, getTournamentFormatLabel, t } from "../../utils/translations";
 
 type Props = {
   homeAnnouncement: HomeAnnouncement;
@@ -18,6 +18,7 @@ export default function FeaturedBanner({
   handleGlow,
 }: Props) {
   const generalText = (t[lang] || t.en).generalPage;
+  const formatLabel = getTournamentFormatLabel(homeAnnouncement.format, lang);
 
   return (
     <div
@@ -50,7 +51,7 @@ export default function FeaturedBanner({
             ) : null}
             {homeAnnouncement.format ? (
               <span className="home-meta-pill">
-                {generalText.format}: {homeAnnouncement.format}
+                {generalText.format}: {formatLabel}
               </span>
             ) : null}
             {homeAnnouncement.status ? (

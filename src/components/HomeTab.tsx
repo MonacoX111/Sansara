@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Player, Team, Tournament, Match, TabKey } from "../types";
-import { Lang, t } from "../utils/translations";
+import { Lang, getMatchStageLabel, t } from "../utils/translations";
 import {
   getBiggestUpset,
   getFeaturedMatch,
@@ -38,6 +38,7 @@ export default function HomeTab({
   lang,
 }: Props) {
   const text = t[lang || "en"] || t.en;
+  const formatStageLabel = (stage?: string) => getMatchStageLabel(stage, lang);
 
   const handleGlow = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -65,7 +66,7 @@ export default function HomeTab({
   );
   const featuredMatchStage =
     featuredMatch?.match.roundLabel ||
-    featuredMatch?.match.stage ||
+    formatStageLabel(featuredMatch?.match.stage) ||
     featuredMatch?.match.round ||
     text.common.match;
   const featuredMatchStatus = featuredMatch?.match.status || text.common.tbd;
@@ -254,7 +255,10 @@ export default function HomeTab({
   };
 
   const getActivityStage = (match: Match) =>
-    match.roundLabel || match.stage || match.round || text.common.match;
+    match.roundLabel ||
+    formatStageLabel(match.stage) ||
+    match.round ||
+    text.common.match;
 
   const quickLinks: {
     tab: TabKey;

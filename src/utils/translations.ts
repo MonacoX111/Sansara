@@ -191,13 +191,13 @@ admin: {
   threeVsThree: "3 vs 3",
   fiveVsFive: "5 vs 5",
   customOption: "Custom",
-  selectFormat: "Select format",
+  selectFormat: "Select Format",
   playoffSingleElimination: "Playoff (Single Elimination)",
   groupsPlayoff: "Groups + Playoff",
-  groupsOnly: "Groups only",
-  swissSystem: "Swiss system",
+  groupsOnly: "Groups Only",
+  swissSystem: "Swiss System",
   leagueRoundRobin: "League / Round Robin",
-  selectStatus: "Select status",
+  selectStatus: "Select Status",
   prizePlaceholder: "Prize pool or reward",
   tournamentDescriptionPlaceholder: "Tournament description",
   imageUrlPlaceholder: "Paste image URL...",
@@ -205,8 +205,8 @@ admin: {
   squadMember: "Squad member",
   participantsSelected: "Participants selected",
   noParticipantsSelected: "No participants selected",
-  groupsSetup: "Groups setup",
-  addGroup: "+ Add group",
+  groupsSetup: "Groups Setup",
+  addGroup: "+ Add Group",
   groupPlaceholder: "Group A",
   selectMvp: "Select MVP",
   selectWinnerTeam: "Select winner team",
@@ -224,12 +224,12 @@ admin: {
   selectTeam: "Select team",
   selectWinner: "Select winner",
   selectWinningTeam: "Select winning team",
-  selectStage: "Select stage",
+  selectStage: "Select Stage",
   groupStage: "Group",
   playoffStage: "Playoff",
   finalStage: "Final",
   showmatchStage: "Showmatch",
-  selectGroup: "Select group",
+  selectGroup: "Select Group",
   roundLabelPlaceholder: "Round 1 / Quarterfinal / Semifinal / Final",
   seriesIdPlaceholder: "quarterfinal-1 / semifinal-1 / final-1",
   nextSeriesPlaceholder: "semifinal-1 / final-1",
@@ -280,7 +280,7 @@ common: {
   bracketFirebaseFailed: "Bracket generated, but Firebase save failed",
   selectTournamentFirst: "Select tournament first",
   noMatchesForTournament: "No matches found for this tournament",
-  unsupportedBracketSize: "Supported playoff sizes: 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series.",
+  unsupportedBracketSize: "Supported Playoff sizes: 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series.",
   achievementSaved: "Achievement saved",
   achievementAdded: "Achievement added",
   achievementDeleted: "Achievement deleted",
@@ -359,12 +359,12 @@ tournamentsPage: {
   results: "Results",
   champion: "Champion",
   placementsEmpty: "Placements have not been added yet.",
-  structure: "Tournament structure",
-  groupStage: "Group stage",
-  groupStageStandings: "Group stage standings",
+  structure: "Tournament Structure",
+  groupStage: "Group Stage",
+  groupStageStandings: "Group Stage Standings",
   matches: "matches",
   participant: "Participant",
-  playoffBracket: "Playoff bracket",
+  playoffBracket: "Playoff Bracket",
   final: "Final",
   otherMatches: "Other matches",
   noMatches: "No matches added yet.",
@@ -490,13 +490,13 @@ nav: {
   admin: "Admin",
 },
 
-    f1: "Tournament management",
+    f1: "Tournament Management",
     f1d: "Tournament formats, participants, and results are admin controlled.",
 
     f2: "Player profiles",
     f2d: "Player stats, ELO, and achievements are shown in one place.",
 
-    f3: "Tournament brackets",
+    f3: "Tournament Brackets",
     f3d: "Playoff and group systems are displayed visually.",
 
     f4: "Tournament history",
@@ -725,7 +725,7 @@ admin: {
   selectWinner: "Оберіть переможця",
   selectWinningTeam: "Оберіть команду-переможця",
   selectStage: "Оберіть стадію",
-  groupStage: "Група",
+  groupStage: "Групи",
   playoffStage: "Плей-оф",
   finalStage: "Фінал",
   showmatchStage: "Шоу-матч",
@@ -864,7 +864,7 @@ tournamentsPage: {
   groupStageStandings: "Таблиця групового етапу",
   matches: "матчів",
   participant: "Учасник",
-  playoffBracket: "Сітка плей-офф",
+  playoffBracket: "Сітка плей-оф",
   final: "Фінал",
   otherMatches: "Інші матчі",
   noMatches: "Матчів ще не додано.",
@@ -997,9 +997,83 @@ nav: {
     f2d: "Статистика, ELO та досягнення гравців показані в одному місці.",
 
     f3: "Сітка турніру",
-    f3d: "Плей-офф і групові етапи відображаються у візуальному форматі.",
+    f3d: "Плей-оф і групові етапи відображаються у візуальному форматі.",
 
     f4: "Історія",
     f4d: "Завершені турніри залишаються доступними в історії платформи.",
   },
+};
+
+const titleCaseLabel = (value: string) =>
+  value
+    .replace(/[_-]+/g, " ")
+    .replace(/\s*\+\s*/g, " + ")
+    .trim()
+    .split(/\s+/)
+    .map((part) =>
+      part === "+"
+        ? part
+        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    )
+    .join(" ");
+
+export const getTournamentFormatLabel = (
+  format: string | undefined,
+  lang: Lang
+) => {
+  if (!format) return "";
+
+  const normalized = format.trim().toLowerCase();
+  const labels: Record<Lang, Record<string, string>> = {
+    en: {
+      playoff: "Playoff",
+      group: "Group",
+      groups: "Groups",
+      "group + playoff": "Group + Playoff",
+      groups_playoff: "Group + Playoff",
+      groups_only: "Groups Only",
+      swiss: "Swiss System",
+      "swiss system": "Swiss System",
+      league: "League / Round Robin",
+      "round robin": "Round Robin",
+      round_robin: "Round Robin",
+    },
+    ua: {
+      playoff: "Плей-оф",
+      group: "Групи",
+      groups: "Групи",
+      "group + playoff": "Групи + плей-оф",
+      groups_playoff: "Групи + плей-оф",
+      groups_only: "Тільки групи",
+      swiss: "Швейцарська система",
+      "swiss system": "Швейцарська система",
+      league: "Ліга / Round Robin",
+      "round robin": "Ліга / Round Robin",
+      round_robin: "Ліга / Round Robin",
+    },
+  };
+
+  return labels[lang]?.[normalized] || titleCaseLabel(format);
+};
+
+export const getMatchStageLabel = (stage: string | undefined, lang: Lang) => {
+  if (!stage) return "";
+
+  const normalized = stage.trim().toLowerCase();
+  const labels: Record<Lang, Record<string, string>> = {
+    en: {
+      group: "Group",
+      playoff: "Playoff",
+      final: "Final",
+      showmatch: "Showmatch",
+    },
+    ua: {
+      group: "Групи",
+      playoff: "Плей-оф",
+      final: "Фінал",
+      showmatch: "Шоу-матч",
+    },
+  };
+
+  return labels[lang]?.[normalized] || titleCaseLabel(stage);
 };

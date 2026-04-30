@@ -1038,6 +1038,44 @@ background: linear-gradient(
   min-width: 72px;
 }
 
+.result-score-upcoming {
+  min-width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.result-score-upcoming strong {
+  color: var(--gold);
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.result-score-kicker,
+.result-score-status {
+  display: block;
+  max-width: 82px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result-score-kicker {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.result-score-status {
+  color: rgba(255, 255, 255, 0.42);
+}
+
 .result-avatar,
 .result-avatar-placeholder {
   width: 34px;
