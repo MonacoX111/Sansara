@@ -541,10 +541,14 @@ placeholder={playerText.searchPlaceholder}
                         <div className="player-name">
                           {player.nickname}{" "}
                           {player.isFeatured ? (
-                            <span className="pill featured-pill">{playerText.featured}</span>
+                            <span className="pill featured-pill player-selected-badge">
+                              {playerText.featured}
+                            </span>
                           ) : null}
                         </div>
-                        <span className="pill light">#{player.rank}</span>
+                        <span className="pill light player-rank-badge">
+                          #{player.rank}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -577,7 +581,7 @@ placeholder={playerText.searchPlaceholder}
                       <span className="info-label">{playerText.achievements}</span>
 
                       {previewAchievements.length > 0 ? (
-                        <div className="tag-row compact">
+                        <div className="tag-row compact player-achievement-preview">
                           {previewAchievements.map((achievement) => (
                             <img
                               key={achievement.id}
@@ -589,25 +593,32 @@ placeholder={playerText.searchPlaceholder}
                           ))}
 
                           {hiddenAchievementsCount > 0 ? (
-                            <span className="pill">
+                            <span className="pill player-achievement-more">
                               +{hiddenAchievementsCount}
                             </span>
                           ) : null}
                         </div>
                       ) : (
-                        <span className="muted small">{playerText.noAchievements}</span>
+                        <span className="muted small player-achievement-empty-text">
+                          {playerText.noAchievements}
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="mini-stats">
-                    <div>
-                      {playerText.winsShort}: {player.wins}
-                    </div>
-                    <div>
-                      {playerText.elo}: {player.elo}
-                    </div>
-                    <div>₴: {player.earnings}</div>
+                  <div className="mini-stats player-card-stats">
+                    <span className="player-stat-pill">
+                      <span>{playerText.winsShort}</span>
+                      <strong>{player.wins}</strong>
+                    </span>
+                    <span className="player-stat-pill player-stat-pill-elo">
+                      <span>{playerText.elo}</span>
+                      <strong>{player.elo}</strong>
+                    </span>
+                    <span className="player-stat-pill">
+                      <span>{"\u20b4"}</span>
+                      <strong>{player.earnings}</strong>
+                    </span>
                   </div>
                 </button>
               );

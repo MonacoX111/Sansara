@@ -2208,6 +2208,226 @@ background: linear-gradient(
   border-radius: 18px;
 }
 
+/* === PLAYER LIST COMPACT PREMIUM CARDS === */
+
+.player-grid {
+  gap: 10px;
+}
+
+.player-grid .player-card {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 16px;
+  border-color: rgba(255, 255, 255, 0.075);
+  background:
+    radial-gradient(circle at var(--x, 18%) var(--y, 16%), rgba(255, 59, 95, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+    rgba(8, 12, 20, 0.74);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+}
+
+.player-grid .player-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.22),
+    0 0 18px rgba(255, 59, 95, 0.1);
+}
+
+.player-grid .player-card.player-card-active {
+  border-color: rgba(255, 59, 95, 0.58) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.24),
+    0 14px 30px rgba(255, 59, 95, 0.14),
+    0 12px 26px rgba(0, 0, 0, 0.2);
+}
+
+.player-grid .player-head {
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-right: 38px;
+}
+
+.player-grid .avatar {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.26),
+    0 0 0 3px rgba(255, 255, 255, 0.025);
+}
+
+.player-grid .player-head-info,
+.player-grid .player-name-row,
+.player-grid .player-name {
+  min-width: 0;
+}
+
+.player-grid .player-name-row {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 7px;
+}
+
+.player-grid .player-name {
+  font-size: 16px;
+  line-height: 1.12;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-selected-badge {
+  padding: 3px 7px;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: rgba(255, 150, 170, 0.86);
+  background: rgba(255, 59, 95, 0.09);
+  border-color: rgba(255, 59, 95, 0.22);
+  box-shadow: none;
+}
+
+.player-rank-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.86);
+  border-color: rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(12, 18, 30, 0.84);
+}
+
+.player-grid .player-info-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.018);
+  border-color: rgba(255, 255, 255, 0.055);
+}
+
+.player-grid .player-info-row {
+  gap: 6px;
+}
+
+.player-grid .player-info-row.column {
+  gap: 5px;
+}
+
+.player-grid .info-label {
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.player-grid .info-value {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.player-grid .tag-row.compact {
+  gap: 6px;
+}
+
+.player-grid .player-games-row .pill {
+  padding: 4px 7px;
+  font-size: 10px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.player-achievement-preview {
+  align-items: center;
+}
+
+.player-achievement-preview .achievement-img {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.26);
+}
+
+.player-achievement-more {
+  height: 24px;
+  padding: 0 7px;
+  font-size: 10px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.player-achievement-empty-text {
+  font-size: 11px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.player-card-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+}
+
+.player-card-stats > div {
+  display: none;
+}
+
+.player-stat-pill {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 6px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.034);
+  line-height: 1;
+}
+
+.player-stat-pill span,
+.player-stat-pill strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-stat-pill span {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.player-stat-pill strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.player-stat-pill-elo {
+  border-color: rgba(74, 222, 128, 0.13);
+  background: rgba(74, 222, 128, 0.045);
+}
+
 .profile-primary-card.team-card {
   padding: 14px 16px;
   border-radius: 16px;
