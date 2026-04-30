@@ -580,7 +580,7 @@ placeholder={playerText.searchPlaceholder}
                   <span className="profile-form-label">FORM</span>
                   {playerFormResults.length > 0 ? (
                     <div className="profile-form-list">
-                      {playerFormResults.map((item) => (
+                      {[...playerFormResults].reverse().map((item) => (
                         <span
                           key={item.match.id}
                           className={`profile-form-pill profile-form-pill-${item.result}`}
@@ -973,6 +973,8 @@ placeholder={playerText.searchPlaceholder}
                               typeof timelineItem?.totalEloBonus === "number"
                                 ? BASE_ELO + timelineItem.totalEloBonus
                                 : null;
+                            const previousElo =
+                              totalElo !== null ? totalElo - item.elo : null;
 
                             return (
                               <div
@@ -1011,7 +1013,7 @@ placeholder={playerText.searchPlaceholder}
                                   <div className="player-tournament-elo-row">
                                     <span>{playerText.totalElo}</span>
                                     <span className="player-tournament-elo-value">
-                                      {totalElo}
+                                      {previousElo} → {totalElo}
                                     </span>
                                   </div>
                                 ) : null}
