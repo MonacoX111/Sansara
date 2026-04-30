@@ -17,6 +17,18 @@ type Props = {
   lang: Lang;
 };
 
+type LatestTransferItem = {
+  key: string;
+  playerId: number;
+  playerNickname: string;
+  playerAvatar: string;
+  teamName: string;
+  teamLogo: string;
+  date?: string;
+  timestamp: number | null;
+  order: number;
+};
+
 export default function HomeTab({
   players,
   teams,
@@ -89,6 +101,95 @@ export default function HomeTab({
   const recentMatches = [...matches]
     .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
     .slice(0, 5);
+  const latestTransfers = useMemo<LatestTransferItem[]>(() => {
+    const teamById = new Map(teams.map((team) => [team.id, team]));
+    const getTimestamp = (date?: string) => {
+      if (!date) return null;
+
+      const timestamp = new Date(date).getTime();
+      return Number.isFinite(timestamp) ? timestamp : null;
+    };
+
+    const entries = players.flatMap((player, playerIndex) => {
+      const history = Array.isArray(player.teamHistory)
+        ? player.teamHistory.filter((item) => teamById.has(Number(item.teamId)))
+        : [];
+
+      if (history.length > 0) {
+        return history.map((item, historyIndex) => {
+          const team = teamById.get(Number(item.teamId));
+          const date = item.from;
+
+          return {
+            key: `${player.id}-${item.teamId}-${date || historyIndex}`,
+            playerId: player.id,
+            playerNickname: player.nickname,
+            playerAvatar: player.avatar,
+            teamName: team?.name || text.playersPage.noTeam,
+            teamLogo: team?.logo || "",
+            date,
+            timestamp: getTimestamp(date),
+            order: playerIndex * 100 + historyIndex,
+          };
+        });
+      }
+
+      const currentTeam = teamById.get(Number(player.teamId));
+      if (!currentTeam) return [];
+
+      return [
+        {
+          key: `${player.id}-${currentTeam.id}-current`,
+          playerId: player.id,
+          playerNickname: player.nickname,
+          playerAvatar: player.avatar,
+          teamName: currentTeam.name,
+          teamLogo: currentTeam.logo || "",
+          timestamp: null,
+          order: playerIndex * 100,
+        },
+      ];
+    });
+
+    return entries
+      .sort((a, b) => {
+        if (a.timestamp !== null && b.timestamp !== null) {
+          return b.timestamp - a.timestamp;
+        }
+
+        if (a.timestamp !== null) return -1;
+        if (b.timestamp !== null) return 1;
+
+        return a.order - b.order;
+      })
+      .slice(0, 5);
+  }, [players, teams, text.playersPage.noTeam]);
+  const latestTransfersText =
+    lang === "ua"
+      ? {
+          title: "Останні трансфери",
+          subtitle: "Останні зміни у складах команд.",
+          empty: "Трансферів поки немає.",
+          joined: "приєднався",
+        }
+      : {
+          title: "Latest Transfers",
+          subtitle: "Recent changes across team rosters.",
+          empty: "No transfers yet.",
+          joined: "joined",
+        };
+  const transferDateLocale = lang === "ua" ? "uk-UA" : "en-US";
+  const formatTransferDate = (date?: string) => {
+    if (!date) return "";
+
+    const timestamp = new Date(date).getTime();
+    if (!Number.isFinite(timestamp)) return "";
+
+    return new Intl.DateTimeFormat(transferDateLocale, {
+      day: "2-digit",
+      month: "short",
+    }).format(timestamp);
+  };
 
   const getMatchSide = (match: Match, side: "left" | "right") => {
     const isTeamMatch = match.matchType === "team";
@@ -569,6 +670,60 @@ onClick={() => setActiveTab("leaderboard")}
             )}
           </div>
         </div>
+      </div>
+
+      <div className="welcome-section welcome-transfers-section">
+        <div className="welcome-section-head">
+          <span>{latestTransfersText.title}</span>
+          <p className="welcome-info-label">{latestTransfersText.subtitle}</p>
+        </div>
+
+        {latestTransfers.length === 0 ? (
+          <div className="welcome-empty">{latestTransfersText.empty}</div>
+        ) : (
+          <div className="welcome-transfer-list home-hover-sync-group">
+            {latestTransfers.map((transfer) => {
+              const transferDate = formatTransferDate(transfer.date);
+
+              return (
+                <div
+                  key={transfer.key}
+                  className="welcome-transfer-row home-hover-sync-card"
+                  onMouseMove={handleGlow}
+                >
+                  <img
+                    src={transfer.playerAvatar}
+                    alt={transfer.playerNickname}
+                    className="welcome-transfer-avatar"
+                  />
+
+                  <div className="welcome-transfer-player">
+                    <strong>{transfer.playerNickname}</strong>
+                    <span>{latestTransfersText.joined}</span>
+                  </div>
+
+                  <span className="welcome-transfer-arrow" aria-hidden="true">
+                    {"\u2192"}
+                  </span>
+
+                  <div className="welcome-transfer-team">
+                    {transfer.teamLogo ? (
+                      <img src={transfer.teamLogo} alt={transfer.teamName} />
+                    ) : (
+                      <span className="welcome-transfer-team-placeholder">
+                        {transfer.teamName.charAt(0)}
+                      </span>
+                    )}
+                    <div>
+                      <strong>{transfer.teamName}</strong>
+                      {transferDate ? <small>{transferDate}</small> : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="welcome-section welcome-activity-section">

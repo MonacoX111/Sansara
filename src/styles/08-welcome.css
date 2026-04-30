@@ -1378,6 +1378,143 @@
   background: rgba(8, 11, 18, 0.54);
 }
 
+.welcome-transfers-section {
+  gap: 14px;
+}
+
+.welcome-transfer-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.welcome-transfer-row {
+  --nav-accent: 74, 222, 128;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "avatar player arrow"
+    "team team team";
+  align-items: center;
+  gap: 9px 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  background:
+    radial-gradient(circle at var(--x, 18%) var(--y, 18%), rgba(74, 222, 128, 0.09), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(8, 12, 20, 0.72);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-transfer-row:hover {
+  border-color: rgba(74, 222, 128, 0.2);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.3),
+    0 0 22px rgba(74, 222, 128, 0.1);
+}
+
+.welcome-transfer-avatar {
+  grid-area: avatar;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.welcome-transfer-player {
+  grid-area: player;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.welcome-transfer-player strong,
+.welcome-transfer-team strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.welcome-transfer-player span,
+.welcome-transfer-team small {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.welcome-transfer-arrow {
+  grid-area: arrow;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(185, 255, 208, 0.88);
+  border: 1px solid rgba(74, 222, 128, 0.16);
+  background: rgba(74, 222, 128, 0.07);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.welcome-transfer-team {
+  grid-area: team;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.welcome-transfer-team img,
+.welcome-transfer-team-placeholder {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+}
+
+.welcome-transfer-team img {
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.welcome-transfer-team-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.welcome-transfer-team > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .welcome-feature-card {
   padding: 22px;
   min-height: 180px;
@@ -1509,6 +1646,10 @@
   }
 
   .welcome-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .welcome-transfer-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1646,7 +1787,8 @@
 
   .welcome-preview-grid,
   .welcome-feature-grid,
-  .welcome-nav-grid {
+  .welcome-nav-grid,
+  .welcome-transfer-list {
     grid-template-columns: 1fr;
   }
 }
