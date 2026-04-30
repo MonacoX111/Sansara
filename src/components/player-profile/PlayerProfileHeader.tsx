@@ -42,27 +42,38 @@ export default function PlayerProfileHeader({
 
   return (
     <div className="profile-head">
-      <img src={player.avatar} alt={player.nickname} className="avatar large" />
-
       <div className="profile-main-info">
-        <div className="profile-identity-row">
-          <div className="profile-identity-copy">
-            <h3 className="profile-name">{player.nickname}</h3>
+        <div className="profile-banner">
+          <div className="profile-banner-bg" />
+          <div className="profile-banner-content">
+            <img
+              src={player.avatar}
+              alt={player.nickname}
+              className="avatar large"
+            />
 
-            {currentTeam ? (
-              <div className="profile-current-team-chip">
-                {currentTeam.logo ? (
-                  <img src={currentTeam.logo} alt={currentTeam.name} />
-                ) : null}
-                <span>{currentTeam.name}</span>
+            <div>
+              <div className="profile-identity-row">
+                <div className="profile-identity-copy">
+                  <h3 className="profile-name">{player.nickname}</h3>
+
+                  {currentTeam ? (
+                    <div className="profile-current-team-chip">
+                      {currentTeam.logo ? (
+                        <img src={currentTeam.logo} alt={currentTeam.name} />
+                      ) : null}
+                      <span>{currentTeam.name}</span>
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            ) : null}
+
+              {player.bio ? (
+                <div className="player-role-badge">{player.bio}</div>
+              ) : null}
+            </div>
           </div>
         </div>
-
-        {player.bio ? (
-          <div className="player-role-badge">{player.bio}</div>
-        ) : null}
 
         <div className="profile-head-stats-bar">
           <div className="profile-head-stat profile-head-stat-elo">
