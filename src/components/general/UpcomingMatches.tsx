@@ -83,10 +83,18 @@ export default function UpcomingMatches({
                 : rightEntity && "avatar" in rightEntity
                 ? rightEntity.avatar
                 : "";
+              const groupPrefix = lang === "ua" ? "Група" : "Group";
+              const groupValue = match.groupName
+                ? match.groupName.replace(/^\s*(група|групи|group|groups)\s+/i, "").trim()
+                : "";
+              const stageLabel =
+                match.stage === "group" && groupValue
+                  ? `${groupPrefix} ${groupValue}`
+                  : formatStageLabel(match.stage);
               const matchStage =
                 match.roundLabel ||
                 match.round ||
-                formatStageLabel(match.stage) ||
+                stageLabel ||
                 commonText.match;
               const isFinalStage = String(matchStage)
                 .toLowerCase()
