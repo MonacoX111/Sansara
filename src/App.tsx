@@ -558,7 +558,7 @@ const handleGlow = handleSpotlightMove;
     getTabFromPath(location.pathname)
   );
 
-  const [lang, setLang] = useState<"en" | "ua">("en");
+  const [lang, setLang] = useState<"en" | "ua">("ua");
 
 const [isLanguageSwitching, setIsLanguageSwitching] = useState(false);
 const langTimerRef = useRef<number | null>(null);
@@ -2269,17 +2269,17 @@ const deleteAchievement = async (achievementId: number) => {
     <div className="lang-switch">
 <button
   type="button"
-  className={lang === "en" ? "active" : ""}
-  onClick={() => switchLanguage("en")}
->
-        EN
-      </button>
-<button
-  type="button"
   className={lang === "ua" ? "active" : ""}
   onClick={() => switchLanguage("ua")}
 >
         UA
+      </button>
+<button
+  type="button"
+  className={lang === "en" ? "active" : ""}
+  onClick={() => switchLanguage("en")}
+>
+        EN
       </button>
     </div>
 
