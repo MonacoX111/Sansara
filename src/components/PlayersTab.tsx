@@ -758,13 +758,15 @@ placeholder={playerText.searchPlaceholder}
 <div className="section-block">
   <h4>{playerText.achievements}</h4>
   {playerAchievements.length === 0 ? (
-    <p className="muted">{playerText.noAchievements}</p>
+    <div className="player-achievement-empty">
+      {playerText.noAchievements}
+    </div>
   ) : (
-                <div className="achievement-grid">
+                <div className="player-achievement-grid">
                   {playerAchievements.map((achievement) => (
                     <div
                       key={achievement.id}
-                      className="achievement-card achievement-card-pro"
+                      className="player-achievement-card"
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         e.currentTarget.style.setProperty(
@@ -777,18 +779,22 @@ placeholder={playerText.searchPlaceholder}
                         );
                       }}
                     >
-                      <img
-                        src={achievement.image}
-                        alt={achievement.title}
-                        className="achievement-img"
-                      />
-                      <div>
-                        <div className="achievement-title">
+                      <div className="player-achievement-icon-wrap">
+                        <img
+                          src={achievement.image}
+                          alt={achievement.title}
+                          className="player-achievement-icon"
+                        />
+                      </div>
+                      <div className="player-achievement-content">
+                        <div className="player-achievement-title">
                           {achievement.title}
                         </div>
-                        <div className="muted small">
-                          {achievement.description}
-                        </div>
+                        {achievement.description ? (
+                          <div className="player-achievement-description">
+                            {achievement.description}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ))}
