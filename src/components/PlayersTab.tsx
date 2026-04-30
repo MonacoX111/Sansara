@@ -24,6 +24,7 @@ import {
 import { Lang, t } from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
+import PlayerProfileHeader from "./player-profile/PlayerProfileHeader";
 
 type Props = {
   players: Player[];
@@ -508,153 +509,25 @@ placeholder={playerText.searchPlaceholder}
           <div className="panel">
             <h2 className="panel-title">{playerText.profile}</h2>
 
-            <div className="profile-head">
-              <img
-                src={selectedPlayer.avatar}
-                alt={selectedPlayer.nickname}
-                className="avatar large"
-              />
-
-              <div className="profile-main-info">
-                <div className="profile-identity-row">
-                  <div className="profile-identity-copy">
-                    <h3 className="profile-name">{selectedPlayer.nickname}</h3>
-
-                    {selectedPlayerCurrentTeam ? (
-                      <div className="profile-current-team-chip">
-                        {selectedPlayerCurrentTeam.logo ? (
-                          <img
-                            src={selectedPlayerCurrentTeam.logo}
-                            alt={selectedPlayerCurrentTeam.name}
-                          />
-                        ) : null}
-                        <span>{selectedPlayerCurrentTeam.name}</span>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-
-                {selectedPlayer.bio ? (
-                  <div className="player-role-badge">{selectedPlayer.bio}</div>
-                ) : null}
-
-                <div className="profile-head-stats-bar">
-                  <div className="profile-head-stat profile-head-stat-elo">
-                    <span className="profile-head-stat-label">
-                      {playerText.elo}
-                    </span>
-                    <span className="profile-head-stat-value">
-                      {selectedPlayer.elo}
-                    </span>
-                  </div>
-
-                  <div className="profile-head-stat">
-                    <span className="profile-head-stat-label">
-                      {text.admin.rank}
-                    </span>
-                    <span className="profile-head-stat-value">
-                      {selectedPlayer.rank ? `#${selectedPlayer.rank}` : "—"}
-                    </span>
-                  </div>
-
-                  <div className="profile-head-stat">
-                    <span className="profile-head-stat-label">
-                      {playerText.winRate}
-                    </span>
-                    <span className="profile-head-stat-value">
-                      {playerWinRate}%
-                    </span>
-                  </div>
-
-                  <div className="profile-head-stat">
-                    <span className="profile-head-stat-label">
-                      {playerText.currentStreak}
-                    </span>
-                    <span className="profile-head-stat-value">
-                      {playerStreak.label}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="profile-form-strip">
-                  <span className="profile-form-label">FORM</span>
-                  {playerFormResults.length > 0 ? (
-                    <div className="profile-form-list">
-                      {[...playerFormResults].reverse().map((item) => (
-                        <span
-                          key={item.match.id}
-                          className={`profile-form-pill profile-form-pill-${item.result}`}
-                        >
-                          {item.result === "win" ? "W" : "L"}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="profile-form-empty">No matches yet</span>
-                  )}
-                </div>
-
-                <div className="profile-info-box upgraded">
-                  <div className="profile-info-row column">
-                    <span className="info-label">{playerText.games}</span>
-
-                    <div className="profile-games-enhanced">
-                      {selectedPlayer.games.length > 0 ? (
-                        selectedPlayer.games.map((game) => (
-                          <span key={game} className="profile-game-chip">
-                            {game}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="muted small">{playerText.noGames}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="profile-mini-stats">
-                    <div
-                      className="profile-mini-stat-card"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-                      <span className="info-label">{playerText.achievements}</span>
-                      <span className="profile-mini-stat-value">
-                        {playerAchievements.length}
-                      </span>
-                    </div>
-
-                    <div
-                      className="profile-mini-stat-card"
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        e.currentTarget.style.setProperty(
-                          "--x",
-                          `${e.clientX - rect.left}px`
-                        );
-                        e.currentTarget.style.setProperty(
-                          "--y",
-                          `${e.clientY - rect.top}px`
-                        );
-                      }}
-                    >
-<span className="info-label">{playerText.tournaments}</span>
-<span className="profile-mini-stat-value">
-  {playerTournaments.length}
-</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PlayerProfileHeader
+              player={selectedPlayer}
+              currentTeam={selectedPlayerCurrentTeam}
+              labels={{
+                elo: playerText.elo,
+                rank: text.admin.rank,
+                winRate: playerText.winRate,
+                currentStreak: playerText.currentStreak,
+                games: playerText.games,
+                noGames: playerText.noGames,
+                achievements: playerText.achievements,
+                tournaments: playerText.tournaments,
+              }}
+              winRate={playerWinRate}
+              streakLabel={playerStreak.label}
+              formResults={playerFormResults}
+              achievementsCount={playerAchievements.length}
+              tournamentsCount={playerTournaments.length}
+            />
 
 <div className="section-block">
   <h4>{playerText.teamHistory}</h4>
