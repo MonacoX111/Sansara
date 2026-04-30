@@ -779,13 +779,11 @@ placeholder={playerText.searchPlaceholder}
                         );
                       }}
                     >
-                      <div className="player-achievement-icon-wrap">
-                        <img
-                          src={achievement.image}
-                          alt={achievement.title}
-                          className="player-achievement-icon"
-                        />
-                      </div>
+                      <img
+                        src={achievement.image}
+                        alt={achievement.title}
+                        className="player-achievement-icon"
+                      />
                       <div className="player-achievement-content">
                         <div className="player-achievement-title">
                           {achievement.title}
@@ -847,8 +845,8 @@ placeholder={playerText.searchPlaceholder}
                         );
                       }}
                     >
-                      <div className="row-between">
-                        <div>
+                      <div className="player-tournament-card-main">
+                        <div className="player-tournament-info">
                           <div className="achievement-title tournament-history-open-title">
                             {tournament.title}
                           </div>
@@ -858,7 +856,8 @@ placeholder={playerText.searchPlaceholder}
                           </div>
                         </div>
 
-                        <div className="player-tournament-pills">
+                        <div className="player-tournament-actions">
+                          <div className="player-tournament-pills">
                           <div className="player-tournament-pills-row player-tournament-pills-row-info">
                             <span
                               className={`player-tournament-pill player-tournament-pill-place ${
@@ -949,13 +948,14 @@ placeholder={playerText.searchPlaceholder}
                               </button>
                             </div>
                           ) : null}
+                          </div>
+                          <span
+                            className="click-card-arrow player-tournament-expand"
+                            aria-hidden="true"
+                          >
+                            &gt;
+                          </span>
                         </div>
-                        <span
-                          className="click-card-arrow"
-                          aria-hidden="true"
-                        >
-                          &gt;
-                        </span>
                       </div>
                       {isEloExpanded ? (
                         <div
