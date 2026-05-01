@@ -4,7 +4,7 @@ import {
   getPlayerMatchResult,
   getPlayerMatches,
   getPlayerRecentMatches,
-  getPlayerStreak,
+  getPlayerStreakFromVisibleForm,
   getPlayerWinRate,
 } from "../domain/player/playerStats";
 import {
@@ -72,7 +72,6 @@ export default function PlayersTab({
   onOpenTournament,
   lang = "en",
 }: Props) {
-
   const text = t[lang] || t.en;
   const playerText = text.playersPage;
   const commonText = text.common;
@@ -94,7 +93,7 @@ export default function PlayersTab({
 
   const getPlayerAchievements = (playerId: number) =>
     achievements.filter((achievement) =>
-      achievement.playerIds.includes(playerId)
+      achievement.playerIds.includes(playerId),
     );
 
   const selectedPlayer =
@@ -112,7 +111,7 @@ export default function PlayersTab({
 
   const isSelectedPlayerInTournamentTeam = (
     tournament: Tournament,
-    teamId: number
+    teamId: number,
   ) => {
     const roster = getTournamentTeamRoster(tournament, teamId);
 
@@ -121,7 +120,7 @@ export default function PlayersTab({
         tournament,
         teamId,
         selectedPlayerId,
-        players
+        players,
       );
     }
 
@@ -135,7 +134,7 @@ export default function PlayersTab({
       ? tournament.teamRosters.find((item) =>
           Array.isArray(item.playerIds)
             ? item.playerIds.map(Number).includes(Number(selectedPlayerId))
-            : false
+            : false,
         )
       : undefined;
 
@@ -155,7 +154,7 @@ export default function PlayersTab({
       (item) =>
         Number(item.playerId) === Number(selectedPlayerId) ||
         (typeof item.teamId === "number" &&
-          isSelectedPlayerInTournamentTeam(tournament, Number(item.teamId)))
+          isSelectedPlayerInTournamentTeam(tournament, Number(item.teamId))),
     );
   };
 
@@ -172,14 +171,15 @@ export default function PlayersTab({
     const participatedByTeam =
       tournament.participantType === "team" &&
       participantIds.some((teamId) =>
-        isSelectedPlayerInTournamentTeam(tournament, teamId)
+        isSelectedPlayerInTournamentTeam(tournament, teamId),
       );
-    const wonDirectly = Number(tournament.winnerId) === Number(selectedPlayer.id);
+    const wonDirectly =
+      Number(tournament.winnerId) === Number(selectedPlayer.id);
     const wonByTeam =
       typeof tournament.winnerTeamId === "number" &&
       isSelectedPlayerInTournamentTeam(
         tournament,
-        Number(tournament.winnerTeamId)
+        Number(tournament.winnerTeamId),
       );
 
     return (
@@ -215,10 +215,10 @@ export default function PlayersTab({
       );
     })
     .filter((player) =>
-      gameFilter === "all" ? true : player.games.includes(gameFilter)
+      gameFilter === "all" ? true : player.games.includes(gameFilter),
     )
     .filter((player) =>
-      teamFilter === "all" ? true : String(player.teamId) === teamFilter
+      teamFilter === "all" ? true : String(player.teamId) === teamFilter,
     )
     .sort((a, b) => {
       const aFeatured = Boolean(a.isFeatured);
@@ -234,7 +234,7 @@ export default function PlayersTab({
     });
 
   const playerMatches = getPlayerMatches(matches, selectedPlayerId).sort(
-    (a, b) => (a.order ?? a.id) - (b.order ?? b.id)
+    (a, b) => (a.order ?? a.id) - (b.order ?? b.id),
   );
   const playerRecentMatches = getPlayerRecentMatches({
     matches,
@@ -262,29 +262,25 @@ export default function PlayersTab({
       round: match.round,
       score: match.score,
       tournamentName,
-    })
+    }),
   );
   const playerFormResults = playerRecentMatches
     .filter((item) => item.result === "win" || item.result === "loss")
     .slice(-5);
+  const playerVisibleFormResults = [...playerFormResults].reverse();
   const playerDecidedMatches = playerMatches.filter(
-    (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending"
+    (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending",
   );
   const playerWins = playerDecidedMatches.filter(
-    (match) => getPlayerMatchResult(match, selectedPlayerId) === "win"
+    (match) => getPlayerMatchResult(match, selectedPlayerId) === "win",
   ).length;
   const playerLosses = playerDecidedMatches.length - playerWins;
   const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId);
-  const playerStreak = getPlayerStreak(playerMatches, selectedPlayerId);
+  const playerStreak = getPlayerStreakFromVisibleForm(playerVisibleFormResults);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
   const playerEloHistory = selectedPlayer
-    ? getPlayerTournamentEloHistory(
-        selectedPlayer,
-        tournaments,
-        teams,
-        players
-      )
+    ? getPlayerTournamentEloHistory(selectedPlayer, tournaments, teams, players)
     : [];
   const playerEloTimeline = selectedPlayer
     ? getPlayerEloTimeline(selectedPlayer, tournaments, teams, players)
@@ -295,7 +291,7 @@ export default function PlayersTab({
         item.teamId || "solo"
       }`,
       item,
-    ])
+    ]),
   );
   const playerTournamentHistory = tournaments
     .filter(isSelectedPlayerTournament)
@@ -312,21 +308,21 @@ export default function PlayersTab({
             ? getTeamName(playedTeamId) || playerText.unknownTeam
             : undefined,
         eloEntries: playerEloHistory.filter(
-          (item) => item.tournamentId === tournament.id
+          (item) => item.tournamentId === tournament.id,
         ),
         isWinner:
           Number(tournament.winnerId) === Number(selectedPlayerId) ||
           (typeof tournament.winnerTeamId === "number" &&
             isSelectedPlayerInTournamentTeam(
               tournament,
-              Number(tournament.winnerTeamId)
+              Number(tournament.winnerTeamId),
             )),
         isMvp: Number(tournament.mvpId) === Number(selectedPlayerId),
       };
     })
     .filter(
       (tournament, index, items) =>
-        items.findIndex((item) => item.id === tournament.id) === index
+        items.findIndex((item) => item.id === tournament.id) === index,
     ) as (Tournament & {
     place: number | string;
     playedTeamName?: string;
@@ -363,7 +359,7 @@ export default function PlayersTab({
     (tournament) => {
       const placementTone = getPlacementTier(tournament.place);
       const placementCardClass = getTournamentPlacementCardClass(
-        tournament.place
+        tournament.place,
       );
       const eloPills = tournament.eloEntries.map((item) => ({
         key: `${tournament.id}-${item.placement}-${item.sourceType}-${
@@ -381,8 +377,8 @@ export default function PlayersTab({
             ? tournament.type === "2x2"
               ? playerText.duo
               : tournament.type === "3x3"
-              ? playerText.trio
-              : playerText.solo
+                ? playerText.trio
+                : playerText.solo
             : item.teamName || playerText.team,
         className:
           item.sourceType === "team"
@@ -395,7 +391,7 @@ export default function PlayersTab({
         !tournament.eloEntries.some(
           (item) =>
             item.sourceType === "team" &&
-            item.teamName === tournament.playedTeamName
+            item.teamName === tournament.playedTeamName,
         )
           ? {
               key: `${tournament.id}-played-team`,
@@ -408,7 +404,7 @@ export default function PlayersTab({
         const timelineItem = playerEloTimelineByTournament.get(
           `${item.tournamentId}-${item.placement}-${item.sourceType}-${
             item.teamId || "solo"
-          }`
+          }`,
         );
         const totalElo =
           typeof timelineItem?.totalEloBonus === "number"
@@ -448,7 +444,7 @@ export default function PlayersTab({
         playedTeamPill,
         eloDetails,
       };
-    }
+    },
   );
 
   return (
@@ -458,7 +454,7 @@ export default function PlayersTab({
           className="input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-placeholder={playerText.searchPlaceholder}
+          placeholder={playerText.searchPlaceholder}
         />
 
         <PremiumSelect
@@ -507,31 +503,31 @@ placeholder={playerText.searchPlaceholder}
         <div className="panel">
           <h2 className="panel-title">{playerText.directory}</h2>
 
-          <div className="player-grid">
+          <div className="player-grid home-hover-sync-group">
             {filteredPlayers.map((player) => {
               const teamName = getTeamName(player.teamId);
               const cardAchievements = getPlayerAchievements(player.id);
               const previewAchievements = cardAchievements.slice(0, 3);
               const hiddenAchievementsCount = Math.max(
                 cardAchievements.length - previewAchievements.length,
-                0
+                0,
               );
 
               return (
                 <button
                   key={player.id}
-                  className={`player-card ${
+                  className={`player-card player-selector-card home-hover-sync-card ${
                     selectedPlayerId === player.id ? "player-card-active" : ""
                   }`}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     e.currentTarget.style.setProperty(
                       "--x",
-                      `${e.clientX - rect.left}px`
+                      `${e.clientX - rect.left}px`,
                     );
                     e.currentTarget.style.setProperty(
                       "--y",
-                      `${e.clientY - rect.top}px`
+                      `${e.clientY - rect.top}px`,
                     );
                   }}
                   onClick={() => setSelectedPlayerId(player.id)}
@@ -561,7 +557,9 @@ placeholder={playerText.searchPlaceholder}
 
                   <div className="player-info-box">
                     <div className="player-info-row">
-                      <span className="info-label">{playerText.currentTeam}</span>
+                      <span className="info-label">
+                        {playerText.currentTeam}
+                      </span>
                       <span className="info-value">
                         {teamName || playerText.noTeam}
                       </span>
@@ -578,13 +576,17 @@ placeholder={playerText.searchPlaceholder}
                             </span>
                           ))
                         ) : (
-                          <span className="muted small">{playerText.noGames}</span>
+                          <span className="muted small">
+                            {playerText.noGames}
+                          </span>
                         )}
                       </div>
                     </div>
 
                     <div className="player-info-row column">
-                      <span className="info-label">{playerText.achievements}</span>
+                      <span className="info-label">
+                        {playerText.achievements}
+                      </span>
 
                       {previewAchievements.length > 0 ? (
                         <div className="tag-row compact player-achievement-preview">
@@ -656,142 +658,145 @@ placeholder={playerText.searchPlaceholder}
               tournamentsCount={playerTournaments.length}
             />
 
-<div className="section-block">
-  <h4>{playerText.teamHistory}</h4>
+            <div className="section-block">
+              <h4>{playerText.teamHistory}</h4>
 
-  {selectedPlayerTeamHistory.length === 0 ? (
-    <p className="muted">{playerText.noTeam}</p>
-  ) : (
+              {selectedPlayerTeamHistory.length === 0 ? (
+                <p className="muted">{playerText.noTeam}</p>
+              ) : (
                 <div className="team-history-list">
                   {selectedPlayerTeamHistory.map((item) => {
                     const teamId = Number(item.teamId);
                     const canOpenTeam = Number.isFinite(teamId) && teamId > 0;
 
                     return (
-                    <div
-                      key={item.teamId}
-                      className={`team-history-card ${
-                        canOpenTeam ? "team-history-click-card" : ""
-                      }`}
-                      role={canOpenTeam ? "button" : undefined}
-                      tabIndex={canOpenTeam ? 0 : undefined}
-                      aria-label={
-                        canOpenTeam
-                          ? `Open ${item.team?.name || playerText.unknownTeam}`
-                          : undefined
-                      }
-                      onClick={() => {
-                        if (!canOpenTeam) return;
-                        onOpenTeam?.(teamId);
-                      }}
-                      onKeyDown={(event) => {
-                        if (!canOpenTeam) return;
-                        if (event.key !== "Enter" && event.key !== " ") return;
-                        event.preventDefault();
-                        onOpenTeam?.(teamId);
-                      }}
-                    >
-                      <div className="team-history-top">
-                        <div className="team-history-main">
-                          {item.team?.logo ? (
-                            <img
-                              src={item.team.logo}
-                              alt={item.team.name}
-                              className="team-history-logo"
-                            />
-                          ) : (
-                            <div className="team-history-logo-placeholder">
-                              {(item.team?.name || playerText.unknownTeam).charAt(
-                                0
-                              )}
+                      <div
+                        key={item.teamId}
+                        className={`team-history-card ${
+                          canOpenTeam ? "team-history-click-card" : ""
+                        }`}
+                        role={canOpenTeam ? "button" : undefined}
+                        tabIndex={canOpenTeam ? 0 : undefined}
+                        aria-label={
+                          canOpenTeam
+                            ? `Open ${item.team?.name || playerText.unknownTeam}`
+                            : undefined
+                        }
+                        onClick={() => {
+                          if (!canOpenTeam) return;
+                          onOpenTeam?.(teamId);
+                        }}
+                        onKeyDown={(event) => {
+                          if (!canOpenTeam) return;
+                          if (event.key !== "Enter" && event.key !== " ")
+                            return;
+                          event.preventDefault();
+                          onOpenTeam?.(teamId);
+                        }}
+                      >
+                        <div className="team-history-top">
+                          <div className="team-history-main">
+                            {item.team?.logo ? (
+                              <img
+                                src={item.team.logo}
+                                alt={item.team.name}
+                                className="team-history-logo"
+                              />
+                            ) : (
+                              <div className="team-history-logo-placeholder">
+                                {(
+                                  item.team?.name || playerText.unknownTeam
+                                ).charAt(0)}
+                              </div>
+                            )}
+                            <div className="team-history-title">
+                              {item.team?.name || playerText.unknownTeam}
                             </div>
-                          )}
-                          <div className="team-history-title">
-                            {item.team?.name || playerText.unknownTeam}
+                          </div>
+                          <div className="team-history-actions">
+                            {item.isCurrent ? (
+                              <span className="pill green">
+                                {playerText.currentTeam}
+                              </span>
+                            ) : null}
+                            {canOpenTeam ? (
+                              <span
+                                className="click-card-arrow"
+                                aria-hidden="true"
+                              >
+                                &gt;
+                              </span>
+                            ) : null}
                           </div>
                         </div>
-                        <div className="team-history-actions">
-                          {item.isCurrent ? (
-                            <span className="pill green">
-                              {playerText.currentTeam}
-                            </span>
-                          ) : null}
-                          {canOpenTeam ? (
-                            <span
-                              className="click-card-arrow"
-                              aria-hidden="true"
-                            >
-                              &gt;
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
 
-                      {(item.from || item.to) ? (
-                        <div className="team-history-meta">
-                          <span>{item.from || "-"}</span>
-                          <span>{item.to || playerText.currentTeam}</span>
-                        </div>
-                      ) : null}
-                    </div>
+                        {item.from || item.to ? (
+                          <div className="team-history-meta">
+                            <span>{item.from || "-"}</span>
+                            <span>{item.to || playerText.currentTeam}</span>
+                          </div>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>
               )}
             </div>
 
-<div className="stats-grid">
-  <StatCard title={playerText.totalMatches} value={playerMatches.length} />
-  <StatCard title={playerText.wins} value={playerWins} />
-  <StatCard title={playerText.losses} value={playerLosses} />
-  <StatCard
-    title={playerText.tournamentsWon}
-    value={selectedPlayer.tournamentsWon}
-  />
-  <StatCard
-    title={playerText.earnings}
-    value={`${selectedPlayer.earnings} ₴`}
-  />
-</div>
+            <div className="stats-grid">
+              <StatCard
+                title={playerText.totalMatches}
+                value={playerMatches.length}
+              />
+              <StatCard title={playerText.wins} value={playerWins} />
+              <StatCard title={playerText.losses} value={playerLosses} />
+              <StatCard
+                title={playerText.tournamentsWon}
+                value={selectedPlayer.tournamentsWon}
+              />
+              <StatCard
+                title={playerText.earnings}
+                value={`${selectedPlayer.earnings} ₴`}
+              />
+            </div>
 
+            <PlayerAchievements
+              achievements={playerAchievements}
+              title={playerText.achievements}
+              emptyText={playerText.noAchievements}
+            />
 
-<PlayerAchievements
-  achievements={playerAchievements}
-  title={playerText.achievements}
-  emptyText={playerText.noAchievements}
-/>
+            <PlayerTournamentHistory
+              tournaments={playerTournamentHistoryRows}
+              labels={{
+                title: playerText.tournamentHistory,
+                emptyText: playerText.noTournamentHistory,
+                place: playerText.place,
+                winner: playerText.winner,
+                mvp: playerText.mvp,
+                eloHistory: playerText.eloHistory,
+                showEloHistory: playerText.showEloHistory,
+                hideEloHistory: playerText.hideEloHistory,
+                eloGain: playerText.eloGain,
+                source: playerText.source,
+                team: playerText.team,
+                totalElo: playerText.totalElo,
+              }}
+              expandedEloTournamentId={expandedEloTournamentId}
+              onToggleEloTournament={(tournamentId) =>
+                setExpandedEloTournamentId((currentId) =>
+                  currentId === tournamentId ? null : tournamentId,
+                )
+              }
+              onOpenTournament={onOpenTournament}
+            />
 
-<PlayerTournamentHistory
-  tournaments={playerTournamentHistoryRows}
-  labels={{
-    title: playerText.tournamentHistory,
-    emptyText: playerText.noTournamentHistory,
-    place: playerText.place,
-    winner: playerText.winner,
-    mvp: playerText.mvp,
-    eloHistory: playerText.eloHistory,
-    showEloHistory: playerText.showEloHistory,
-    hideEloHistory: playerText.hideEloHistory,
-    eloGain: playerText.eloGain,
-    source: playerText.source,
-    team: playerText.team,
-    totalElo: playerText.totalElo,
-  }}
-  expandedEloTournamentId={expandedEloTournamentId}
-  onToggleEloTournament={(tournamentId) =>
-    setExpandedEloTournamentId((currentId) =>
-      currentId === tournamentId ? null : tournamentId
-    )
-  }
-  onOpenTournament={onOpenTournament}
-/>
-
-<PlayerRecentMatches
-  title={playerText.recentMatches}
-  emptyText={playerText.noRecentMatches}
-  vsText={commonText.vs}
-  matches={playerRecentMatchRows}
-/>
+            <PlayerRecentMatches
+              title={playerText.recentMatches}
+              emptyText={playerText.noRecentMatches}
+              vsText={commonText.vs}
+              matches={playerRecentMatchRows}
+            />
           </div>
         )}
       </div>

@@ -1580,14 +1580,13 @@
     background 180ms ease;
 }
 
-.home-hover-sync-group:hover .home-hover-sync-card,
-.home-hover-sync-group:focus-within .home-hover-sync-card {
+.home-hover-sync-group:hover .home-hover-sync-card {
   opacity: 0.72;
   transform: scale(0.985);
 }
 
 .home-hover-sync-group:hover .home-hover-sync-card:hover,
-.home-hover-sync-group:focus-within .home-hover-sync-card:focus-visible {
+.home-hover-sync-card:focus-visible {
   z-index: 2;
   opacity: 1;
   transform: translateY(-4px) scale(1.01);

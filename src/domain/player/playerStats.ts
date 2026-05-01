@@ -45,12 +45,12 @@ export const getPlayerMatches = (matches: Match[], playerId: number) =>
     (match) =>
       match.matchType === "player" &&
       (normalizeId(match.player1) === playerId ||
-        normalizeId(match.player2) === playerId)
+        normalizeId(match.player2) === playerId),
   );
 
 export const getPlayerMatchResult = (
   match: Match,
-  playerId: number
+  playerId: number,
 ): PlayerMatchResult => {
   const winnerId = normalizeId(match.winnerId);
 
@@ -60,13 +60,13 @@ export const getPlayerMatchResult = (
 
 export const getPlayerWinRate = (matches: Match[], playerId: number) => {
   const decidedMatches = matches.filter(
-    (match) => getPlayerMatchResult(match, playerId) !== "pending"
+    (match) => getPlayerMatchResult(match, playerId) !== "pending",
   );
 
   if (decidedMatches.length === 0) return 0;
 
   const wins = decidedMatches.filter(
-    (match) => getPlayerMatchResult(match, playerId) === "win"
+    (match) => getPlayerMatchResult(match, playerId) === "win",
   ).length;
 
   return Math.round((wins / decidedMatches.length) * 100);
@@ -74,10 +74,10 @@ export const getPlayerWinRate = (matches: Match[], playerId: number) => {
 
 export const getPlayerStreak = (
   matches: Match[],
-  playerId: number
+  playerId: number,
 ): PlayerStreak => {
   const decidedMatches = [...matches]
-    .sort(comparePlayerMatchesLatestFirst)
+    .sort((a, b) => comparePlayerMatchesLatestFirst(b, a))
     .filter((match) => getPlayerMatchResult(match, playerId) !== "pending");
 
   if (decidedMatches.length === 0) {
@@ -88,16 +88,59 @@ export const getPlayerStreak = (
     };
   }
 
-  const firstResult = getPlayerMatchResult(decidedMatches[0], playerId);
-  const type = firstResult === "win" ? "W" : "L";
+  const latestResult = getPlayerMatchResult(
+    decidedMatches[decidedMatches.length - 1],
+    playerId,
+  );
+  const type = latestResult === "win" ? "W" : "L";
   let count = 0;
 
-  for (const match of decidedMatches) {
-    const result = getPlayerMatchResult(match, playerId);
+  for (let index = decidedMatches.length - 1; index >= 0; index -= 1) {
+    const result = getPlayerMatchResult(decidedMatches[index], playerId);
     if (
       (type === "W" && result !== "win") ||
       (type === "L" && result !== "loss")
     ) {
+      break;
+    }
+
+    count += 1;
+  }
+
+  return {
+    type,
+    count,
+    label: `${type}${count}`,
+  };
+};
+
+export const getPlayerStreakFromVisibleForm = (
+  visibleResults: PlayerRecentMatch[],
+): PlayerStreak => {
+  const latestDecidedIndex = visibleResults
+    .map((item) => item.result)
+    .lastIndexOf("win");
+  const latestLossIndex = visibleResults
+    .map((item) => item.result)
+    .lastIndexOf("loss");
+  const latestIndex = Math.max(latestDecidedIndex, latestLossIndex);
+
+  if (latestIndex === -1) {
+    return {
+      type: "-",
+      count: 0,
+      label: "-",
+    };
+  }
+
+  const latestResult = visibleResults[latestIndex].result;
+  const type = latestResult === "win" ? "W" : "L";
+  let count = 0;
+
+  for (let index = latestIndex; index >= 0; index -= 1) {
+    const result = visibleResults[index].result;
+
+    if (result !== latestResult) {
       break;
     }
 
