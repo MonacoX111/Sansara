@@ -62,7 +62,10 @@ import {
 } from "./domain/match/matchOrdering";
 import { progressMatchWinner } from "./domain/match/matchProgression";
 import { validateMatchWinner } from "./domain/match/matchValidation";
-import { recalculateAllPlayersElo } from "./domain/player/playerElo";
+import {
+  recalculateAllPlayersElo,
+  recalculatePlayerRanks,
+} from "./domain/player/playerElo";
 
 type PlayerForm = {
   nickname: string;
@@ -269,23 +272,6 @@ participantLabelType: "players",
 tournamentId: undefined,
   isVisible: true,
 });
-
-const recalculatePlayerRanks = (items: Player[]): Player[] => {
-  const sortedPlayers = [...items].sort((a, b) => {
-    if (b.elo !== a.elo) return b.elo - a.elo;
-    return a.id - b.id;
-  });
-
-  const rankMap = new Map<number, number>();
-  sortedPlayers.forEach((player, index) => {
-    rankMap.set(player.id, index + 1);
-  });
-
-  return items.map((player) => ({
-    ...player,
-    rank: rankMap.get(player.id) || 0,
-  }));
-};
 
 const normalizePlayers = (items: Player[]): Player[] =>
   recalculatePlayerRanks(

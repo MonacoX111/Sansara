@@ -13,7 +13,7 @@ export const BASE_ELO = 1000;
 const isFinishedTournament = (tournament: Tournament) =>
   tournament.status === "finished" || tournament.status === "completed";
 
-const recalculatePlayerRanks = (items: Player[]): Player[] => {
+export const recalculatePlayerRanks = (items: Player[]): Player[] => {
   const sortedPlayers = [...items].sort((a, b) => {
     if (b.elo !== a.elo) return b.elo - a.elo;
     return a.id - b.id;
