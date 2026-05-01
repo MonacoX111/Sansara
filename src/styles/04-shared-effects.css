@@ -195,7 +195,8 @@
 .tournament-history-info-card,
 .achievement-card,
 .champion-card,
-.player-row.new {
+.player-row.new,
+.transfer-card {
   position: relative;
   overflow: hidden;
 }
@@ -221,7 +222,8 @@
 .tournament-history-info-card::before,
 .achievement-card::before,
 .champion-card::before,
-.player-row.new::before {
+.player-row.new::before,
+.transfer-card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -261,7 +263,8 @@
 .tournament-history-info-card:hover::before,
 .achievement-card:hover::before,
 .champion-card:hover::before,
-.player-row.new:hover::before {
+.player-row.new:hover::before,
+.transfer-card:hover::before {
   opacity: 1;
 }
 
@@ -289,7 +292,8 @@
 .achievement-card > *,
 .champion-card > *,
 .mvp-card > *,
-.player-row.new > * {
+.player-row.new > *,
+.transfer-card > * {
   position: relative;
   z-index: 2;
 }

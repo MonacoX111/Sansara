@@ -1,0 +1,205 @@
+/* ===== Searchable Select ===== */
+
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select-trigger {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.searchable-select-trigger:hover,
+.searchable-select-open .searchable-select-trigger {
+  border-color: rgba(255, 59, 95, 0.55);
+  background: rgba(255, 59, 95, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 20px rgba(255, 59, 95, 0.12);
+  transform: translateY(-1px);
+}
+
+.searchable-select-disabled .searchable-select-trigger {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.searchable-select-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.searchable-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchable-select-placeholder {
+  opacity: 0.55;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+}
+
+.searchable-select-arrow {
+  font-size: 14px;
+  opacity: 0.7;
+  transition: transform 0.18s ease;
+}
+
+.searchable-select-open .searchable-select-arrow {
+  transform: rotate(180deg);
+}
+
+.searchable-select-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.searchable-select-avatar-fallback {
+  background: linear-gradient(135deg, rgba(255, 59, 95, 0.28), rgba(255, 59, 95, 0.08));
+  border: 1px solid rgba(255, 59, 95, 0.25);
+}
+
+.searchable-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 59, 95, 0.28);
+  background:
+    linear-gradient(180deg, rgba(22, 22, 28, 0.96), rgba(14, 14, 18, 0.96));
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(255, 59, 95, 0.12);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.searchable-select-search {
+  padding: 2px;
+}
+
+.searchable-select-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.searchable-select-input:focus {
+  border-color: rgba(255, 59, 95, 0.6);
+  background: rgba(255, 59, 95, 0.06);
+}
+
+.searchable-select-list {
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.searchable-select-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.searchable-select-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.searchable-select-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.searchable-select-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 59, 95, 0.4);
+}
+
+.searchable-select-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.searchable-select-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+
+.searchable-select-option-active {
+  background: rgba(255, 59, 95, 0.14);
+  border-color: rgba(255, 59, 95, 0.4);
+  color: #fff;
+}
+
+.searchable-select-empty {
+  padding: 14px 10px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.55;
+}

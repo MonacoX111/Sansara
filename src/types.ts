@@ -75,6 +75,14 @@ export type Player = {
   isFeatured?: boolean;
 };
 
+export type Transfer = {
+  id: number;
+  playerId: number;
+  fromTeamId: number | null;
+  toTeamId: number | null;
+  date: string;
+};
+
 export type Tournament = {
   id: number;
   order?: number;

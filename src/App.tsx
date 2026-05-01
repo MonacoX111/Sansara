@@ -33,6 +33,7 @@ import {
   TournamentGroup,
   TournamentStatus,
   TournamentTeamRoster,
+  Transfer,
 } from "./types";
 import {
   getNextId,
@@ -550,6 +551,9 @@ const handleGlow = handleSpotlightMove;
   const [achievements, setAchievements] = useState<Achievement[]>(() =>
     normalizeAchievements(fallbackAchievements)
   );
+  const [transfers, setTransfers] = useState<Transfer[]>(() =>
+    readStorage<Transfer[]>("tm_transfers", [])
+  );
   const [homeAnnouncement, setHomeAnnouncement] = useState<HomeAnnouncement>(
     () => normalizeHomeAnnouncement(fallbackHomeAnnouncement)
   );
@@ -725,6 +729,7 @@ const showToast = (
     () => writeStorage("tm_achievements", achievements),
     [achievements]
   );
+  useEffect(() => writeStorage("tm_transfers", transfers), [transfers]);
   useEffect(
     () => writeStorage("tm_home_announcement", homeAnnouncement),
     [homeAnnouncement]
@@ -755,6 +760,7 @@ useEffect(() => {
         loadedTournaments,
         loadedMatches,
         loadedAchievements,
+        loadedTransfers,
         loadedHomeAnnouncement,
       ] = await Promise.all([
         loadCollection<Player>("players"),
@@ -762,6 +768,7 @@ useEffect(() => {
         loadCollection<Tournament>("tournaments"),
         loadCollection<Match>("matches"),
         loadCollection<Achievement>("achievements"),
+        loadCollection<Transfer>("transfers"),
         loadCollection<HomeAnnouncement>("homeAnnouncement"),
       ]);
 
@@ -785,6 +792,10 @@ useEffect(() => {
 
       if (loadedAchievements.length > 0) {
         setAchievements(normalizeAchievements(loadedAchievements));
+      }
+
+      if (loadedTransfers.length > 0) {
+        setTransfers(loadedTransfers);
       }
 
       if (loadedHomeAnnouncement.length > 0) {
@@ -2242,6 +2253,44 @@ const deleteAchievement = async (achievementId: number) => {
   );
 };
 
+  const addTransfer = async (input: Omit<Transfer, "id">) => {
+    const newTransfer: Transfer = {
+      id: getNextId(transfers),
+      playerId: Number(input.playerId),
+      fromTeamId: input.fromTeamId ?? null,
+      toTeamId: input.toTeamId ?? null,
+      date: input.date,
+    };
+
+    setTransfers((prev) => [...prev, newTransfer]);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("transfers", newTransfer);
+      }
+      showToast(commonText.transferAdded);
+    } catch (error) {
+      console.error("Failed to add transfer:", error);
+      showToast("Failed to add transfer", "danger");
+    }
+  };
+
+  const deleteTransfer = async (transferId: number) => {
+    const backup = transfers;
+    setTransfers((prev) => prev.filter((tr) => tr.id !== transferId));
+
+    try {
+      if (isFirebaseConfigured) {
+        await deleteItem("transfers", transferId);
+      }
+      showToast(commonText.transferDeleted);
+    } catch (error) {
+      console.error("Failed to delete transfer:", error);
+      setTransfers(backup);
+      showToast("Failed to delete transfer", "danger");
+    }
+  };
+
   const text = t[lang] || t.en;
   const commonText = text.common;
   const routeTournamentId = getRouteEntityId(location.pathname, "tournaments");
@@ -2309,6 +2358,7 @@ const deleteAchievement = async (achievementId: number) => {
   teams={teams}
   tournaments={tournaments}
   matches={matches}
+  transfers={transfers}
   setActiveTab={navigateToTab}
   lang={lang}
 />
@@ -2435,6 +2485,9 @@ saveAchievement={saveAchievement}
 addAchievement={addAchievement}
 deleteAchievement={deleteAchievement}
 selectedAchievement={selectedAchievement}
+transfers={transfers}
+addTransfer={addTransfer}
+deleteTransfer={deleteTransfer}
 lang={lang}
 />
         )}

@@ -11,6 +11,7 @@ import {
   TournamentGroup,
   TournamentStatus,
   TournamentTeamRoster,
+  Transfer,
 } from "../types";
 import { gamesList } from "../data";
 import { parseList } from "../utils";
@@ -21,6 +22,7 @@ import AdminTournaments from "./admin/AdminTournaments";
 import AdminMatches from "./admin/AdminMatches";
 import AdminAchievements from "./admin/AdminAchievements";
 import AdminGeneral from "./admin/AdminGeneral";
+import AdminTransfers from "./admin/AdminTransfers";
 import PremiumSelect from "./ui/PremiumSelect";
 
 type PlayerForm = {
@@ -170,6 +172,11 @@ reorderMatch: (direction: "up" | "down", tournamentId: number) => void | Promise
   addAchievement: () => void | Promise<void>;
   deleteAchievement: (id: number) => void | Promise<void>;
   selectedAchievement: Achievement | null;
+
+  transfers: Transfer[];
+  addTransfer: (transfer: Omit<Transfer, "id">) => void | Promise<void>;
+  deleteTransfer: (id: number) => void | Promise<void>;
+
 autoGenerateBracket: (tournamentId: number) => void | Promise<void>;
 lang: "en" | "ua";
 };
@@ -272,6 +279,9 @@ reorderMatch,
   addAchievement,
   deleteAchievement,
   selectedAchievement,
+  transfers,
+  addTransfer,
+  deleteTransfer,
 }: Props) {
   const safeTournamentParticipantIds = Array.isArray(
     tournamentForm.participantIds
@@ -289,6 +299,7 @@ reorderMatch,
       general: text.nav.general,
       matches: adminText.quickMatches,
       achievements: adminText.quickAchievements,
+      transfers: adminText.transfers,
     };
 
   const safeAchievementPlayerIds = (achievement: Achievement) =>
@@ -860,6 +871,7 @@ const adminAchievementsProps = {
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-general")}>{quickNavText.general}</button>
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-matches")}>{quickNavText.matches}</button>
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-achievements")}>{quickNavText.achievements}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-transfers")}>{quickNavText.transfers}</button>
           </div>
         </nav>
 
@@ -870,6 +882,18 @@ const adminAchievementsProps = {
           <AdminGeneral {...adminGeneralProps} />
           <AdminMatches {...adminMatchesProps} />
           <AdminAchievements {...adminAchievementsProps} />
+          <AdminTransfers
+            adminText={adminText}
+            commonText={commonText}
+            players={players}
+            teams={teams}
+            transfers={transfers}
+            addTransfer={addTransfer}
+            deleteTransfer={deleteTransfer}
+            isAdminActionLoading={isAdminActionLoading}
+            runAdminAction={runAdminAction}
+            setConfirmDelete={setConfirmDelete}
+          />
         </div>
       </div>
 

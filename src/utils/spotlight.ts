@@ -42,6 +42,7 @@ const spotlightSelector = [
   ".welcome-feature-card",
   ".welcome-nav-card",
   ".welcome-activity-row",
+  ".transfer-card",
 ].join(",");
 
 export const handleSpotlightMove = (event: MouseEvent<HTMLElement>) => {

@@ -102,6 +102,16 @@ admin: {
   bannerImageUrl: "Banner image URL",
   participantsCount: "Participants count",
 
+  transfers: "Transfers",
+  addTransfer: "+ Add transfer",
+  deleteTransfer: "Delete",
+  transferPlayer: "Player",
+  transferFrom: "From",
+  transferTo: "To",
+  transferDate: "Date",
+  transferFreeAgent: "Free Agent",
+  noTransfers: "No transfers yet",
+
   matches: "Matches (admin)",
   addMatch: "+ Add match",
   autoGenerateBracket: "Auto generate bracket",
@@ -284,6 +294,8 @@ common: {
   achievementSaved: "Achievement saved",
   achievementAdded: "Achievement added",
   achievementDeleted: "Achievement deleted",
+  transferAdded: "Transfer added",
+  transferDeleted: "Transfer deleted",
 },
 
 team: {
@@ -602,6 +614,16 @@ admin: {
   bannerImageUrl: "URL банера",
   participantsCount: "Кількість учасників",
 
+  transfers: "Трансфери",
+  addTransfer: "+ Додати трансфер",
+  deleteTransfer: "Видалити",
+  transferPlayer: "Гравець",
+  transferFrom: "З",
+  transferTo: "До",
+  transferDate: "Дата",
+  transferFreeAgent: "Вільний агент",
+  noTransfers: "Трансферів поки немає",
+
   matches: "Матчі (адмін)",
   addMatch: "+ Додати матч",
   autoGenerateBracket: "Автоматично створити сітку",
@@ -784,6 +806,8 @@ common: {
   achievementSaved: "Досягнення збережено",
   achievementAdded: "Досягнення додано",
   achievementDeleted: "Досягнення видалено",
+  transferAdded: "Трансфер додано",
+  transferDeleted: "Трансфер видалено",
 },
 
 team: {
