@@ -1309,12 +1309,7 @@ const deletePlayer = async () => {
 
   const nextTeams = syncTeamPlayers(
     nextPlayers,
-    teams.map((team) => ({
-      ...team,
-      players: Array.isArray(team.players)
-        ? team.players.filter((playerId) => playerId !== deletedId)
-        : [],
-    }))
+    teams
   );
 
   const nextTournaments = tournaments.map((tournament) => ({
