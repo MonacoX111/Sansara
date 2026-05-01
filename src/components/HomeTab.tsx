@@ -187,6 +187,7 @@ export default function HomeTab({
     return new Intl.DateTimeFormat(transferDateLocale, {
       day: "2-digit",
       month: "short",
+      year: "numeric",
     }).format(timestamp);
   };
 
