@@ -22,8 +22,9 @@ type LatestTransferItem = {
   playerId: number;
   playerNickname: string;
   playerAvatar: string;
-  teamName: string;
-  teamLogo: string;
+  fromTeamName: string;
+  toTeamName: string;
+  toTeamLogo: string;
   date?: string;
   timestamp: number | null;
   order: number;
@@ -104,53 +105,95 @@ export default function HomeTab({
     .slice(0, 5);
   const latestTransfers = useMemo<LatestTransferItem[]>(() => {
     const teamById = new Map(teams.map((team) => [team.id, team]));
+    const freeAgentLabel = lang === "ua" ? "Вільний агент" : "Free Agent";
     const getTimestamp = (date?: string) => {
       if (!date) return null;
 
       const timestamp = new Date(date).getTime();
       return Number.isFinite(timestamp) ? timestamp : null;
     };
+    const getHistoryTimestamp = (
+      item: NonNullable<Player["teamHistory"]>[number]
+    ) => {
+      const timestamps = [getTimestamp(item.to), getTimestamp(item.from)].filter(
+        (timestamp): timestamp is number => timestamp !== null
+      );
 
-    const entries = players.flatMap((player, playerIndex) => {
-      const history = Array.isArray(player.teamHistory)
-        ? player.teamHistory.filter((item) => teamById.has(Number(item.teamId)))
-        : [];
+      return timestamps.length > 0 ? Math.max(...timestamps) : null;
+    };
+    const getHistoryDate = (
+      item?: NonNullable<Player["teamHistory"]>[number]
+    ) => item?.to || item?.from;
+    const getLatestHistoryItem = (
+      history: (NonNullable<Player["teamHistory"]>[number] & {
+        index: number;
+        timestamp: number | null;
+      })[]
+    ) =>
+      [...history].sort((a, b) => {
+        if (a.timestamp !== null && b.timestamp !== null) {
+          return b.timestamp - a.timestamp;
+        }
 
-      if (history.length > 0) {
-        return history.map((item, historyIndex) => {
-          const team = teamById.get(Number(item.teamId));
-          const date = item.from;
+        if (a.timestamp !== null) return -1;
+        if (b.timestamp !== null) return 1;
 
-          return {
-            key: `${player.id}-${item.teamId}-${date || historyIndex}`,
-            playerId: player.id,
-            playerNickname: player.nickname,
-            playerAvatar: player.avatar,
-            teamName: team?.name || text.playersPage.noTeam,
-            teamLogo: team?.logo || "",
-            date,
-            timestamp: getTimestamp(date),
-            order: playerIndex * 100 + historyIndex,
-          };
-        });
-      }
+        return b.index - a.index;
+      })[0];
 
-      const currentTeam = teamById.get(Number(player.teamId));
-      if (!currentTeam) return [];
+    const entries = players
+      .map((player, playerIndex) => {
+        const currentTeamId = Number(player.teamId || 0);
+        const currentTeam = teamById.get(currentTeamId) || null;
+        const history = Array.isArray(player.teamHistory)
+          ? player.teamHistory
+              .map((item, index) => ({
+                ...item,
+                teamId: Number(item.teamId || 0),
+                index,
+                timestamp: getHistoryTimestamp(item),
+              }))
+              .filter((item) => teamById.has(item.teamId))
+          : [];
+        const currentHistoryItem = currentTeam
+          ? getLatestHistoryItem(
+              history.filter((item) => item.teamId === currentTeam.id)
+            )
+          : undefined;
+        const previousHistoryItem = getLatestHistoryItem(
+          history.filter(
+            (item) => !currentTeam || item.teamId !== currentTeam.id
+          )
+        );
+        const previousTeam = previousHistoryItem
+          ? teamById.get(previousHistoryItem.teamId) || null
+          : null;
 
-      return [
-        {
-          key: `${player.id}-${currentTeam.id}-current`,
+        if (!currentTeam && !previousTeam) return null;
+
+        const date = currentTeam
+          ? getHistoryDate(currentHistoryItem) ||
+            getHistoryDate(previousHistoryItem)
+          : getHistoryDate(previousHistoryItem);
+        const timestamp =
+          currentHistoryItem?.timestamp ?? previousHistoryItem?.timestamp ?? null;
+
+        return {
+          key: `${player.id}-${previousTeam?.id || "free"}-${
+            currentTeam?.id || "free"
+          }-${date || playerIndex}`,
           playerId: player.id,
           playerNickname: player.nickname,
           playerAvatar: player.avatar,
-          teamName: currentTeam.name,
-          teamLogo: currentTeam.logo || "",
-          timestamp: null,
-          order: playerIndex * 100,
-        },
-      ];
-    });
+          fromTeamName: previousTeam?.name || freeAgentLabel,
+          toTeamName: currentTeam?.name || freeAgentLabel,
+          toTeamLogo: currentTeam?.logo || "",
+          date,
+          timestamp,
+          order: playerIndex,
+        };
+      })
+      .filter((entry): entry is LatestTransferItem => entry !== null);
 
     return entries
       .sort((a, b) => {
@@ -164,7 +207,7 @@ export default function HomeTab({
         return a.order - b.order;
       })
       .slice(0, 5);
-  }, [players, teams, text.playersPage.noTeam]);
+  }, [players, teams, lang]);
   const latestTransfersText =
     lang === "ua"
       ? {
@@ -179,6 +222,7 @@ export default function HomeTab({
           empty: "No transfers yet.",
           joined: "joined",
         };
+  const transferActionLabel = lang === "ua" ? "перейшов" : "transferred";
   const transferDateLocale = lang === "ua" ? "uk-UA" : "en-US";
   const formatTransferDate = (date?: string) => {
     if (!date) return "";
@@ -703,7 +747,7 @@ onClick={() => setActiveTab("leaderboard")}
 
                   <div className="welcome-transfer-player">
                     <strong>{transfer.playerNickname}</strong>
-                    <span>{latestTransfersText.joined}</span>
+                    <span>{transferActionLabel}</span>
                   </div>
 
                   <span className="welcome-transfer-arrow" aria-hidden="true">
@@ -711,15 +755,17 @@ onClick={() => setActiveTab("leaderboard")}
                   </span>
 
                   <div className="welcome-transfer-team">
-                    {transfer.teamLogo ? (
-                      <img src={transfer.teamLogo} alt={transfer.teamName} />
+                    {transfer.toTeamLogo ? (
+                      <img src={transfer.toTeamLogo} alt={transfer.toTeamName} />
                     ) : (
                       <span className="welcome-transfer-team-placeholder">
-                        {transfer.teamName.charAt(0)}
+                        {transfer.toTeamName.charAt(0)}
                       </span>
                     )}
                     <div>
-                      <strong>{transfer.teamName}</strong>
+                      <strong>
+                        {transfer.fromTeamName} {"\u2192"} {transfer.toTeamName}
+                      </strong>
                       {transferDate ? <small>{transferDate}</small> : null}
                     </div>
                   </div>
