@@ -63,7 +63,6 @@ export default function AdminTransfers({
         avatar: team.logo,
       })),
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [teams, adminText.transferFreeAgent]
   );
 
