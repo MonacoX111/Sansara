@@ -340,8 +340,10 @@
     ),
     rgba(255, 255, 255, 0.03);
   color: #ff7a92;
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
-    0 0 20px rgba(255, 59, 95, 0.22), 0 0 40px rgba(255, 59, 95, 0.12);
+  box-shadow:
+    inset 0 0 16px rgba(255, 59, 95, 0.1),
+    0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 12px rgba(255, 59, 95, 0.14);
 }
 
 .delete-achievement-btn-top::after {
@@ -364,8 +366,10 @@
   border-color: rgba(255, 59, 95, 0.8);
   color: #ffffff;
   transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.2) inset,
-    0 0 28px rgba(255, 59, 95, 0.34), 0 0 60px rgba(255, 59, 95, 0.2);
+  box-shadow:
+    inset 0 0 18px rgba(255, 59, 95, 0.13),
+    0 0 0 1px rgba(255, 59, 95, 0.2) inset,
+    0 0 14px rgba(255, 59, 95, 0.18);
 }
 
 @keyframes deleteAchievementShimmer {
@@ -445,8 +449,11 @@
 
 .admin-list-btn-featured {
   border-color: rgba(255, 59, 95, 0.45);
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
-    0 0 20px rgba(255, 59, 95, 0.22), 0 0 40px rgba(255, 59, 95, 0.12);
+  box-shadow:
+    inset 0 0 16px rgba(255, 59, 95, 0.1),
+    0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 12px rgba(255, 59, 95, 0.14);
+  overflow: hidden;
 
   background: linear-gradient(
       135deg,
@@ -507,8 +514,11 @@
 
 .featured-team-card {
   border-color: rgba(255, 59, 95, 0.45);
-  box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
-    0 0 20px rgba(255, 59, 95, 0.22), 0 0 40px rgba(255, 59, 95, 0.12);
+  box-shadow:
+    inset 0 0 16px rgba(255, 59, 95, 0.1),
+    0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+    0 0 12px rgba(255, 59, 95, 0.14);
+  overflow: hidden;
   background: linear-gradient(
       135deg,
       rgba(255, 59, 95, 0.12),
@@ -560,16 +570,22 @@
 
 @keyframes featuredTeamGlow {
   0% {
-    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
-      0 0 18px rgba(255, 59, 95, 0.18), 0 0 36px rgba(255, 59, 95, 0.1);
+    box-shadow:
+      inset 0 0 16px rgba(255, 59, 95, 0.1),
+      0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+      0 0 12px rgba(255, 59, 95, 0.14);
   }
   50% {
-    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.2) inset,
-      0 0 30px rgba(255, 59, 95, 0.34), 0 0 60px rgba(255, 59, 95, 0.2);
+    box-shadow:
+      inset 0 0 18px rgba(255, 59, 95, 0.13),
+      0 0 0 1px rgba(255, 59, 95, 0.2) inset,
+      0 0 14px rgba(255, 59, 95, 0.18);
   }
   100% {
-    box-shadow: 0 0 0 1px rgba(255, 59, 95, 0.12) inset,
-      0 0 18px rgba(255, 59, 95, 0.18), 0 0 36px rgba(255, 59, 95, 0.1);
+    box-shadow:
+      inset 0 0 16px rgba(255, 59, 95, 0.1),
+      0 0 0 1px rgba(255, 59, 95, 0.12) inset,
+      0 0 12px rgba(255, 59, 95, 0.14);
   }
 }
 

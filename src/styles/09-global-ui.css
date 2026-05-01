@@ -60,8 +60,9 @@
     linear-gradient(135deg, rgba(214, 41, 118, 0.2), rgba(254, 218, 117, 0.08)),
     rgba(255, 255, 255, 0.04);
   box-shadow:
-    0 0 16px rgba(214, 41, 118, 0.45),
-    0 8px 22px rgba(0, 0, 0, 0.35);
+    inset 0 0 16px rgba(214, 41, 118, 0.1),
+    0 0 12px rgba(214, 41, 118, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
 .instagram-btn:active {
@@ -72,7 +73,8 @@
   outline: none;
   border-color: rgba(67, 208, 255, 0.6);
   box-shadow:
-    0 0 0 3px rgba(67, 208, 255, 0.22);
+    inset 0 0 14px rgba(67, 208, 255, 0.08),
+    0 0 0 2px rgba(67, 208, 255, 0.18);
 }
 
 .topbar-right .secondary-btn {
