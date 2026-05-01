@@ -1621,9 +1621,16 @@ console.warn("ELO: Empty roster for team", teamId, updatedTournament.id);
     };
   });
 
+  const rosterByTeamId = new Map(
+    existingRosters.map((roster) => [Number(roster.teamId), roster])
+  );
+  frozenRosters.forEach((roster) => {
+    rosterByTeamId.set(Number(roster.teamId), roster);
+  });
+
   updatedTournamentWithRoster = {
     ...updatedTournament,
-    teamRosters: frozenRosters,
+    teamRosters: Array.from(rosterByTeamId.values()),
   };
 }
 
