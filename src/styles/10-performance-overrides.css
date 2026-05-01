@@ -120,11 +120,29 @@ body::before {
 .player-card-active,
 .team-card-active,
 .tournament-card-active,
-.admin-list-btn-active,
-.tab-btn-active,
-body .lang-switch button.active {
+.admin-list-btn-active {
   border-radius: inherit;
   overflow: hidden;
+}
+
+body .lang-switch button.active {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+body .lang-switch button.active::before,
+body .lang-switch button.active::after {
+  border-radius: inherit;
+}
+
+.tab-btn-active {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tab-btn-active::before,
+.tab-btn-active::after {
+  border-radius: inherit;
 }
 
 .player-card-active,

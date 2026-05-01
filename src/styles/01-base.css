@@ -301,6 +301,7 @@ button {
 }
 
 .tab-btn-active {
+  border-radius: 12px;
   background:
     linear-gradient(135deg, rgba(var(--color-brand-red-rgb), 0.92), rgba(255, 23, 68, 0.78));
   background-size: 180% 180%;
@@ -313,6 +314,11 @@ button {
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   animation: tabActiveBreath 3.2s ease-in-out infinite;
   overflow: hidden;
+}
+
+.tab-btn-active::before,
+.tab-btn-active::after {
+  border-radius: inherit;
 }
 
 .tab-btn-active:hover {
@@ -356,6 +362,7 @@ body .lang-switch button:active {
 }
 
 body .lang-switch button.active {
+  border-radius: 12px;
   background: linear-gradient(90deg, var(--red), var(--red-2));
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow:
@@ -363,6 +370,11 @@ body .lang-switch button.active {
     0 0 12px rgba(255, 59, 95, 0.16),
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   overflow: hidden;
+}
+
+body .lang-switch button.active::before,
+body .lang-switch button.active::after {
+  border-radius: inherit;
 }
 
 body .lang-switch button.active:hover {
