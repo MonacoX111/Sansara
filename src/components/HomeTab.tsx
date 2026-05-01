@@ -104,8 +104,17 @@ export default function HomeTab({
   const featuredParticipantA = getFeaturedParticipantVisual("left");
   const featuredParticipantB = getFeaturedParticipantVisual("right");
   const recentMatches = [...matches]
-    .sort((a, b) => (a.order ?? a.id) - (b.order ?? b.id))
-    .slice(0, 5);
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+
+      if (dateA !== dateB) {
+        return dateB - dateA;
+      }
+
+      return (a.order ?? a.id) - (b.order ?? b.id);
+    })
+    .slice(0, 6);
   const latestTransfers = useMemo<LatestTransferItem[]>(() => {
     const teamById = new Map(teams.map((team) => [team.id, team]));
     const playerById = new Map(players.map((player) => [player.id, player]));
