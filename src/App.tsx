@@ -1205,6 +1205,11 @@ tournamentId: safeTournamentId,
   const savePlayer = async () => {
     if (!selectedPlayer) return;
 
+    if (!playerForm.nickname.trim()) {
+      showToast("Player nickname is required", "danger");
+      return;
+    }
+
     const updatedPlayer: Player = {
       ...selectedPlayer,
       nickname: playerForm.nickname,
@@ -1280,6 +1285,11 @@ try {
       bio: "",
       isFeatured: false,
     };
+
+    if (!newPlayer.nickname.trim()) {
+      showToast("Player nickname is required", "danger");
+      return;
+    }
 
     const nextPlayers = recalculatePlayerRanks([...players, newPlayer]);
     const nextTeams = syncTeamPlayers(nextPlayers, teams);
@@ -1387,6 +1397,11 @@ if (isFirebaseConfigured) {
   const saveTeam = async () => {
     if (!selectedTeam) return;
 
+    if (!teamForm.name.trim()) {
+      showToast("Team name is required", "danger");
+      return;
+    }
+
     const updatedTeam: Team = {
       ...selectedTeam,
       name: teamForm.name,
@@ -1432,6 +1447,11 @@ if (isFirebaseConfigured) {
       description: "",
       isFeatured: false,
     };
+
+if (!newTeam.name.trim()) {
+  showToast("Team name is required", "danger");
+  return;
+}
 
 setTeams((prev) => [...prev, newTeam]);
 setSelectedTeamId(newTeam.id);
@@ -1500,7 +1520,12 @@ if (isFirebaseConfigured) {
   );
 };
 
-  const saveTournament = async () => {
+  const saveTournament = async (confirmedEloWarning = false) => {
+    if (!tournamentForm.title.trim()) {
+      showToast("Tournament title is required", "danger");
+      return;
+    }
+
     const updatedTournament: Tournament = {
       id: selectedTournamentId,
       order:
@@ -1587,6 +1612,31 @@ if (isFirebaseConfigured) {
     const isFinished =
       updatedTournament.status === "completed" ||
       updatedTournament.status === "finished";
+
+    if (
+      ["player", "team", "squad"].includes(updatedTournament.participantType) &&
+      updatedTournament.participantIds.length === 0
+    ) {
+      showToast("Tournament participants are required", "danger");
+      return;
+    }
+
+    if (
+      isFinished &&
+      Array.isArray(updatedTournament.placements) &&
+      updatedTournament.placements.length > 0 &&
+      !confirmedEloWarning
+    ) {
+      showToast(
+        "Saving placements for a finished tournament may change ELO/ranks.",
+        "warning",
+        () => {
+          void saveTournament(true);
+        },
+        commonText.save || "Save"
+      );
+      return;
+    }
 
 let updatedTournamentWithRoster = updatedTournament;
 
@@ -1750,6 +1800,19 @@ if (isFirebaseConfigured) {
       eloApplied: false,
       isPublished: false,
     };
+
+    if (!newTournament.title.trim()) {
+      showToast("Tournament title is required", "danger");
+      return;
+    }
+
+    if (
+      ["player", "team", "squad"].includes(newTournament.participantType) &&
+      newTournament.participantIds.length === 0
+    ) {
+      showToast("Tournament participants are required", "danger");
+      return;
+    }
 
     const nextTournaments = [...tournaments, newTournament];
 
@@ -1932,6 +1995,21 @@ if (isFirebaseConfigured) {
   };
 
 const saveMatch = async () => {
+  if (!matchForm.game.trim()) {
+    showToast("Match game is required", "danger");
+    return;
+  }
+
+  if (
+    (matchForm.matchType === "player" &&
+      (!Number(matchForm.player1) || !Number(matchForm.player2))) ||
+    (matchForm.matchType === "team" &&
+      (!Number(matchForm.team1) || !Number(matchForm.team2)))
+  ) {
+    showToast("Both match participants are required", "danger");
+    return;
+  }
+
   const baseMatch: Match =
     selectedMatch || {
       id: getNextId(matches),
@@ -2057,6 +2135,19 @@ roundLabel: "",
 bestOf: 1,
       notes: "",
     };
+
+    if (!newMatch.game.trim()) {
+      showToast("Match game is required", "danger");
+      return;
+    }
+
+    if (
+      (newMatch.matchType === "player" && (!newMatch.player1 || !newMatch.player2)) ||
+      (newMatch.matchType === "team" && (!newMatch.team1 || !newMatch.team2))
+    ) {
+      showToast("Both match participants are required", "danger");
+      return;
+    }
 
     setMatches((prev) => [...prev, newMatch]);
     setSelectedMatchId(newMatch.id);
@@ -2209,6 +2300,11 @@ const autoGenerateBracket = async (tournamentId: number) => {
         : currentAchievement.playerIds,
     };
 
+    if (!updatedAchievement.title.trim()) {
+      showToast("Achievement title is required", "danger");
+      return;
+    }
+
     setAchievements((prev) =>
       prev.map((achievement) =>
         achievement.id === achievementId ? updatedAchievement : achievement
@@ -2235,6 +2331,11 @@ showToast(commonText.achievementSaved);
       image: achievementPlaceholder("A"),
       playerIds: [],
     };
+
+if (!newAchievement.title.trim()) {
+  showToast("Achievement title is required", "danger");
+  return;
+}
 
 setAchievements((prev) => [...prev, newAchievement]);
 setSelectedAchievementId(newAchievement.id);
@@ -2288,6 +2389,16 @@ const deleteAchievement = async (achievementId: number) => {
 };
 
   const addTransfer = async (input: Omit<Transfer, "id">) => {
+    if (!Number(input.playerId)) {
+      showToast("Transfer player is required", "danger");
+      return;
+    }
+
+    if (!input.date.trim()) {
+      showToast("Transfer date is required", "danger");
+      return;
+    }
+
     const newTransfer: Transfer = {
       id: getNextId(transfers),
       playerId: Number(input.playerId),

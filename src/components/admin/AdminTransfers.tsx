@@ -85,14 +85,10 @@ export default function AdminTransfers({
     );
   };
 
-  const canSubmit = Boolean(player && date);
-
   const handleAdd = () => {
-    if (!canSubmit || !player) return;
-
     runAdminAction("create-transfer", async () => {
       await addTransfer({
-        playerId: Number(player.value),
+        playerId: Number(player?.value || 0),
         fromTeamId:
           fromTeam && fromTeam.value !== null ? Number(fromTeam.value) : null,
         toTeamId:
@@ -160,9 +156,7 @@ export default function AdminTransfers({
           <div className="btn-row">
             <button
               className="primary-btn"
-              disabled={
-                !canSubmit || isAdminActionLoading("create-transfer")
-              }
+              disabled={isAdminActionLoading("create-transfer")}
               onClick={handleAdd}
             >
               {isAdminActionLoading("create-transfer")
