@@ -121,7 +121,6 @@ body::before {
 .team-card-active,
 .tournament-card-active,
 .admin-list-btn-active {
-  border-radius: inherit;
   overflow: hidden;
 }
 
