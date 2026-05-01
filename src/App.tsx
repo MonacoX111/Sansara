@@ -1238,6 +1238,8 @@ tournamentId: safeTournamentId,
     const savedPlayer =
       nextPlayers.find((player) => player.id === selectedPlayer.id) ||
       updatedPlayer;
+    const previousPlayers = players;
+    const previousTeams = teams;
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
@@ -1250,6 +1252,12 @@ try {
   showToast(commonText.playerSaved);
     } catch (error) {
       console.error("Failed to save player:", error);
+      if (isFirebaseConfigured) {
+        setPlayers(previousPlayers);
+        setTeams(previousTeams);
+        writeStorage("tm_players", previousPlayers);
+        writeStorage("tm_teams", previousTeams);
+      }
       showToast("Failed to save player", "danger");
     }
   };
@@ -1390,6 +1398,8 @@ if (isFirebaseConfigured) {
       isFeatured: Boolean(teamForm.isFeatured),
     };
 
+    const previousTeams = teams;
+
     setTeams((prev) =>
       prev.map((team) => (team.id === selectedTeam.id ? updatedTeam : team))
     );
@@ -1402,6 +1412,10 @@ if (isFirebaseConfigured) {
       showToast(commonText.teamSaved);
     } catch (error) {
       console.error("Failed to save team:", error);
+      if (isFirebaseConfigured) {
+        setTeams(previousTeams);
+        writeStorage("tm_teams", previousTeams);
+      }
       showToast("Failed to save team", "danger");
     }
   };
@@ -1844,6 +1858,14 @@ if (isFirebaseConfigured) {
 }
     } catch (error) {
       console.error("Failed to delete tournament:", error);
+      if (isFirebaseConfigured) {
+        setTournaments(backupTournaments);
+        setMatches(backupMatches);
+        setPlayers(backupPlayers);
+        writeStorage("tm_tournaments", backupTournaments);
+        writeStorage("tm_matches", backupMatches);
+        writeStorage("tm_players", backupPlayers);
+      }
       showToast("Failed to delete tournament", "danger");
     }
   }, 3000);
@@ -1857,6 +1879,7 @@ if (isFirebaseConfigured) {
       setMatches(backupMatches);
       setPlayers(backupPlayers);
       writeStorage("tm_tournaments", backupTournaments);
+      writeStorage("tm_matches", backupMatches);
       writeStorage("tm_players", backupPlayers);
     },
     commonText.undo
@@ -1975,6 +1998,8 @@ roundLabel: "",
     currentMatch: updatedMatch,
   });
 
+  const previousMatches = matches;
+
   setMatches(progressionResult.matches);
 
   setSelectedMatchId(updatedMatch.id);
@@ -1991,6 +2016,10 @@ roundLabel: "",
     showToast(commonText.matchSaved);
   } catch (error) {
     console.error("Failed to save match:", error);
+    if (isFirebaseConfigured) {
+      setMatches(previousMatches);
+      writeStorage("tm_matches", previousMatches);
+    }
     showToast(commonText.matchSaveFailed, "danger");
   }
 };
@@ -2112,6 +2141,10 @@ const deleteMatch = async () => {
       }
     } catch (error) {
       console.error("Failed to delete match:", error);
+      if (isFirebaseConfigured) {
+        setMatches(backupMatches);
+        writeStorage("tm_matches", backupMatches);
+      }
       showToast("Failed to delete match", "danger");
     }
   }, 3000);
@@ -2122,6 +2155,7 @@ const deleteMatch = async () => {
     () => {
       window.clearTimeout(deleteTimer);
       setMatches(backupMatches);
+      writeStorage("tm_matches", backupMatches);
     },
     commonText.undo
   );
