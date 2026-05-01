@@ -378,7 +378,11 @@ export default function PlayersTab({
         }-source`,
         label:
           item.sourceType === "player"
-            ? playerText.solo
+            ? tournament.type === "2x2"
+              ? playerText.duo
+              : tournament.type === "3x3"
+              ? playerText.trio
+              : playerText.solo
             : item.teamName || playerText.team,
         className:
           item.sourceType === "team"
