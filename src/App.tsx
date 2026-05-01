@@ -1639,6 +1639,9 @@ const tournamentToSave: Tournament = {
   eloApplied: isFinished ? true : Boolean(updatedTournament.eloApplied),
 };
 
+    const previousTournaments = tournaments;
+    const previousPlayers = players;
+
     const nextTournaments = tournaments.map((tournament) =>
       tournament.id === selectedTournamentId ? tournamentToSave : tournament
     );
@@ -1688,6 +1691,15 @@ if (isFirebaseConfigured) {
       showToast(commonText.tournamentSaved);
     } catch (error) {
       console.error("Failed to save tournament:", error);
+      if (isFirebaseConfigured) {
+        setTournaments(previousTournaments);
+        writeStorage("tm_tournaments", previousTournaments);
+
+        if (changedPlayers.length > 0) {
+          setPlayers(previousPlayers);
+          writeStorage("tm_players", previousPlayers);
+        }
+      }
       showToast("Failed to save tournament", "danger");
     }
   };
