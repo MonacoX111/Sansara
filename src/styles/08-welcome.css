@@ -1669,8 +1669,16 @@
     grid-row: auto;
   }
 
+  /* Mobile-only reorder: Featured Match is the most important card and
+     must render first, above the smaller side highlights. Desktop layout
+     (defined outside this media query) is unaffected. */
   .smart-highlight-card--featured {
     grid-template-columns: 1fr;
+    order: -1;
+  }
+
+  .welcome-smart-highlight-card:not(.smart-highlight-card--featured) {
+    order: 0;
   }
 
   .featured-right {
