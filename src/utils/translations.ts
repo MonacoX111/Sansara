@@ -495,6 +495,7 @@ playersPage: {
   teamHistory: "Team history",
   unknownTeam: "Unknown team",
   vs: "vs",
+  backToList: "Back to list",
 },
 
 nav: {
@@ -1012,6 +1013,7 @@ playersPage: {
   teamHistory: "Історія команд",
   unknownTeam: "Невідома команда",
   vs: "проти",
+  backToList: "Назад до списку",
 },
 
 nav: {

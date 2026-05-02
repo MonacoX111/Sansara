@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Achievement, Match, Player, Team, Tournament } from "../types";
 import {
   getPlayerMatchResult,
@@ -80,6 +80,42 @@ export default function PlayersTab({
   const [expandedEloTournamentId, setExpandedEloTournamentId] = useState<
     number | null
   >(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
+  // Remembers the page scroll position of the player list right before the
+  // user tapped a card on mobile, so the "Back to list" button can restore it.
+  const savedScrollYRef = useRef<number | null>(null);
+
+  // Mobile-only: scroll the profile panel into view after selecting a player.
+  // Desktop behaviour (two-column side-by-side layout) is unchanged because
+  // the viewport check (≤ 768px) matches the CSS breakpoint that stacks
+  // the directory panel above the profile panel.
+  const handleSelectPlayer = (playerId: number) => {
+    setSelectedPlayerId(playerId);
+
+    if (typeof window === "undefined") return;
+    if (window.innerWidth > 768) return;
+
+    // Remember current list scroll position so we can jump back to it later.
+    savedScrollYRef.current = window.scrollY;
+
+    // Defer to the next frame so the profile panel has rendered
+    // (it is conditionally mounted when `selectedPlayer` becomes truthy).
+    window.requestAnimationFrame(() => {
+      profileRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  // Mobile-only: restore the saved list scroll position. Does NOT touch
+  // selectedPlayerId — the profile stays mounted so the user can re-open it
+  // simply by scrolling back down, and state is preserved.
+  const handleBackToList = () => {
+    if (typeof window === "undefined") return;
+    const targetY = savedScrollYRef.current ?? 0;
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+  };
 
   const getTeamName = (teamId?: number) =>
     teams.find((t) => t.id === Number(teamId || 0))?.name || "";
@@ -530,7 +566,7 @@ export default function PlayersTab({
                       `${e.clientY - rect.top}px`,
                     );
                   }}
-                  onClick={() => setSelectedPlayerId(player.id)}
+                  onClick={() => handleSelectPlayer(player.id)}
                 >
                   <div className="player-head">
                     <img
@@ -635,7 +671,19 @@ export default function PlayersTab({
         </div>
 
         {selectedPlayer && (
-          <div className="panel">
+          <div className="panel" ref={profileRef}>
+            <button
+              type="button"
+              className="players-back-to-list"
+              onClick={handleBackToList}
+              aria-label={playerText.backToList}
+            >
+              <span aria-hidden="true" className="players-back-to-list-arrow">
+                ←
+              </span>
+              {playerText.backToList}
+            </button>
+
             <h2 className="panel-title">{playerText.profile}</h2>
 
             <PlayerProfileHeader

@@ -4743,3 +4743,70 @@
         max-width: 100%;
     }
 }
+
+/* ============================================================
+   Players tab: mobile-only "Back to list" button.
+   Hidden on desktop, visible ≤ 768px. Does not affect desktop layout.
+   ============================================================ */
+.players-back-to-list {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .players-back-to-list {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+        margin: 0 0 14px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.06),
+                rgba(255, 255, 255, 0.02)
+            ),
+            rgba(10, 14, 22, 0.72);
+        color: rgba(255, 255, 255, 0.9);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        cursor: pointer;
+        transition:
+            transform 0.18s ease,
+            border-color 0.18s ease,
+            background 0.18s ease,
+            color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .players-back-to-list:hover,
+    .players-back-to-list:focus-visible {
+        transform: translateY(-1px);
+        border-color: rgba(255, 59, 95, 0.45);
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 59, 95, 0.14),
+                rgba(255, 59, 95, 0.05)
+            ),
+            rgba(10, 14, 22, 0.82);
+        color: #ffffff;
+        box-shadow: 0 6px 16px rgba(255, 59, 95, 0.18);
+        outline: none;
+    }
+
+    .players-back-to-list:active {
+        transform: translateY(0);
+    }
+
+    .players-back-to-list-arrow {
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1;
+    }
+}
