@@ -4644,3 +4644,102 @@
         padding: 12px;
     }
 }
+
+/* ============================================================
+   MOBILE SAFETY (≤ 768px): force single-column layout on the
+   General/Overview tab (ChampionCard, RecentResults, UpcomingMatches,
+   TopPlayers) and related home/tournament grids. Desktop layout
+   is untouched — all rules live inside the media query.
+   ============================================================ */
+@media (max-width: 768px) {
+    /* 1. Parent grid of the Overview tab. `.home-grid` is the
+          direct parent of ChampionCard, RecentResults, UpcomingMatches
+          and TopPlayers panels. Force it to a single column and
+          neutralise `.champion-panel { grid-column: span 2 }`. */
+    .home-announcement-page,
+    .home-grid,
+    .tournament-overview-grid,
+    .tournament-sections-grid,
+    .tournament-participants,
+    .tournament-hero-side,
+    .tournament-hero,
+    .stats-grid,
+    .profile-mini-stats,
+    .results-placements-grid,
+    .tournament-history-info-grid,
+    .participant-stats-grid,
+    .player-achievement-grid,
+    .player-tournament-card-main {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* 2. Every direct child of the overview grid must span the full
+          single column and shrink inside it. This kills any residual
+          `grid-column: span 2` or fixed-width child that could push a
+          sibling into a second visual column. */
+    .home-grid > *,
+    .tournament-overview-grid > *,
+    .tournament-sections-grid > * {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* 3. Panels/cards themselves — clamp width, enable shrink. */
+    .home-panel,
+    .champion-panel,
+    .panel,
+    .champion-card,
+    .champion-card-upgraded,
+    .result-card,
+    .result-card-upcoming,
+    .tournament-match-card,
+    .overview-stat-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* 4. Text wrapping — NORMAL word wrapping, not letter-by-letter.
+          Uses `overflow-wrap: break-word` (only breaks overly long
+          tokens) and `word-break: normal` (respects word boundaries). */
+    .champion-name,
+    .champion-tournament-badge,
+    .champion-meta-row,
+    .champion-score-big,
+    .champion-opponent-pill,
+    .result-player-name,
+    .result-tournament,
+    .result-round,
+    .result-date,
+    .tournament-match-name,
+    .player-name {
+        overflow-wrap: break-word;
+        word-break: normal;
+        white-space: normal;
+        max-width: 100%;
+    }
+
+    /* 5. Flex children inside cards must be allowed to shrink below
+          their intrinsic min-content width (default flex behaviour
+          otherwise causes horizontal overflow). */
+    .champion-left,
+    .champion-right,
+    .result-row,
+    .result-player-side,
+    .result-score-wrap,
+    .tournament-match-side,
+    .player-left,
+    .player-row.new {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
