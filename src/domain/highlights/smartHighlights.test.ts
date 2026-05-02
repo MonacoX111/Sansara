@@ -566,4 +566,65 @@ describe("scopeMatchesToNewestTournament", () => {
     expect(scoped).toHaveLength(1);
     expect(scoped[0].id).toBe(300);
   });
+
+  it("skips newest tournament with only scheduled matches and picks previous tournament with completed matches", () => {
+    // Newest tournament (id=5) has only a scheduled match.
+    // Older tournament (id=1) has a completed match → must be chosen.
+    const matches = [
+      makeMatch({
+        id: 400,
+        tournamentId: 1,
+        status: "completed",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+        score: "13-10",
+      }),
+      makeMatch({
+        id: 401,
+        tournamentId: 5,
+        status: "scheduled",
+        player1: 1,
+        player2: 2,
+      }),
+    ];
+
+    const newest = getNewestTournamentWithCompletedMatches({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(newest?.id).toBe(1);
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(scoped.map((m) => m.id)).toEqual([400]);
+  });
+
+  it("skips an empty newest tournament (no matches at all) and picks previous tournament with completed matches", () => {
+    const matches = [
+      makeMatch({
+        id: 500,
+        tournamentId: 1,
+        status: "completed",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+        score: "13-8",
+      }),
+    ];
+
+    const newest = getNewestTournamentWithCompletedMatches({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(newest?.id).toBe(1);
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(scoped.map((m) => m.id)).toEqual([500]);
+  });
 });

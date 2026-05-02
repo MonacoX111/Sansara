@@ -615,7 +615,9 @@ export const getNewestTournamentWithCompletedMatches = ({
 
   if (completedTournamentIds.size === 0) return null;
 
-  // 2. Sort all tournaments DESC by (order ?? id) — larger = newer.
+  // 2. Sort all tournaments DESC strictly by id — larger id = newer.
+  //    A tournament with only scheduled matches will be naturally skipped
+  //    in step 3 because its id is not in `completedTournamentIds`.
   const sortedDesc = [...tournaments].sort(
     (a, b) => getTournamentOrderKey(b) - getTournamentOrderKey(a)
   );
