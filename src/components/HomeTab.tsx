@@ -30,6 +30,7 @@ type LatestTransferItem = {
   date?: string;
   timestamp: number | null;
   order: number;
+  type: "transfer" | "loan";
 };
 
 export default function HomeTab({
@@ -158,6 +159,7 @@ export default function HomeTab({
           date: transfer.date,
           timestamp: getTimestamp(transfer.date),
           order: index,
+          type: transfer.type ?? "transfer",
         });
         return acc;
       }, []);
@@ -177,6 +179,7 @@ export default function HomeTab({
           joined: "joined",
         };
   const transferActionLabel = lang === "ua" ? "перейшов" : "transferred";
+  const loanBadgeLabel = lang === "ua" ? "Аренда" : "Loan";
   const transferDateLocale = lang === "ua" ? "uk-UA" : "en-US";
   const formatTransferDate = (date?: string) => {
     if (!date) return "";
@@ -719,6 +722,11 @@ onClick={() => setActiveTab("leaderboard")}
                         />
                         <strong className="transfer-player-name">
                           {transfer.playerNickname}
+                          {transfer.type === "loan" ? (
+                            <span className="transfer-type-badge">
+                              {loanBadgeLabel}
+                            </span>
+                          ) : null}
                         </strong>
                       </div>
                       <span className="transfer-arrow" aria-hidden="true">

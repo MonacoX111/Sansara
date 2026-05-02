@@ -75,12 +75,15 @@ export type Player = {
   isFeatured?: boolean;
 };
 
+export type TransferType = "transfer" | "loan";
+
 export type Transfer = {
   id: number;
   playerId: number;
   fromTeamId: number | null;
   toTeamId: number | null;
   date: string;
+  type?: TransferType;
 };
 
 export type Tournament = {

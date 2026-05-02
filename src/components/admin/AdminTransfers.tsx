@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { Player, Team, Transfer } from "../../types";
+import { Player, Team, Transfer, TransferType } from "../../types";
 import SearchableSelect, {
   SearchableOption,
 } from "../ui/SearchableSelect";
@@ -38,6 +38,7 @@ export default function AdminTransfers({
   const [fromTeam, setFromTeam] = useState<SearchableOption | null>(null);
   const [toTeam, setToTeam] = useState<SearchableOption | null>(null);
   const [date, setDate] = useState<string>("");
+  const [transferType, setTransferType] = useState<TransferType>("transfer");
 
   const freeAgentOption: SearchableOption = {
     value: null,
@@ -94,11 +95,13 @@ export default function AdminTransfers({
         toTeamId:
           toTeam && toTeam.value !== null ? Number(toTeam.value) : null,
         date,
+        type: transferType,
       });
       setPlayer(null);
       setFromTeam(null);
       setToTeam(null);
       setDate("");
+      setTransferType("transfer");
     });
   };
 
@@ -141,6 +144,18 @@ export default function AdminTransfers({
                 searchPlaceholder={adminText.searchPlaceholder}
               />
             </div>
+          </div>
+
+          <div className="field-block">
+            <label className="field-label">{adminText.transferType}</label>
+            <select
+              className="input"
+              value={transferType}
+              onChange={(e) => setTransferType(e.target.value as TransferType)}
+            >
+              <option value="transfer">{adminText.transferTypeTransfer}</option>
+              <option value="loan">{adminText.transferTypeLoan}</option>
+            </select>
           </div>
 
           <div className="field-block">
@@ -191,7 +206,20 @@ export default function AdminTransfers({
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column" }}>
-                      <strong>{playerNameById(transfer.playerId)}</strong>
+                      <strong>
+                        {playerNameById(transfer.playerId)}
+                        {(transfer.type ?? "transfer") === "loan" ? (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              fontSize: 11,
+                              opacity: 0.8,
+                            }}
+                          >
+                            ({adminText.transferTypeLoan})
+                          </span>
+                        ) : null}
+                      </strong>
                       <span style={{ opacity: 0.75, fontSize: 13 }}>
                         {teamNameById(transfer.fromTeamId)}
                         {" \u2192 "}

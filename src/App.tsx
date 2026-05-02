@@ -2405,6 +2405,7 @@ const deleteAchievement = async (achievementId: number) => {
       fromTeamId: input.fromTeamId ?? null,
       toTeamId: input.toTeamId ?? null,
       date: input.date,
+      type: input.type ?? "transfer",
     };
 
     setTransfers((prev) => [...prev, newTransfer]);

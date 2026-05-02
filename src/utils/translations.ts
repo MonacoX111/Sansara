@@ -109,6 +109,9 @@ admin: {
   transferFrom: "From",
   transferTo: "To",
   transferDate: "Date",
+  transferType: "Transfer type",
+  transferTypeTransfer: "Transfer",
+  transferTypeLoan: "Loan",
   transferFreeAgent: "Free Agent",
   noTransfers: "No transfers yet",
 
@@ -623,6 +626,9 @@ admin: {
   transferFrom: "З",
   transferTo: "До",
   transferDate: "Дата",
+  transferType: "Тип переходу",
+  transferTypeTransfer: "Трансфер",
+  transferTypeLoan: "Аренда",
   transferFreeAgent: "Вільний агент",
   noTransfers: "Трансферів поки немає",
 
