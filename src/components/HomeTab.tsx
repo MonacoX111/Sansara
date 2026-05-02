@@ -135,13 +135,22 @@ export default function HomeTab({
   const featuredParticipantB = getFeaturedParticipantVisual("right");
   const recentMatches = [...matches]
     .sort((a, b) => {
+      // Primary key: newest tournament first (by tournament.id DESC).
+      // Matches without a tournamentId fall to the bottom (treated as 0).
+      const tournamentA = Number(a.tournamentId) || 0;
+      const tournamentB = Number(b.tournamentId) || 0;
+      if (tournamentA !== tournamentB) {
+        return tournamentB - tournamentA;
+      }
+
+      // Secondary key: most recent date first. Missing/invalid dates count as 0.
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-
       if (dateA !== dateB) {
         return dateB - dateA;
       }
 
+      // Tertiary key: stable display order within the same date.
       return (a.order ?? a.id) - (b.order ?? b.id);
     })
     .slice(0, 6);
