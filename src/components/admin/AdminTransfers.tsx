@@ -3,6 +3,7 @@ import { Player, Team, Transfer, TransferType } from "../../types";
 import SearchableSelect, {
   SearchableOption,
 } from "../ui/SearchableSelect";
+import PremiumSelect from "../ui/PremiumSelect";
 
 type ConfirmDeleteState = {
   open: boolean;
@@ -148,14 +149,16 @@ export default function AdminTransfers({
 
           <div className="field-block">
             <label className="field-label">{adminText.transferType}</label>
-            <select
-              className="input"
+            <PremiumSelect
               value={transferType}
-              onChange={(e) => setTransferType(e.target.value as TransferType)}
-            >
-              <option value="transfer">{adminText.transferTypeTransfer}</option>
-              <option value="loan">{adminText.transferTypeLoan}</option>
-            </select>
+              placeholder={adminText.transferType}
+              includePlaceholderOption={false}
+              onChange={(value) => setTransferType(value as TransferType)}
+              options={[
+                { value: "transfer", label: adminText.transferTypeTransfer },
+                { value: "loan", label: adminText.transferTypeLoan },
+              ]}
+            />
           </div>
 
           <div className="field-block">
