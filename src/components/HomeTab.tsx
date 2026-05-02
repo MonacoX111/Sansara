@@ -6,6 +6,7 @@ import {
   getFeaturedMatch,
   getHotPlayer,
   getRivalry,
+  scopeMatchesToNewestTournament,
 } from "../domain/highlights/smartHighlights";
 
 type Props = {
@@ -53,21 +54,49 @@ export default function HomeTab({
 
   const topElo =
     players.length > 0 ? Math.max(...players.map((p) => p.elo || 0)) : 0;
-  const biggestUpset = useMemo(
-    () => getBiggestUpset({ matches, players, teams, tournaments }),
-    [matches, players, teams, tournaments]
+  // Always recompute the tournament scope from the latest props so that
+  // adding a completed match to the newest tournament immediately re-targets
+  // every Smart Highlight to that tournament.
+  const scopedHighlightMatches = useMemo(
+    () => scopeMatchesToNewestTournament({ matches, tournaments }),
+    [matches, tournaments]
   );
+  const biggestUpset = useMemo(
+    () =>
+      getBiggestUpset({
+        matches: scopedHighlightMatches,
+        players,
+        teams,
+        tournaments,
+      }),
+    [scopedHighlightMatches, matches, tournaments, players, teams]
+  );
+  // Hot Player uses ALL completed matches across tournaments, so that the
+  // biggest active win streak is surfaced regardless of where it happened.
   const hotPlayer = useMemo(
-    () => getHotPlayer({ matches, players, tournaments }),
-    [matches, players, tournaments]
+    () =>
+      getHotPlayer({
+        matches,
+        players,
+        tournaments,
+      }),
+    [matches, tournaments, players, teams]
   );
   const featuredMatch = useMemo(
-    () => getFeaturedMatch({ matches, players, teams, tournaments }),
-    [matches, players, teams, tournaments]
+    () =>
+      getFeaturedMatch({
+        matches: scopedHighlightMatches,
+        players,
+        teams,
+        tournaments,
+      }),
+    [scopedHighlightMatches, matches, tournaments, players, teams]
   );
+  // Rivalry also uses ALL completed matches so long-running matchups
+  // across several tournaments are not hidden by newest-tournament scope.
   const rivalry = useMemo(
     () => getRivalry({ matches, players, teams }),
-    [matches, players, teams]
+    [matches, tournaments, players, teams]
   );
   const featuredMatchStage =
     featuredMatch?.match.roundLabel ||
@@ -423,20 +452,29 @@ onClick={() => setActiveTab("leaderboard")}
           >
             <div className="welcome-smart-highlight-main">
               <span className="welcome-smart-kicker">{text.biggestUpset}</span>
-              {biggestUpset ? (
-                <>
-                  <strong>
-                    {biggestUpset.winnerName} {text.common.vs}{" "}
-                    {biggestUpset.loserName}
-                  </strong>
-                  <p>{text.biggestUpsetDescription}</p>
-                </>
-              ) : (
-                <>
-                  <strong>{text.noUpsetFoundYet}</strong>
-                  <p>{text.biggestUpsetDescription}</p>
-                </>
-              )}
+              {(() => {
+                const biggestUpsetDescription =
+                  biggestUpset?.matchType === "team"
+                    ? lang === "ua"
+                      ? "Команда з нижчим рейтингом перемогла сильнішого суперника"
+                      : "The team with the lower rating defeated a stronger opponent"
+                    : text.biggestUpsetDescription;
+
+                return biggestUpset ? (
+                  <>
+                    <strong>
+                      {biggestUpset.winnerName} {text.common.vs}{" "}
+                      {biggestUpset.loserName}
+                    </strong>
+                    <p>{biggestUpsetDescription}</p>
+                  </>
+                ) : (
+                  <>
+                    <strong>{text.noUpsetFoundYet}</strong>
+                    <p>{biggestUpsetDescription}</p>
+                  </>
+                );
+              })()}
             </div>
 
             {biggestUpset ? (

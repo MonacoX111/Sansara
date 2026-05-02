@@ -5,7 +5,9 @@ import {
   getBiggestUpset,
   getFeaturedMatch,
   getHotPlayer,
+  getNewestTournamentWithCompletedMatches,
   getRivalry,
+  scopeMatchesToNewestTournament,
 } from "./smartHighlights";
 
 const makePlayer = (overrides: Partial<Player>): Player => ({
@@ -367,5 +369,201 @@ describe("getRivalry", () => {
 
   it("returns null for empty match list", () => {
     expect(getRivalry({ matches: [], players, teams: [] })).toBeNull();
+  });
+});
+
+describe("scopeMatchesToNewestTournament", () => {
+  const oldTournament = makeTournament({
+    id: 1,
+    order: 1,
+    title: "LDC 1 Season",
+  });
+  const newTournament = makeTournament({
+    id: 5,
+    order: 5,
+    title: "Newest Cup",
+  });
+
+  it("picks the newest tournament by order/id even when match.tournamentId is a string", () => {
+    const matches = [
+      makeMatch({
+        id: 100,
+        tournamentId: 1,
+        status: "completed",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+        score: "13-7",
+      }),
+      makeMatch({
+        id: 101,
+        // Simulate Firebase string-coerced id
+        tournamentId: "5" as unknown as number,
+        status: "completed",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+        score: "13-11",
+      }),
+    ];
+
+    const newest = getNewestTournamentWithCompletedMatches({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+
+    expect(newest?.id).toBe(5);
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+
+    expect(scoped).toHaveLength(1);
+    expect(scoped[0].id).toBe(101);
+  });
+
+  it("accepts 'finished' status as completed for scoping", () => {
+    const matches = [
+      makeMatch({
+        id: 200,
+        tournamentId: 1,
+        status: "completed",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+      }),
+      makeMatch({
+        id: 201,
+        tournamentId: 5,
+        status: "finished" as Match["status"],
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+      }),
+    ];
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+
+    expect(scoped.map((m) => m.id)).toEqual([201]);
+  });
+
+  it("strictly prefers newest tournament even when older one has flashier completed matches", () => {
+    const oldPlayers = [
+      makePlayer({ id: 1, nickname: "lowElo", elo: 800 }),
+      makePlayer({ id: 2, nickname: "highElo", elo: 1600 }),
+      makePlayer({ id: 3, nickname: "midElo", elo: 1200 }),
+    ];
+    const newPlayers = [
+      makePlayer({ id: 10, nickname: "newA", elo: 1000 }),
+      makePlayer({ id: 11, nickname: "newB", elo: 1000 }),
+    ];
+    const players = [...oldPlayers, ...newPlayers];
+
+    const oldMatches = [
+      // huge upset, final stage, close score → would dominate globally
+      makeMatch({
+        id: 1,
+        tournamentId: 1,
+        status: "completed",
+        stage: "final",
+        player1: 1,
+        player2: 2,
+        winnerId: 1,
+        score: "13-12",
+        date: "2025-01-10",
+      }),
+      // streak builder for highElo on old tournament
+      makeMatch({
+        id: 2,
+        tournamentId: 1,
+        status: "completed",
+        player1: 2,
+        player2: 3,
+        winnerId: 2,
+        score: "13-0",
+        date: "2025-01-11",
+      }),
+      makeMatch({
+        id: 3,
+        tournamentId: 1,
+        status: "completed",
+        player1: 2,
+        player2: 3,
+        winnerId: 2,
+        score: "13-0",
+        date: "2025-01-12",
+      }),
+    ];
+    const newMatches = [
+      // single mediocre group match in newest tournament
+      makeMatch({
+        id: 99,
+        tournamentId: 5,
+        status: "completed",
+        stage: "group",
+        player1: 10,
+        player2: 11,
+        winnerId: 10,
+        score: "13-11",
+        date: "2025-02-01",
+      }),
+    ];
+    const matches = [...oldMatches, ...newMatches];
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+
+    expect(scoped.map((m) => m.id)).toEqual([99]);
+
+    const featured = getFeaturedMatch({
+      matches: scoped,
+      players,
+      teams: [],
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(featured?.match.id).toBe(99);
+
+    const upset = getBiggestUpset({
+      matches: scoped,
+      players,
+      teams: [],
+      tournaments: [oldTournament, newTournament],
+    });
+    // newest tournament has no upset (equal ELO) → must be null, NOT the old final
+    expect(upset).toBeNull();
+
+    const hot = getHotPlayer({
+      matches: scoped,
+      players,
+      tournaments: [oldTournament, newTournament],
+    });
+    expect(hot?.player.id).toBe(10);
+    expect(hot?.streakCount).toBe(1);
+  });
+
+  it("falls back to all matches when no tournament has completed matches", () => {
+    const matches = [
+      makeMatch({
+        id: 300,
+        tournamentId: 1,
+        status: "scheduled",
+        player1: 1,
+        player2: 2,
+      }),
+    ];
+
+    const scoped = scopeMatchesToNewestTournament({
+      matches,
+      tournaments: [oldTournament, newTournament],
+    });
+
+    expect(scoped).toHaveLength(1);
+    expect(scoped[0].id).toBe(300);
   });
 });

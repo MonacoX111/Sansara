@@ -74,6 +74,11 @@ type GetRivalryArgs = {
   teams: Team[];
 };
 
+type TournamentScopeArgs = {
+  matches: Match[];
+  tournaments: Tournament[];
+};
+
 type RivalryGroup = RivalryHighlight & {
   lastMatchSortValue: number;
 };
@@ -101,8 +106,20 @@ const getCurrentTeamAverageElo = (teamId: number, players: Player[]) => {
   return Math.round(totalElo / currentTeamPlayers.length);
 };
 
-const getTournamentName = (match: Match, tournaments: Tournament[]) =>
-  tournaments.find((tournament) => tournament.id === match.tournamentId)?.title;
+const toTournamentIdNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const getTournamentName = (match: Match, tournaments: Tournament[]) => {
+  const matchTournamentId = toTournamentIdNumber(match.tournamentId);
+  if (matchTournamentId === null) return undefined;
+
+  return tournaments.find(
+    (tournament) => toTournamentIdNumber(tournament.id) === matchTournamentId
+  )?.title;
+};
 
 const parseScoreDifference = (score?: string) => {
   if (!score) return null;
@@ -111,6 +128,25 @@ const parseScoreDifference = (score?: string) => {
   if (scores.length < 2) return null;
 
   return Math.abs(scores[0] - scores[1]);
+};
+
+const NORMAL_WIN_SCORE_THRESHOLD = 13;
+
+const parseScoreInfo = (score?: string) => {
+  if (!score) return null;
+
+  const scores = score.match(/\d+/g)?.map(Number) || [];
+  if (scores.length < 2) return null;
+
+  const [a, b] = scores;
+  const difference = Math.abs(a - b);
+  const maxScore = Math.max(a, b);
+
+  return {
+    difference,
+    isDraw: a === b,
+    hasOvertime: maxScore > NORMAL_WIN_SCORE_THRESHOLD,
+  };
 };
 
 const getStageImportance = (match: Match) => {
@@ -387,19 +423,47 @@ export const getFeaturedMatch = ({
 
     if (!participants) return bestMatch;
 
-    const scoreDifference = parseScoreDifference(match.score);
+    const scoreInfo = parseScoreInfo(match.score);
+    const scoreDifference = scoreInfo ? scoreInfo.difference : null;
+
+    // Close score still matters but no longer dominates (cap 200, was 500).
     const closeScoreValue =
-      scoreDifference === null ? 0 : Math.max(0, 500 - scoreDifference * 120);
-    const tournamentValue = match.tournamentId ? 120 : 0;
+      scoreDifference === null ? 0 : Math.max(0, 200 - scoreDifference * 40);
+
+    // Stage and tournament are now the strongest signals.
     const stageValue = getStageImportance(match);
+    const tournamentValue = match.tournamentId ? 150 : 0;
+
+    // A real winner outranks a draw of the same closeness.
+    const hasWinner = Boolean(match.winnerId || match.winnerTeamId);
+    const winnerBonus = hasWinner ? 200 : 0;
+
+    // Overtime / extra rounds (e.g. CS 16:12) outrank normal close scores.
+    const overtimeBonus = scoreInfo?.hasOvertime ? 220 : 0;
+
+    const combinedEloValue = participants.combinedElo / 20;
+
+    // Recency acts as a real tiebreaker: ~9 points per day, well below stage.
     const recentValue = getMatchSortValue(match) / 1000000000000000;
-    const combinedEloValue = participants.combinedElo / 10;
+
     const totalScore =
+      stageValue +
+      tournamentValue +
+      winnerBonus +
+      overtimeBonus +
       closeScoreValue +
       combinedEloValue +
-      tournamentValue +
-      stageValue +
       recentValue;
+
+    const reasonLabel = scoreInfo?.hasOvertime
+      ? "overtime"
+      : stageValue >= 120
+      ? "high-stakes-stage"
+      : !scoreInfo?.isDraw && scoreDifference !== null && scoreDifference <= 1
+      ? "close-score"
+      : match.tournamentId
+      ? "tournament-match"
+      : "recent-form";
 
     const currentHighlight: FeaturedMatchHighlight = {
       match,
@@ -408,12 +472,7 @@ export const getFeaturedMatch = ({
       winnerName: participants.winnerName,
       tournamentName: getTournamentName(match, tournaments),
       score: match.score,
-      reasonLabel:
-        scoreDifference !== null && scoreDifference <= 1
-          ? "close-score"
-          : match.tournamentId
-          ? "tournament-match"
-          : "recent-form",
+      reasonLabel,
     };
 
     if (!bestMatch || totalScore > bestMatch.score) {
@@ -531,4 +590,64 @@ export const getRivalry = ({
   const { lastMatchSortValue, ...highlight } = bestRivalry;
 
   return highlight;
+};
+
+const getTournamentOrderKey = (tournament: Tournament) => {
+  // Newest tournament is determined strictly by creation order (id).
+  // Larger id = newer tournament. The `order` field is intentionally
+  // ignored here so that legacy tournaments with large `order` values
+  // cannot be mistaken for the newest one.
+  return toTournamentIdNumber(tournament.id) ?? 0;
+};
+
+export const getNewestTournamentWithCompletedMatches = ({
+  matches,
+  tournaments,
+}: TournamentScopeArgs): Tournament | null => {
+  // 1. Build the set of tournament ids that have at least one completed/finished match.
+  const completedTournamentIds = new Set<number>();
+  for (const match of matches) {
+    if (!isCompletedMatch(match)) continue;
+    const id = toTournamentIdNumber(match.tournamentId);
+    if (id === null) continue;
+    completedTournamentIds.add(id);
+  }
+
+  if (completedTournamentIds.size === 0) return null;
+
+  // 2. Sort all tournaments DESC by (order ?? id) — larger = newer.
+  const sortedDesc = [...tournaments].sort(
+    (a, b) => getTournamentOrderKey(b) - getTournamentOrderKey(a)
+  );
+
+  // 3. Return the first tournament (newest) that has a completed match.
+  for (const tournament of sortedDesc) {
+    const id = toTournamentIdNumber(tournament.id);
+    if (id !== null && completedTournamentIds.has(id)) return tournament;
+  }
+
+  return null;
+};
+
+export const scopeMatchesToNewestTournament = ({
+  matches,
+  tournaments,
+}: TournamentScopeArgs): Match[] => {
+  const tournament = getNewestTournamentWithCompletedMatches({
+    matches,
+    tournaments,
+  });
+
+  // Strict rule: fall back to all matches ONLY if no tournament has any
+  // completed/finished match. Never merge old + new tournaments.
+  // Always return a fresh array so consumers (e.g. React useMemo) never
+  // reuse a stale reference when match data changes.
+  if (!tournament) return [...matches];
+
+  const tournamentId = toTournamentIdNumber(tournament.id);
+  if (tournamentId === null) return [...matches];
+
+  return matches.filter(
+    (match) => toTournamentIdNumber(match.tournamentId) === tournamentId
+  );
 };

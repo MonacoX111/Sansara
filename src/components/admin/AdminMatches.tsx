@@ -136,10 +136,15 @@ export default function AdminMatches(props: Props) {
             <PremiumSelect
               value={matchTournamentFilterId}
               placeholder={adminText.selectTournament}
-              options={tournaments.map((tournament) => ({
-                value: tournament.id,
-                label: tournament.title || adminText.tournamentFallback,
-              }))}
+              options={[...tournaments]
+                .sort(
+                  (a, b) =>
+                    (a.order ?? a.id) - (b.order ?? b.id)
+                )
+                .map((tournament) => ({
+                  value: tournament.id,
+                  label: tournament.title || adminText.tournamentFallback,
+                }))}
               onChange={(value) => {
                 const nextTournamentId = Number(value);
                 const nextTournament =
