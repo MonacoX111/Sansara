@@ -408,6 +408,7 @@ tournamentsPage: {
 teamsPage: {
   directory: "Teams",
   profile: "Team profile",
+  backToList: "Back to list",
   players: "Players",
   wins: "Wins",
   earnings: "Earnings",
@@ -926,6 +927,7 @@ tournamentsPage: {
 teamsPage: {
   directory: "Команди",
   profile: "Профіль команди",
+  backToList: "Назад до списку",
   players: "Гравці",
   wins: "Перемоги",
   earnings: "Заробіток",

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Match, Player, Team, Tournament } from "../types";
 import { getPlayersForHistoricalTeam } from "../domain/player/playerTeams";
 import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
@@ -27,7 +28,37 @@ export default function TeamsTab({
   const commonText = text.common;
   const formatTournamentLabel = (format?: string) =>
     getTournamentFormatLabel(format, lang);
-  const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
+const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
+
+const profileRef = useRef<HTMLDivElement | null>(null);
+const savedScrollYRef = useRef<number | null>(null);
+
+const handleSelectTeam = (teamId: number) => {
+  setSelectedTeamId(teamId);
+
+  if (typeof window === "undefined") return;
+  if (window.innerWidth > 768) return;
+
+  savedScrollYRef.current = window.scrollY;
+
+  window.requestAnimationFrame(() => {
+    profileRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  });
+};
+
+const handleBackToTeamList = () => {
+  if (typeof window === "undefined") return;
+
+  const targetY = savedScrollYRef.current ?? 0;
+
+  window.scrollTo({
+    top: targetY,
+    behavior: "smooth",
+  });
+};
 
   const teamPlayers = players.filter(
     (player) => player.teamId === selectedTeamId
@@ -114,7 +145,7 @@ return teamText.loss;
                     `${e.clientY - rect.top}px`
                   );
                 }}
-                onClick={() => setSelectedTeamId(team.id)}
+onClick={() => handleSelectTeam(team.id)}
               >
                 <div className="player-head">
                   <img src={team.logo} alt={team.name} className="logo" />
@@ -133,9 +164,21 @@ return teamText.loss;
         </div>
       </div>
 
-      {selectedTeam && (
-        <div className="panel">
-          <h2 className="panel-title">{teamText.profile}</h2>
+{selectedTeam && (
+  <div className="panel" ref={profileRef}>
+<button
+  type="button"
+  className="players-back-to-list"
+  onClick={handleBackToTeamList}
+  aria-label={teamText.backToList}
+>
+  <span aria-hidden="true" className="players-back-to-list-arrow">
+    ←
+  </span>
+  {teamText.backToList}
+</button>
+
+    <h2 className="panel-title">{teamText.profile}</h2>
 
           <div className="team-profile-head">
             <img
