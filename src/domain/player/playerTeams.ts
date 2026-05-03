@@ -39,24 +39,30 @@ export const getPlayerTeamHistory = (
   const teamOrder = new Map(
     teams.map((team, index) => [team.id, index] as const)
   );
+
+  const currentTeamId = normalizeTeamId(player.teamId);
+
   const history =
     Array.isArray(player.teamHistory) && player.teamHistory.length > 0
       ? player.teamHistory
-      : player.teamId
-      ? [{ teamId: player.teamId, isCurrent: true }]
-      : [];
+      : currentTeamId
+        ? [{ teamId: currentTeamId, isCurrent: true }]
+        : [];
 
   return history
     .filter((item) => normalizeTeamId(item.teamId) > 0)
-    .map((item) => ({
-      ...item,
-      teamId: normalizeTeamId(item.teamId),
-      isCurrent:
-        Boolean(item.isCurrent) ||
-        normalizeTeamId(item.teamId) === normalizeTeamId(player.teamId),
-      team:
-        teams.find((team) => team.id === normalizeTeamId(item.teamId)) || null,
-    }))
+    .map((item) => {
+      const itemTeamId = normalizeTeamId(item.teamId);
+
+      return {
+        ...item,
+        teamId: itemTeamId,
+        isCurrent: currentTeamId
+          ? itemTeamId === currentTeamId
+          : Boolean(item.isCurrent),
+        team: teams.find((team) => team.id === itemTeamId) || null,
+      };
+    })
     .sort(
       (a, b) =>
         (teamOrder.get(a.teamId) ?? Number.MAX_SAFE_INTEGER) -
