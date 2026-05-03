@@ -353,29 +353,54 @@ export const getHotPlayer = ({
   players,
   tournaments,
 }: GetHotPlayerArgs): HotPlayerHighlight | null => {
-  const completedPlayerMatches = matches
+  const completedMatches = matches
     .filter(
       (match) =>
         isCompletedMatch(match) &&
-        match.matchType === "player" &&
-        Boolean(match.winnerId) &&
-        Boolean(match.player1) &&
-        Boolean(match.player2)
+        ((match.matchType === "player" &&
+          Boolean(match.winnerId) &&
+          Boolean(match.player1) &&
+          Boolean(match.player2)) ||
+          (match.matchType === "team" &&
+            Boolean(match.winnerTeamId) &&
+            Boolean(match.team1) &&
+            Boolean(match.team2)))
     )
     .sort((a, b) => getMatchSortValue(b) - getMatchSortValue(a));
 
-  if (completedPlayerMatches.length === 0) return null;
+  if (completedMatches.length === 0) return null;
 
   return players.reduce<HotPlayerHighlight | null>((bestHotPlayer, player) => {
+    const playerTeamIds = [
+      player.teamId,
+      ...(player.teamHistory || []).map((item) => item.teamId),
+    ]
+      .map((teamId) => Number(teamId || 0))
+      .filter((teamId) => teamId > 0);
+
     let streakCount = 0;
     let latestMatch: Match | null = null;
 
-    for (const match of completedPlayerMatches) {
-      const didPlay = match.player1 === player.id || match.player2 === player.id;
+    for (const match of completedMatches) {
+      const didPlayPlayerMatch =
+        match.matchType === "player" &&
+        (match.player1 === player.id || match.player2 === player.id);
 
-      if (!didPlay) continue;
+      const didPlayTeamMatch =
+        match.matchType === "team" &&
+        (playerTeamIds.includes(Number(match.team1 || 0)) ||
+          playerTeamIds.includes(Number(match.team2 || 0)));
 
-      if (match.winnerId !== player.id) break;
+      if (!didPlayPlayerMatch && !didPlayTeamMatch) continue;
+
+      const didWinPlayerMatch =
+        match.matchType === "player" && match.winnerId === player.id;
+
+      const didWinTeamMatch =
+        match.matchType === "team" &&
+        playerTeamIds.includes(Number(match.winnerTeamId || 0));
+
+      if (!didWinPlayerMatch && !didWinTeamMatch) break;
 
       streakCount += 1;
       latestMatch = latestMatch || match;
