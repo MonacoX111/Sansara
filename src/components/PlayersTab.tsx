@@ -272,15 +272,15 @@ export default function PlayersTab({
   const playerMatches = getPlayerMatches(matches, selectedPlayerId, players).sort(
     (a, b) => (a.order ?? a.id) - (b.order ?? b.id),
   );
-  const playerRecentMatches = getPlayerRecentMatches({
-    matches,
-    players,
-    tournaments,
-    playerId: selectedPlayerId,
-    limit: 6,
-    unknownPlayerLabel: playerText.unknown,
-    friendlyMatchLabel: playerText.friendlyMatch,
-  }).reverse();
+const playerRecentMatches = getPlayerRecentMatches({
+  matches,
+  players,
+  tournaments,
+  playerId: selectedPlayerId,
+  limit: 10,
+  unknownPlayerLabel: playerText.unknown,
+  friendlyMatchLabel: playerText.friendlyMatch,
+}).reverse();
   const playerRecentMatchRows = playerRecentMatches.map(
     ({ match, result, tournamentName }) => ({
       id: match.id,

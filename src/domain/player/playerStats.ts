@@ -202,7 +202,7 @@ export const getPlayerRecentMatches = ({
   players,
   tournaments,
   playerId,
-  limit = 6,
+  limit = 10,
   unknownPlayerLabel,
   friendlyMatchLabel,
 }: RecentMatchOptions): PlayerRecentMatch[] =>
