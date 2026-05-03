@@ -269,9 +269,7 @@ export default function PlayersTab({
       return a.nickname.localeCompare(b.nickname);
     });
 
-  const playerMatches = getPlayerMatches(matches, selectedPlayerId, players).sort(
-    (a, b) => (a.order ?? a.id) - (b.order ?? b.id),
-  );
+const playerMatches = getPlayerMatches(matches, selectedPlayerId, players);
 const playerRecentMatches = getPlayerRecentMatches({
   matches,
   players,
@@ -302,18 +300,19 @@ const playerRecentMatches = getPlayerRecentMatches({
   );
 const playerFormResults = playerRecentMatches
   .filter((item) => item.result === "win" || item.result === "loss")
-  .slice(0, 5);
+  .slice(0, 10);
 
-const playerVisibleFormResults = playerFormResults;
-  const playerDecidedMatches = playerMatches.filter(
-    (match) => getPlayerMatchResult(match, selectedPlayerId, players)
-  );
+const playerVisibleFormResults = [...playerFormResults].reverse();
+const playerDecidedMatches = playerMatches.filter(
+  (match) =>
+    getPlayerMatchResult(match, selectedPlayerId, players) !== "pending"
+);
   const playerWins = playerDecidedMatches.filter(
     (match) => getPlayerMatchResult(match, selectedPlayerId, players) === "win",
   ).length;
   const playerLosses = playerDecidedMatches.length - playerWins;
   const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId, players);
-  const playerStreak = getPlayerStreakFromVisibleForm(playerRecentMatches);
+const playerStreak = getPlayerStreakFromVisibleForm([...playerFormResults].reverse());
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
   const playerEloHistory = selectedPlayer
@@ -702,7 +701,7 @@ const playerVisibleFormResults = playerFormResults;
               }}
               winRate={playerWinRate}
               streakLabel={playerStreak.label}
-              formResults={playerFormResults}
+formResults={playerVisibleFormResults}
               achievementsCount={playerAchievements.length}
               tournamentsCount={playerTournaments.length}
             />
