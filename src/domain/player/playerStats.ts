@@ -1,4 +1,5 @@
 import { Match, Player, Tournament } from "../../types";
+import { getPlayerAllTeamIds } from "./playerTeams";
 
 export type PlayerMatchResult = "win" | "loss" | "pending";
 
@@ -40,33 +41,75 @@ export const comparePlayerMatchesLatestFirst = (a: Match, b: Match) => {
   return (b.order ?? b.id) - (a.order ?? a.id);
 };
 
-export const getPlayerMatches = (matches: Match[], playerId: number) =>
-  matches.filter(
-    (match) =>
+const getPlayerTeamIdsForStats = (playerId: number, players: Player[]) => {
+  const player = players.find((item) => item.id === playerId);
+  return player ? getPlayerAllTeamIds(player) : [];
+};
+
+export const getPlayerMatches = (
+  matches: Match[],
+  playerId: number,
+  players: Player[] = []
+) => {
+  const playerTeamIds = getPlayerTeamIdsForStats(playerId, players);
+
+  return matches.filter((match) => {
+    if (
       match.matchType === "player" &&
       (normalizeId(match.player1) === playerId ||
-        normalizeId(match.player2) === playerId),
-  );
+        normalizeId(match.player2) === playerId)
+    ) {
+      return true;
+    }
+
+    if (match.matchType === "team") {
+      return (
+        playerTeamIds.includes(normalizeId(match.team1)) ||
+        playerTeamIds.includes(normalizeId(match.team2))
+      );
+    }
+
+    return false;
+  });
+};
 
 export const getPlayerMatchResult = (
   match: Match,
   playerId: number,
+  players: Player[] = []
 ): PlayerMatchResult => {
+  if (match.matchType === "team") {
+    const playerTeamIds = getPlayerTeamIdsForStats(playerId, players);
+    const playerTeamId = [normalizeId(match.team1), normalizeId(match.team2)].find(
+      (teamId) => playerTeamIds.includes(teamId)
+    );
+    const winnerTeamId = normalizeId(match.winnerTeamId);
+
+    if (!playerTeamId || !winnerTeamId) return "pending";
+
+    return winnerTeamId === playerTeamId ? "win" : "loss";
+  }
+
   const winnerId = normalizeId(match.winnerId);
 
   if (!winnerId) return "pending";
+
   return winnerId === playerId ? "win" : "loss";
 };
 
-export const getPlayerWinRate = (matches: Match[], playerId: number) => {
+export const getPlayerWinRate = (
+  matches: Match[],
+  playerId: number,
+  players: Player[] = []
+) => {
   const decidedMatches = matches.filter(
-    (match) => getPlayerMatchResult(match, playerId) !== "pending",
+    (match) => getPlayerMatchResult(match, playerId, players) !== "pending",
   );
 
   if (decidedMatches.length === 0) return 0;
 
   const wins = decidedMatches.filter(
-    (match) => getPlayerMatchResult(match, playerId) === "win",
+    (match) => getPlayerMatchResult(match, playerId, players) === "win",
   ).length;
 
   return Math.round((wins / decidedMatches.length) * 100);
@@ -163,7 +206,7 @@ export const getPlayerRecentMatches = ({
   unknownPlayerLabel,
   friendlyMatchLabel,
 }: RecentMatchOptions): PlayerRecentMatch[] =>
-  getPlayerMatches(matches, playerId)
+getPlayerMatches(matches, playerId, players)
     .sort(comparePlayerMatchesLatestFirst)
     .slice(0, limit)
     .map((match) => {
@@ -181,7 +224,7 @@ export const getPlayerRecentMatches = ({
         match,
         opponentId,
         opponentName,
-        result: getPlayerMatchResult(match, playerId),
+result: getPlayerMatchResult(match, playerId, players),
         tournamentName,
       };
     });

@@ -269,7 +269,7 @@ export default function PlayersTab({
       return a.nickname.localeCompare(b.nickname);
     });
 
-  const playerMatches = getPlayerMatches(matches, selectedPlayerId).sort(
+  const playerMatches = getPlayerMatches(matches, selectedPlayerId, players).sort(
     (a, b) => (a.order ?? a.id) - (b.order ?? b.id),
   );
   const playerRecentMatches = getPlayerRecentMatches({
@@ -305,13 +305,13 @@ export default function PlayersTab({
     .slice(-5);
   const playerVisibleFormResults = [...playerFormResults].reverse();
   const playerDecidedMatches = playerMatches.filter(
-    (match) => getPlayerMatchResult(match, selectedPlayerId) !== "pending",
+    (match) => getPlayerMatchResult(match, selectedPlayerId, players)
   );
   const playerWins = playerDecidedMatches.filter(
-    (match) => getPlayerMatchResult(match, selectedPlayerId) === "win",
+    (match) => getPlayerMatchResult(match, selectedPlayerId, players) === "win",
   ).length;
   const playerLosses = playerDecidedMatches.length - playerWins;
-  const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId);
+  const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId, players);
   const playerStreak = getPlayerStreakFromVisibleForm(playerVisibleFormResults);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
