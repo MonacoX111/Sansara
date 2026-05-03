@@ -34,16 +34,15 @@ const getMatchDateTime = (match: Match) => {
   return Number.isNaN(timestamp) ? 0 : timestamp;
 };
 
-export const comparePlayerMatchesLatestFirst = (a: Match, b: Match) => {
-  const dateDiff = getMatchDateTime(b) - getMatchDateTime(a);
-  if (dateDiff !== 0) return dateDiff;
-
-  return (b.order ?? b.id) - (a.order ?? a.id);
-};
-
 const getPlayerTeamIdsForStats = (playerId: number, players: Player[]) => {
   const player = players.find((item) => item.id === playerId);
   return player ? getPlayerAllTeamIds(player) : [];
+};
+
+export const comparePlayerMatchesLatestFirst = (a: Match, b: Match) => {
+  const dateDiff = getMatchDateTime(b) - getMatchDateTime(a);
+  if (dateDiff !== 0) return dateDiff;
+  return (b.order ?? b.id) - (a.order ?? a.id);
 };
 
 export const getPlayerMatches = (
@@ -103,13 +102,13 @@ export const getPlayerWinRate = (
   players: Player[] = []
 ) => {
   const decidedMatches = matches.filter(
-    (match) => getPlayerMatchResult(match, playerId, players) !== "pending",
+    (match) => getPlayerMatchResult(match, playerId, players) !== "pending"
   );
 
   if (decidedMatches.length === 0) return 0;
 
   const wins = decidedMatches.filter(
-    (match) => getPlayerMatchResult(match, playerId, players) === "win",
+    (match) => getPlayerMatchResult(match, playerId, players) === "win"
   ).length;
 
   return Math.round((wins / decidedMatches.length) * 100);
@@ -118,83 +117,54 @@ export const getPlayerWinRate = (
 export const getPlayerStreak = (
   matches: Match[],
   playerId: number,
+  players: Player[] = []
 ): PlayerStreak => {
   const decidedMatches = [...matches]
-    .sort((a, b) => comparePlayerMatchesLatestFirst(b, a))
-    .filter((match) => getPlayerMatchResult(match, playerId) !== "pending");
+    .sort(comparePlayerMatchesLatestFirst)
+    .filter((match) => getPlayerMatchResult(match, playerId, players) !== "pending");
 
   if (decidedMatches.length === 0) {
-    return {
-      type: "-",
-      count: 0,
-      label: "-",
-    };
+    return { type: "-", count: 0, label: "-" };
   }
 
-  const latestResult = getPlayerMatchResult(
-    decidedMatches[decidedMatches.length - 1],
-    playerId,
-  );
+  const latestResult = getPlayerMatchResult(decidedMatches[0], playerId, players);
   const type = latestResult === "win" ? "W" : "L";
+
   let count = 0;
 
-  for (let index = decidedMatches.length - 1; index >= 0; index -= 1) {
-    const result = getPlayerMatchResult(decidedMatches[index], playerId);
-    if (
-      (type === "W" && result !== "win") ||
-      (type === "L" && result !== "loss")
-    ) {
-      break;
-    }
+  for (const match of decidedMatches) {
+    const result = getPlayerMatchResult(match, playerId, players);
+
+    if (result !== latestResult) break;
 
     count += 1;
   }
 
-  return {
-    type,
-    count,
-    label: `${type}${count}`,
-  };
+  return { type, count, label: `${type}${count}` };
 };
 
 export const getPlayerStreakFromVisibleForm = (
-  visibleResults: PlayerRecentMatch[],
+  visibleResults: PlayerRecentMatch[]
 ): PlayerStreak => {
-  const latestDecidedIndex = visibleResults
-    .map((item) => item.result)
-    .lastIndexOf("win");
-  const latestLossIndex = visibleResults
-    .map((item) => item.result)
-    .lastIndexOf("loss");
-  const latestIndex = Math.max(latestDecidedIndex, latestLossIndex);
+  const decidedResults = visibleResults.filter(
+    (item) => item.result === "win" || item.result === "loss"
+  );
 
-  if (latestIndex === -1) {
-    return {
-      type: "-",
-      count: 0,
-      label: "-",
-    };
+  if (decidedResults.length === 0) {
+    return { type: "-", count: 0, label: "-" };
   }
 
-  const latestResult = visibleResults[latestIndex].result;
+  const latestResult = decidedResults[0].result;
   const type = latestResult === "win" ? "W" : "L";
+
   let count = 0;
 
-  for (let index = latestIndex; index >= 0; index -= 1) {
-    const result = visibleResults[index].result;
-
-    if (result !== latestResult) {
-      break;
-    }
-
+  for (const item of decidedResults) {
+    if (item.result !== latestResult) break;
     count += 1;
   }
 
-  return {
-    type,
-    count,
-    label: `${type}${count}`,
-  };
+  return { type, count, label: `${type}${count}` };
 };
 
 export const getPlayerRecentMatches = ({
@@ -206,16 +176,32 @@ export const getPlayerRecentMatches = ({
   unknownPlayerLabel,
   friendlyMatchLabel,
 }: RecentMatchOptions): PlayerRecentMatch[] =>
-getPlayerMatches(matches, playerId, players)
+  getPlayerMatches(matches, playerId, players)
     .sort(comparePlayerMatchesLatestFirst)
     .slice(0, limit)
     .map((match) => {
+      const isTeamMatch = match.matchType === "team";
+
+      const playerTeamIds = getPlayerTeamIdsForStats(playerId, players);
+      const team1 = normalizeId(match.team1);
+      const team2 = normalizeId(match.team2);
+
       const player1 = normalizeId(match.player1);
       const player2 = normalizeId(match.player2);
-      const opponentId = player1 === playerId ? player2 : player1;
-      const opponentName =
-        players.find((player) => player.id === opponentId)?.nickname ||
-        unknownPlayerLabel;
+
+      const opponentId = isTeamMatch
+        ? playerTeamIds.includes(team1)
+          ? team2
+          : team1
+        : player1 === playerId
+          ? player2
+          : player1;
+
+      const opponentName = isTeamMatch
+        ? unknownPlayerLabel
+        : players.find((player) => player.id === opponentId)?.nickname ||
+          unknownPlayerLabel;
+
       const tournamentName =
         tournaments.find((tournament) => tournament.id === match.tournamentId)
           ?.title || friendlyMatchLabel;
@@ -224,7 +210,7 @@ getPlayerMatches(matches, playerId, players)
         match,
         opponentId,
         opponentName,
-result: getPlayerMatchResult(match, playerId, players),
+        result: getPlayerMatchResult(match, playerId, players),
         tournamentName,
       };
     });

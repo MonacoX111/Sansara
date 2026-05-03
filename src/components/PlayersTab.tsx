@@ -312,7 +312,7 @@ const playerRecentMatches = getPlayerRecentMatches({
   ).length;
   const playerLosses = playerDecidedMatches.length - playerWins;
   const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId, players);
-  const playerStreak = getPlayerStreakFromVisibleForm(playerVisibleFormResults);
+  const playerStreak = getPlayerStreakFromVisibleForm(playerRecentMatches);
 
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
   const playerEloHistory = selectedPlayer
