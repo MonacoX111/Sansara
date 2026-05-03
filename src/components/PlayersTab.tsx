@@ -280,7 +280,7 @@ const playerRecentMatches = getPlayerRecentMatches({
   limit: 10,
   unknownPlayerLabel: playerText.unknown,
   friendlyMatchLabel: playerText.friendlyMatch,
-}).reverse();
+});
   const playerRecentMatchRows = playerRecentMatches.map(
     ({ match, result, tournamentName }) => ({
       id: match.id,
@@ -300,10 +300,11 @@ const playerRecentMatches = getPlayerRecentMatches({
       tournamentName,
     }),
   );
-  const playerFormResults = playerRecentMatches
-    .filter((item) => item.result === "win" || item.result === "loss")
-    .slice(-5);
-  const playerVisibleFormResults = [...playerFormResults].reverse();
+const playerFormResults = playerRecentMatches
+  .filter((item) => item.result === "win" || item.result === "loss")
+  .slice(0, 5);
+
+const playerVisibleFormResults = playerFormResults;
   const playerDecidedMatches = playerMatches.filter(
     (match) => getPlayerMatchResult(match, selectedPlayerId, players)
   );
