@@ -279,7 +279,7 @@ const playerRecentMatches = getPlayerRecentMatches({
   unknownPlayerLabel: playerText.unknown,
   friendlyMatchLabel: playerText.friendlyMatch,
 });
-  const playerRecentMatchRows = playerRecentMatches.map(
+const playerRecentMatchRows = [...playerRecentMatches].reverse().map(
     ({ match, result, tournamentName }) => ({
       id: match.id,
       result,
@@ -313,7 +313,6 @@ const playerDecidedMatches = playerMatches.filter(
   const playerLosses = playerDecidedMatches.length - playerWins;
   const playerWinRate = getPlayerWinRate(playerMatches, selectedPlayerId, players);
 const playerStreak = getPlayerStreakFromVisibleForm([...playerFormResults].reverse());
-
   const playerAchievements = getPlayerAchievements(selectedPlayerId);
   const playerEloHistory = selectedPlayer
     ? getPlayerTournamentEloHistory(selectedPlayer, tournaments, teams, players)
