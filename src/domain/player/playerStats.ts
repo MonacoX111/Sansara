@@ -40,9 +40,29 @@ const getPlayerTeamIdsForStats = (playerId: number, players: Player[]) => {
 };
 
 export const comparePlayerMatchesLatestFirst = (a: Match, b: Match) => {
-  const dateDiff = getMatchDateTime(b) - getMatchDateTime(a);
-  if (dateDiff !== 0) return dateDiff;
-  return (b.order ?? b.id) - (a.order ?? a.id);
+  const aTime = getMatchDateTime(a);
+  const bTime = getMatchDateTime(b);
+
+  // Both matches have real dates — newer date first
+  if (aTime > 0 && bTime > 0 && aTime !== bTime) return bTime - aTime;
+
+  // Different tournaments — sort by tournament recency
+  const aTid = Number(a.tournamentId || 0);
+  const bTid = Number(b.tournamentId || 0);
+  if (aTid !== bTid) {
+    // If only one has a date, the one without a date may be newer (just added)
+    // Use tournamentId as proxy: higher id = newer tournament
+    if (aTime !== bTime) {
+      // One has date, one doesn't — use date presence:
+      // dateless match likely belongs to a newer tournament
+      return aTime === 0 ? -1 : 1;
+    }
+    // Both have same date status — higher tournamentId = newer
+    return bTid - aTid;
+  }
+
+  // Same tournament — use admin order (ascending: lower order = top of list)
+  return (a.order ?? a.id) - (b.order ?? b.id);
 };
 
 export const getPlayerMatches = (
