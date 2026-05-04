@@ -21,6 +21,9 @@ export const getTournamentRosterPlayerIds = (
   teamId: number,
   players: Player[] = []
 ): TournamentRosterLookup => {
+  const hasAnyRosters =
+    Array.isArray(tournament.teamRosters) && tournament.teamRosters.length > 0;
+
   const snapshot = getTournamentTeamRoster(tournament, teamId);
   const snapshotIds =
     snapshot && Array.isArray(snapshot.playerIds)
@@ -31,6 +34,13 @@ export const getTournamentRosterPlayerIds = (
     return { playerIds: snapshotIds, isFallback: false };
   }
 
+  // If rosters exist on the tournament, don't fall back to current team membership.
+  // An empty/missing roster for this team means the team had no players recorded.
+  if (hasAnyRosters) {
+    return { playerIds: [], isFallback: false };
+  }
+
+  // Only fall back when teamRosters is completely absent
   return {
     playerIds: players
       .filter((player) => Number(player.teamId) === Number(teamId))

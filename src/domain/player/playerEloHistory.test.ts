@@ -148,7 +148,6 @@ describe("getPlayerTournamentEloHistory", () => {
       makeTournament({
         id: 21,
         participantType: "team",
-        teamRosters: [],
         placements: [{ place: 3, teamId: 60 }],
       }),
     ];

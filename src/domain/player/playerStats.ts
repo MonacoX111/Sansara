@@ -214,3 +214,52 @@ export const getPlayerRecentMatches = ({
         tournamentName,
       };
     });
+
+/**
+ * Single source of truth: determines which tournaments a player actually
+ * participated in. Uses roster-first logic — only falls back to player.teamId
+ * when teamRosters are completely absent from the tournament.
+ */
+export const getPlayerParticipatedTournaments = (
+  player: Player,
+  tournaments: Tournament[],
+  players: Player[] = []
+): Tournament[] => {
+  const playerId = Number(player.id);
+  const playerTeamIds = getPlayerAllTeamIds(player);
+
+  return tournaments.filter((tournament) => {
+    const participantIds = Array.isArray(tournament.participantIds)
+      ? tournament.participantIds.map(Number)
+      : [];
+
+    // Direct player participation
+    if (
+      tournament.participantType === "player" &&
+      participantIds.includes(playerId)
+    ) {
+      return true;
+    }
+
+    // Team tournament — check rosters
+    if (tournament.participantType === "team") {
+      const hasRosters =
+        Array.isArray(tournament.teamRosters) &&
+        tournament.teamRosters.length > 0;
+
+      if (hasRosters) {
+        // Roster-first: only count if player is explicitly in a roster
+        return tournament.teamRosters!.some(
+          (roster) =>
+            Array.isArray(roster.playerIds) &&
+            roster.playerIds.map(Number).includes(playerId)
+        );
+      }
+
+      // Fallback: no rosters at all → use team membership
+      return participantIds.some((teamId) => playerTeamIds.includes(teamId));
+    }
+
+    return false;
+  });
+};

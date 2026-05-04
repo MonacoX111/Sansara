@@ -3,6 +3,7 @@ import { Achievement, Match, Player, Team, Tournament } from "../types";
 import {
   getPlayerMatchResult,
   getPlayerMatches,
+  getPlayerParticipatedTournaments,
   getPlayerRecentMatches,
   getPlayerStreakFromVisibleForm,
   getPlayerWinRate,
@@ -145,43 +146,52 @@ export default function PlayersTab({
     : [];
   const selectedPlayerTeamIdSet = new Set(selectedPlayerTeamIds);
 
-  const isSelectedPlayerInTournamentTeam = (
-    tournament: Tournament,
-    teamId: number,
-  ) => {
-    const roster = getTournamentTeamRoster(tournament, teamId);
+const isSelectedPlayerInTournamentTeam = (
+  tournament: Tournament,
+  teamId: number,
+) => {
+  const hasExplicitRosters =
+    Array.isArray(tournament.teamRosters) &&
+    tournament.teamRosters.length > 0;
 
-    if (roster) {
-      return isPlayerInTournamentTeamRoster(
-        tournament,
-        teamId,
-        selectedPlayerId,
-        players,
-      );
-    }
+  if (hasExplicitRosters) {
+    return isPlayerInTournamentTeamRoster(
+      tournament,
+      teamId,
+      selectedPlayerId,
+      players,
+    );
+  }
 
-    return selectedPlayerTeamIdSet.has(Number(teamId));
-  };
+  // Only fall back to team membership when no rosters exist at all
+  return selectedPlayerTeamIdSet.has(Number(teamId));
+};
 
-  const getSelectedPlayerTournamentTeamId = (tournament: Tournament) => {
-    if (tournament.participantType !== "team") return undefined;
+const getSelectedPlayerTournamentTeamId = (tournament: Tournament) => {
+  if (tournament.participantType !== "team") return undefined;
 
-    const roster = Array.isArray(tournament.teamRosters)
-      ? tournament.teamRosters.find((item) =>
-          Array.isArray(item.playerIds)
-            ? item.playerIds.map(Number).includes(Number(selectedPlayerId))
-            : false,
-        )
-      : undefined;
+  const rosters = Array.isArray(tournament.teamRosters)
+    ? tournament.teamRosters
+    : [];
 
-    if (roster) return Number(roster.teamId);
+  if (rosters.length > 0) {
+    // Roster-first: only match via roster
+    const roster = rosters.find((item) =>
+      Array.isArray(item.playerIds)
+        ? item.playerIds.map(Number).includes(Number(selectedPlayerId))
+        : false,
+    );
 
-    const participantIds = Array.isArray(tournament.participantIds)
-      ? tournament.participantIds.map(Number)
-      : [];
+    return roster ? Number(roster.teamId) : undefined;
+  }
 
-    return participantIds.find((teamId) => selectedPlayerTeamIdSet.has(teamId));
-  };
+  // Only fall back when no rosters exist at all
+  const participantIds = Array.isArray(tournament.participantIds)
+    ? tournament.participantIds.map(Number)
+    : [];
+
+  return participantIds.find((teamId) => selectedPlayerTeamIdSet.has(teamId));
+};
 
   const getTournamentPlacementForSelectedPlayer = (tournament: Tournament) => {
     if (!Array.isArray(tournament.placements)) return undefined;
@@ -194,37 +204,18 @@ export default function PlayersTab({
     );
   };
 
+  // Use the canonical single-source-of-truth function for participation
+  const participatedTournamentIds = selectedPlayer
+    ? new Set(
+        getPlayerParticipatedTournaments(selectedPlayer, tournaments, players).map(
+          (t) => t.id,
+        ),
+      )
+    : new Set<number>();
+
   const isSelectedPlayerTournament = (tournament: Tournament) => {
     if (!selectedPlayer) return false;
-
-    const participantIds = Array.isArray(tournament.participantIds)
-      ? tournament.participantIds.map((id) => Number(id))
-      : [];
-    const placement = getTournamentPlacementForSelectedPlayer(tournament);
-    const participatedDirectly =
-      tournament.participantType === "player" &&
-      participantIds.includes(Number(selectedPlayer.id));
-    const participatedByTeam =
-      tournament.participantType === "team" &&
-      participantIds.some((teamId) =>
-        isSelectedPlayerInTournamentTeam(tournament, teamId),
-      );
-    const wonDirectly =
-      Number(tournament.winnerId) === Number(selectedPlayer.id);
-    const wonByTeam =
-      typeof tournament.winnerTeamId === "number" &&
-      isSelectedPlayerInTournamentTeam(
-        tournament,
-        Number(tournament.winnerTeamId),
-      );
-
-    return (
-      participatedDirectly ||
-      participatedByTeam ||
-      Boolean(placement) ||
-      wonDirectly ||
-      wonByTeam
-    );
+    return participatedTournamentIds.has(tournament.id);
   };
 
   const compareTournamentsLatestFirst = (a: Tournament, b: Tournament) => {
