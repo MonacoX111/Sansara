@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
@@ -1509,7 +1509,7 @@ const deletePlayer = async () => {
   const addTeam = async () => {
     const newTeam: Team = {
       id: getNextId(teams),
-      name: "",
+      name: "New Team",
       logo: achievementPlaceholder("T"),
       games: [],
       earnings: 0,
@@ -1519,12 +1519,12 @@ const deletePlayer = async () => {
       isFeatured: false,
     };
 
-if (!newTeam.name.trim()) {
-  showToast("Team name is required", "danger");
-  return;
-}
+    if (!newTeam.name.trim()) {
+      showToast("Team name is required", "danger");
+      return;
+    }
 
-setTeams((prev) => [...prev, newTeam]);
+    setTeams((prev) => [...prev, newTeam]);
 setSelectedTeamId(newTeam.id);
 setTeamForm(createEmptyTeamForm());
 
@@ -1543,6 +1543,7 @@ const deleteTeam = async () => {
   if (!selectedTeam) return;
 
   const deletedId = selectedTeam.id;
+  const deletedTeam = selectedTeam;
 
   const backupPlayers = players;
   const backupTeams = teams;
@@ -1566,26 +1567,65 @@ const deleteTeam = async () => {
   setPlayers(nextPlayers);
   setTeams(nextTeams);
   setTournaments(nextTournaments);
+  writeStorage("tm_players", nextPlayers);
+  writeStorage("tm_teams", nextTeams);
+  writeStorage("tm_tournaments", nextTournaments);
 
-  const deleteTimer = window.setTimeout(async () => {
-    try {
-if (isFirebaseConfigured) {
-  await deleteItem("teams", deletedId);
-}
-    } catch (error) {
-      console.error("Failed to delete team:", error);
-      showToast("Failed to delete team", "danger");
+  try {
+    if (isFirebaseConfigured) {
+      const changedPlayers = nextPlayers.filter((player) => {
+        const previous = backupPlayers.find((item) => item.id === player.id);
+        return previous && JSON.stringify(previous) !== JSON.stringify(player);
+      });
+      const changedTournaments = nextTournaments.filter((tournament) => {
+        const previous = backupTournaments.find((item) => item.id === tournament.id);
+        return previous && JSON.stringify(previous) !== JSON.stringify(tournament);
+      });
+
+      await Promise.all([
+        deleteItem("teams", deletedId),
+        ...changedPlayers.map((player) => saveItem("players", player)),
+        ...changedTournaments.map((tournament) =>
+          saveItem("tournaments", tournament)
+        ),
+      ]);
     }
-  }, 3000);
+  } catch (error) {
+    console.error("Failed to delete team:", error);
+    if (isFirebaseConfigured) {
+      setPlayers(backupPlayers);
+      setTeams(backupTeams);
+      setTournaments(backupTournaments);
+      writeStorage("tm_players", backupPlayers);
+      writeStorage("tm_teams", backupTeams);
+      writeStorage("tm_tournaments", backupTournaments);
+    }
+    showToast("Failed to delete team", "danger");
+    return;
+  }
 
   showToast(
     commonText.teamDeleted,
     "danger",
     () => {
-      window.clearTimeout(deleteTimer);
       setPlayers(backupPlayers);
       setTeams(backupTeams);
       setTournaments(backupTournaments);
+      writeStorage("tm_players", backupPlayers);
+      writeStorage("tm_teams", backupTeams);
+      writeStorage("tm_tournaments", backupTournaments);
+      if (isFirebaseConfigured) {
+        void Promise.all([
+          saveItem("teams", deletedTeam),
+          ...backupPlayers.map((player) => saveItem("players", player)),
+          ...backupTournaments.map((tournament) =>
+            saveItem("tournaments", tournament)
+          ),
+        ]).catch((error) => {
+          console.error("Failed to undo team delete:", error);
+          showToast("Failed to undo team delete", "danger");
+        });
+      }
     },
     commonText.undo
   );
