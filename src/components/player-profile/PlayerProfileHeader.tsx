@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, useRef } from "react";
+import { MouseEvent, useState } from "react";
 import { Player, Team } from "../../types";
 import { PlayerRecentMatch } from "../../domain/player/playerStats";
 
@@ -27,9 +27,9 @@ type Props = {
   achievementsCount: number;
   tournamentsCount: number;
   canChangeAvatar?: boolean;
-  avatarUploadLoading?: boolean;
-  avatarUploadError?: string;
-  onAvatarChange?: (playerId: number, file: File | null) => void;
+  avatarSaveLoading?: boolean;
+  avatarSaveError?: string;
+  onAvatarSave?: (playerId: number, avatarUrl: string) => void;
 };
 
 export default function PlayerProfileHeader({
@@ -42,20 +42,16 @@ export default function PlayerProfileHeader({
   achievementsCount,
   tournamentsCount,
   canChangeAvatar = false,
-  avatarUploadLoading = false,
-  avatarUploadError = "",
-  onAvatarChange,
+  avatarSaveLoading = false,
+  avatarSaveError = "",
+  onAvatarSave,
 }: Props) {
-  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(player.avatar || "");
   const handleMiniStatMove = (e: MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
     e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
-  };
-
-  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onAvatarChange?.(player.id, event.target.files?.[0] || null);
-    event.target.value = "";
   };
 
   return (
@@ -92,23 +88,51 @@ export default function PlayerProfileHeader({
 
               {canChangeAvatar ? (
                 <div className="profile-avatar-actions">
-                  <input
-                    ref={avatarInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={handleAvatarFileChange}
-                  />
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    disabled={avatarUploadLoading}
-                    onClick={() => avatarInputRef.current?.click()}
-                  >
-                    {avatarUploadLoading ? "Uploading..." : "Change avatar"}
-                  </button>
-                  {avatarUploadError ? (
-                    <div className="admin-error">{avatarUploadError}</div>
+                  {isEditingAvatar ? (
+                    <div className="profile-avatar-edit-form">
+                      <input
+                        type="url"
+                        className="input"
+                        placeholder="Avatar image URL"
+                        value={avatarUrl}
+                        onChange={(event) => setAvatarUrl(event.target.value)}
+                      />
+                      <div className="btn-row">
+                        <button
+                          type="button"
+                          className="primary-btn"
+                          disabled={avatarSaveLoading}
+                          onClick={() => onAvatarSave?.(player.id, avatarUrl)}
+                        >
+                          {avatarSaveLoading ? "Saving..." : "Save avatar"}
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-btn"
+                          disabled={avatarSaveLoading}
+                          onClick={() => {
+                            setAvatarUrl(player.avatar || "");
+                            setIsEditingAvatar(false);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={() => {
+                        setAvatarUrl(player.avatar || "");
+                        setIsEditingAvatar(true);
+                      }}
+                    >
+                      Change avatar
+                    </button>
+                  )}
+                  {avatarSaveError ? (
+                    <div className="admin-error">{avatarSaveError}</div>
                   ) : null}
                 </div>
               ) : null}

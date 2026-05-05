@@ -1,7 +1,6 @@
 ﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { getDownloadURL, ref as storageRef, uploadBytes } from "firebase/storage";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
@@ -49,7 +48,7 @@ import {
   handleSpotlightMove,
   handleSpotlightMoveCapture,
 } from "./utils/spotlight";
-import { isFirebaseConfigured, auth, storage } from "./firebase";
+import { isFirebaseConfigured, auth } from "./firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -754,8 +753,8 @@ const playerLogout = async () => {
   const [claimCodeInput, setClaimCodeInput] = useState("");
   const [claimCodeError, setClaimCodeError] = useState("");
   const [claimCodeLoading, setClaimCodeLoading] = useState(false);
-  const [avatarUploadLoading, setAvatarUploadLoading] = useState(false);
-  const [avatarUploadError, setAvatarUploadError] = useState("");
+  const [avatarSaveLoading, setAvatarSaveLoading] = useState(false);
+  const [avatarSaveError, setAvatarSaveError] = useState("");
 
   useEffect(() => {
     if (auth) {
@@ -1393,40 +1392,33 @@ const submitClaimCode = async () => {
   }
 };
 
-  const handlePlayerAvatarUpload = async (
+  const handlePlayerAvatarSave = async (
     playerId: number,
-    file: File | null
+    avatarUrl: string
   ) => {
-    if (!file) return;
+    const nextAvatar = avatarUrl.trim();
 
     if (!playerUser || !linkedPlayer || linkedPlayer.id !== playerId) {
-      setAvatarUploadError("You can only update your own avatar.");
+      setAvatarSaveError("You can only update your own avatar.");
       return;
     }
 
     if (linkedPlayer.authUid !== playerUser.uid) {
-      setAvatarUploadError("You can only update your own avatar.");
+      setAvatarSaveError("You can only update your own avatar.");
       return;
     }
 
-    if (!storage || !isFirebaseConfigured) {
-      setAvatarUploadError("Firebase Storage is not configured.");
+    if (!nextAvatar) {
+      setAvatarSaveError("Avatar image URL is required.");
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
-      setAvatarUploadError("Please choose an image file.");
-      return;
-    }
+    const updatedPlayer: Player = { ...linkedPlayer, avatar: nextAvatar };
+    const previousPlayers = players;
 
     try {
-      setAvatarUploadLoading(true);
-      setAvatarUploadError("");
-
-      const avatarRef = storageRef(storage, `avatars/${playerId}.jpg`);
-      await uploadBytes(avatarRef, file, { contentType: file.type });
-      const avatarUrl = await getDownloadURL(avatarRef);
-      const updatedPlayer: Player = { ...linkedPlayer, avatar: avatarUrl };
+      setAvatarSaveLoading(true);
+      setAvatarSaveError("");
 
       setPlayers((currentPlayers) =>
         currentPlayers.map((player) =>
@@ -1435,10 +1427,11 @@ const submitClaimCode = async () => {
       );
       await saveItem("players", updatedPlayer);
     } catch (error: any) {
-      console.error("Avatar upload failed:", error);
-      setAvatarUploadError(error.message || "Failed to update avatar.");
+      console.error("Avatar save failed:", error);
+      setPlayers(previousPlayers);
+      setAvatarSaveError(error.message || "Failed to update avatar.");
     } finally {
-      setAvatarUploadLoading(false);
+      setAvatarSaveLoading(false);
     }
   };
 
@@ -3001,9 +2994,9 @@ const deleteAchievement = async (achievementId: number) => {
       linkedPlayer.authUid &&
       linkedPlayer.authUid === playerUser.uid
   )}
-  avatarUploadLoading={avatarUploadLoading}
-  avatarUploadError={avatarUploadError}
-  onAvatarChange={handlePlayerAvatarUpload}
+  avatarSaveLoading={avatarSaveLoading}
+  avatarSaveError={avatarSaveError}
+  onAvatarSave={handlePlayerAvatarSave}
   lang={lang}
 />
 )}

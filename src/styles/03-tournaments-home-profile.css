@@ -2292,6 +2292,30 @@
     margin-bottom: 0;
 }
 
+.profile-avatar-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 16px;
+    max-width: 460px;
+}
+
+.profile-avatar-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(100%, 460px);
+}
+
+.profile-avatar-edit-form .input {
+    width: 100%;
+}
+
+.profile-avatar-edit-form .btn-row {
+    margin-top: 0;
+}
+
 .profile-info-box.upgraded {
     width: 100%;
     margin-top: 0;

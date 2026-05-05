@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
 import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
@@ -16,14 +15,12 @@ export const isFirebaseConfigured =
   Object.values(firebaseConfig).every(Boolean);
 
 let db: Firestore | null = null;
-let storage: FirebaseStorage | null = null;
 let auth: Auth | null = null;
 
 if (isFirebaseConfigured) {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
-  storage = getStorage(app);
   auth = getAuth(app);
 }
 
-export { db, storage, auth };
+export { db, auth };
