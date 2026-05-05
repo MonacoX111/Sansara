@@ -1,6 +1,9 @@
 import { useRef } from "react";
 import { Match, Player, Team, Tournament } from "../types";
-import { getPlayersForHistoricalTeam } from "../domain/player/playerTeams";
+import {
+  getPlayersForHistoricalTeam,
+  wasPlayerInTeam,
+} from "../domain/player/playerTeams";
 import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
 import StatCard from "./StatCard";
 
@@ -71,6 +74,67 @@ const handleBackToTeamList = () => {
   const wonTournaments = tournaments.filter(
     (tournament) => tournament.winnerTeamId === selectedTeamId
   );
+
+  const getPlayerById = (playerId: number) =>
+    players.find((player) => Number(player.id) === Number(playerId));
+
+  const getPlayerTeamConnection = (player: Player) => {
+    if (Number(player.teamId) === Number(selectedTeamId)) {
+      return teamText.currentPlayer;
+    }
+
+    return teamText.formerPlayer;
+  };
+
+  const getPlayerBasedWinnerIds = (tournament: Tournament) => {
+    const winnerIds = new Set<number>();
+
+    if (tournament.winnerId) {
+      winnerIds.add(Number(tournament.winnerId));
+    }
+
+    if (Array.isArray(tournament.winnerSquadIds)) {
+      tournament.winnerSquadIds.forEach((playerId) => {
+        if (playerId) winnerIds.add(Number(playerId));
+      });
+    }
+
+    if (Array.isArray(tournament.placements)) {
+      tournament.placements
+        .filter(
+          (placement) =>
+            Number(placement.place) === 1 && typeof placement.playerId === "number"
+        )
+        .forEach((placement) => {
+          if (placement.playerId) winnerIds.add(Number(placement.playerId));
+        });
+    }
+
+    return Array.from(winnerIds);
+  };
+
+  const playerBasedWonTournaments = tournaments
+    .filter(
+      (tournament) =>
+        (tournament.status === "completed" || tournament.status === "finished") &&
+        !tournament.winnerTeamId
+    )
+    .map((tournament) => {
+      const connectedWinners = getPlayerBasedWinnerIds(tournament)
+        .map(getPlayerById)
+        .filter(
+          (player): player is Player =>
+            Boolean(player) && wasPlayerInTeam(player, selectedTeamId)
+        );
+
+      if (connectedWinners.length === 0) return null;
+
+      return {
+        tournament,
+        winners: connectedWinners,
+      };
+    })
+    .filter(Boolean) as { tournament: Tournament; winners: Player[] }[];
 
   const recentTeamMatches = matches
     .filter(
@@ -325,6 +389,59 @@ onClick={() => handleSelectTeam(team.id)}
               </div>
             ) : (
               <div className="empty-block">{teamText.noTournamentsWon}</div>
+            )}
+          </div>
+
+          <div className="section-block">
+            <h4>{teamText.playerBasedWins}</h4>
+
+            {playerBasedWonTournaments.length > 0 ? (
+              <div className="team-history-list">
+                {playerBasedWonTournaments.map(({ tournament, winners }) => (
+                  <div
+                    key={tournament.id}
+                    className="team-history-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--x",
+                        `${e.clientX - rect.left}px`
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--y",
+                        `${e.clientY - rect.top}px`
+                      );
+                    }}
+                  >
+                    <div className="team-history-top">
+                      <div className="team-history-title">
+                        {tournament.title}
+                      </div>
+                      <span className="pill gold">{teamText.winner}</span>
+                    </div>
+
+                    <div className="team-history-meta">
+                      <span>{tournament.game}</span>
+                      <span>{tournament.date || teamText.noDate}</span>
+                      <span>{formatTournamentLabel(tournament.format)}</span>
+                    </div>
+
+                    <div className="team-history-meta">
+                      <span>{teamText.wonBy}</span>
+                      <span>
+                        {winners
+                          .map(
+                            (player) =>
+                              `${player.nickname} (${getPlayerTeamConnection(player)})`
+                          )
+                          .join(", ")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-block">{teamText.noPlayerBasedWins}</div>
             )}
           </div>
 
