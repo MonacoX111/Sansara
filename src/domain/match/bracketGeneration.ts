@@ -38,6 +38,34 @@ const getRoundKey = (match: Match): string =>
   (match.roundLabel || match.round || "auto").trim().toLowerCase();
 
 const getBracketPlan = (seriesCount: number): BracketPlanItem[] | null => {
+  if (seriesCount === 1) {
+    return [
+      {
+        seriesId: "F1",
+        nextSeriesId: "",
+        roundLabel: "Final",
+        stage: "final",
+      },
+    ];
+  }
+
+  if (seriesCount === 2) {
+    return [
+      {
+        seriesId: "SF1",
+        nextSeriesId: "",
+        roundLabel: "1/2 Final",
+        stage: "playoff",
+      },
+      {
+        seriesId: "SF2",
+        nextSeriesId: "",
+        roundLabel: "1/2 Final",
+        stage: "playoff",
+      },
+    ];
+  }
+
   if (seriesCount === 3) {
     return [
       {
@@ -255,7 +283,7 @@ const tournamentMatches = sortMatchesByOrder(
     return {
       ok: false,
       reason: "unsupported_size",
-message: `Supported playoff sizes: 2 semifinals = 2 series, 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series. Found ${seriesGroups.length}`,
+message: `Supported playoff sizes: final only = 1 series, semifinals only = 2 series, 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series. Found ${seriesGroups.length}`,
     };
   }
 

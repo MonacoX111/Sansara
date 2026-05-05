@@ -11,7 +11,8 @@ export type TournamentValidationIssue = {
     | "TOURNAMENT_PLAYER_PLACEMENT_IN_TEAM_EVENT"
     | "TOURNAMENT_TEAM_PLACEMENT_IN_PLAYER_EVENT"
     | "TOURNAMENT_FINISHED_TEAM_WITHOUT_ROSTERS"
-    | "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS";
+    | "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS"
+    | "TOURNAMENT_FINISHED_WITHOUT_PARTICIPANTS";
   severity: TournamentValidationSeverity;
   message: string;
 };
@@ -59,6 +60,19 @@ export const validateTournamentConsistency = (
   const winnerTeamPresent = hasWinnerTeamId(tournament);
   const winnerSquadPresent = hasWinnerSquadIds(tournament);
   const placementsPresent = hasPlacements(tournament);
+
+  if (
+    finished &&
+    ["player", "team", "squad"].includes(tournament.participantType) &&
+    (!Array.isArray(tournament.participantIds) ||
+      tournament.participantIds.length === 0)
+  ) {
+    issues.push({
+      code: "TOURNAMENT_FINISHED_WITHOUT_PARTICIPANTS",
+      severity: "error",
+      message: "Tournament participants are required",
+    });
+  }
 
   if (
     finished &&
@@ -144,7 +158,7 @@ export const validateTournamentConsistency = (
     issues.push({
       code: "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS",
       severity: "warning",
-      message: "Tournament has a winner but no placements",
+      message: "Tournament has a winner but no placements — ELO will not be applied",
     });
   }
 

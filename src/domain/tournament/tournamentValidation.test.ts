@@ -22,6 +22,33 @@ const makeTournament = (overrides: Partial<Tournament>): Tournament => ({
 });
 
 describe("validateTournamentConsistency", () => {
+  it("allows draft tournaments with no participants", () => {
+    const result = validateTournamentConsistency(
+      makeTournament({
+        status: "draft",
+        participantIds: [],
+      })
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("allows upcoming tournaments with no participants", () => {
+    const result = validateTournamentConsistency(
+      makeTournament({
+        status: "upcoming",
+        participantIds: [],
+      })
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.warnings.map((issue) => issue.code)).not.toContain(
+      "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS"
+    );
+  });
+
   it("warns when a finished tournament has a winner but no placements", () => {
     const result = validateTournamentConsistency(
       makeTournament({
@@ -31,6 +58,7 @@ describe("validateTournamentConsistency", () => {
     );
 
     expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
     expect(result.warnings.map((issue) => issue.code)).toContain(
       "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS"
     );
@@ -82,6 +110,47 @@ describe("validateTournamentConsistency", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.map((issue) => issue.code)).toContain(
       "TOURNAMENT_FINISHED_WITHOUT_RESULTS"
+    );
+  });
+
+  it("blocks completed or finished tournaments with no participants", () => {
+    const completed = validateTournamentConsistency(
+      makeTournament({
+        status: "completed",
+        participantIds: [],
+        winnerId: 10,
+      })
+    );
+    const finished = validateTournamentConsistency(
+      makeTournament({
+        status: "finished",
+        participantIds: [],
+        winnerId: 10,
+      })
+    );
+
+    expect(completed.valid).toBe(false);
+    expect(completed.errors.map((issue) => issue.code)).toContain(
+      "TOURNAMENT_FINISHED_WITHOUT_PARTICIPANTS"
+    );
+    expect(finished.valid).toBe(false);
+    expect(finished.errors.map((issue) => issue.code)).toContain(
+      "TOURNAMENT_FINISHED_WITHOUT_PARTICIPANTS"
+    );
+  });
+
+  it("does not warn about missing placements when placements exist", () => {
+    const result = validateTournamentConsistency(
+      makeTournament({
+        status: "finished",
+        winnerId: 10,
+        placements: [{ place: 1, playerId: 10 }],
+      })
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.warnings.map((issue) => issue.code)).not.toContain(
+      "TOURNAMENT_WINNER_WITHOUT_PLACEMENTS"
     );
   });
 

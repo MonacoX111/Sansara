@@ -336,6 +336,7 @@ common: {
   matchParticipantsRequired: "Both match participants are required",
   tournamentFinishedWithoutResults:
     "Finished tournament needs placements or a winner",
+  tournamentParticipantsRequired: "Tournament participants are required",
   tournamentTeamWinnerForNonTeam:
     "Team winner is only valid for team tournaments",
   tournamentPlayerWinnerForNonPlayer:
@@ -353,7 +354,8 @@ common: {
   bracketFirebaseFailed: "Bracket generated, but Firebase save failed",
   selectTournamentFirst: "Select tournament first",
   noMatchesForTournament: "No matches found for this tournament",
-  unsupportedBracketSize: "Supported Playoff sizes: 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series.",
+  unsupportedBracketSize:
+    "Supported Playoff sizes: final only = 1 series, semifinals only = 2 series, 4 teams = 3 series, 8 teams = 7 series, 16 teams = 15 series.",
   achievementSaved: "Achievement saved",
   achievementAdded: "Achievement added",
   achievementDeleted: "Achievement deleted",
@@ -929,6 +931,7 @@ common: {
   matchParticipantsRequired: "Потрібні обидва учасники матчу",
   tournamentFinishedWithoutResults:
     "Завершений турнір потребує місць або переможця",
+  tournamentParticipantsRequired: "Потрібні учасники турніру",
   tournamentTeamWinnerForNonTeam:
     "Командний переможець дійсний лише для командних турнірів",
   tournamentPlayerWinnerForNonPlayer:
@@ -946,7 +949,8 @@ common: {
   bracketFirebaseFailed: "Сітку створено, але збереження у Firebase не вдалося",
   selectTournamentFirst: "Спочатку оберіть турнір",
   noMatchesForTournament: "Матчів для цього турніру не знайдено",
-  unsupportedBracketSize: "Підтримувані розміри плей-офф: 4 команди = 3 серії, 8 команд = 7 серій, 16 команд = 15 серій.",
+  unsupportedBracketSize:
+    "Підтримувані розміри плей-офф: фінал = 1 серія, лише півфінали = 2 серії, 4 команди = 3 серії, 8 команд = 7 серій, 16 команд = 15 серій.",
   achievementSaved: "Досягнення збережено",
   achievementAdded: "Досягнення додано",
   achievementDeleted: "Досягнення видалено",

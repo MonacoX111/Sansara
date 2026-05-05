@@ -46,10 +46,12 @@ describe("generateBracketMatches — error cases", () => {
     }
   });
 
-  it("returns unsupported_size for non-{3,7,15} series counts", () => {
+  it("returns unsupported_size for unsupported series counts", () => {
     const matches = [
       makeMatch({ id: 1, order: 1, player1: 1, player2: 2 }),
       makeMatch({ id: 2, order: 2, player1: 3, player2: 4 }),
+      makeMatch({ id: 3, order: 3, player1: 5, player2: 6 }),
+      makeMatch({ id: 4, order: 4, player1: 7, player2: 8 }),
     ];
 
     const result = generateBracketMatches({ matches, tournamentId: 1 });
@@ -57,8 +59,46 @@ describe("generateBracketMatches — error cases", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.reason).toBe("unsupported_size");
-      expect(result.message).toContain("Found 2");
+      expect(result.message).toContain("Found 4");
     }
+  });
+});
+
+describe("generateBracketMatches — 1 series (final only)", () => {
+  it("labels the single series as F1 with no next series", () => {
+    const matches = [
+      makeMatch({ id: 1, order: 1, player1: 1, player2: 2 }),
+    ];
+
+    const result = ok(generateBracketMatches({ matches, tournamentId: 1 }));
+
+    expect(result.matches[0].seriesId).toBe("F1");
+    expect(result.matches[0].nextSeriesId).toBe("");
+    expect(result.matches[0].roundLabel).toBe("Final");
+    expect(result.matches[0].stage).toBe("final");
+    expect(result.updatedMatches).toHaveLength(1);
+  });
+});
+
+describe("generateBracketMatches — 2 series (semifinals only)", () => {
+  it("labels both series as semifinals with no final linkage", () => {
+    const matches = [
+      makeMatch({ id: 1, order: 1, player1: 1, player2: 2 }),
+      makeMatch({ id: 2, order: 2, player1: 3, player2: 4 }),
+    ];
+
+    const result = ok(generateBracketMatches({ matches, tournamentId: 1 }));
+
+    expect(result.matches[0].seriesId).toBe("SF1");
+    expect(result.matches[0].nextSeriesId).toBe("");
+    expect(result.matches[0].roundLabel).toBe("1/2 Final");
+    expect(result.matches[0].stage).toBe("playoff");
+
+    expect(result.matches[1].seriesId).toBe("SF2");
+    expect(result.matches[1].nextSeriesId).toBe("");
+    expect(result.matches[1].roundLabel).toBe("1/2 Final");
+    expect(result.matches[1].stage).toBe("playoff");
+    expect(result.updatedMatches).toHaveLength(2);
   });
 });
 

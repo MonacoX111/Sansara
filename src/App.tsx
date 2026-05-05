@@ -1646,14 +1646,6 @@ if (isFirebaseConfigured) {
       return;
     }
 
-    if (
-      ["player", "team", "squad"].includes(newTournament.participantType) &&
-      newTournament.participantIds.length === 0
-    ) {
-      showToast("Tournament participants are required", "danger");
-      return;
-    }
-
     const nextTournaments = [...tournaments, newTournament];
 
     const safeTournaments = nextTournaments.map((tournament) => ({

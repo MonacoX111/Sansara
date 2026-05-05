@@ -67,6 +67,8 @@ const getTournamentValidationMessage = (
       commonText.tournamentFinishedTeamWithoutRosters,
     TOURNAMENT_WINNER_WITHOUT_PLACEMENTS:
       commonText.tournamentWinnerWithoutPlacements,
+    TOURNAMENT_FINISHED_WITHOUT_PARTICIPANTS:
+      commonText.tournamentParticipantsRequired,
   };
 
   return messages[issue.code] || issue.message;
@@ -194,11 +196,22 @@ export const saveTournamentMutation = async (
     updatedTournament.status === "completed" ||
     updatedTournament.status === "finished";
 
+  const requiresParticipants =
+    updatedTournament.status === "ongoing" ||
+    updatedTournament.status === "completed" ||
+    updatedTournament.status === "finished" ||
+    updatedTournament.isPublished;
+
   if (
+    requiresParticipants &&
     ["player", "team", "squad"].includes(updatedTournament.participantType) &&
     updatedTournament.participantIds.length === 0
   ) {
-    showToast("Tournament participants are required", "danger");
+    showToast(
+      commonText.tournamentParticipantsRequired ||
+        "Tournament participants are required",
+      "danger"
+    );
     return;
   }
 
