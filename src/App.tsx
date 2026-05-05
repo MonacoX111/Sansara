@@ -499,6 +499,20 @@ const isAllowedAdminUser = (currentUser: User | null): currentUser is User => {
 const getAllowedAdminUser = (currentUser: User | null): User | null =>
   isAllowedAdminUser(currentUser) ? currentUser : null;
 
+const CLAIM_ALREADY_LINKED_MESSAGE =
+  "Claim failed. If this profile is already linked, log in with the linked account or ask admin to reset/unlink.";
+
+const getClaimErrorMessage = (error: any) => {
+  const code = String(error?.code || "").toLowerCase();
+  const message = String(error?.message || "");
+
+  if (code.includes("internal") || message.toUpperCase() === "INTERNAL") {
+    return CLAIM_ALREADY_LINKED_MESSAGE;
+  }
+
+  return message || "Invalid or used code";
+};
+
 const CLAIM_CODE_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const createClaimCode = () => {
@@ -520,6 +534,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const didCheckReloadRedirectRef = useRef(false);
+  const didOpenLinkedProfileForUidRef = useRef<string | null>(null);
 
   useEffect(() => {
     clearUnsafeUiStorage();
@@ -777,6 +792,9 @@ useEffect(() => {
 const toastTimerRef = useRef<number | null>(null);
 
 const [firebaseReady, setFirebaseReady] = useState(false);
+const [firestorePlayersLoaded, setFirestorePlayersLoaded] = useState(
+  !isFirebaseConfigured
+);
 const [firebaseStatus, setFirebaseStatus] = useState("");
 const [showLeaderboardSkeleton, setShowLeaderboardSkeleton] = useState(false);
 
@@ -929,6 +947,7 @@ useEffect(() => {
       if (loadedPlayers.length > 0) {
         setPlayers(normalizePlayers(loadedPlayers));
       }
+      setFirestorePlayersLoaded(true);
 
       if (loadedTeams.length > 0) {
         setTeams(normalizeTeams(loadedTeams));
@@ -1298,9 +1317,31 @@ tournamentId:
     navigate("/my-profile");
   };
 
+  useEffect(() => {
+    if (!playerUser) {
+      didOpenLinkedProfileForUidRef.current = null;
+      return;
+    }
+
+    if (!playerUser || !linkedPlayer || !firestorePlayersLoaded) return;
+    if (didOpenLinkedProfileForUidRef.current === playerUser.uid) return;
+
+    didOpenLinkedProfileForUidRef.current = playerUser.uid;
+    setClaimCodeInput("");
+    setClaimCodeError("");
+    navigateToMyProfile(linkedPlayer.id);
+  }, [firestorePlayersLoaded, linkedPlayer, playerUser]);
+
 const submitClaimCode = async () => {
   if (!playerUser) {
     setClaimCodeError("Please log in before claiming a profile.");
+    return;
+  }
+
+  if (linkedPlayer) {
+    setClaimCodeInput("");
+    setClaimCodeError("");
+    navigateToMyProfile(linkedPlayer.id);
     return;
   }
 
@@ -1343,7 +1384,7 @@ const submitClaimCode = async () => {
 
   } catch (error: any) {
     console.error("Claim failed:", error);
-    setClaimCodeError(error.message || "Invalid or used code");
+    setClaimCodeError(getClaimErrorMessage(error));
   } finally {
     setClaimCodeLoading(false);
   }
@@ -2628,7 +2669,9 @@ const deleteAchievement = async (achievementId: number) => {
   )
     ? null
     : routeTournamentId;
-  const isAccountResolving = !authReady || Boolean(playerUser && !firebaseReady);
+  const isAccountResolving =
+    !authReady ||
+    Boolean(playerUser && (!firebaseReady || !firestorePlayersLoaded));
 
   if (!adminUser && (isAccountResolving || !playerUser || !linkedPlayer)) {
     return (
