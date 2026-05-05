@@ -533,6 +533,8 @@ export default function App() {
   const functions = getFunctions();
   const location = useLocation();
   const navigate = useNavigate();
+  const routeTab = getTabFromPath(location.pathname);
+  const isMyProfileRoute = routeTab === "myProfile";
   const didCheckReloadRedirectRef = useRef(false);
   const didOpenLinkedProfileForUidRef = useRef<string | null>(null);
 
@@ -2717,8 +2719,14 @@ const deleteAchievement = async (achievementId: number) => {
   const isAccountResolving =
     !authReady ||
     Boolean(playerUser && (!firebaseReady || !firestorePlayersLoaded));
+  const renderedTab =
+    !isMyProfileRoute && activeTab === "myProfile" ? routeTab : activeTab;
 
-  if (!adminUser && (isAccountResolving || !playerUser || !linkedPlayer)) {
+  if (
+    isMyProfileRoute &&
+    !adminUser &&
+    (isAccountResolving || !playerUser || !linkedPlayer)
+  ) {
     return (
       <div className="page">
         <div className="admin-overlay">
@@ -2867,7 +2875,7 @@ const deleteAchievement = async (achievementId: number) => {
 
 <div className="topbar-actions">
 <Tabs
-  active={activeTab}
+  active={renderedTab}
   onChange={navigateToTab}
   showAdmin={isAdmin}
   showMyProfile={Boolean(linkedPlayer)}
@@ -2903,6 +2911,32 @@ const deleteAchievement = async (achievementId: number) => {
       Instagram
     </a>
 
+    {!firebaseUser && (
+      <button
+        className="secondary-btn"
+        onClick={() => {
+          setPlayerAuthMode("login");
+          setPlayerAuthError("");
+          setClaimCodeError("");
+          navigateToTab("myProfile");
+        }}
+      >
+        Login
+      </button>
+    )}
+
+    {playerUser && !linkedPlayer && (
+      <button
+        className="secondary-btn"
+        onClick={() => {
+          setClaimCodeError("");
+          navigateToTab("myProfile");
+        }}
+      >
+        Claim Profile
+      </button>
+    )}
+
     {isAdmin && (
       <button className="secondary-btn" onClick={handleAdminLogout}>
         {commonText.logoutAdmin}
@@ -2917,7 +2951,7 @@ const deleteAchievement = async (achievementId: number) => {
   </div>
 </div>
 
-{activeTab === "home" && (
+{renderedTab === "home" && (
 <HomeTab
   key={lang}
   players={players}
@@ -2930,7 +2964,7 @@ const deleteAchievement = async (achievementId: number) => {
 />
 )}
 
-{activeTab === "general" && (
+{renderedTab === "general" && (
   <GeneralTab
     homeAnnouncement={homeAnnouncement}
     players={players}
@@ -2944,7 +2978,7 @@ const deleteAchievement = async (achievementId: number) => {
   />
 )}
 
-        {activeTab === "players" && (
+        {renderedTab === "players" && (
 <PlayersTab
   players={players}
   teams={teams}
@@ -2968,7 +3002,7 @@ const deleteAchievement = async (achievementId: number) => {
 />
         )}
 
-{activeTab === "myProfile" && linkedPlayer && (
+{renderedTab === "myProfile" && linkedPlayer && (
 <PlayersTab
   players={players}
   teams={teams}
@@ -3001,7 +3035,7 @@ const deleteAchievement = async (achievementId: number) => {
 />
 )}
 
-{activeTab === "teams" && (
+{renderedTab === "teams" && (
   <TeamsTab
     teams={teams}
     players={players}
@@ -3013,7 +3047,7 @@ const deleteAchievement = async (achievementId: number) => {
   />
 )}
 
-        {activeTab === "tournaments" && (
+        {renderedTab === "tournaments" && (
 <TournamentsTab
   tournaments={tournaments}
   players={players}
@@ -3025,7 +3059,7 @@ const deleteAchievement = async (achievementId: number) => {
 />
         )}
 
-        {activeTab === "leaderboard" && (
+        {renderedTab === "leaderboard" && (
 <LeaderboardTab
   players={players}
   teams={teams}
@@ -3036,7 +3070,7 @@ const deleteAchievement = async (achievementId: number) => {
 />
         )}
 
-        {activeTab === "admin" && isAdmin && (
+        {renderedTab === "admin" && isAdmin && (
           <AdminTab
           autoGenerateBracket={autoGenerateBracket}
             players={players}
