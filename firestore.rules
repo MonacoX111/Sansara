@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email == "yakata706@gmail.com";
+    }
+
+    function changedOnly(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(fields);
+    }
+
+    function isOwnAvatarUpdate() {
+      return isSignedIn() &&
+        resource.data.authUid == request.auth.uid &&
+        request.resource.data.authUid == resource.data.authUid &&
+        changedOnly(["avatar"]);
+    }
+
+    function isProfileLinkUpdate() {
+      return isSignedIn() &&
+        !("authUid" in resource.data) &&
+        request.resource.data.authUid == request.auth.uid &&
+        request.resource.data.claimCodeUsed == true &&
+        changedOnly(["authUid", "claimCodeUsed"]);
+    }
+
+    match /players/{docId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || isOwnAvatarUpdate() || isProfileLinkUpdate();
+    }
+
+    match /teams/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /tournaments/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /matches/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /achievements/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /transfers/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /homeAnnouncement/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /playerClaims/{docId} {
+      allow read: if false;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
