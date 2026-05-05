@@ -2863,6 +2863,12 @@ const deleteAchievement = async (achievementId: number) => {
         {commonText.logoutAdmin}
       </button>
     )}
+
+    {playerUser && !adminUser && (
+      <button className="secondary-btn" onClick={() => void playerLogout()}>
+        Logout
+      </button>
+    )}
   </div>
 </div>
 
