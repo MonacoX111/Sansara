@@ -57,6 +57,7 @@ import {
   User,
 } from "firebase/auth";
 import {
+  commitBatchOperations,
   deleteItem,
   deleteItemsBatch,
   loadCollection,
@@ -2218,12 +2219,18 @@ const deleteTournament = async () => {
 
   try {
     if (isFirebaseConfigured) {
-      await Promise.all([
-        deleteItem("tournaments", deletedId),
-        deletedMatchIds.length > 0
-          ? deleteItemsBatch("matches", deletedMatchIds)
-          : Promise.resolve(),
-        ...changedPlayers.map((player) => saveItem("players", player)),
+      await commitBatchOperations([
+        { type: "delete", collectionName: "tournaments", id: deletedId },
+        ...deletedMatchIds.map((matchId) => ({
+          type: "delete" as const,
+          collectionName: "matches",
+          id: matchId,
+        })),
+        ...changedPlayers.map((player) => ({
+          type: "set" as const,
+          collectionName: "players",
+          item: player,
+        })),
       ]);
     }
   } catch (error) {
@@ -2251,15 +2258,27 @@ const deleteTournament = async () => {
       writeStorage("tm_matches", backupMatches);
       writeStorage("tm_players", backupPlayers);
       if (isFirebaseConfigured) {
-        void Promise.all([
-          saveItem("tournaments", deletedTournament),
+        void commitBatchOperations([
+          {
+            type: "set",
+            collectionName: "tournaments",
+            item: deletedTournament,
+          },
           ...backupMatches
             .filter((match) => deletedMatchIds.includes(match.id))
-            .map((match) => saveItem("matches", match)),
+            .map((match) => ({
+              type: "set" as const,
+              collectionName: "matches",
+              item: match,
+            })),
           ...changedPlayers
             .map((player) => backupPlayers.find((item) => item.id === player.id))
             .filter((player): player is Player => Boolean(player))
-            .map((player) => saveItem("players", player)),
+            .map((player) => ({
+              type: "set" as const,
+              collectionName: "players",
+              item: player,
+            })),
         ]).catch((error) => {
           console.error("Failed to undo tournament delete:", error);
           showToast("Failed to undo tournament delete", "danger");

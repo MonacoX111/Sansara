@@ -96,6 +96,41 @@ export const updateItemFields = async (
   );
 };
 
+type BatchOperation =
+  | {
+      type: "set";
+      collectionName: string;
+      item: FirebaseItem;
+    }
+  | {
+      type: "delete";
+      collectionName: string;
+      id: number | string;
+    };
+
+export const commitBatchOperations = async (operations: BatchOperation[]) => {
+  if (operations.length === 0) return;
+
+  const currentDb = ensureDb();
+  const batch = writeBatch(currentDb);
+
+  operations.forEach((operation) => {
+    if (operation.type === "set") {
+      batch.set(
+        doc(currentDb, operation.collectionName, String(operation.item.id)),
+        stripUndefinedDeep(operation.item)
+      );
+      return;
+    }
+
+    batch.delete(
+      doc(currentDb, operation.collectionName, String(operation.id))
+    );
+  });
+
+  await batch.commit();
+};
+
 export const saveItemsBatch = async <T extends FirebaseItem>(
   collectionName: string,
   items: T[]
