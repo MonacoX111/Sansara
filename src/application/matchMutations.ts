@@ -166,6 +166,7 @@ export const saveMatchMutation = async ({
   const previousMatches = matches;
 
   setMatches(progressionResult.matches);
+  writeStorage("tm_matches", progressionResult.matches);
 
   setSelectedMatchId(updatedMatch.id);
 

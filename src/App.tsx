@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
@@ -1277,13 +1277,23 @@ tournamentId: safeTournamentId,
 
     setPlayers(nextPlayers);
     setTeams(nextTeams);
+    writeStorage("tm_players", nextPlayers);
+    writeStorage("tm_teams", nextTeams);
 
-try {
-  if (isFirebaseConfigured) {
-    await saveItem("players", savedPlayer);
-  }
+    try {
+      if (isFirebaseConfigured) {
+        const changedTeams = nextTeams.filter((team) => {
+          const previous = previousTeams.find((item) => item.id === team.id);
+          return previous && JSON.stringify(previous) !== JSON.stringify(team);
+        });
 
-  showToast(commonText.playerSaved);
+        await Promise.all([
+          saveItem("players", savedPlayer),
+          ...changedTeams.map((team) => saveItem("teams", team)),
+        ]);
+      }
+
+      showToast(commonText.playerSaved);
     } catch (error) {
       console.error("Failed to save player:", error);
       if (isFirebaseConfigured) {
@@ -1954,7 +1964,11 @@ bestOf: 1,
       notes: "",
     };
 
-    setMatches((prev) => [...prev, newMatch]);
+    const backupMatches = matches;
+    const nextMatches = [...matches, newMatch];
+
+    setMatches(nextMatches);
+    writeStorage("tm_matches", nextMatches);
     setSelectedMatchId(newMatch.id);
     setMatchForm({
       seriesId: "",
@@ -1987,6 +2001,10 @@ bestOf: 1,
       showToast(commonText.matchAdded);
     } catch (error) {
       console.error("Failed to add match:", error);
+      if (isFirebaseConfigured) {
+        setMatches(backupMatches);
+        writeStorage("tm_matches", backupMatches);
+      }
       showToast(commonText.matchSaveFailed, "danger");
     }
   };
@@ -2001,7 +2019,10 @@ const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
 
   if (!reorderResult) return;
 
+  const backupMatches = matches;
+
   setMatches(reorderResult.matches);
+  writeStorage("tm_matches", reorderResult.matches);
   setSelectedMatchId(reorderResult.selectedMatchId);
 
   try {
@@ -2016,6 +2037,10 @@ const reorderMatch = async (direction: "up" | "down", tournamentId: number) => {
     showToast(commonText.matchOrderUpdated);
   } catch (error) {
     console.error("Failed to reorder matches:", error);
+    if (isFirebaseConfigured) {
+      setMatches(backupMatches);
+      writeStorage("tm_matches", backupMatches);
+    }
     showToast(commonText.matchReorderFailed, "danger");
   }
 };
@@ -2077,7 +2102,10 @@ const autoGenerateBracket = async (tournamentId: number) => {
     return;
   }
 
+  const backupMatches = matches;
+
   setMatches(bracketResult.matches);
+  writeStorage("tm_matches", bracketResult.matches);
 
   try {
     if (isFirebaseConfigured) {
@@ -2089,6 +2117,10 @@ const autoGenerateBracket = async (tournamentId: number) => {
     showToast(commonText.bracketGenerated);
   } catch (error) {
     console.error("Failed to save generated bracket:", error);
+    if (isFirebaseConfigured) {
+      setMatches(backupMatches);
+      writeStorage("tm_matches", backupMatches);
+    }
     showToast(commonText.bracketFirebaseFailed, "warning");
   }
 };
