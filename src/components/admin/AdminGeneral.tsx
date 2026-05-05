@@ -25,6 +25,7 @@ type PremiumSelectProps = {
 
 type Props = {
   adminText: Record<string, string>;
+  commonText: Record<string, string>;
   PremiumSelect: (props: PremiumSelectProps) => ReactElement;
   players: Player[];
   teams: Team[];
@@ -41,6 +42,7 @@ type Props = {
 export default function AdminGeneral(props: Props) {
   const {
     adminText,
+    commonText,
     PremiumSelect,
     players,
     teams,

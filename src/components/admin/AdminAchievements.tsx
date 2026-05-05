@@ -9,6 +9,7 @@ type ConfirmDeleteState = {
 
 type Props = {
   adminText: Record<string, string>;
+  commonText: Record<string, string>;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
   isAdminActionLoading: (key: string) => boolean;
   runAdminAction: (
@@ -59,6 +60,7 @@ const buildAchievementForm = (
 export default function AdminAchievements(props: Props) {
   const {
     adminText,
+    commonText,
     setConfirmDelete,
     isAdminActionLoading,
     runAdminAction,

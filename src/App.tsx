@@ -472,7 +472,7 @@ const isBrowserReload = (): boolean => {
 };
 
 export default function App() {
-  const ADMIN_PASSWORD = "monaco123";
+  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
   const location = useLocation();
   const navigate = useNavigate();
   const didCheckReloadRedirectRef = useRef(false);
@@ -482,6 +482,14 @@ export default function App() {
     document.documentElement.style.setProperty("--x", "50%");
     document.documentElement.style.setProperty("--y", "50%");
   }, []);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development" && !ADMIN_PASSWORD) {
+      console.warn(
+        "REACT_APP_ADMIN_PASSWORD is not set. Admin login is disabled."
+      );
+    }
+  }, [ADMIN_PASSWORD]);
 
   useEffect(() => {
     if (didCheckReloadRedirectRef.current) return;
@@ -1120,7 +1128,7 @@ tournamentId:
   };
 
   const handleAdminLogin = () => {
-    if (adminPassword === ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORD && adminPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
       navigateToTab("admin");
       setShowAdminLogin(false);
@@ -1314,6 +1322,7 @@ const deletePlayer = async () => {
   if (!selectedPlayer) return;
 
   const deletedId = selectedPlayer.id;
+  const deletedPlayer = selectedPlayer;
 
   const backupPlayers = players;
   const backupTeams = teams;
@@ -1336,6 +1345,9 @@ const deletePlayer = async () => {
       ? tournament.participantIds.filter((playerId) => playerId !== deletedId)
       : [],
     winnerId: tournament.winnerId === deletedId ? 0 : tournament.winnerId,
+    winnerSquadIds: Array.isArray(tournament.winnerSquadIds)
+      ? tournament.winnerSquadIds.filter((playerId) => playerId !== deletedId)
+      : [],
     mvpId: tournament.mvpId === deletedId ? 0 : tournament.mvpId,
     placements: Array.isArray(tournament.placements)
       ? tournament.placements.filter((item) => item.playerId !== deletedId)
@@ -1364,31 +1376,91 @@ const deletePlayer = async () => {
   setTournaments(nextTournaments);
   setAchievements(nextAchievements);
   setMatches(nextMatches);
+  writeStorage("tm_players", nextPlayers);
+  writeStorage("tm_teams", nextTeams);
+  writeStorage("tm_tournaments", nextTournaments);
+  writeStorage("tm_achievements", nextAchievements);
+  writeStorage("tm_matches", nextMatches);
 
-  const deleteTimer = window.setTimeout(async () => {
-    try {
-if (isFirebaseConfigured) {
-  await Promise.all([
-    deleteItem("players", deletedId),
-    deleteItemsBatch("matches", deletedMatchIds),
-  ]);
-}
-    } catch (error) {
-      console.error("Failed to delete player:", error);
-      showToast("Failed to delete player", "danger");
+  try {
+    if (isFirebaseConfigured) {
+      const changedTeams = nextTeams.filter((team) => {
+        const previous = backupTeams.find((item) => item.id === team.id);
+        return previous && JSON.stringify(previous) !== JSON.stringify(team);
+      });
+      const changedTournaments = nextTournaments.filter((tournament) => {
+        const previous = backupTournaments.find((item) => item.id === tournament.id);
+        return previous && JSON.stringify(previous) !== JSON.stringify(tournament);
+      });
+      const changedAchievements = nextAchievements.filter((achievement) => {
+        const previous = backupAchievements.find((item) => item.id === achievement.id);
+        return previous && JSON.stringify(previous) !== JSON.stringify(achievement);
+      });
+
+      await Promise.all([
+        deleteItem("players", deletedId),
+        deletedMatchIds.length > 0
+          ? deleteItemsBatch("matches", deletedMatchIds)
+          : Promise.resolve(),
+        ...changedTeams.map((team) => saveItem("teams", team)),
+        ...changedTournaments.map((tournament) =>
+          saveItem("tournaments", tournament)
+        ),
+        ...changedAchievements.map((achievement) =>
+          saveItem("achievements", achievement)
+        ),
+      ]);
     }
-  }, 3000);
-
-  showToast(
-    commonText.playerDeleted,
-    "danger",
-    () => {
-      window.clearTimeout(deleteTimer);
+  } catch (error) {
+    console.error("Failed to delete player:", error);
+    if (isFirebaseConfigured) {
       setPlayers(backupPlayers);
       setTeams(backupTeams);
       setTournaments(backupTournaments);
       setAchievements(backupAchievements);
       setMatches(backupMatches);
+      writeStorage("tm_players", backupPlayers);
+      writeStorage("tm_teams", backupTeams);
+      writeStorage("tm_tournaments", backupTournaments);
+      writeStorage("tm_achievements", backupAchievements);
+      writeStorage("tm_matches", backupMatches);
+    }
+    showToast("Failed to delete player", "danger");
+    return;
+  }
+
+  showToast(
+    commonText.playerDeleted,
+    "danger",
+    () => {
+      setPlayers(backupPlayers);
+      setTeams(backupTeams);
+      setTournaments(backupTournaments);
+      setAchievements(backupAchievements);
+      setMatches(backupMatches);
+      writeStorage("tm_players", backupPlayers);
+      writeStorage("tm_teams", backupTeams);
+      writeStorage("tm_tournaments", backupTournaments);
+      writeStorage("tm_achievements", backupAchievements);
+      writeStorage("tm_matches", backupMatches);
+      if (isFirebaseConfigured) {
+        void Promise.all([
+          saveItem("players", deletedPlayer),
+          ...backupMatches
+            .filter((match) => deletedMatchIds.includes(match.id))
+            .map((match) => saveItem("matches", match)),
+          ...backupTeams.map((team) => saveItem("teams", team)),
+          ...backupTournaments.map((tournament) =>
+            saveItem("tournaments", tournament)
+          ),
+          ...backupAchievements.map((achievement) =>
+            saveItem("achievements", achievement)
+          ),
+        ]).catch((error) => {
+          console.error("Failed to undo player delete:", error);
+          showToast("Failed to undo player delete", "danger");
+        });
+      }
     },
     commonText.undo
   );
@@ -1866,6 +1938,7 @@ const deleteTournament = async () => {
   if (!selectedTournament) return;
 
   const deletedId = selectedTournament.id;
+  const deletedTournament = selectedTournament;
 
   const backupTournaments = tournaments;
   const backupMatches = matches;
@@ -1908,42 +1981,58 @@ const deleteTournament = async () => {
   setMatches(nextMatches);
   setPlayers(recalculatedPlayers);
   writeStorage("tm_tournaments", safeTournaments);
+  writeStorage("tm_matches", nextMatches);
   writeStorage("tm_players", recalculatedPlayers);
 
-  const deleteTimer = window.setTimeout(async () => {
-    try {
-if (isFirebaseConfigured) {
-  await Promise.all([
-    deleteItem("tournaments", deletedId),
-    deleteItemsBatch("matches", deletedMatchIds),
-    ...changedPlayers.map((player) => saveItem("players", player)),
-  ]);
-}
-    } catch (error) {
-      console.error("Failed to delete tournament:", error);
-      if (isFirebaseConfigured) {
-        setTournaments(backupTournaments);
-        setMatches(backupMatches);
-        setPlayers(backupPlayers);
-        writeStorage("tm_tournaments", backupTournaments);
-        writeStorage("tm_matches", backupMatches);
-        writeStorage("tm_players", backupPlayers);
-      }
-      showToast("Failed to delete tournament", "danger");
+  try {
+    if (isFirebaseConfigured) {
+      await Promise.all([
+        deleteItem("tournaments", deletedId),
+        deletedMatchIds.length > 0
+          ? deleteItemsBatch("matches", deletedMatchIds)
+          : Promise.resolve(),
+        ...changedPlayers.map((player) => saveItem("players", player)),
+      ]);
     }
-  }, 3000);
-
-  showToast(
-    commonText.tournamentDeleted,
-    "danger",
-    () => {
-      window.clearTimeout(deleteTimer);
+  } catch (error) {
+    console.error("Failed to delete tournament:", error);
+    if (isFirebaseConfigured) {
       setTournaments(backupTournaments);
       setMatches(backupMatches);
       setPlayers(backupPlayers);
       writeStorage("tm_tournaments", backupTournaments);
       writeStorage("tm_matches", backupMatches);
       writeStorage("tm_players", backupPlayers);
+    }
+    showToast("Failed to delete tournament", "danger");
+    return;
+  }
+
+  showToast(
+    commonText.tournamentDeleted,
+    "danger",
+    () => {
+      setTournaments(backupTournaments);
+      setMatches(backupMatches);
+      setPlayers(backupPlayers);
+      writeStorage("tm_tournaments", backupTournaments);
+      writeStorage("tm_matches", backupMatches);
+      writeStorage("tm_players", backupPlayers);
+      if (isFirebaseConfigured) {
+        void Promise.all([
+          saveItem("tournaments", deletedTournament),
+          ...backupMatches
+            .filter((match) => deletedMatchIds.includes(match.id))
+            .map((match) => saveItem("matches", match)),
+          ...changedPlayers
+            .map((player) => backupPlayers.find((item) => item.id === player.id))
+            .filter((player): player is Player => Boolean(player))
+            .map((player) => saveItem("players", player)),
+        ]).catch((error) => {
+          console.error("Failed to undo tournament delete:", error);
+          showToast("Failed to undo tournament delete", "danger");
+        });
+      }
     },
     commonText.undo
   );
@@ -2136,19 +2225,6 @@ bestOf: 1,
       notes: "",
     };
 
-    if (!newMatch.game.trim()) {
-      showToast("Match game is required", "danger");
-      return;
-    }
-
-    if (
-      (newMatch.matchType === "player" && (!newMatch.player1 || !newMatch.player2)) ||
-      (newMatch.matchType === "team" && (!newMatch.team1 || !newMatch.team2))
-    ) {
-      showToast("Both match participants are required", "danger");
-      return;
-    }
-
     setMatches((prev) => [...prev, newMatch]);
     setSelectedMatchId(newMatch.id);
     setMatchForm({
@@ -2219,34 +2295,40 @@ const deleteMatch = async () => {
   if (!selectedMatch) return;
 
   const deletedId = selectedMatch.id;
+  const deletedMatch = selectedMatch;
 
   const backupMatches = matches;
   const nextMatches = matches.filter((match) => match.id !== deletedId);
 
   setMatches(nextMatches);
+  writeStorage("tm_matches", nextMatches);
 
-  const deleteTimer = window.setTimeout(async () => {
-    try {
-      if (isFirebaseConfigured) {
-        await deleteItem("matches", deletedId);
-      }
-    } catch (error) {
-      console.error("Failed to delete match:", error);
-      if (isFirebaseConfigured) {
-        setMatches(backupMatches);
-        writeStorage("tm_matches", backupMatches);
-      }
-      showToast("Failed to delete match", "danger");
+  try {
+    if (isFirebaseConfigured) {
+      await deleteItem("matches", deletedId);
     }
-  }, 3000);
+  } catch (error) {
+    console.error("Failed to delete match:", error);
+    if (isFirebaseConfigured) {
+      setMatches(backupMatches);
+      writeStorage("tm_matches", backupMatches);
+    }
+    showToast("Failed to delete match", "danger");
+    return;
+  }
 
   showToast(
     commonText.matchDeleted,
     "danger",
     () => {
-      window.clearTimeout(deleteTimer);
       setMatches(backupMatches);
       writeStorage("tm_matches", backupMatches);
+      if (isFirebaseConfigured) {
+        void saveItem("matches", deletedMatch).catch((error) => {
+          console.error("Failed to undo match delete:", error);
+          showToast("Failed to undo match delete", "danger");
+        });
+      }
     },
     commonText.undo
   );
@@ -2354,35 +2436,49 @@ try {
 const deleteAchievement = async (achievementId: number) => {
   const backupAchievements = achievements;
   const backupSelectedAchievementId = selectedAchievementId;
+  const deletedAchievement = achievements.find(
+    (achievement) => achievement.id === achievementId
+  );
 
   const nextAchievements = achievements.filter(
     (achievement) => achievement.id !== achievementId
   );
 
   setAchievements(nextAchievements);
+  writeStorage("tm_achievements", nextAchievements);
 
   if (selectedAchievementId === achievementId) {
     setSelectedAchievementId(nextAchievements[0]?.id || 0);
   }
 
-  const deleteTimer = window.setTimeout(async () => {
-    try {
-      if (isFirebaseConfigured) {
-        await deleteItem("achievements", achievementId);
-      }
-    } catch (error) {
-      console.error("Failed to delete achievement:", error);
-      showToast("Failed to delete achievement", "danger");
+  try {
+    if (isFirebaseConfigured) {
+      await deleteItem("achievements", achievementId);
     }
-  }, 3000);
+  } catch (error) {
+    console.error("Failed to delete achievement:", error);
+    if (isFirebaseConfigured) {
+      setAchievements(backupAchievements);
+      setSelectedAchievementId(backupSelectedAchievementId);
+      writeStorage("tm_achievements", backupAchievements);
+    }
+    showToast("Failed to delete achievement", "danger");
+    return;
+  }
 
   showToast(
     commonText.achievementDeleted,
     "danger",
     () => {
-      window.clearTimeout(deleteTimer);
       setAchievements(backupAchievements);
       setSelectedAchievementId(backupSelectedAchievementId);
+      writeStorage("tm_achievements", backupAchievements);
+      if (isFirebaseConfigured && deletedAchievement) {
+        void saveItem("achievements", deletedAchievement).catch((error) => {
+          console.error("Failed to undo achievement delete:", error);
+          showToast("Failed to undo achievement delete", "danger");
+        });
+      }
     },
     commonText.undo
   );

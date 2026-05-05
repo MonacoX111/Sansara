@@ -784,6 +784,7 @@ const adminTournamentsProps = {
 
 const adminGeneralProps = {
   adminText,
+  commonText,
   PremiumSelect,
   players,
   teams,
@@ -843,6 +844,7 @@ const adminMatchesProps = {
 
 const adminAchievementsProps = {
   adminText,
+  commonText,
   setConfirmDelete,
   isAdminActionLoading,
   runAdminAction,
