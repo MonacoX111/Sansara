@@ -166,15 +166,15 @@ export default function AdminTournaments(props: Props) {
               />
             </div>
 
-            <button
-              className="secondary-btn add-list-btn admin-create-btn"
-              disabled={isAdminActionLoading("create-tournament")}
-              onClick={addTournament}
-            >
-              {isAdminActionLoading("create-tournament")
-                ? "Creating..."
-                : adminText.addTournament}
-            </button>
+                <button
+                  className="secondary-btn add-list-btn admin-create-btn"
+                  disabled={isAdminActionLoading("create-tournament")}
+                  onClick={addTournament}
+                >
+                  {isAdminActionLoading("create-tournament")
+                    ? commonText.creating
+                    : adminText.addTournament}
+                </button>
 
             <div className="btn-row">
               <button
@@ -188,7 +188,7 @@ export default function AdminTournaments(props: Props) {
                 onClick={() => reorderTournament("up")}
               >
                 {isAdminActionLoading("reorder-tournament-up")
-                  ? "Updating..."
+                  ? commonText.updating
                   : adminText.moveUp}
               </button>
 
@@ -207,7 +207,7 @@ export default function AdminTournaments(props: Props) {
                 onClick={() => reorderTournament("down")}
               >
                 {isAdminActionLoading("reorder-tournament-down")
-                  ? "Updating..."
+                  ? commonText.updating
                   : adminText.moveDown}
               </button>
             </div>
@@ -325,10 +325,19 @@ export default function AdminTournaments(props: Props) {
                 <PremiumSelect
                   value={tournamentForm.status}
                   placeholder={adminText.selectStatus}
-                  options={tournamentStatusOptions.map((status) => ({
-                    value: status,
-                    label: status,
-                  }))}
+                    options={tournamentStatusOptions.map((status) => ({
+                      value: status,
+                      label:
+                        status === "draft"
+                          ? commonText.statusDraft
+                          : status === "upcoming"
+                          ? commonText.statusUpcoming
+                          : status === "ongoing"
+                          ? commonText.statusOngoing
+                          : status === "completed"
+                          ? commonText.statusCompleted
+                          : commonText.statusFinished,
+                    }))}
                   onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
@@ -477,7 +486,7 @@ export default function AdminTournaments(props: Props) {
             selectedTournamentTeams.length > 0 ? (
               <div className="field-block">
                 <label className="field-label">
-                  {adminText.tournamentTeamRosters || "Tournament team rosters"}
+                  {adminText.tournamentTeamRosters}
                 </label>
 
                 <div className="form-col">
@@ -509,8 +518,7 @@ export default function AdminTournaments(props: Props) {
                           <div>
                             <div className="achievement-title">{team.name}</div>
                             <div className="muted small">
-                              {adminText.rosterPlayersSelected ||
-                                "Roster players selected"}
+                              {adminText.rosterPlayersSelected}
                               : {selectedRosterPlayerIds.size}
                             </div>
                           </div>
@@ -547,8 +555,7 @@ export default function AdminTournaments(props: Props) {
                           </div>
                         ) : (
                           <div className="muted small">
-                            {adminText.noEligibleRosterPlayers ||
-                              "No eligible players for this team"}
+                            {adminText.noEligibleRosterPlayers}
                           </div>
                         )}
 
@@ -565,9 +572,8 @@ export default function AdminTournaments(props: Props) {
                                   className="pill light"
                                 >
                                   {selectedPlayer?.nickname ||
-                                    adminText.unknownPlayer ||
-                                    "Unknown"}{" "}
-                                  / not eligible
+                                    adminText.unknownPlayer}{" "}
+                                  / {adminText.notEligible}
                                 </span>
                               );
                             })}
@@ -975,7 +981,7 @@ export default function AdminTournaments(props: Props) {
   disabled={isAdminActionLoading("save-tournament")}
   onClick={saveTournament}
 >
-  {isAdminActionLoading("save-tournament") ? "Saving..." : commonText.save}
+  {isAdminActionLoading("save-tournament") ? commonText.saving : commonText.save}
 </button>
 <button
   className="danger-btn"

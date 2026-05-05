@@ -8,6 +8,10 @@ import {
   Team,
   Tournament,
 } from "../../types";
+import {
+  Lang,
+  formatTournamentLabel as formatStoredTournamentLabel,
+} from "../../utils/translations";
 
 const matchStatusOptions: MatchStatus[] = [
   "scheduled",
@@ -68,6 +72,7 @@ type WinnerOption = {
 type Props = {
   adminText: Record<string, string>;
   commonText: Record<string, string>;
+  lang: Lang;
   PremiumSelect: (props: PremiumSelectProps) => ReactElement;
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
   isAdminActionLoading: (key: string) => boolean;
@@ -99,6 +104,7 @@ export default function AdminMatches(props: Props) {
   const {
     adminText,
     commonText,
+    lang,
     PremiumSelect,
     setConfirmDelete,
     isAdminActionLoading,
@@ -136,7 +142,7 @@ export default function AdminMatches(props: Props) {
             <PremiumSelect
               value={matchTournamentFilterId}
               placeholder={adminText.selectTournament}
-              options={[...tournaments]
+      options={[...tournaments]
                 .sort(
                   (a, b) =>
                     (a.order ?? a.id) - (b.order ?? b.id)
@@ -191,7 +197,7 @@ game: nextTournament?.game || "",
     disabled={isAdminActionLoading("create-match")}
     onClick={() => addMatch(matchTournamentFilterId)}
   >
-    {isAdminActionLoading("create-match") ? "Creating..." : adminText.addMatch}
+    {isAdminActionLoading("create-match") ? commonText.creating : adminText.addMatch}
   </button>
 
 <button
@@ -201,9 +207,9 @@ game: nextTournament?.game || "",
     isAdminActionLoading(`auto-bracket-${matchTournamentFilterId}`)
   }
   onClick={() => autoGenerateBracket(matchTournamentFilterId)}
->
+  >
   {isAdminActionLoading(`auto-bracket-${matchTournamentFilterId}`)
-    ? "Generating..."
+    ? commonText.generating
     : adminText.autoGenerateBracket}
 </button>
 </div>
@@ -217,7 +223,7 @@ game: nextTournament?.game || "",
     onClick={() => reorderMatch("up", matchTournamentFilterId)}
   >
     {isAdminActionLoading("reorder-match-up")
-      ? "Updating..."
+      ? commonText.updating
       : adminText.moveUp}
   </button>
 
@@ -229,7 +235,7 @@ game: nextTournament?.game || "",
     onClick={() => reorderMatch("down", matchTournamentFilterId)}
   >
     {isAdminActionLoading("reorder-match-down")
-      ? "Updating..."
+      ? commonText.updating
       : adminText.moveDown}
   </button>
 </div>
@@ -522,10 +528,17 @@ game: nextTournament?.game || "",
     <PremiumSelect
       value={matchForm.status}
       placeholder={adminText.selectStatus}
-      options={matchStatusOptions.map((status) => ({
-        value: status,
-        label: status,
-      }))}
+                  options={matchStatusOptions.map((status) => ({
+                    value: status,
+                    label:
+                      status === "scheduled"
+                        ? commonText.statusScheduled
+                        : status === "ongoing"
+                        ? commonText.statusOngoing
+                        : status === "completed"
+                        ? commonText.statusCompleted
+                        : commonText.statusCancelled,
+                  }))}
       onChange={(value) =>
         setMatchForm((prev: MatchForm) => ({
           ...prev,
@@ -566,7 +579,7 @@ game: nextTournament?.game || "",
     disabled={matchForm.stage !== "group"}
     options={(selectedMatchTournament?.groups || []).map((group) => ({
       value: group.name,
-      label: group.name,
+      label: formatStoredTournamentLabel(group.name, lang),
     }))}
     onChange={(value) =>
       setMatchForm((prev: MatchForm) => ({
@@ -660,7 +673,7 @@ game: nextTournament?.game || "",
   disabled={isAdminActionLoading("save-match")}
   onClick={saveMatch}
 >
-  {isAdminActionLoading("save-match") ? "Saving..." : commonText.save}
+  {isAdminActionLoading("save-match") ? commonText.saving : commonText.save}
 </button>
 <button
   className="danger-btn"

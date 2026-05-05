@@ -46,6 +46,7 @@ type Labels = {
   source: string;
   team: string;
   totalElo: string;
+  openTournamentAria: string;
 };
 
 type Props = {
@@ -95,7 +96,7 @@ export default function PlayerTournamentHistory({
                 className={`simple-card tournament-history-click-card ${tournament.placementCardClass}`}
                 role="button"
                 tabIndex={0}
-                aria-label={`Open ${tournament.title}`}
+                aria-label={`${labels.openTournamentAria} ${tournament.title}`}
                 onClick={() => onOpenTournament?.(tournament.id)}
                 onKeyDown={(event) => handleCardKeyDown(event, tournament.id)}
                 onMouseMove={handleCardMove}

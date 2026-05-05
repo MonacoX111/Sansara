@@ -269,7 +269,7 @@ export default function AdminGeneral(props: Props) {
                 onClick={saveHomeAnnouncement}
               >
                 {isAdminActionLoading("save-home-announcement")
-                  ? "Saving..."
+                  ? commonText.saving
                   : adminText.saveHomeAnnouncement}
               </button>
             </div>

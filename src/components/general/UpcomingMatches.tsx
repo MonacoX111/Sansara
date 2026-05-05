@@ -1,6 +1,12 @@
 import type { MouseEvent } from "react";
 import { Match, Player, Team, Tournament } from "../../types";
-import { Lang, getMatchStageLabel, t } from "../../utils/translations";
+import {
+  Lang,
+  formatTournamentLabel as formatStoredTournamentLabel,
+  getMatchStageLabel,
+  getMatchStatusLabel,
+  t,
+} from "../../utils/translations";
 
 type Props = {
   matches: Match[];
@@ -83,22 +89,27 @@ export default function UpcomingMatches({
                 : rightEntity && "avatar" in rightEntity
                 ? rightEntity.avatar
                 : "";
-              const groupPrefix = lang === "ua" ? "Група" : "Group";
-              const groupValue = match.groupName
-                ? match.groupName.replace(/^\s*(група|групи|group|groups)\s+/i, "").trim()
-                : "";
               const stageLabel =
-                match.stage === "group" && groupValue
-                  ? `${groupPrefix} ${groupValue}`
+                match.stage === "group" && match.groupName
+                  ? formatStoredTournamentLabel(match.groupName, lang)
                   : formatStageLabel(match.stage);
+              const rawRoundLabel = match.roundLabel || match.round || "";
               const matchStage =
-                match.roundLabel ||
-                match.round ||
+                formatStoredTournamentLabel(rawRoundLabel, lang) ||
                 stageLabel ||
                 commonText.match;
-              const isFinalStage = String(matchStage)
-                .toLowerCase()
-                .includes("final");
+              const rawLabel = [match.stage, rawRoundLabel]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+              const isFinalStage =
+                match.stage === "final" ||
+                /(^|\s)(f|sf|final|semifinal|semi final|quarterfinal|quarter final|qf|r16|r32)(\s|$)/.test(
+                  rawLabel
+                ) ||
+                rawLabel.includes("1/2 final") ||
+                rawLabel.includes("1/4 final") ||
+                rawLabel.includes("1/8 final");
 
               return (
                 <div
@@ -139,7 +150,9 @@ export default function UpcomingMatches({
                           </span>
                         ) : null}
                         <strong>{commonText.vs}</strong>
-                        <span className="result-score-status">{match.status}</span>
+                        <span className="result-score-status">
+                          {getMatchStatusLabel(match.status, lang)}
+                        </span>
                       </div>
                     </div>
 

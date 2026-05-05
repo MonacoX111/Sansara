@@ -15,12 +15,12 @@ const makeVisibleForm = (results: Array<"W" | "L">): PlayerRecentMatch[] =>
 
 describe("getPlayerStreakFromVisibleForm", () => {
   it.each([
-    [["W", "W", "W", "L"], "L1"],
-    [["W", "W", "L", "L"], "L2"],
-    [["L", "W", "W", "W"], "W3"],
-    [["W", "L", "W", "W"], "W2"],
+    [["W", "W", "W", "L"], "W3"],
+    [["W", "W", "L", "L"], "W2"],
+    [["L", "W", "W", "W"], "L1"],
+    [["W", "L", "W", "W"], "W1"],
   ] as const)(
-    "counts backwards from the rightmost visible FORM badge for %s",
+    "counts from the leftmost visible FORM badge for %s",
     (results, expectedLabel) => {
       expect(getPlayerStreakFromVisibleForm(makeVisibleForm([...results])).label).toBe(
         expectedLabel,

@@ -18,6 +18,8 @@ type Props = {
   title: string;
   emptyText: string;
   vsText: string;
+  winShort: string;
+  lossShort: string;
   matches: PlayerRecentMatchRow[];
 };
 
@@ -25,6 +27,8 @@ export default function PlayerRecentMatches({
   title,
   emptyText,
   vsText,
+  winShort,
+  lossShort,
   matches,
 }: Props) {
   const handleMatchMove = (e: MouseEvent<HTMLDivElement>) => {
@@ -52,9 +56,9 @@ export default function PlayerRecentMatches({
                   className={`player-match-result player-match-result-${match.result}`}
                 >
                   {match.result === "win"
-                    ? "W"
+                    ? winShort
                     : match.result === "loss"
-                    ? "L"
+                    ? lossShort
                     : "-"}
                 </span>
               </div>

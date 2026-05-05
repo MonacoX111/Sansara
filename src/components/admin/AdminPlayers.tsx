@@ -125,7 +125,7 @@ export default function AdminPlayers(props: Props) {
                 onClick={addPlayer}
               >
                 {isAdminActionLoading("create-player")
-                  ? "Creating..."
+                  ? commonText.creating
                   : adminText.addPlayer}
               </button>
 
@@ -391,7 +391,7 @@ export default function AdminPlayers(props: Props) {
     disabled={isAdminActionLoading("save-player")}
     onClick={savePlayer}
   >
-    {isAdminActionLoading("save-player") ? "Saving..." : commonText.save}
+    {isAdminActionLoading("save-player") ? commonText.saving : commonText.save}
   </button>
   <button
     className="danger-btn"

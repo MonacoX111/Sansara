@@ -1,6 +1,12 @@
 import { useMemo } from "react";
 import { Player, Team, Tournament, Match, Transfer, TabKey } from "../types";
-import { Lang, getMatchStageLabel, t } from "../utils/translations";
+import {
+  Lang,
+  formatTournamentLabel as formatStoredTournamentLabel,
+  getMatchStageLabel,
+  getMatchStatusLabel,
+  t,
+} from "../utils/translations";
 import {
   getBiggestUpset,
   getFeaturedMatch,
@@ -99,11 +105,21 @@ export default function HomeTab({
     [matches, tournaments, players, teams]
   );
   const featuredMatchStage =
-    featuredMatch?.match.roundLabel ||
+    (featuredMatch
+      ? formatStoredTournamentLabel(
+          featuredMatch.match.stage === "group"
+            ? featuredMatch.match.groupName ||
+              featuredMatch.match.roundLabel ||
+              featuredMatch.match.round
+            : featuredMatch.match.roundLabel || featuredMatch.match.round,
+          lang
+        )
+      : "") ||
     formatStageLabel(featuredMatch?.match.stage) ||
-    featuredMatch?.match.round ||
     text.common.match;
-  const featuredMatchStatus = featuredMatch?.match.status || text.common.tbd;
+  const featuredMatchStatus = featuredMatch
+    ? getMatchStatusLabel(featuredMatch.match.status, lang) || text.common.tbd
+    : text.common.tbd;
   const getFeaturedParticipantVisual = (side: "left" | "right") => {
     if (!featuredMatch) return null;
 
@@ -157,7 +173,7 @@ export default function HomeTab({
   const latestTransfers = useMemo<LatestTransferItem[]>(() => {
     const teamById = new Map(teams.map((team) => [team.id, team]));
     const playerById = new Map(players.map((player) => [player.id, player]));
-    const freeAgentLabel = lang === "ua" ? "Вільний агент" : "Free Agent";
+    const freeAgentLabel = text.team.freeAgent;
 
     const getTimestamp = (date?: string) => {
       if (!date) return null;
@@ -202,22 +218,9 @@ export default function HomeTab({
         return acc;
       }, []);
   }, [transfers, players, teams, lang]);
-  const latestTransfersText =
-    lang === "ua"
-      ? {
-          title: "Останні трансфери",
-          subtitle: "Останні зміни у складах команд.",
-          empty: "Трансферів поки немає.",
-          joined: "приєднався",
-        }
-      : {
-          title: "Latest Transfers",
-          subtitle: "Recent changes across team rosters.",
-          empty: "No transfers yet.",
-          joined: "joined",
-        };
-  const transferActionLabel = lang === "ua" ? "перейшов" : "transferred";
-  const loanBadgeLabel = lang === "ua" ? "Аренда" : "Loan";
+  const latestTransfersText = text.latestTransfers;
+  const transferActionLabel = latestTransfersText.transferred;
+  const loanBadgeLabel = latestTransfersText.loanBadge;
   const transferDateLocale = lang === "ua" ? "uk-UA" : "en-US";
   const formatTransferDate = (date?: string) => {
     if (!date) return "";
@@ -295,9 +298,13 @@ export default function HomeTab({
   };
 
   const getActivityStage = (match: Match) =>
-    match.roundLabel ||
+    formatStoredTournamentLabel(
+      match.stage === "group"
+        ? match.groupName || match.roundLabel || match.round
+        : match.roundLabel || match.round,
+      lang
+    ) ||
     formatStageLabel(match.stage) ||
-    match.round ||
     text.common.match;
 
   const quickLinks: {
@@ -375,7 +382,7 @@ onClick={() => setActiveTab("leaderboard")}
             className="welcome-preview-card welcome-stat-card home-hover-sync-card main"
             onMouseMove={handleGlow}
             onClick={() => setActiveTab("players")}
-            aria-label="Open players"
+            aria-label={text.openPlayersAria}
           >
             <span>{text.platform}</span>
             <strong>
@@ -393,7 +400,7 @@ onClick={() => setActiveTab("leaderboard")}
               className="welcome-mini-card welcome-stat-card home-hover-sync-card"
               onMouseMove={handleGlow}
               onClick={() => setActiveTab("tournaments")}
-              aria-label="Open tournaments"
+              aria-label={text.openTournamentsAria}
             >
               <span>{text.tournaments}</span>
               <strong>{tournaments.length}</strong>
@@ -404,7 +411,7 @@ onClick={() => setActiveTab("leaderboard")}
               className="welcome-mini-card welcome-stat-card home-hover-sync-card"
               onMouseMove={handleGlow}
               onClick={() => setActiveTab("leaderboard")}
-              aria-label="Open leaderboard"
+              aria-label={text.openLeaderboardAria}
             >
               <span>{text.topElo}</span>
               <strong>{topElo}</strong>
@@ -464,10 +471,8 @@ onClick={() => setActiveTab("leaderboard")}
               {(() => {
                 const biggestUpsetDescription =
                   biggestUpset?.matchType === "team"
-                    ? lang === "ua"
-                      ? "Команда з нижчим рейтингом перемогла сильнішого суперника"
-                      : "The team with the lower rating defeated a stronger opponent"
-                    : text.biggestUpsetDescription;
+                  ? text.biggestUpsetTeamDescription
+                  : text.biggestUpsetDescription;
 
                 return biggestUpset ? (
                   <>

@@ -114,13 +114,14 @@ export default function AdminTransfers({
         <div className="form-col">
           <div className="field-block">
             <label className="field-label">{adminText.transferPlayer}</label>
-            <SearchableSelect
-              value={player}
-              options={playerOptions}
-              onChange={setPlayer}
-              placeholder={adminText.selectPlayer}
-              searchPlaceholder={adminText.searchPlaceholder}
-            />
+              <SearchableSelect
+                value={player}
+                options={playerOptions}
+                onChange={setPlayer}
+                placeholder={adminText.selectPlayer}
+                searchPlaceholder={adminText.searchPlaceholder}
+                emptyLabel={commonText.noResults}
+              />
           </div>
 
           <div className="form-grid">
@@ -132,6 +133,7 @@ export default function AdminTransfers({
                 onChange={setFromTeam}
                 placeholder={adminText.transferFreeAgent}
                 searchPlaceholder={adminText.searchPlaceholder}
+                emptyLabel={commonText.noResults}
               />
             </div>
 
@@ -143,6 +145,7 @@ export default function AdminTransfers({
                 onChange={setToTeam}
                 placeholder={adminText.transferFreeAgent}
                 searchPlaceholder={adminText.searchPlaceholder}
+                emptyLabel={commonText.noResults}
               />
             </div>
           </div>
@@ -177,10 +180,10 @@ export default function AdminTransfers({
               disabled={isAdminActionLoading("create-transfer")}
               onClick={handleAdd}
             >
-              {isAdminActionLoading("create-transfer")
-                ? "Saving..."
-                : adminText.addTransfer}
-            </button>
+                {isAdminActionLoading("create-transfer")
+                  ? commonText.saving
+                  : adminText.addTransfer}
+              </button>
           </div>
         </div>
       </div>

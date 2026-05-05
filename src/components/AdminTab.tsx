@@ -598,7 +598,7 @@ const runAdminAction = async (
           ...currentGroups,
           {
             id: `group-${Date.now()}`,
-            name: `Group ${nextLetter}`,
+            name: `${text.generalPage.groupPrefix} ${nextLetter}`,
             participantIds: [],
           },
         ],
@@ -801,6 +801,7 @@ const adminGeneralProps = {
 const adminMatchesProps = {
   adminText,
   commonText,
+  lang,
   PremiumSelect,
   setConfirmDelete,
   isAdminActionLoading,

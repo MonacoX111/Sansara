@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Match, Player, Team, Tournament } from "../types";
-import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
+import {
+  Lang,
+  formatTournamentLabel as formatStoredTournamentLabel,
+  getMatchStatusLabel,
+  getTournamentFormatLabel,
+  getTournamentStatusLabel,
+  t,
+} from "../utils/translations";
 import { getTournamentRosterPlayerIds } from "../domain/tournament/tournamentRosters";
 import {
   calculateGroupStandings,
@@ -605,8 +612,11 @@ return (
     className="bracket-match-card"
   >
       <div className="bracket-match-top">
-        <span>{match.roundLabel || match.round || tournamentText.match}</span>
-        <span>{match.status || "—"}</span>
+        <span>
+          {formatStoredTournamentLabel(match.roundLabel || match.round, lang) ||
+            tournamentText.match}
+        </span>
+        <span>{getMatchStatusLabel(match.status, lang) || "—"}</span>
       </div>
 
       <div className={`bracket-side ${winnerLeft ? "winner" : ""}`}>
@@ -679,9 +689,12 @@ className={`bracket-match-card bracket-series-card ${
 >
       <div className="bracket-match-top">
         <span>
-          {mainMatch.roundLabel || mainMatch.round || tournamentText.series}
+          {formatStoredTournamentLabel(
+            mainMatch.roundLabel || mainMatch.round,
+            lang
+          ) || tournamentText.series}
         </span>
-        <span>{mainMatch.status || "—"}</span>
+        <span>{getMatchStatusLabel(mainMatch.status, lang) || "—"}</span>
       </div>
 
 {seriesMatches.map((match) => {
@@ -1021,10 +1034,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
               >
 <div className="muted small">{tournamentText.status}</div>
                 <div className="achievement-title">
-{selectedTournament.status
-  ? selectedTournament.status.charAt(0).toUpperCase() +
-    selectedTournament.status.slice(1)
-  : "—"}
+{getTournamentStatusLabel(selectedTournament.status, lang) || "—"}
                 </div>
               </div>
 
@@ -1196,10 +1206,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 >
                   <span className="overview-stat-label">{tournamentText.status}</span>
                   <strong className="overview-stat-value">
-{selectedTournament.status
-  ? selectedTournament.status.charAt(0).toUpperCase() +
-    selectedTournament.status.slice(1)
-  : "—"}
+{getTournamentStatusLabel(selectedTournament.status, lang) || "—"}
                   </strong>
                 </div>
 
@@ -1441,7 +1448,9 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
         <div className="bracket-groups-grid">
           {Object.entries(groupedMatches).map(([groupName, groupItems]) => (
 <div key={groupName} className="bracket-group-card">
-  <div className="bracket-group-title">{groupName}</div>
+  <div className="bracket-group-title">
+    {formatStoredTournamentLabel(groupName, lang)}
+  </div>
 
   <div className="group-standings-table">
     <div className="group-standings-row group-standings-head">
@@ -1544,7 +1553,9 @@ return (
 
             {playoffRoundSeries.map(({ roundName, series }) => (
               <div key={roundName} className="bracket-column">
-                <div className="bracket-column-title">{roundName}</div>
+                <div className="bracket-column-title">
+                  {formatStoredTournamentLabel(roundName, lang)}
+                </div>
 
                 <div className="bracket-column-matches">
                   {series.map((seriesMatches) =>

@@ -112,7 +112,7 @@ export default function AdminAchievements(props: Props) {
             onClick={addAchievement}
           >
             {isAdminActionLoading("create-achievement")
-              ? "Creating..."
+              ? commonText.creating
               : adminText.addAchievement}
           </button>
 
@@ -240,7 +240,7 @@ export default function AdminAchievements(props: Props) {
                     })
                   }
                 >
-                  {isSavingAchievement ? "Saving..." : adminText.save || "Save"}
+                  {isSavingAchievement ? commonText.saving : commonText.save}
                 </button>
               </div>
             </div>

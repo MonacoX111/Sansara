@@ -11,6 +11,10 @@ type PlayerProfileHeaderLabels = {
   noGames: string;
   achievements: string;
   tournaments: string;
+  form: string;
+  noMatchesYet: string;
+  formWinShort: string;
+  formLossShort: string;
 };
 
 type Props = {
@@ -102,7 +106,7 @@ export default function PlayerProfileHeader({
         </div>
 
         <div className="profile-form-strip">
-          <span className="profile-form-label">FORM</span>
+          <span className="profile-form-label">{labels.form}</span>
           {formResults.length > 0 ? (
             <div className="profile-form-list">
               {[...formResults].reverse().map((item) => (
@@ -110,12 +114,14 @@ export default function PlayerProfileHeader({
                   key={item.match.id}
                   className={`profile-form-pill profile-form-pill-${item.result}`}
                 >
-                  {item.result === "win" ? "W" : "L"}
+                  {item.result === "win"
+                    ? labels.formWinShort
+                    : labels.formLossShort}
                 </span>
               ))}
             </div>
           ) : (
-            <span className="profile-form-empty">No matches yet</span>
+            <span className="profile-form-empty">{labels.noMatchesYet}</span>
           )}
         </div>
 

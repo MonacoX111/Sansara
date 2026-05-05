@@ -38,7 +38,7 @@ const getRoundKey = (match: Match): string =>
   (match.roundLabel || match.round || "auto").trim().toLowerCase();
 
 const getBracketPlan = (seriesCount: number): BracketPlanItem[] | null => {
-  if (seriesCount === 2) {
+  if (seriesCount === 3) {
     return [
       {
         seriesId: "SF1",
@@ -52,10 +52,16 @@ const getBracketPlan = (seriesCount: number): BracketPlanItem[] | null => {
         roundLabel: "1/2 Final",
         stage: "playoff",
       },
+      {
+        seriesId: "F1",
+        nextSeriesId: "",
+        roundLabel: "Final",
+        stage: "final",
+      },
     ];
   }
 
-  if (seriesCount === 3) {
+  if (seriesCount === 7) {
     return [
       {
         seriesId: "QF1",

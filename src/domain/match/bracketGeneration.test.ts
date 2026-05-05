@@ -11,6 +11,7 @@ const makeMatch = (overrides: Partial<Match>): Match => ({
   date: "",
   status: "scheduled",
   round: "",
+  stage: "playoff",
   bestOf: 1,
   notes: "",
   tournamentId: 1,

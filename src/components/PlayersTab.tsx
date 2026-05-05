@@ -22,7 +22,12 @@ import {
   getTournamentTeamRoster,
   isPlayerInTournamentTeamRoster,
 } from "../domain/tournament/tournamentRosters";
-import { Lang, getTournamentFormatLabel, t } from "../utils/translations";
+import {
+  Lang,
+  formatTournamentLabel as formatStoredTournamentLabel,
+  getTournamentFormatLabel,
+  t,
+} from "../utils/translations";
 import PremiumSelect from "./ui/PremiumSelect";
 import StatCard from "./StatCard";
 import PlayerProfileHeader from "./player-profile/PlayerProfileHeader";
@@ -283,8 +288,8 @@ const playerRecentMatchRows = playerRecentMatches.map(
           ? getTeamName(match.team2) || playerText.unknownTeam
           : getPlayerName(match.player2),
       game: match.game,
-      roundLabel: match.roundLabel,
-      round: match.round,
+      roundLabel: formatStoredTournamentLabel(match.roundLabel, lang),
+      round: formatStoredTournamentLabel(match.round, lang),
       score: match.score,
       tournamentName,
     }),
@@ -688,6 +693,10 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
                 noGames: playerText.noGames,
                 achievements: playerText.achievements,
                 tournaments: playerText.tournaments,
+                form: playerText.form,
+                noMatchesYet: playerText.noMatchesYet,
+                formWinShort: playerText.formWinShort,
+                formLossShort: playerText.formLossShort,
               }}
               winRate={playerWinRate}
               streakLabel={playerStreak.label}
@@ -717,7 +726,9 @@ formResults={playerVisibleFormResults}
                         tabIndex={canOpenTeam ? 0 : undefined}
                         aria-label={
                           canOpenTeam
-                            ? `Open ${item.team?.name || playerText.unknownTeam}`
+                            ? `${playerText.openTeamAria} ${
+                                item.team?.name || playerText.unknownTeam
+                              }`
                             : undefined
                         }
                         onClick={() => {
@@ -819,6 +830,7 @@ formResults={playerVisibleFormResults}
                 source: playerText.source,
                 team: playerText.team,
                 totalElo: playerText.totalElo,
+                openTournamentAria: playerText.openTournamentAria,
               }}
               expandedEloTournamentId={expandedEloTournamentId}
               onToggleEloTournament={(tournamentId) =>
@@ -833,6 +845,8 @@ formResults={playerVisibleFormResults}
               title={playerText.recentMatches}
               emptyText={playerText.noRecentMatches}
               vsText={commonText.vs}
+              winShort={playerText.winsShort}
+              lossShort={playerText.lossesShort}
               matches={playerRecentMatchRows}
             />
           </div>

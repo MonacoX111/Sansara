@@ -43,6 +43,8 @@ export const t = {
     biggestUpset: "Biggest Upset",
     biggestUpsetDescription:
       "Lower-rated player defeated a stronger opponent",
+    biggestUpsetTeamDescription:
+      "The team with the lower rating defeated a stronger opponent",
     eloDifference: "ELO difference",
     noUpsetFoundYet: "No upset found yet",
     winner: "Winner",
@@ -73,9 +75,27 @@ export const t = {
       noRivalry: "No rivalry yet",
     },
 
+    latestTransfers: {
+      title: "Latest Transfers",
+      subtitle: "Recent changes across team rosters.",
+      empty: "No transfers yet.",
+      joined: "joined",
+      transferred: "transferred",
+      loanBadge: "Loan",
+    },
+
+    openPlayersAria: "Open players",
+    openTournamentsAria: "Open tournaments",
+    openLeaderboardAria: "Open leaderboard",
+
 
 
 admin: {
+  creating: "Creating...",
+  saving: "Saving...",
+  updating: "Updating...",
+  generating: "Generating...",
+
   players: "Players (admin)",
   editPlayer: "Edit player",
   searchPlayer: "Search player",
@@ -188,6 +208,7 @@ admin: {
   achievementFallback: "Achievement",
   unknown: "Unknown",
   unknownTeam: "Unknown team",
+  unknownPlayer: "Unknown",
   noTournament: "No tournament",
   elo: "ELO",
   teamNamePlaceholder: "Team name",
@@ -256,6 +277,10 @@ admin: {
   quickMatches: "Matches",
   quickAchievements: "Achievements",
   logoUploadDisabled: "Logo upload via file is disabled. Paste a logo URL in the team form.",
+  tournamentTeamRosters: "Tournament team rosters",
+  rosterPlayersSelected: "Roster players selected",
+  noEligibleRosterPlayers: "No eligible players for this team",
+  notEligible: "not eligible",
 
 },
 
@@ -265,11 +290,24 @@ common: {
   cancel: "Cancel",
   undo: "Undo",
   logoutAdmin: "Logout admin",
+  creating: "Creating...",
+  saving: "Saving...",
+  updating: "Updating...",
+  generating: "Generating...",
+  searchPlaceholder: "Search...",
+  noResults: "No results",
   vs: "vs",
   tbd: "TBD",
   match: "Match",
   elo: "ELO",
   bestOfShort: "BO",
+  statusDraft: "Draft",
+  statusUpcoming: "Upcoming",
+  statusOngoing: "Ongoing",
+  statusCompleted: "Completed",
+  statusFinished: "Finished",
+  statusScheduled: "Scheduled",
+  statusCancelled: "Cancelled",
   scrollToTop: "Scroll to top",
   homeAnnouncementSaved: "Home announcement saved",
   playerSaved: "Player saved",
@@ -308,7 +346,8 @@ team: {
 
 generalPage: {
     teams: "Teams",
-  homeAnnouncementHidden: "Home announcement is hidden",
+    groupPrefix: "Group",
+    homeAnnouncementHidden: "Home announcement is hidden",
   homeAnnouncementHiddenDescription:
     "Turn it on in Admin when you want to show the next tournament.",
   nextTournament: "Next tournament",
@@ -443,6 +482,8 @@ playersPage: {
   sortByName: "Sort by name",
   directory: "Players directory",
   profile: "Player profile",
+  form: "FORM",
+  noMatchesYet: "No matches yet",
   team: "Team",
   games: "Games",
   achievements: "Achievements",
@@ -486,6 +527,9 @@ playersPage: {
   unknown: "Unknown",
   elo: "ELO",
   winsShort: "W",
+  lossesShort: "L",
+  formWinShort: "W",
+  formLossShort: "L",
   mvp: "MVP",
   opponent: "Opponent",
   result: "Result",
@@ -497,6 +541,8 @@ playersPage: {
   unknownTeam: "Unknown team",
   vs: "vs",
   backToList: "Back to list",
+  openTournamentAria: "Open tournament",
+  openTeamAria: "Open team",
 },
 
 nav: {
@@ -547,7 +593,7 @@ nav: {
     quickLeaderboardDescription: "Дивіться поточного лідера рейтингу та топ ELO.",
     recentActivity: {
       title: "Остання активність",
-      live: "Live",
+      live: "У прямому ефірі",
       finished: "Завершено",
       upcoming: "Заплановано",
       winner: "Переможець",
@@ -564,6 +610,8 @@ nav: {
     biggestUpset: "Найбільша сенсація",
     biggestUpsetDescription:
       "Гравець із нижчим рейтингом переміг сильнішого суперника",
+    biggestUpsetTeamDescription:
+      "Команда з нижчим рейтингом перемогла сильнішого суперника",
     eloDifference: "Різниця ELO",
     noUpsetFoundYet: "Сенсацій поки не знайдено",
     winner: "Переможець",
@@ -594,7 +642,25 @@ nav: {
       noRivalry: "Поки що немає протистояння",
     },
 
-admin: {
+    latestTransfers: {
+      title: "Останні трансфери",
+      subtitle: "Останні зміни у складах команд.",
+      empty: "Трансферів поки немає.",
+      joined: "приєднався",
+      transferred: "перейшов",
+      loanBadge: "Оренда",
+    },
+
+    openPlayersAria: "Відкрити гравців",
+    openTournamentsAria: "Відкрити турніри",
+    openLeaderboardAria: "Відкрити рейтинг",
+
+ admin: {
+  creating: "Створення...",
+  saving: "Збереження...",
+  updating: "Оновлення...",
+  generating: "Генерація...",
+
   players: "Гравці (адмін)",
   editPlayer: "Редагувати гравця",
   searchPlayer: "Пошук гравця",
@@ -630,7 +696,7 @@ admin: {
   transferDate: "Дата",
   transferType: "Тип переходу",
   transferTypeTransfer: "Трансфер",
-  transferTypeLoan: "Аренда",
+  transferTypeLoan: "Оренда",
   transferFreeAgent: "Вільний агент",
   noTransfers: "Трансферів поки немає",
 
@@ -707,6 +773,7 @@ admin: {
   achievementFallback: "Досягнення",
   unknown: "Невідомо",
   unknownTeam: "Невідома команда",
+  unknownPlayer: "Невідомо",
   noTournament: "Без турніру",
   elo: "ELO",
   teamNamePlaceholder: "Назва команди",
@@ -724,11 +791,11 @@ admin: {
   fiveVsFive: "5 проти 5",
   customOption: "Власний",
   selectFormat: "Оберіть формат",
-  playoffSingleElimination: "Плей-оф (Single Elimination)",
+  playoffSingleElimination: "Плей-оф (на вибування)",
   groupsPlayoff: "Групи + плей-оф",
   groupsOnly: "Тільки групи",
   swissSystem: "Швейцарська система",
-  leagueRoundRobin: "Ліга / Round Robin",
+  leagueRoundRobin: "Ліга / Кожен з кожним",
   selectStatus: "Оберіть статус",
   prizePlaceholder: "Призовий фонд або нагорода",
   tournamentDescriptionPlaceholder: "Опис турніру",
@@ -775,6 +842,10 @@ admin: {
   quickMatches: "Матчі",
   quickAchievements: "Досягнення",
   logoUploadDisabled: "Завантаження логотипу файлом вимкнено. Вставте URL логотипу у форму команди.",
+  tournamentTeamRosters: "Склади команд турніру",
+  rosterPlayersSelected: "Обрано гравців складу",
+  noEligibleRosterPlayers: "Для цієї команди немає доступних гравців",
+  notEligible: "не підходить",
 
 },
 
@@ -784,11 +855,24 @@ common: {
   cancel: "Скасувати",
   undo: "Скасувати дію",
   logoutAdmin: "Вийти з адміна",
+  creating: "Створення...",
+  saving: "Збереження...",
+  updating: "Оновлення...",
+  generating: "Генерація...",
+  searchPlaceholder: "Пошук...",
+  noResults: "Нічого не знайдено",
   vs: "проти",
   tbd: "Буде визначено",
   match: "Матч",
   elo: "ELO",
   bestOfShort: "BO",
+  statusDraft: "Чернетка",
+  statusUpcoming: "Заплановано",
+  statusOngoing: "У процесі",
+  statusCompleted: "Завершено",
+  statusFinished: "Завершено",
+  statusScheduled: "Заплановано",
+  statusCancelled: "Скасовано",
   scrollToTop: "Прокрутити вгору",
   homeAnnouncementSaved: "Анонс збережено",
   playerSaved: "Гравця збережено",
@@ -826,7 +910,8 @@ team: {
 },
 
 generalPage: {
-    teams: "Команди",
+  teams: "Команди",
+  groupPrefix: "Група",
   homeAnnouncementHidden: "Анонс на головній приховано",
   homeAnnouncementHiddenDescription:
     "Увімкніть його в адмінці, коли захочете показати наступний турнір.",
@@ -962,6 +1047,8 @@ playersPage: {
   sortByName: "Сортувати за іменем",
   directory: "Список гравців",
   profile: "Профіль гравця",
+  form: "ФОРМА",
+  noMatchesYet: "Поки що немає матчів",
   team: "Команда",
   games: "Ігри",
   achievements: "Досягнення",
@@ -979,7 +1066,7 @@ playersPage: {
   eloHistory: "Історія ELO",
   showEloHistory: "Показати історію ELO",
   hideEloHistory: "Сховати історію ELO",
-  noEloHistory: "No tournament ELO history.",
+  noEloHistory: "Немає історії турнірного ELO.",
   solo: "Соло",
   duo: "Дуо",
   trio: "Тріо",
@@ -1004,7 +1091,10 @@ playersPage: {
   featured: "Обраний",
   unknown: "Невідомо",
   elo: "ELO",
-  winsShort: "П",
+  winsShort: "В",
+  lossesShort: "П",
+  formWinShort: "В",
+  formLossShort: "П",
   mvp: "MVP",
   opponent: "Суперник",
   result: "Результат",
@@ -1016,6 +1106,8 @@ playersPage: {
   unknownTeam: "Невідома команда",
   vs: "проти",
   backToList: "Назад до списку",
+  openTournamentAria: "Відкрити турнір",
+  openTeamAria: "Відкрити команду",
 },
 
 nav: {
@@ -1055,6 +1147,57 @@ const titleCaseLabel = (value: string) =>
     )
     .join(" ");
 
+const normalizeTournamentLabel = (value: string) =>
+  value.replace(/\s+/g, " ").trim().replace(/\s*\/\s*/g, "/");
+
+const tournamentRoundLabels: Record<
+  string,
+  Record<Lang, string>
+> = {
+  final: { en: "Final", ua: "Фінал" },
+  f: { en: "Final", ua: "Фінал" },
+  "1/2 final": { en: "1/2 Final", ua: "1/2 Фіналу" },
+  semifinal: { en: "1/2 Final", ua: "1/2 Фіналу" },
+  "semi final": { en: "1/2 Final", ua: "1/2 Фіналу" },
+  sf: { en: "1/2 Final", ua: "1/2 Фіналу" },
+  "1/4 final": { en: "1/4 Final", ua: "1/4 Фіналу" },
+  quarterfinal: { en: "1/4 Final", ua: "1/4 Фіналу" },
+  "quarter final": { en: "1/4 Final", ua: "1/4 Фіналу" },
+  qf: { en: "1/4 Final", ua: "1/4 Фіналу" },
+  "1/8 final": { en: "1/8 Final", ua: "1/8 Фіналу" },
+  "round of 16": { en: "1/8 Final", ua: "1/8 Фіналу" },
+  r16: { en: "1/8 Final", ua: "1/8 Фіналу" },
+  "1/16 final": { en: "1/16 Final", ua: "1/16 Фіналу" },
+  "round of 32": { en: "1/16 Final", ua: "1/16 Фіналу" },
+  r32: { en: "1/16 Final", ua: "1/16 Фіналу" },
+};
+
+export const formatTournamentLabel = (
+  label: string | undefined,
+  lang: Lang
+) => {
+  if (!label) return "";
+
+  const normalized = normalizeTournamentLabel(label).toLowerCase();
+  const groupMatch = normalized.match(/^(group|група)\s+([a-z0-9]{1,3})$/i);
+
+  if (groupMatch) {
+    const suffix = groupMatch[2];
+    const suffixDisplay = /^[a-z0-9]+$/i.test(suffix)
+      ? suffix.toUpperCase()
+      : suffix;
+
+    return `${t[lang].generalPage.groupPrefix} ${suffixDisplay}`;
+  }
+
+  const roundLabel = tournamentRoundLabels[normalized];
+  if (roundLabel) {
+    return roundLabel[lang];
+  }
+
+  return label;
+};
+
 export const getTournamentFormatLabel = (
   format: string | undefined,
   lang: Lang
@@ -1085,9 +1228,9 @@ export const getTournamentFormatLabel = (
       groups_only: "Тільки групи",
       swiss: "Швейцарська система",
       "swiss system": "Швейцарська система",
-      league: "Ліга / Round Robin",
-      "round robin": "Ліга / Round Robin",
-      round_robin: "Ліга / Round Robin",
+      league: "Ліга / Кожен з кожним",
+      "round robin": "Кожен з кожним",
+      round_robin: "Кожен з кожним",
     },
   };
 
@@ -1114,4 +1257,56 @@ export const getMatchStageLabel = (stage: string | undefined, lang: Lang) => {
   };
 
   return labels[lang]?.[normalized] || titleCaseLabel(stage);
+};
+
+export const getMatchStatusLabel = (
+  status: string | undefined,
+  lang: Lang
+) => {
+  if (!status) return "";
+
+  const normalized = status.trim().toLowerCase();
+  const labels: Record<Lang, Record<string, string>> = {
+    en: {
+      scheduled: t.en.common.statusScheduled,
+      ongoing: t.en.common.statusOngoing,
+      completed: t.en.common.statusCompleted,
+      cancelled: t.en.common.statusCancelled,
+    },
+    ua: {
+      scheduled: t.ua.common.statusScheduled,
+      ongoing: t.ua.common.statusOngoing,
+      completed: t.ua.common.statusCompleted,
+      cancelled: t.ua.common.statusCancelled,
+    },
+  };
+
+  return labels[lang]?.[normalized] || titleCaseLabel(status);
+};
+
+export const getTournamentStatusLabel = (
+  status: string | undefined,
+  lang: Lang
+) => {
+  if (!status) return "";
+
+  const normalized = status.trim().toLowerCase();
+  const labels: Record<Lang, Record<string, string>> = {
+    en: {
+      draft: t.en.common.statusDraft,
+      upcoming: t.en.common.statusUpcoming,
+      ongoing: t.en.common.statusOngoing,
+      completed: t.en.common.statusCompleted,
+      finished: t.en.common.statusFinished,
+    },
+    ua: {
+      draft: t.ua.common.statusDraft,
+      upcoming: t.ua.common.statusUpcoming,
+      ongoing: t.ua.common.statusOngoing,
+      completed: t.ua.common.statusCompleted,
+      finished: t.ua.common.statusFinished,
+    },
+  };
+
+  return labels[lang]?.[normalized] || titleCaseLabel(status);
 };

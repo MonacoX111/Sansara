@@ -65,7 +65,7 @@ export default function AdminTeams(props: Props) {
               onClick={addTeam}
             >
               {isAdminActionLoading("create-team")
-                ? "Creating..."
+                ? commonText.creating
                 : adminText.addTeam}
             </button>
 
@@ -221,7 +221,7 @@ export default function AdminTeams(props: Props) {
     disabled={isAdminActionLoading("save-team")}
     onClick={saveTeam}
   >
-    {isAdminActionLoading("save-team") ? "Saving..." : commonText.save}
+    {isAdminActionLoading("save-team") ? commonText.saving : commonText.save}
   </button>
   <button
     className="danger-btn"

@@ -46,8 +46,8 @@ export default function SearchableSelect({
   options,
   onChange,
   placeholder,
-  searchPlaceholder = "Search...",
-  emptyLabel = "No results",
+  searchPlaceholder = "",
+  emptyLabel = "",
   disabled = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
