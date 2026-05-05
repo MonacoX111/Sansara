@@ -782,6 +782,11 @@ const [toast, setToast] = useState<{
 } | null>(null);
 
 useEffect(() => {
+  if (location.pathname === "/admin" && adminUser) {
+    setShowAdminLogin(false);
+    return;
+  }
+
   if (location.pathname === "/admin" && !adminUser) {
     setShowAdminLogin(true);
   }
@@ -997,12 +1002,20 @@ useEffect(() => {
       const isBindPressed =
         event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a";
 
-      if (isBindPressed) {
-        event.preventDefault();
-        setShowAdminLogin(true);
-        setAdminPassword("");
-        setAdminError("");
-      }
+if (isBindPressed) {
+  event.preventDefault();
+
+  if (adminUser) {
+    setShowAdminLogin(false);
+    setActiveTab("admin");
+    navigate("/admin");
+    return;
+  }
+
+  setShowAdminLogin(true);
+  setAdminPassword("");
+  setAdminError("");
+}
 
       if (event.key === "Escape") {
         setShowAdminLogin(false);
@@ -1013,7 +1026,7 @@ useEffect(() => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+}, [adminUser, navigate]);
 
   useEffect(() => {
     if (players.length === 0) {
