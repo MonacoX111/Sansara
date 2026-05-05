@@ -742,6 +742,8 @@ const playerLogout = async () => {
 
   try {
     await signOut(auth);
+    setFirebaseUser(null);
+    navigateToTab("home");
   } catch (error) {
     console.error("Logout error:", error);
   }
