@@ -477,14 +477,6 @@ const clearUnsafeUiStorage = () => {
   }
 };
 
-const isBrowserReload = (): boolean => {
-  const navigationEntry = performance.getEntriesByType("navigation")[0] as
-    | PerformanceNavigationTiming
-    | undefined;
-
-  return navigationEntry?.type === "reload";
-};
-
 const ALLOWED_ADMIN_EMAILS = ["yakata706@gmail.com"];
 
 const normalizeAuthEmail = (email?: string | null) =>
@@ -536,7 +528,6 @@ export default function App() {
   const navigate = useNavigate();
   const routeTab = getTabFromPath(location.pathname);
   const isMyProfileRoute = routeTab === "myProfile";
-  const didCheckReloadRedirectRef = useRef(false);
   const didOpenLinkedProfileForUidRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -544,15 +535,6 @@ export default function App() {
     document.documentElement.style.setProperty("--x", "50%");
     document.documentElement.style.setProperty("--y", "50%");
   }, []);
-
-  useEffect(() => {
-    if (didCheckReloadRedirectRef.current) return;
-    didCheckReloadRedirectRef.current = true;
-
-    if (isBrowserReload() && location.pathname !== "/") {
-      navigate("/", { replace: true });
-    }
-  }, [location.pathname, navigate]);
 
 const handleGlow = handleSpotlightMove;
 
