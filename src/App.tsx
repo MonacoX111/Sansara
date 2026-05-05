@@ -496,6 +496,9 @@ const isAllowedAdminUser = (currentUser: User | null): currentUser is User => {
   return isAllowedAdminEmail(currentUser?.email);
 };
 
+const getAllowedAdminUser = (currentUser: User | null): User | null =>
+  isAllowedAdminUser(currentUser) ? currentUser : null;
+
 const CLAIM_CODE_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 const createClaimCode = () => {
@@ -514,7 +517,6 @@ const createClaimCode = () => {
 
 export default function App() {
   const functions = getFunctions();
-  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
   const location = useLocation();
   const navigate = useNavigate();
   const didCheckReloadRedirectRef = useRef(false);
@@ -524,14 +526,6 @@ export default function App() {
     document.documentElement.style.setProperty("--x", "50%");
     document.documentElement.style.setProperty("--y", "50%");
   }, []);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development" && !ADMIN_PASSWORD) {
-      console.warn(
-        "REACT_APP_ADMIN_PASSWORD is not set. Admin login is disabled."
-      );
-    }
-  }, [ADMIN_PASSWORD]);
 
   useEffect(() => {
     if (didCheckReloadRedirectRef.current) return;
@@ -684,9 +678,10 @@ useEffect(() => {
   const [homeAnnouncementForm, setHomeAnnouncementForm] =
     useState<HomeAnnouncementForm>(createEmptyHomeAnnouncementForm());
 
-  const [adminUser, setAdminUser] = useState<User | null>(null);
-  const [playerUser, setPlayerUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(!auth);
+  const adminUser = getAllowedAdminUser(firebaseUser);
+  const playerUser = firebaseUser && !adminUser ? firebaseUser : null;
   const isAdmin = Boolean(adminUser);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
@@ -747,30 +742,17 @@ const playerLogout = async () => {
   useEffect(() => {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setFirebaseUser(currentUser);
         setAuthReady(true);
 
-        if (!currentUser) {
-          setAdminUser(null);
-          setPlayerUser(null);
-          return;
+        if (isAllowedAdminUser(currentUser)) {
+          setShowAdminLogin(false);
         }
-
-if (isAllowedAdminUser(currentUser)) {
-  setAdminUser(currentUser);
-  setPlayerUser(null);
-
-  // 🔥 FIX
-  setShowAdminLogin(false);
-
-  return;
-}
-
-        setAdminUser(null);
-        setPlayerUser(currentUser);
       });
       return () => unsubscribe();
     }
 
+    setFirebaseUser(null);
     setAuthReady(true);
   }, []);
 const [toast, setToast] = useState<{
@@ -1386,8 +1368,7 @@ const submitClaimCode = async () => {
         return;
       }
 
-      setAdminUser(credential.user);
-      setPlayerUser(null);
+      setFirebaseUser(credential.user);
       navigateToTab("admin");
       setShowAdminLogin(false);
       setAdminEmail("");
@@ -1403,8 +1384,7 @@ const submitClaimCode = async () => {
     if (auth) {
       await signOut(auth);
     }
-    setAdminUser(null);
-    setPlayerUser(null);
+    setFirebaseUser(null);
     navigateToTab("players");
   };
 
