@@ -73,6 +73,18 @@ export type Player = {
   eloAdjustment?: number;
   bio: string;
   isFeatured?: boolean;
+  authUid?: string;
+  claimCode?: string;
+  claimCodeUsed?: boolean;
+};
+
+export type PlayerClaim = {
+  id: string;
+  playerId: number;
+  used: boolean;
+  createdAt?: string;
+  usedAt?: string;
+  usedByUid?: string;
 };
 
 export type TransferType = "transfer" | "loan";
@@ -195,4 +207,5 @@ export type TabKey =
   | "teams"
   | "tournaments"
   | "leaderboard"
+  | "myProfile"
   | "admin";

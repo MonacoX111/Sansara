@@ -1,5 +1,6 @@
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
 import PlayersTab from "./components/PlayersTab";
@@ -27,6 +28,7 @@ import {
   MatchStatus,
   Placement,
   Player,
+  PlayerClaim,
   TabKey,
   Team,
   Tournament,
@@ -47,7 +49,13 @@ import {
   handleSpotlightMoveCapture,
 } from "./utils/spotlight";
 import { isFirebaseConfigured, auth } from "./firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  User,
+} from "firebase/auth";
 import {
   deleteItem,
   deleteItemsBatch,
@@ -288,6 +296,9 @@ const normalizePlayers = (items: Player[]): Player[] =>
       rank: Number(player.rank || 0),
       elo: Number(player.elo || 1000),
       isFeatured: Boolean(player.isFeatured),
+      authUid: player.authUid,
+      claimCode: player.claimCode,
+      claimCodeUsed: player.claimCodeUsed,
     }))
   );
 
@@ -410,6 +421,7 @@ const getTabFromPath = (pathname: string): TabKey => {
   if (firstSegment === "teams") return "teams";
   if (firstSegment === "tournaments") return "tournaments";
   if (firstSegment === "leaderboard") return "leaderboard";
+  if (firstSegment === "my-profile") return "myProfile";
   if (firstSegment === "admin") return "admin";
   if (firstSegment === "general") return "general";
 
@@ -419,6 +431,7 @@ const getTabFromPath = (pathname: string): TabKey => {
 const getPathForTab = (tab: TabKey): string => {
   if (tab === "home") return "/";
   if (tab === "general") return "/general";
+  if (tab === "myProfile") return "/my-profile";
   return `/${tab}`;
 };
 
@@ -471,7 +484,36 @@ const isBrowserReload = (): boolean => {
   return navigationEntry?.type === "reload";
 };
 
+const ALLOWED_ADMIN_EMAILS = ["yakata706@gmail.com"];
+
+const normalizeAuthEmail = (email?: string | null) =>
+  email?.trim().toLowerCase() || "";
+
+const isAllowedAdminEmail = (email?: string | null) =>
+  ALLOWED_ADMIN_EMAILS.includes(normalizeAuthEmail(email));
+
+const isAllowedAdminUser = (currentUser: User | null): currentUser is User => {
+  return isAllowedAdminEmail(currentUser?.email);
+};
+
+const CLAIM_CODE_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const createClaimCode = () => {
+  const length = 6 + Math.floor(Math.random() * 3);
+  let code = "";
+
+  for (let index = 0; index < length; index += 1) {
+    code +=
+      CLAIM_CODE_CHARACTERS[
+        Math.floor(Math.random() * CLAIM_CODE_CHARACTERS.length)
+      ];
+  }
+
+  return code;
+};
+
 export default function App() {
+  const functions = getFunctions();
   const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "";
   const location = useLocation();
   const navigate = useNavigate();
@@ -548,6 +590,7 @@ const handleGlow = handleSpotlightMove;
   const [transfers, setTransfers] = useState<Transfer[]>(() =>
     readStorage<Transfer[]>("tm_transfers", [])
   );
+  const [playerClaims, setPlayerClaims] = useState<PlayerClaim[]>([]);
   const [homeAnnouncement, setHomeAnnouncement] = useState<HomeAnnouncement>(
     () => normalizeHomeAnnouncement(fallbackHomeAnnouncement)
   );
@@ -641,21 +684,94 @@ useEffect(() => {
   const [homeAnnouncementForm, setHomeAnnouncementForm] =
     useState<HomeAnnouncementForm>(createEmptyHomeAnnouncementForm());
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [adminUser, setAdminUser] = useState<User | null>(null);
+  const [playerUser, setPlayerUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(!auth);
+  const isAdmin = Boolean(adminUser);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
+  const [playerAuthEmail, setPlayerAuthEmail] = useState("");
+  const playerLogin = async (email: string, password: string) => {
+  if (!auth) return;
+
+  try {
+    setPlayerAuthLoading(true);
+    setPlayerAuthError("");
+
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error: any) {
+    console.error("Login error:", error);
+    setPlayerAuthError(error.message || "Login failed");
+  } finally {
+    setPlayerAuthLoading(false);
+  }
+};
+
+const playerRegister = async (email: string, password: string) => {
+  if (!auth) return;
+
+  try {
+    setPlayerAuthLoading(true);
+    setPlayerAuthError("");
+
+    await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error: any) {
+    console.error("Register error:", error);
+    setPlayerAuthError(error.message || "Register failed");
+  } finally {
+    setPlayerAuthLoading(false);
+  }
+};
+
+const playerLogout = async () => {
+  if (!auth) return;
+
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
+  const [playerAuthPassword, setPlayerAuthPassword] = useState("");
+  const [playerAuthMode, setPlayerAuthMode] = useState<"login" | "register">(
+    "login"
+  );
+  const [playerAuthError, setPlayerAuthError] = useState("");
+  const [playerAuthLoading, setPlayerAuthLoading] = useState(false);
+  const [claimCodeInput, setClaimCodeInput] = useState("");
+  const [claimCodeError, setClaimCodeError] = useState("");
+  const [claimCodeLoading, setClaimCodeLoading] = useState(false);
 
   useEffect(() => {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        setIsAdmin(!!currentUser);
+        setAuthReady(true);
+
+        if (!currentUser) {
+          setAdminUser(null);
+          setPlayerUser(null);
+          return;
+        }
+
+if (isAllowedAdminUser(currentUser)) {
+  setAdminUser(currentUser);
+  setPlayerUser(null);
+
+  // 🔥 FIX
+  setShowAdminLogin(false);
+
+  return;
+}
+
+        setAdminUser(null);
+        setPlayerUser(currentUser);
       });
       return () => unsubscribe();
     }
+
+    setAuthReady(true);
   }, []);
 const [toast, setToast] = useState<{
   text: string;
@@ -666,10 +782,10 @@ const [toast, setToast] = useState<{
 } | null>(null);
 
 useEffect(() => {
-  if (location.pathname === "/admin" && !isAdmin) {
+  if (location.pathname === "/admin" && !adminUser) {
     setShowAdminLogin(true);
   }
-}, [isAdmin, location.pathname]);
+}, [adminUser, location.pathname]);
 
 const toastTimerRef = useRef<number | null>(null);
 
@@ -689,6 +805,23 @@ const [showLeaderboardSkeleton, setShowLeaderboardSkeleton] = useState(false);
     achievements.find(
       (achievement) => achievement.id === selectedAchievementId
     ) || null;
+  const linkedPlayer = useMemo(
+    () =>
+      playerUser
+        ? players.find((player) => player.authUid === playerUser.uid) || null
+        : null,
+    [players, playerUser]
+  );
+  const createUniquePlayerClaimCode = () => {
+    const existingCodes = new Set(playerClaims.map((claim) => claim.id));
+    let code = createClaimCode();
+
+    while (existingCodes.has(code)) {
+      code = createClaimCode();
+    }
+
+    return code;
+  };
   const getSafeTeamId = (teamId: number) =>
     teams.some((team) => team.id === teamId) ? teamId : 0;
 
@@ -740,6 +873,32 @@ const showToast = (
     () => writeStorage("tm_home_announcement", homeAnnouncement),
     [homeAnnouncement]
   );
+
+useEffect(() => {
+  if (!isFirebaseConfigured || !adminUser) {
+    setPlayerClaims([]);
+    return;
+  }
+
+  let isMounted = true;
+
+  loadCollection<PlayerClaim>("playerClaims")
+    .then((loadedPlayerClaims) => {
+      if (isMounted) {
+        setPlayerClaims(loadedPlayerClaims);
+      }
+    })
+    .catch((error) => {
+      console.error("Failed to load player claims:", error);
+      if (isMounted) {
+        setPlayerClaims([]);
+      }
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}, [adminUser]);
 
 useEffect(() => {
   let isMounted = true;
@@ -1139,6 +1298,62 @@ tournamentId:
     navigate(nextTournamentId > 0 ? `/tournaments/${nextTournamentId}` : "/tournaments");
   };
 
+  const navigateToMyProfile = (playerId: number) => {
+    setSelectedPlayerId(playerId);
+    navigate("/my-profile");
+  };
+
+const submitClaimCode = async () => {
+  if (!playerUser) {
+    setClaimCodeError("Please log in before claiming a profile.");
+    return;
+  }
+
+  const code = claimCodeInput.trim();
+
+  if (!code) {
+    setClaimCodeError("Claim code is required.");
+    return;
+  }
+
+  try {
+    setClaimCodeLoading(true);
+    setClaimCodeError("");
+
+    const claimFn = httpsCallable(functions, "claimPlayerProfile");
+
+    await claimFn({ code });
+
+    const loadedPlayers = isFirebaseConfigured
+      ? normalizePlayers(await loadCollection<Player>("players"))
+      : players;
+    const linkedAfterClaim =
+      loadedPlayers.find((player) => player.authUid === playerUser.uid) ||
+      null;
+
+    if (loadedPlayers !== players) {
+      setPlayers(loadedPlayers);
+      writeStorage("tm_players", loadedPlayers);
+    }
+
+    if (linkedAfterClaim) {
+      setClaimCodeInput("");
+      setClaimCodeError("");
+      navigateToMyProfile(linkedAfterClaim.id);
+    } else {
+      setClaimCodeError(
+        "Profile claimed, but the linked profile was not loaded yet. Please refresh."
+      );
+    }
+
+  } catch (error: any) {
+    console.error("Claim failed:", error);
+    setClaimCodeError(error.message || "Invalid or used code");
+  } finally {
+    setClaimCodeLoading(false);
+  }
+};
+
   const handleAdminLogin = async () => {
     if (!auth) {
       setAdminError("Firebase Auth is not configured");
@@ -1146,7 +1361,20 @@ tournamentId:
     }
     
     try {
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        adminEmail,
+        adminPassword
+      );
+
+      if (!isAllowedAdminUser(credential.user)) {
+        await signOut(auth);
+        setAdminError("This Firebase account is not allowed to access admin.");
+        return;
+      }
+
+      setAdminUser(credential.user);
+      setPlayerUser(null);
       navigateToTab("admin");
       setShowAdminLogin(false);
       setAdminEmail("");
@@ -1162,7 +1390,8 @@ tournamentId:
     if (auth) {
       await signOut(auth);
     }
-    setIsAdmin(false);
+    setAdminUser(null);
+    setPlayerUser(null);
     navigateToTab("players");
   };
 
@@ -1346,6 +1575,109 @@ if (isFirebaseConfigured) {
     } catch (error) {
       console.error("Failed to add player:", error);
       showToast("Failed to add player", "danger");
+    }
+  };
+
+  const generatePlayerClaimCode = async (playerId: number) => {
+    if (!players.some((player) => player.id === playerId)) return;
+
+    const newClaim: PlayerClaim = {
+      id: createUniquePlayerClaimCode(),
+      playerId,
+      used: false,
+      createdAt: new Date().toISOString(),
+    };
+    const previousPlayerClaims = playerClaims;
+    const nextPlayerClaims = [...playerClaims, newClaim];
+
+    setPlayerClaims(nextPlayerClaims);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("playerClaims", newClaim);
+      }
+
+      showToast("Player claim code generated");
+    } catch (error) {
+      console.error("Failed to generate player claim code:", error);
+      setPlayerClaims(previousPlayerClaims);
+      showToast("Failed to generate player claim code", "danger");
+    }
+  };
+
+  const resetPlayerClaimCode = async (playerId: number) => {
+    if (!players.some((player) => player.id === playerId)) return;
+
+    const now = new Date().toISOString();
+    const oldUnusedClaims = playerClaims.filter(
+      (claim) => claim.playerId === playerId && !claim.used
+    );
+    const retiredClaims = oldUnusedClaims.map((claim) => ({
+      ...claim,
+      used: true,
+      usedAt: claim.usedAt || now,
+    }));
+    const newClaim: PlayerClaim = {
+      id: createUniquePlayerClaimCode(),
+      playerId,
+      used: false,
+      createdAt: now,
+    };
+    const previousPlayerClaims = playerClaims;
+    const nextPlayerClaims = [
+      ...playerClaims.map((claim) => {
+        const retiredClaim = retiredClaims.find((item) => item.id === claim.id);
+        return retiredClaim || claim;
+      }),
+      newClaim,
+    ];
+
+    setPlayerClaims(nextPlayerClaims);
+
+    try {
+      if (isFirebaseConfigured) {
+        await Promise.all([
+          ...retiredClaims.map((claim) => saveItem("playerClaims", claim)),
+          saveItem("playerClaims", newClaim),
+        ]);
+      }
+
+      showToast("Player claim code reset");
+    } catch (error) {
+      console.error("Failed to reset player claim code:", error);
+      setPlayerClaims(previousPlayerClaims);
+      showToast("Failed to reset player claim code", "danger");
+    }
+  };
+
+  const unlinkPlayerAccount = async (playerId: number) => {
+    const currentPlayer = players.find((player) => player.id === playerId);
+    if (!currentPlayer) return;
+
+    const updatedPlayer: Player = {
+      ...currentPlayer,
+      authUid: undefined,
+      claimCodeUsed: false,
+    };
+    const previousPlayers = players;
+    const nextPlayers = players.map((player) =>
+      player.id === playerId ? updatedPlayer : player
+    );
+
+    setPlayers(nextPlayers);
+    writeStorage("tm_players", nextPlayers);
+
+    try {
+      if (isFirebaseConfigured) {
+        await saveItem("players", updatedPlayer);
+      }
+
+      showToast("Player account unlinked");
+    } catch (error) {
+      console.error("Failed to unlink player account:", error);
+      setPlayers(previousPlayers);
+      writeStorage("tm_players", previousPlayers);
+      showToast("Failed to unlink player account", "danger");
     }
   };
 
@@ -2303,6 +2635,149 @@ const deleteAchievement = async (achievementId: number) => {
   )
     ? null
     : routeTournamentId;
+  const isAccountResolving = !authReady || Boolean(playerUser && !firebaseReady);
+
+  if (!adminUser && (isAccountResolving || !playerUser || !linkedPlayer)) {
+    return (
+      <div className="page">
+        <div className="admin-overlay">
+          <div className="admin-modal">
+            {isAccountResolving ? (
+              <>
+                <h2 className="panel-title">Loading account</h2>
+                <div className="muted">Please wait...</div>
+              </>
+            ) : !playerUser ? (
+              <>
+                <h2 className="panel-title">
+                  {playerAuthMode === "login" ? "Player Login" : "Register"}
+                </h2>
+                <form
+                  className="form-col"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (playerAuthMode === "login") {
+                      void playerLogin(playerAuthEmail, playerAuthPassword);
+                    } else {
+                      void playerRegister(playerAuthEmail, playerAuthPassword);
+                    }
+                  }}
+                >
+                  <div className="btn-row">
+                    <button
+                      type="button"
+                      className={
+                        playerAuthMode === "login"
+                          ? "primary-btn"
+                          : "secondary-btn"
+                      }
+                      onClick={() => {
+                        setPlayerAuthMode("login");
+                        setPlayerAuthError("");
+                      }}
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      className={
+                        playerAuthMode === "register"
+                          ? "primary-btn"
+                          : "secondary-btn"
+                      }
+                      onClick={() => {
+                        setPlayerAuthMode("register");
+                        setPlayerAuthError("");
+                      }}
+                    >
+                      Register
+                    </button>
+                  </div>
+
+                  <input
+                    type="email"
+                    className="input"
+                    placeholder="Player email"
+                    value={playerAuthEmail}
+                    onChange={(event) => setPlayerAuthEmail(event.target.value)}
+                  />
+                  <input
+                    type="password"
+                    className="input"
+                    placeholder="Password"
+                    value={playerAuthPassword}
+                    onChange={(event) =>
+                      setPlayerAuthPassword(event.target.value)
+                    }
+                  />
+
+                  {playerAuthError ? (
+                    <div className="admin-error">{playerAuthError}</div>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    className="primary-btn"
+                    disabled={playerAuthLoading || !authReady}
+                  >
+                    {!authReady
+                      ? "Please wait..."
+                      : playerAuthLoading
+                      ? "Please wait..."
+                      : playerAuthMode === "login"
+                      ? "Login"
+                      : "Create account"}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <h2 className="panel-title">Claim Profile</h2>
+                <form
+                  className="form-col"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void submitClaimCode();
+                  }}
+                >
+                  <div className="muted">Logged in as {playerUser.email}</div>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Claim code"
+                    value={claimCodeInput}
+                    onChange={(event) => {
+                      setClaimCodeInput(event.target.value);
+                      setClaimCodeError("");
+                    }}
+                  />
+                  {claimCodeError ? (
+                    <div className="admin-error">{claimCodeError}</div>
+                  ) : null}
+                  <div className="btn-row">
+                    <button
+                      type="submit"
+                      className="primary-btn"
+                      disabled={claimCodeLoading}
+                    >
+                      {claimCodeLoading ? "Please wait..." : "Claim profile"}
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={() => void playerLogout()}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page" onMouseMoveCapture={handleSpotlightMoveCapture}>
@@ -2314,6 +2789,7 @@ const deleteAchievement = async (achievementId: number) => {
   active={activeTab}
   onChange={navigateToTab}
   showAdmin={isAdmin}
+  showMyProfile={Boolean(linkedPlayer)}
   lang={lang}
 />
 
@@ -2405,6 +2881,31 @@ const deleteAchievement = async (achievementId: number) => {
 />
         )}
 
+{activeTab === "myProfile" && linkedPlayer && (
+<PlayersTab
+  players={players}
+  teams={teams}
+  matches={matches}
+  tournaments={tournaments}
+  achievements={achievements}
+  selectedPlayerId={linkedPlayer.id}
+  setSelectedPlayerId={navigateToPlayer}
+  search={search}
+  setSearch={setSearch}
+  gameFilter={gameFilter}
+  setGameFilter={setGameFilter}
+  teamFilter={teamFilter}
+  setTeamFilter={setTeamFilter}
+  sortMode={sortMode}
+  setSortMode={setSortMode}
+  gamesList={gamesList}
+  onOpenTeam={openTeamFromPlayerProfile}
+  onOpenTournament={openTournamentFromPlayerProfile}
+  profileOnly
+  lang={lang}
+/>
+)}
+
 {activeTab === "teams" && (
   <TeamsTab
     teams={teams}
@@ -2444,6 +2945,7 @@ const deleteAchievement = async (achievementId: number) => {
           <AdminTab
           autoGenerateBracket={autoGenerateBracket}
             players={players}
+            playerClaims={playerClaims}
             teams={teams}
             tournaments={tournaments}
             matches={matches}
@@ -2472,6 +2974,9 @@ const deleteAchievement = async (achievementId: number) => {
             handleTeamLogoUpload={handleTeamLogoUpload}
             savePlayer={savePlayer}
             addPlayer={addPlayer}
+            generatePlayerClaimCode={generatePlayerClaimCode}
+            resetPlayerClaimCode={resetPlayerClaimCode}
+            unlinkPlayerAccount={unlinkPlayerAccount}
             deletePlayer={deletePlayer}
             saveTeam={saveTeam}
             addTeam={addTeam}

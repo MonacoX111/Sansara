@@ -1,5 +1,5 @@
 import { Dispatch, ReactElement, SetStateAction } from "react";
-import { Player, Team } from "../../types";
+import { Player, PlayerClaim, Team } from "../../types";
 
 type PlayerForm = {
   nickname: string;
@@ -52,6 +52,7 @@ type Props = {
   setConfirmDelete: Dispatch<SetStateAction<ConfirmDeleteState>>;
   isAdminActionLoading: (key: string) => boolean;
   players: Player[];
+  playerClaims: PlayerClaim[];
   teams: Team[];
   selectedPlayerId: number;
   setSelectedPlayerId: (id: number) => void;
@@ -59,6 +60,9 @@ type Props = {
   setPlayerForm: Dispatch<SetStateAction<PlayerForm>>;
   savePlayer: () => void | Promise<void>;
   addPlayer: () => void | Promise<void>;
+  generatePlayerClaimCode: (playerId: number) => void | Promise<void>;
+  resetPlayerClaimCode: (playerId: number) => void | Promise<void>;
+  unlinkPlayerAccount: (playerId: number) => void | Promise<void>;
   playerAdminSearch: string;
   setPlayerAdminSearch: Dispatch<SetStateAction<string>>;
   filteredAdminPlayers: Player[];
@@ -73,6 +77,7 @@ export default function AdminPlayers(props: Props) {
     setConfirmDelete,
     isAdminActionLoading,
     players,
+    playerClaims,
     teams,
     selectedPlayerId,
     setSelectedPlayerId,
@@ -80,10 +85,41 @@ export default function AdminPlayers(props: Props) {
     setPlayerForm,
     savePlayer,
     addPlayer,
+    generatePlayerClaimCode,
+    resetPlayerClaimCode,
+    unlinkPlayerAccount,
     playerAdminSearch,
     setPlayerAdminSearch,
     filteredAdminPlayers,
   } = props;
+
+  const selectedPlayer =
+    players.find((player) => player.id === selectedPlayerId) || null;
+  const selectedPlayerClaims = selectedPlayer
+    ? playerClaims.filter((claim) => claim.playerId === selectedPlayer.id)
+    : [];
+  const currentClaim =
+    selectedPlayerClaims.find((claim) => !claim.used) || null;
+  const hasUsedClaim = selectedPlayerClaims.some((claim) => claim.used);
+  const claimStatus = currentClaim
+    ? "Unused"
+    : hasUsedClaim
+    ? "Used"
+    : "No code";
+
+  const copyClaimCode = async (code: string) => {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(code);
+    }
+  };
+
+  const getPlayerClaimStatus = (playerId: number) => {
+    const claims = playerClaims.filter((claim) => claim.playerId === playerId);
+    const activeClaim = claims.find((claim) => !claim.used);
+    if (activeClaim) return `Code: ${activeClaim.id}`;
+    if (claims.some((claim) => claim.used)) return "Claim used";
+    return "No claim code";
+  };
 
   const toggleHistoricalTeam = (teamId: number) => {
     setPlayerForm((prev) => {
@@ -140,6 +176,9 @@ export default function AdminPlayers(props: Props) {
                   } ${player.isFeatured ? "admin-list-btn-featured" : ""}`}
                 >
                   <span>{player.nickname || adminText.playerFallback}</span>
+                  <span className="muted small">
+                    {getPlayerClaimStatus(player.id)}
+                  </span>
                   {player.isFeatured ? (
                     <span className="admin-featured-badge">{adminText.featured}</span>
                   ) : null}
@@ -213,6 +252,71 @@ export default function AdminPlayers(props: Props) {
                 {adminText.featuredPlayer}
               </label>
             </div>
+
+            {selectedPlayer ? (
+              <div className="field-block simple-card">
+                <label className="field-label">Player claim code</label>
+                <div className="muted small">
+                  Current code: {currentClaim?.id || "None"}
+                </div>
+                <div className="muted small">Status: {claimStatus}</div>
+                {selectedPlayer.authUid ? (
+                  <div className="muted small">
+                    Linked UID: {selectedPlayer.authUid}
+                  </div>
+                ) : null}
+
+                <div className="btn-row">
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    disabled={
+                      Boolean(currentClaim) ||
+                      isAdminActionLoading(
+                        `generate-player-claim-${selectedPlayer.id}`
+                      )
+                    }
+                    onClick={() => generatePlayerClaimCode(selectedPlayer.id)}
+                  >
+                    Generate code
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    disabled={!currentClaim}
+                    onClick={() => {
+                      if (currentClaim) {
+                        void copyClaimCode(currentClaim.id);
+                      }
+                    }}
+                  >
+                    Copy code
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    disabled={isAdminActionLoading(
+                      `reset-player-claim-${selectedPlayer.id}`
+                    )}
+                    onClick={() => resetPlayerClaimCode(selectedPlayer.id)}
+                  >
+                    Reset code
+                  </button>
+                  {selectedPlayer.authUid ? (
+                    <button
+                      type="button"
+                      className="danger-btn"
+                      disabled={isAdminActionLoading(
+                        `unlink-player-${selectedPlayer.id}`
+                      )}
+                      onClick={() => unlinkPlayerAccount(selectedPlayer.id)}
+                    >
+                      Unlink account
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             <div className="field-block">
               <label className="field-label">{adminText.team}</label>

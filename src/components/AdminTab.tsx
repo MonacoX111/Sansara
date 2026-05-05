@@ -6,6 +6,7 @@ import {
   MatchStatus,
   Placement,
   Player,
+  PlayerClaim,
   Team,
   Tournament,
   TournamentGroup,
@@ -110,6 +111,7 @@ type HomeAnnouncementForm = HomeAnnouncement;
 
 type Props = {
   players: Player[];
+  playerClaims: PlayerClaim[];
   teams: Team[];
   tournaments: Tournament[];
   matches: Match[];
@@ -149,6 +151,9 @@ type Props = {
 
   savePlayer: () => void | Promise<void>;
   addPlayer: () => void | Promise<void>;
+  generatePlayerClaimCode: (playerId: number) => void | Promise<void>;
+  resetPlayerClaimCode: (playerId: number) => void | Promise<void>;
+  unlinkPlayerAccount: (playerId: number) => void | Promise<void>;
   deletePlayer: () => void | Promise<void>;
 
   saveTeam: () => void | Promise<void>;
@@ -235,6 +240,7 @@ export default function AdminTab({
   lang,
   autoGenerateBracket,
   players,
+  playerClaims,
   teams,
   tournaments,
   matches,
@@ -263,6 +269,9 @@ export default function AdminTab({
   handleTeamLogoUpload,
   savePlayer,
   addPlayer,
+  generatePlayerClaimCode,
+  resetPlayerClaimCode,
+  unlinkPlayerAccount,
   deletePlayer,
   saveTeam,
   addTeam,
@@ -700,6 +709,7 @@ const adminPlayersProps = {
   setConfirmDelete,
   isAdminActionLoading,
   players,
+  playerClaims,
   teams,
   selectedPlayerId,
   setSelectedPlayerId,
@@ -712,6 +722,18 @@ const adminPlayersProps = {
   addPlayer: () =>
     runAdminAction("create-player", async () => {
       await addPlayer();
+    }),
+  generatePlayerClaimCode: (playerId: number) =>
+    runAdminAction(`generate-player-claim-${playerId}`, async () => {
+      await generatePlayerClaimCode(playerId);
+    }),
+  resetPlayerClaimCode: (playerId: number) =>
+    runAdminAction(`reset-player-claim-${playerId}`, async () => {
+      await resetPlayerClaimCode(playerId);
+    }),
+  unlinkPlayerAccount: (playerId: number) =>
+    runAdminAction(`unlink-player-${playerId}`, async () => {
+      await unlinkPlayerAccount(playerId);
     }),
   playerAdminSearch,
   setPlayerAdminSearch,

@@ -54,6 +54,7 @@ type Props = {
   gamesList: { id: string; name: string; icon: string }[];
   onOpenTeam?: (teamId: number) => void;
   onOpenTournament?: (tournamentId: number) => void;
+  profileOnly?: boolean;
   lang: Lang;
 };
 
@@ -76,6 +77,7 @@ export default function PlayersTab({
   gamesList,
   onOpenTeam,
   onOpenTournament,
+  profileOnly = false,
   lang = "en",
 }: Props) {
   const text = t[lang] || t.en;
@@ -480,6 +482,7 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
 
   return (
     <>
+      {!profileOnly && (
       <div className="toolbar">
         <input
           className="input"
@@ -529,8 +532,10 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
           onChange={(value) => setSortMode(String(value))}
         />
       </div>
+      )}
 
       <div className="two-col">
+        {!profileOnly && (
         <div className="panel">
           <h2 className="panel-title">{playerText.directory}</h2>
 
@@ -664,6 +669,7 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
             })}
           </div>
         </div>
+        )}
 
         {selectedPlayer && (
           <div className="panel" ref={profileRef}>

@@ -12,7 +12,7 @@ import {
 import { db } from "./firebase";
 
 export type FirebaseItem = {
-  id: number;
+  id: number | string;
 };
 
 const ensureDb = () => {
@@ -100,14 +100,14 @@ export const saveItemsBatch = async <T extends FirebaseItem>(
   await batch.commit();
 };
 
-export const deleteItem = async (collectionName: string, id: number) => {
+export const deleteItem = async (collectionName: string, id: number | string) => {
   const currentDb = ensureDb();
   await deleteDoc(doc(currentDb, collectionName, String(id)));
 };
 
 export const deleteItemsBatch = async (
   collectionName: string,
-  ids: number[]
+  ids: Array<number | string>
 ) => {
   const currentDb = ensureDb();
   const batch = writeBatch(currentDb);
