@@ -6,6 +6,7 @@ import {
   orderBy,
   query,
   setDoc,
+  updateDoc,
   deleteDoc,
   writeBatch,
 } from "firebase/firestore";
@@ -80,6 +81,18 @@ export const saveItem = async <T extends FirebaseItem>(
   await setDoc(
     doc(currentDb, collectionName, String(item.id)),
     stripUndefinedDeep(item)
+  );
+};
+
+export const updateItemFields = async (
+  collectionName: string,
+  id: number | string,
+  updates: Record<string, unknown>
+) => {
+  const currentDb = ensureDb();
+  await updateDoc(
+    doc(currentDb, collectionName, String(id)),
+    stripUndefinedDeep(updates)
   );
 };
 

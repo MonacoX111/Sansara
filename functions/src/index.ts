@@ -50,6 +50,18 @@ export const claimPlayerProfile = onCall(async (request) => {
       throw new HttpsError("failed-precondition", "Player already linked");
     }
 
+    const existingLinkedPlayerQuery = db.collection("players")
+      .where("authUid", "==", uid)
+      .limit(1);
+    const existingLinkedPlayerSnap = await tx.get(existingLinkedPlayerQuery);
+
+    if (!existingLinkedPlayerSnap.empty) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This account is already linked to another player profile."
+      );
+    }
+
     tx.update(playerRef, {
       authUid: uid,
       claimCodeUsed: true,

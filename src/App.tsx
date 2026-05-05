@@ -61,6 +61,7 @@ import {
   deleteItemsBatch,
   loadCollection,
   saveItem,
+  updateItemFields,
 } from "./firebaseDb";
 import { generateBracketMatches } from "./domain/match/bracketGeneration";
 import {
@@ -1429,7 +1430,9 @@ const submitClaimCode = async () => {
           player.id === updatedPlayer.id ? updatedPlayer : player
         )
       );
-      await saveItem("players", updatedPlayer);
+      await updateItemFields("players", updatedPlayer.id, {
+        avatar: nextAvatar,
+      });
     } catch (error: any) {
       console.error("Avatar save failed:", error);
       setPlayers(previousPlayers);
