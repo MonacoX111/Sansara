@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { Match } from "../../types";
-import { validateMatchWinner } from "./matchValidation";
+import { validateMatchConsistency, validateMatchWinner } from "./matchValidation";
 
 const makeMatch = (overrides: Partial<Match>): Match => ({
   id: 1,
@@ -14,6 +14,119 @@ const makeMatch = (overrides: Partial<Match>): Match => ({
   bestOf: 1,
   notes: "",
   ...overrides,
+});
+
+describe("validateMatchConsistency", () => {
+  it("blocks player matches with the same participant on both sides", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        matchType: "player",
+        player1: 10,
+        player2: 10,
+      }),
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "MATCH_SAME_PLAYER"
+    );
+  });
+
+  it("blocks completed matches without a winner", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        matchType: "player",
+        player1: 10,
+        player2: 20,
+        status: "completed",
+        winnerId: 0,
+      }),
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "MATCH_COMPLETED_WITHOUT_WINNER"
+    );
+  });
+
+  it("blocks scheduled matches that already have a winner", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        matchType: "player",
+        player1: 10,
+        player2: 20,
+        status: "scheduled",
+        winnerId: 10,
+      }),
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "MATCH_SCHEDULED_WITH_WINNER"
+    );
+  });
+
+  it("blocks winners that are not match participants", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        matchType: "player",
+        player1: 10,
+        player2: 20,
+        winnerId: 999,
+      }),
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "MATCH_WINNER_NOT_PARTICIPANT"
+    );
+  });
+
+  it("allows a draft scheduled match with missing game and participants", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        game: "",
+        matchType: "player",
+        player1: 0,
+        player2: 0,
+        status: "scheduled",
+      }),
+    });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it("blocks match type mismatches when tournament data is available", () => {
+    const result = validateMatchConsistency({
+      match: makeMatch({
+        matchType: "player",
+        player1: 10,
+        player2: 20,
+        tournamentId: 1,
+      }),
+      tournament: {
+        id: 1,
+        title: "Cup",
+        game: "g",
+        type: "5x5",
+        format: "playoff",
+        status: "ongoing",
+        date: "",
+        prize: "",
+        description: "",
+        imageUrl: "",
+        participantType: "team",
+        participantIds: [1, 2],
+        placements: [],
+        isPublished: true,
+      },
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.map((issue) => issue.code)).toContain(
+      "MATCH_TYPE_MISMATCH_TOURNAMENT"
+    );
+  });
 });
 
 describe("validateMatchWinner — player match", () => {

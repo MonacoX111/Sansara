@@ -8,6 +8,10 @@ import {
   TournamentTeamRoster,
 } from "../types";
 import { recalculateAllPlayersElo } from "../domain/player/playerElo";
+import {
+  TournamentValidationIssue,
+  validateTournamentConsistency,
+} from "../domain/tournament/tournamentValidation";
 
 type TournamentForm = {
   title: string;
@@ -41,6 +45,32 @@ type ShowToast = (
 ) => void;
 
 type CommonText = Record<string, string>;
+
+const getTournamentValidationMessage = (
+  commonText: CommonText,
+  issue: TournamentValidationIssue
+) => {
+  const messages: Record<TournamentValidationIssue["code"], string | undefined> = {
+    TOURNAMENT_FINISHED_WITHOUT_RESULTS:
+      commonText.tournamentFinishedWithoutResults,
+    TOURNAMENT_TEAM_WINNER_FOR_NON_TEAM:
+      commonText.tournamentTeamWinnerForNonTeam,
+    TOURNAMENT_PLAYER_WINNER_FOR_NON_PLAYER:
+      commonText.tournamentPlayerWinnerForNonPlayer,
+    TOURNAMENT_SQUAD_WINNER_FOR_INVALID_TYPE:
+      commonText.tournamentSquadWinnerForInvalidType,
+    TOURNAMENT_PLAYER_PLACEMENT_IN_TEAM_EVENT:
+      commonText.tournamentPlayerPlacementInTeamEvent,
+    TOURNAMENT_TEAM_PLACEMENT_IN_PLAYER_EVENT:
+      commonText.tournamentTeamPlacementInPlayerEvent,
+    TOURNAMENT_FINISHED_TEAM_WITHOUT_ROSTERS:
+      commonText.tournamentFinishedTeamWithoutRosters,
+    TOURNAMENT_WINNER_WITHOUT_PLACEMENTS:
+      commonText.tournamentWinnerWithoutPlacements,
+  };
+
+  return messages[issue.code] || issue.message;
+};
 
 type SaveTournamentMutationParams = {
   confirmedEloWarning?: boolean;
@@ -125,19 +155,16 @@ export const saveTournamentMutation = async (
         }))
       : [],
     winnerId:
-      tournamentForm.participantType === "player" &&
       tournamentForm.winnerId &&
       tournamentForm.winnerId > 0
         ? Number(tournamentForm.winnerId)
         : undefined,
     winnerTeamId:
-      tournamentForm.participantType === "team" &&
       tournamentForm.winnerTeamId &&
       tournamentForm.winnerTeamId > 0
         ? Number(tournamentForm.winnerTeamId)
         : undefined,
     winnerSquadIds:
-      tournamentForm.participantType === "squad" &&
       Array.isArray(tournamentForm.winnerSquadIds)
         ? tournamentForm.winnerSquadIds.map(Number)
         : [],
@@ -194,6 +221,20 @@ export const saveTournamentMutation = async (
     );
     return;
   }
+
+  const consistencyValidation =
+    validateTournamentConsistency(updatedTournament);
+
+  if (!consistencyValidation.valid) {
+    const firstError = consistencyValidation.errors[0];
+    console.error(firstError.message, firstError);
+    showToast(getTournamentValidationMessage(commonText, firstError), "danger");
+    return;
+  }
+
+  consistencyValidation.warnings.forEach((warning) => {
+    console.warn(getTournamentValidationMessage(commonText, warning), warning);
+  });
 
   let updatedTournamentWithRoster = updatedTournament;
 

@@ -327,6 +327,28 @@ common: {
   matchOrderUpdated: "Match order updated",
   matchReorderFailed: "Failed to reorder matches",
   invalidMatchWinner: "Invalid match winner",
+  matchSameParticipant: "Match participants must be different",
+  matchCompletedWithoutWinner: "Completed match needs a winner",
+  matchScheduledWithWinner: "Scheduled match cannot already have a winner",
+  matchTypeMismatchTournament:
+    "Match participant type does not match tournament",
+  matchGameRequired: "Match game is required",
+  matchParticipantsRequired: "Both match participants are required",
+  tournamentFinishedWithoutResults:
+    "Finished tournament needs placements or a winner",
+  tournamentTeamWinnerForNonTeam:
+    "Team winner is only valid for team tournaments",
+  tournamentPlayerWinnerForNonPlayer:
+    "Player winner is only valid for player tournaments",
+  tournamentSquadWinnerForInvalidType:
+    "Squad winners are only valid for squad or duo/trio tournaments",
+  tournamentPlayerPlacementInTeamEvent:
+    "Team tournaments should use team placements",
+  tournamentTeamPlacementInPlayerEvent:
+    "Player tournaments should use player placements",
+  tournamentFinishedTeamWithoutRosters:
+    "Finished team tournament has no frozen rosters",
+  tournamentWinnerWithoutPlacements: "Tournament has a winner but no placements",
   bracketGenerated: "Bracket generated automatically",
   bracketFirebaseFailed: "Bracket generated, but Firebase save failed",
   selectTournamentFirst: "Select tournament first",
@@ -897,6 +919,29 @@ common: {
   matchOrderUpdated: "Порядок матчів оновлено",
   matchReorderFailed: "Не вдалося змінити порядок матчів",
   invalidMatchWinner: "Невірний переможець матчу",
+  matchSameParticipant: "Учасники матчу мають бути різними",
+  matchCompletedWithoutWinner: "Завершений матч потребує переможця",
+  matchScheduledWithWinner:
+    "Запланований матч не може вже мати переможця",
+  matchTypeMismatchTournament:
+    "Тип учасників матчу не відповідає турніру",
+  matchGameRequired: "Гра матчу обов'язкова",
+  matchParticipantsRequired: "Потрібні обидва учасники матчу",
+  tournamentFinishedWithoutResults:
+    "Завершений турнір потребує місць або переможця",
+  tournamentTeamWinnerForNonTeam:
+    "Командний переможець дійсний лише для командних турнірів",
+  tournamentPlayerWinnerForNonPlayer:
+    "Переможець-гравець дійсний лише для турнірів гравців",
+  tournamentSquadWinnerForInvalidType:
+    "Переможці складу дійсні лише для squad або duo/trio турнірів",
+  tournamentPlayerPlacementInTeamEvent:
+    "Командні турніри мають використовувати командні місця",
+  tournamentTeamPlacementInPlayerEvent:
+    "Турніри гравців мають використовувати місця гравців",
+  tournamentFinishedTeamWithoutRosters:
+    "Завершений командний турнір не має зафіксованих складів",
+  tournamentWinnerWithoutPlacements: "У турнірі є переможець, але немає місць",
   bracketGenerated: "Сітку створено автоматично",
   bracketFirebaseFailed: "Сітку створено, але збереження у Firebase не вдалося",
   selectTournamentFirst: "Спочатку оберіть турнір",

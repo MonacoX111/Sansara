@@ -1,8 +1,11 @@
 import { saveItem } from "../firebaseDb";
-import { Match, MatchStatus } from "../types";
+import { Match, MatchStatus, Tournament } from "../types";
 import { getFallbackMatchOrder } from "../domain/match/matchOrdering";
 import { progressMatchWinner } from "../domain/match/matchProgression";
-import { validateMatchWinner } from "../domain/match/matchValidation";
+import {
+  MatchValidationIssue,
+  validateMatchConsistency,
+} from "../domain/match/matchValidation";
 import { getNextId } from "../utils";
 
 type MatchForm = {
@@ -39,10 +42,29 @@ type ShowToast = (
 
 type CommonText = Record<string, string>;
 
+const getMatchValidationMessage = (
+  commonText: CommonText,
+  issue: MatchValidationIssue
+) => {
+  const messages: Record<MatchValidationIssue["code"], string | undefined> = {
+    MATCH_SAME_PLAYER: commonText.matchSameParticipant,
+    MATCH_SAME_TEAM: commonText.matchSameParticipant,
+    MATCH_COMPLETED_WITHOUT_WINNER: commonText.matchCompletedWithoutWinner,
+    MATCH_SCHEDULED_WITH_WINNER: commonText.matchScheduledWithWinner,
+    MATCH_WINNER_NOT_PARTICIPANT: commonText.invalidMatchWinner,
+    MATCH_TYPE_MISMATCH_TOURNAMENT: commonText.matchTypeMismatchTournament,
+    MATCH_COMPLETE_WITHOUT_GAME: commonText.matchGameRequired,
+    MATCH_COMPLETE_WITHOUT_PARTICIPANTS: commonText.matchParticipantsRequired,
+  };
+
+  return messages[issue.code] || issue.message;
+};
+
 type SaveMatchMutationParams = {
   matchForm: MatchForm;
   selectedMatch: Match | null;
   matches: Match[];
+  tournaments: Tournament[];
   commonText: CommonText;
   isFirebaseConfigured: boolean;
   setMatches: (items: Match[]) => void;
@@ -55,6 +77,7 @@ export const saveMatchMutation = async ({
   matchForm,
   selectedMatch,
   matches,
+  tournaments,
   commonText,
   isFirebaseConfigured,
   setMatches,
@@ -62,21 +85,6 @@ export const saveMatchMutation = async ({
   showToast,
   writeStorage,
 }: SaveMatchMutationParams) => {
-  if (!matchForm.game.trim()) {
-    showToast("Match game is required", "danger");
-    return;
-  }
-
-  if (
-    (matchForm.matchType === "player" &&
-      (!Number(matchForm.player1) || !Number(matchForm.player2))) ||
-    (matchForm.matchType === "team" &&
-      (!Number(matchForm.team1) || !Number(matchForm.team2)))
-  ) {
-    showToast("Both match participants are required", "danger");
-    return;
-  }
-
   const baseMatch: Match =
     selectedMatch || {
       id: getNextId(matches),
@@ -130,13 +138,25 @@ export const saveMatchMutation = async ({
     eloApplied: false,
   };
 
-  const validation = validateMatchWinner(updatedMatch);
+  const matchTournament =
+    tournaments.find(
+      (tournament) => tournament.id === Number(updatedMatch.tournamentId || 0)
+    ) || null;
+  const validation = validateMatchConsistency({
+    match: updatedMatch,
+    tournament: matchTournament,
+  });
 
   if (!validation.valid) {
-    console.error(validation.logMessage);
-    showToast(commonText.invalidMatchWinner, "danger");
+    const firstError = validation.errors[0];
+    console.error(firstError.message, firstError);
+    showToast(getMatchValidationMessage(commonText, firstError), "danger");
     return;
   }
+
+  validation.warnings.forEach((warning) => {
+    console.warn(getMatchValidationMessage(commonText, warning), warning);
+  });
 
   const progressionResult = progressMatchWinner({
     matches,

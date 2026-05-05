@@ -1856,6 +1856,7 @@ const saveMatch = async () => {
     matchForm,
     selectedMatch,
     matches,
+    tournaments,
     commonText,
     isFirebaseConfigured,
     setMatches,
