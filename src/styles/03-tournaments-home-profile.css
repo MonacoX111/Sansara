@@ -179,6 +179,9 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .participant-card {
@@ -187,6 +190,9 @@
     border: 1px solid var(--line);
     background: rgba(255, 255, 255, 0.025);
     transition: 0.2s ease;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .participant-card:hover {
@@ -240,6 +246,26 @@
 
     .tournament-participants {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .tournament-participants,
+    .participant-card,
+    .participant-card-head,
+    .participant-roster-item,
+    .participant-roster-name {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .participant-card .achievement-title {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 .tournament-hero-image-note {
@@ -1219,6 +1245,9 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .participant-avatar,
@@ -1849,6 +1878,9 @@
     gap: 10px;
     padding: 10px 12px;
     border-radius: 12px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 
     background: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1891,6 +1923,12 @@
     font-size: 14px;
     font-weight: 800;
     color: var(--text);
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .participant-roster-empty {

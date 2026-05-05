@@ -696,6 +696,126 @@
     width: 260px;
   }
 }
+
+@media (max-width: 768px) {
+  .bracket-block,
+  .bracket-group-card,
+  .bracket-group-matches,
+  .bracket-group-matches .bracket-match-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bracket-block {
+    padding: 14px;
+    overflow: hidden;
+    contain: layout;
+  }
+
+  .bracket-scroll,
+  .group-standings-table,
+  .bracket-group-matches {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 59, 95, 0.72) rgba(255, 255, 255, 0.05);
+  }
+
+  .bracket-scroll {
+    width: 100%;
+    padding-bottom: 14px;
+    cursor: default;
+  }
+
+  .group-standings-table,
+  .bracket-group-matches {
+    padding-bottom: 12px;
+  }
+
+  .bracket-scroll::-webkit-scrollbar,
+  .group-standings-table::-webkit-scrollbar,
+  .bracket-group-matches::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .bracket-scroll::-webkit-scrollbar-track,
+  .group-standings-table::-webkit-scrollbar-track,
+  .bracket-group-matches::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.045);
+    border-radius: 999px;
+  }
+
+  .bracket-scroll::-webkit-scrollbar-thumb,
+  .group-standings-table::-webkit-scrollbar-thumb,
+  .bracket-group-matches::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, rgba(255, 59, 95, 0.82), rgba(255, 111, 145, 0.64));
+    border-radius: 999px;
+  }
+
+  .bracket-inner-scale {
+    width: max-content;
+    min-width: max-content;
+    transform: none;
+  }
+
+  .bracket-columns {
+    padding: 24px 76px 30px 22px !important;
+  }
+
+  .group-standings-row {
+    min-width: 430px;
+  }
+
+  .bracket-group-matches .bracket-match-card {
+    width: 100%;
+  }
+
+  .bracket-group-matches .bracket-match-top {
+    min-width: 0;
+  }
+
+  .bracket-group-matches .bracket-side,
+  .bracket-group-matches .bracket-player {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .bracket-group-matches .bracket-winner {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .bracket-side {
+    cursor: default;
+  }
+
+  .bracket-columns:has(.bracket-series-active) .bracket-series-card,
+  .bracket-columns:has(.bracket-series-path-loss) .bracket-series-card,
+  .bracket-columns:has(.bracket-series-path-draw) .bracket-series-card {
+    opacity: 1;
+    filter: none;
+  }
+
+  .bracket-columns:has(.bracket-series-active) .bracket-series-active,
+  .bracket-columns:has(.bracket-series-path-loss) .bracket-series-path-loss,
+  .bracket-columns:has(.bracket-series-path-draw) .bracket-series-path-draw {
+    transform: none;
+  }
+
+  .bracket-columns:has(.bracket-series-active) .bracket-svg-lines path:not(.bracket-line-champion-route) {
+    opacity: 1;
+  }
+
+  .bracket-side-hover-win,
+  .bracket-side-hover-loss,
+  .bracket-side-hover-draw {
+    transform: none;
+  }
+}
 /* ===== GPU COMPOSITING FORCE ===== */
 
 .bracket-block,
@@ -727,6 +847,18 @@
   transform: scale(0.96);
   transform-origin: top left;
   width: 104.17%;
+}
+
+@media (max-width: 768px) {
+  .bracket-block {
+    contain: layout;
+  }
+
+  .bracket-inner-scale {
+    width: max-content;
+    min-width: max-content;
+    transform: none;
+  }
 }
 /* ===== GRAND FINAL SPECIAL ===== */
 
