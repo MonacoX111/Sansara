@@ -1519,6 +1519,7 @@ return (
   <g key={line.id}>
     <path
       d={line.path}
+      vectorEffect="non-scaling-stroke"
       className={[
         isLossLine && "bracket-line-loss",
         isWinLine && "bracket-line-active",
@@ -1532,6 +1533,7 @@ return (
     {isChampionLine ? (
       <path
         d={line.path}
+        vectorEffect="non-scaling-stroke"
         className="bracket-line-champion-flow"
       />
     ) : null}
