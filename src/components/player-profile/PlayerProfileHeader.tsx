@@ -1,4 +1,4 @@
-import { MouseEvent } from "react";
+import { ChangeEvent, MouseEvent, useRef } from "react";
 import { Player, Team } from "../../types";
 import { PlayerRecentMatch } from "../../domain/player/playerStats";
 
@@ -26,6 +26,10 @@ type Props = {
   formResults: PlayerRecentMatch[];
   achievementsCount: number;
   tournamentsCount: number;
+  canChangeAvatar?: boolean;
+  avatarUploadLoading?: boolean;
+  avatarUploadError?: string;
+  onAvatarChange?: (playerId: number, file: File | null) => void;
 };
 
 export default function PlayerProfileHeader({
@@ -37,11 +41,21 @@ export default function PlayerProfileHeader({
   formResults,
   achievementsCount,
   tournamentsCount,
+  canChangeAvatar = false,
+  avatarUploadLoading = false,
+  avatarUploadError = "",
+  onAvatarChange,
 }: Props) {
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const handleMiniStatMove = (e: MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
     e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
+  };
+
+  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onAvatarChange?.(player.id, event.target.files?.[0] || null);
+    event.target.value = "";
   };
 
   return (
@@ -74,6 +88,29 @@ export default function PlayerProfileHeader({
 
               {player.bio ? (
                 <div className="player-role-badge">{player.bio}</div>
+              ) : null}
+
+              {canChangeAvatar ? (
+                <div className="profile-avatar-actions">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleAvatarFileChange}
+                  />
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    disabled={avatarUploadLoading}
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    {avatarUploadLoading ? "Uploading..." : "Change avatar"}
+                  </button>
+                  {avatarUploadError ? (
+                    <div className="admin-error">{avatarUploadError}</div>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </div>

@@ -55,6 +55,10 @@ type Props = {
   onOpenTeam?: (teamId: number) => void;
   onOpenTournament?: (tournamentId: number) => void;
   profileOnly?: boolean;
+  canChangeAvatar?: boolean;
+  avatarUploadLoading?: boolean;
+  avatarUploadError?: string;
+  onAvatarChange?: (playerId: number, file: File | null) => void;
   lang: Lang;
 };
 
@@ -78,6 +82,10 @@ export default function PlayersTab({
   onOpenTeam,
   onOpenTournament,
   profileOnly = false,
+  canChangeAvatar = false,
+  avatarUploadLoading = false,
+  avatarUploadError = "",
+  onAvatarChange,
   lang = "en",
 }: Props) {
   const text = t[lang] || t.en;
@@ -709,6 +717,10 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
 formResults={playerVisibleFormResults}
               achievementsCount={playerAchievements.length}
               tournamentsCount={playerTournaments.length}
+              canChangeAvatar={canChangeAvatar}
+              avatarUploadLoading={avatarUploadLoading}
+              avatarUploadError={avatarUploadError}
+              onAvatarChange={onAvatarChange}
             />
 
             <div className="section-block">
