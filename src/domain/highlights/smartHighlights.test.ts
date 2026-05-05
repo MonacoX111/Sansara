@@ -172,6 +172,130 @@ describe("getBiggestUpset", () => {
       getBiggestUpset({ matches, players, teams: [], tournaments: [] })
     ).toBeNull();
   });
+
+  it("uses tournament team roster snapshots instead of current team players", () => {
+    const teamA = makeTeam({ id: 1, name: "Archive A" });
+    const teamB = makeTeam({ id: 2, name: "Archive B" });
+    const players = [
+      makePlayer({ id: 10, nickname: "oldA", elo: 800, teamId: 99 }),
+      makePlayer({ id: 11, nickname: "newA", elo: 2100, teamId: 1 }),
+      makePlayer({ id: 20, nickname: "oldB", elo: 1600, teamId: 88 }),
+      makePlayer({ id: 21, nickname: "newB", elo: 900, teamId: 2 }),
+    ];
+    const tournaments = [
+      makeTournament({
+        id: 1,
+        participantType: "team",
+        teamRosters: [
+          { teamId: 1, playerIds: [10] },
+          { teamId: 2, playerIds: [20] },
+        ],
+      }),
+    ];
+    const matches = [
+      makeMatch({
+        id: 30,
+        matchType: "team",
+        team1: 1,
+        team2: 2,
+        winnerTeamId: 1,
+        tournamentId: 1,
+      }),
+    ];
+
+    const upset = getBiggestUpset({
+      matches,
+      players,
+      teams: [teamA, teamB],
+      tournaments,
+    });
+
+    expect(upset?.winnerName).toBe("Archive A");
+    expect(upset?.loserName).toBe("Archive B");
+    expect(upset?.winnerElo).toBe(800);
+    expect(upset?.loserElo).toBe(1600);
+    expect(upset?.eloDifference).toBe(800);
+  });
+
+  it("falls back to current team players when roster snapshot is missing", () => {
+    const players = [
+      makePlayer({ id: 10, elo: 800, teamId: 1 }),
+      makePlayer({ id: 20, elo: 1500, teamId: 2 }),
+    ];
+    const matches = [
+      makeMatch({
+        id: 31,
+        matchType: "team",
+        team1: 1,
+        team2: 2,
+        winnerTeamId: 1,
+        tournamentId: 1,
+      }),
+    ];
+
+    const upset = getBiggestUpset({
+      matches,
+      players,
+      teams: [makeTeam({ id: 1, name: "A" }), makeTeam({ id: 2, name: "B" })],
+      tournaments: [
+        makeTournament({
+          id: 1,
+          participantType: "team",
+          teamRosters: [{ teamId: 99, playerIds: [999] }],
+        }),
+      ],
+    });
+
+    expect(upset?.winnerElo).toBe(800);
+    expect(upset?.loserElo).toBe(1500);
+    expect(upset?.eloDifference).toBe(700);
+  });
+
+  it("keeps historical team upset calculation stable after transfers", () => {
+    const teams = [makeTeam({ id: 1, name: "A" }), makeTeam({ id: 2, name: "B" })];
+    const match = makeMatch({
+      id: 32,
+      matchType: "team",
+      team1: 1,
+      team2: 2,
+      winnerTeamId: 1,
+      tournamentId: 1,
+    });
+    const tournament = makeTournament({
+      id: 1,
+      participantType: "team",
+      teamRosters: [
+        { teamId: 1, playerIds: [10] },
+        { teamId: 2, playerIds: [20] },
+      ],
+    });
+    const beforeTransferPlayers = [
+      makePlayer({ id: 10, elo: 800, teamId: 1 }),
+      makePlayer({ id: 20, elo: 1600, teamId: 2 }),
+    ];
+    const afterTransferPlayers = [
+      makePlayer({ id: 10, elo: 800, teamId: 2 }),
+      makePlayer({ id: 20, elo: 1600, teamId: 1 }),
+    ];
+
+    const before = getBiggestUpset({
+      matches: [match],
+      players: beforeTransferPlayers,
+      teams,
+      tournaments: [tournament],
+    });
+    const after = getBiggestUpset({
+      matches: [match],
+      players: afterTransferPlayers,
+      teams,
+      tournaments: [tournament],
+    });
+
+    expect(before?.eloDifference).toBe(800);
+    expect(after?.eloDifference).toBe(800);
+    expect(after?.winnerElo).toBe(800);
+    expect(after?.loserElo).toBe(1600);
+  });
 });
 
 describe("getHotPlayer", () => {

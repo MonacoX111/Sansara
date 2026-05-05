@@ -1,4 +1,5 @@
 import { Match, Player, Team, Tournament } from "../../types";
+import { getTournamentTeamRoster } from "../tournament/tournamentRosters";
 
 export type BiggestUpsetHighlight = {
   match: Match;
@@ -106,6 +107,60 @@ const getCurrentTeamAverageElo = (teamId: number, players: Player[]) => {
   return Math.round(totalElo / currentTeamPlayers.length);
 };
 
+const getTournamentForMatch = (match: Match, tournaments: Tournament[]) => {
+  const matchTournamentId = toTournamentIdNumber(match.tournamentId);
+  if (matchTournamentId === null) return null;
+
+  return (
+    tournaments.find(
+      (tournament) => toTournamentIdNumber(tournament.id) === matchTournamentId
+    ) || null
+  );
+};
+
+const getRosterAverageElo = (playerIds: number[], players: Player[]) => {
+  const rosterPlayers = playerIds
+    .map((playerId) =>
+      players.find((player) => Number(player.id) === Number(playerId))
+    )
+    .filter((player): player is Player => Boolean(player));
+
+  if (rosterPlayers.length === 0) return null;
+
+  const totalElo = rosterPlayers.reduce(
+    (sum, player) => sum + Number(player.elo || 0),
+    0
+  );
+
+  return Math.round(totalElo / rosterPlayers.length);
+};
+
+const getTeamAverageEloForMatch = (
+  teamId: number,
+  match: Match,
+  players: Player[],
+  tournaments: Tournament[]
+) => {
+  const tournament = getTournamentForMatch(match, tournaments);
+  const hasRosterSnapshots =
+    tournament &&
+    Array.isArray(tournament.teamRosters) &&
+    tournament.teamRosters.length > 0;
+
+  if (tournament && hasRosterSnapshots) {
+    const roster = getTournamentTeamRoster(tournament, teamId);
+
+    if (roster) {
+      return getRosterAverageElo(
+        Array.isArray(roster.playerIds) ? roster.playerIds.map(Number) : [],
+        players
+      );
+    }
+  }
+
+  return getCurrentTeamAverageElo(teamId, players);
+};
+
 const toTournamentIdNumber = (value: unknown): number | null => {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(value);
@@ -166,7 +221,8 @@ const getStageImportance = (match: Match) => {
 const getMatchParticipants = (
   match: Match,
   players: Player[],
-  teams: Team[]
+  teams: Team[],
+  tournaments: Tournament[]
 ) => {
   if (match.matchType === "player") {
     const playerA = players.find((player) => player.id === match.player1);
@@ -195,8 +251,18 @@ const getMatchParticipants = (
 
     if (!teamA || !teamB) return null;
 
-    const teamAElo = getCurrentTeamAverageElo(teamA.id, players);
-    const teamBElo = getCurrentTeamAverageElo(teamB.id, players);
+    const teamAElo = getTeamAverageEloForMatch(
+      teamA.id,
+      match,
+      players,
+      tournaments
+    );
+    const teamBElo = getTeamAverageEloForMatch(
+      teamB.id,
+      match,
+      players,
+      tournaments
+    );
     const winner =
       match.winnerTeamId === teamA.id
         ? teamA
@@ -301,8 +367,18 @@ const getTeamUpset = (
 
   if (!winner || !loser) return null;
 
-  const winnerElo = getCurrentTeamAverageElo(winner.id, players);
-  const loserElo = getCurrentTeamAverageElo(loser.id, players);
+  const winnerElo = getTeamAverageEloForMatch(
+    winner.id,
+    match,
+    players,
+    tournaments
+  );
+  const loserElo = getTeamAverageEloForMatch(
+    loser.id,
+    match,
+    players,
+    tournaments
+  );
 
   if (winnerElo === null || loserElo === null) return null;
 
@@ -444,7 +520,7 @@ export const getFeaturedMatch = ({
     highlight: FeaturedMatchHighlight;
     score: number;
   } | null>((bestMatch, match) => {
-    const participants = getMatchParticipants(match, players, teams);
+    const participants = getMatchParticipants(match, players, teams, tournaments);
 
     if (!participants) return bestMatch;
 
