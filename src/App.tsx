@@ -55,17 +55,16 @@ import {
 } from "./firebaseDb";
 import { generateBracketMatches } from "./domain/match/bracketGeneration";
 import {
-  getFallbackMatchOrder,
   getTopOrderForNewMatch,
   normalizeMatches,
   reorderMatchByOrder,
 } from "./domain/match/matchOrdering";
-import { progressMatchWinner } from "./domain/match/matchProgression";
-import { validateMatchWinner } from "./domain/match/matchValidation";
 import {
   recalculateAllPlayersElo,
   recalculatePlayerRanks,
 } from "./domain/player/playerElo";
+import { saveTournamentMutation } from "./application/tournamentMutations";
+import { saveMatchMutation } from "./application/matchMutations";
 
 type PlayerForm = {
   nickname: string;
@@ -1593,251 +1592,20 @@ if (isFirebaseConfigured) {
 };
 
   const saveTournament = async (confirmedEloWarning = false) => {
-    if (!tournamentForm.title.trim()) {
-      showToast("Tournament title is required", "danger");
-      return;
-    }
-
-    const updatedTournament: Tournament = {
-      id: selectedTournamentId,
-      order:
-        typeof selectedTournament?.order === "number"
-          ? selectedTournament.order
-          : tournaments.findIndex(
-              (tournament) => tournament.id === selectedTournamentId
-            ),
-      title: tournamentForm.title,
-      game: tournamentForm.game,
-      type: tournamentForm.type,
-      format: tournamentForm.format,
-      status: tournamentForm.status,
-      date: tournamentForm.date,
-      prize: tournamentForm.prize,
-      description: tournamentForm.description,
-      imageUrl: tournamentForm.imageUrl,
-      participantType: tournamentForm.participantType || "player",
-      participantIds: Array.isArray(tournamentForm.participantIds)
-        ? tournamentForm.participantIds.map(Number)
-        : [],
-      teamRosters:
-        tournamentForm.participantType === "team" &&
-        Array.isArray(tournamentForm.teamRosters)
-          ? tournamentForm.teamRosters
-              .filter((roster) =>
-                tournamentForm.participantIds.includes(Number(roster.teamId))
-              )
-              .map((roster) => ({
-                teamId: Number(roster.teamId),
-                playerIds: Array.isArray(roster.playerIds)
-                  ? roster.playerIds.map(Number)
-                  : [],
-              }))
-          : undefined,
-      groups: Array.isArray(tournamentForm.groups)
-        ? tournamentForm.groups.map((group, groupIndex) => ({
-            id: group.id || `group-${groupIndex + 1}`,
-            name: group.name || `Group ${groupIndex + 1}`,
-            participantIds: Array.isArray(group.participantIds)
-              ? group.participantIds.map(Number)
-              : [],
-          }))
-        : [],
-      winnerId:
-        tournamentForm.participantType === "player" &&
-        tournamentForm.winnerId &&
-        tournamentForm.winnerId > 0
-          ? Number(tournamentForm.winnerId)
-          : undefined,
-      winnerTeamId:
-        tournamentForm.participantType === "team" &&
-        tournamentForm.winnerTeamId &&
-        tournamentForm.winnerTeamId > 0
-          ? Number(tournamentForm.winnerTeamId)
-          : undefined,
-      winnerSquadIds:
-        tournamentForm.participantType === "squad" &&
-        Array.isArray(tournamentForm.winnerSquadIds)
-          ? tournamentForm.winnerSquadIds.map(Number)
-          : [],
-      mvpId:
-        tournamentForm.mvpId && tournamentForm.mvpId > 0
-          ? Number(tournamentForm.mvpId)
-          : undefined,
-      placements: Array.isArray(tournamentForm.placements)
-        ? tournamentForm.placements.map((item) => ({
-            place: Number(item.place),
-            playerId:
-              typeof item.playerId === "number"
-                ? Number(item.playerId)
-                : undefined,
-            teamId:
-              typeof item.teamId === "number" ? Number(item.teamId) : undefined,
-          }))
-        : [],
-      eloApplied:
-        typeof selectedTournament?.eloApplied === "boolean"
-          ? selectedTournament.eloApplied
-          : undefined,
-      isPublished: Boolean(tournamentForm.isPublished),
-    };
-
-    const isFinished =
-      updatedTournament.status === "completed" ||
-      updatedTournament.status === "finished";
-
-    if (
-      ["player", "team", "squad"].includes(updatedTournament.participantType) &&
-      updatedTournament.participantIds.length === 0
-    ) {
-      showToast("Tournament participants are required", "danger");
-      return;
-    }
-
-    if (
-      isFinished &&
-      Array.isArray(updatedTournament.placements) &&
-      updatedTournament.placements.length > 0 &&
-      !confirmedEloWarning
-    ) {
-      showToast(
-        "Saving placements for a finished tournament may change ELO/ranks.",
-        "warning",
-        () => {
-          void saveTournament(true);
-        },
-        commonText.save || "Save"
-      );
-      return;
-    }
-
-let updatedTournamentWithRoster = updatedTournament;
-
-if (
-  isFinished &&
-  updatedTournament.participantType === "team" &&
-  Array.isArray(updatedTournament.placements)
-) {
-  const existingRosters = Array.isArray(updatedTournament.teamRosters)
-    ? updatedTournament.teamRosters
-    : [];
-
-const teamIdsFromPlacements = updatedTournament.placements
-  .map((placement) => Number(placement.teamId ?? 0))
-  .filter((teamId) => !Number.isNaN(teamId) && teamId > 0);
-
-  const uniqueTeamIds = [...new Set(teamIdsFromPlacements)];
-
-  const frozenRosters = uniqueTeamIds.map((teamId) => {
-    const existing = existingRosters.find(
-      (roster) => Number(roster.teamId) === teamId
-    );
-
-    if (
-      existing &&
-      Array.isArray(existing.playerIds) &&
-      existing.playerIds.length > 0
-    ) {
-      return {
-        teamId,
-        playerIds: existing.playerIds.map(Number),
-      };
-    }
-
-    const playerIds = players
-      .filter((player) => Number(player.teamId) === teamId)
-      .map((player) => Number(player.id));
-
-    if (playerIds.length === 0) {
-console.warn("ELO: Empty roster for team", teamId, updatedTournament.id);
-    }
-
-    return {
-      teamId,
-      playerIds,
-    };
-  });
-
-  const rosterByTeamId = new Map(
-    existingRosters.map((roster) => [Number(roster.teamId), roster])
-  );
-  frozenRosters.forEach((roster) => {
-    rosterByTeamId.set(Number(roster.teamId), roster);
-  });
-
-  updatedTournamentWithRoster = {
-    ...updatedTournament,
-    teamRosters: Array.from(rosterByTeamId.values()),
-  };
-}
-
-const tournamentToSave: Tournament = {
-  ...updatedTournamentWithRoster,
-  eloApplied: isFinished ? true : Boolean(updatedTournament.eloApplied),
-};
-
-    const previousTournaments = tournaments;
-    const previousPlayers = players;
-
-    const nextTournaments = tournaments.map((tournament) =>
-      tournament.id === selectedTournamentId ? tournamentToSave : tournament
-    );
-
-    const safeTournaments = nextTournaments.map((tournament) => ({
-      ...tournament,
-      imageUrl:
-        typeof tournament.imageUrl === "string" &&
-        tournament.imageUrl.startsWith("data:")
-          ? ""
-          : tournament.imageUrl || "",
-    }));
-
-    const recalculatedPlayers = recalculateAllPlayersElo(
+    await saveTournamentMutation({
+      confirmedEloWarning,
+      tournamentForm,
+      selectedTournamentId,
+      selectedTournament,
+      tournaments,
       players,
-      safeTournaments
-    );
-    const changedPlayers = recalculatedPlayers.filter((player) => {
-      const previous = players.find((item) => item.id === player.id);
-      return (
-        previous &&
-        (previous.elo !== player.elo || previous.rank !== player.rank)
-      );
+      commonText,
+      isFirebaseConfigured,
+      setTournaments,
+      setPlayers,
+      showToast,
+      writeStorage,
     });
-
-    setTournaments(safeTournaments);
-    writeStorage("tm_tournaments", safeTournaments);
-
-    if (changedPlayers.length > 0) {
-      setPlayers(recalculatedPlayers);
-      writeStorage("tm_players", recalculatedPlayers);
-    }
-
-    try {
-if (isFirebaseConfigured) {
-  const safeTournament =
-    safeTournaments.find((tournament) => tournament.id === tournamentToSave.id) ||
-    tournamentToSave;
-
-  await saveItem("tournaments", safeTournament);
-  if (changedPlayers.length > 0) {
-    await Promise.all(
-      changedPlayers.map((player) => saveItem("players", player))
-    );
-  }
-}
-      showToast(commonText.tournamentSaved);
-    } catch (error) {
-      console.error("Failed to save tournament:", error);
-      if (isFirebaseConfigured) {
-        setTournaments(previousTournaments);
-        writeStorage("tm_tournaments", previousTournaments);
-
-        if (changedPlayers.length > 0) {
-          setPlayers(previousPlayers);
-          writeStorage("tm_players", previousPlayers);
-        }
-      }
-      showToast("Failed to save tournament", "danger");
-    }
   };
 
   const addTournament = async () => {
@@ -2084,111 +1852,17 @@ if (isFirebaseConfigured) {
   };
 
 const saveMatch = async () => {
-  if (!matchForm.game.trim()) {
-    showToast("Match game is required", "danger");
-    return;
-  }
-
-  if (
-    (matchForm.matchType === "player" &&
-      (!Number(matchForm.player1) || !Number(matchForm.player2))) ||
-    (matchForm.matchType === "team" &&
-      (!Number(matchForm.team1) || !Number(matchForm.team2)))
-  ) {
-    showToast("Both match participants are required", "danger");
-    return;
-  }
-
-  const baseMatch: Match =
-    selectedMatch || {
-      id: getNextId(matches),
-      game: "",
-      matchType: matchForm.matchType,
-      player1: 0,
-      player2: 0,
-      team1: 0,
-      team2: 0,
-      score: "",
-      winnerId: 0,
-      winnerTeamId: 0,
-      tournamentId: Number(matchForm.tournamentId || 0),
-      date: "",
-      status: "scheduled",
-      round: "",
-      bestOf: 1,
-      notes: "",
-      eloApplied: false,
-      stage: "group",
-      groupName: "",
-roundLabel: "",
-    };
-
-  const updatedMatch: Match = {
-    ...baseMatch,
-    order:
-      typeof baseMatch.order === "number"
-        ? baseMatch.order
-        : getFallbackMatchOrder(matches, Number(matchForm.tournamentId || 0)),
-    seriesId: matchForm.seriesId || "",
-    nextSeriesId: matchForm.nextSeriesId || "",
-    game: matchForm.game,
-    matchType: matchForm.matchType,
-    player1: Number(matchForm.player1),
-    player2: Number(matchForm.player2),
-    team1: Number(matchForm.team1),
-    team2: Number(matchForm.team2),
-    score: matchForm.score,
-    winnerId: Number(matchForm.winnerId),
-    winnerTeamId: Number(matchForm.winnerTeamId),
-    tournamentId: Number(matchForm.tournamentId),
-    date: matchForm.date,
-    status: matchForm.status,
-    round: matchForm.roundLabel || matchForm.round,
-    stage: matchForm.stage || "group",
-    groupName: matchForm.stage === "group" ? matchForm.groupName || "" : "",
-    roundLabel: matchForm.roundLabel || "",
-    bestOf: Number(matchForm.bestOf || 1),
-    notes: matchForm.notes,
-    eloApplied: false,
-  };
-
-  const validation = validateMatchWinner(updatedMatch);
-
-  if (!validation.valid) {
-    console.error(validation.logMessage);
-    showToast(commonText.invalidMatchWinner, "danger");
-    return;
-  }
-
-  const progressionResult = progressMatchWinner({
+  await saveMatchMutation({
+    matchForm,
+    selectedMatch,
     matches,
-    currentMatch: updatedMatch,
+    commonText,
+    isFirebaseConfigured,
+    setMatches,
+    setSelectedMatchId,
+    showToast,
+    writeStorage,
   });
-
-  const previousMatches = matches;
-
-  setMatches(progressionResult.matches);
-
-  setSelectedMatchId(updatedMatch.id);
-
-  try {
-    if (isFirebaseConfigured) {
-      await Promise.all(
-        progressionResult.affectedMatches.map((match) =>
-          saveItem("matches", match)
-        )
-      );
-    }
-
-    showToast(commonText.matchSaved);
-  } catch (error) {
-    console.error("Failed to save match:", error);
-    if (isFirebaseConfigured) {
-      setMatches(previousMatches);
-      writeStorage("tm_matches", previousMatches);
-    }
-    showToast(commonText.matchSaveFailed, "danger");
-  }
 };
 
   const addMatch = async (tournamentId = 0) => {
