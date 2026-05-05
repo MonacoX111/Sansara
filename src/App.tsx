@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+﻿import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t } from "./utils/translations";
 import Tabs from "./components/Tabs";
@@ -46,7 +46,8 @@ import {
   handleSpotlightMove,
   handleSpotlightMoveCapture,
 } from "./utils/spotlight";
-import { isFirebaseConfigured } from "./firebase";
+import { isFirebaseConfigured, auth } from "./firebase";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from "firebase/auth";
 import {
   deleteItem,
   deleteItemsBatch,
@@ -641,9 +642,21 @@ useEffect(() => {
     useState<HomeAnnouncementForm>(createEmptyHomeAnnouncementForm());
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
+
+  useEffect(() => {
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setIsAdmin(!!currentUser);
+      });
+      return () => unsubscribe();
+    }
+  }, []);
 const [toast, setToast] = useState<{
   text: string;
   type: "success" | "danger" | "warning";
@@ -1126,20 +1139,29 @@ tournamentId:
     navigate(nextTournamentId > 0 ? `/tournaments/${nextTournamentId}` : "/tournaments");
   };
 
-  const handleAdminLogin = () => {
-    if (ADMIN_PASSWORD && adminPassword === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      navigateToTab("admin");
-      setShowAdminLogin(false);
-      setAdminPassword("");
-      setAdminError("");
+  const handleAdminLogin = async () => {
+    if (!auth) {
+      setAdminError("Firebase Auth is not configured");
       return;
     }
-
-    setAdminError(t[lang].adminLogin.wrongPassword);
+    
+    try {
+      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      navigateToTab("admin");
+      setShowAdminLogin(false);
+      setAdminEmail("");
+      setAdminPassword("");
+      setAdminError("");
+} catch (error) {
+  console.error("Firebase admin login failed:", error);
+  setAdminError(t[lang].adminLogin.wrongPassword);
+}
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+    }
     setIsAdmin(false);
     navigateToTab("players");
   };
@@ -2466,6 +2488,7 @@ lang={lang}
           className="admin-overlay"
             onClick={() => {
               setShowAdminLogin(false);
+              setAdminEmail("");
               setAdminPassword("");
               setAdminError("");
             }}
@@ -2474,6 +2497,19 @@ lang={lang}
               <h2 className="panel-title">{t[lang].adminLogin.title}</h2>
 
               <div className="form-col">
+                <input
+                  type="email"
+                  className="input"
+                  placeholder="Email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAdminLogin();
+                    }
+                  }}
+                  autoFocus
+                />
                 <input
                   type="password"
                   className="input"
@@ -2485,7 +2521,6 @@ lang={lang}
                       handleAdminLogin();
                     }
                   }}
-                  autoFocus
                 />
 
                 {adminError ? (
@@ -2500,6 +2535,7 @@ lang={lang}
     className="secondary-btn"
     onClick={() => {
       setShowAdminLogin(false);
+      setAdminEmail("");
       setAdminPassword("");
       setAdminError("");
     }}

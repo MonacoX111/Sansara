@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
+import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyQcF7RvpL3xchZpJAnzgCrDbR1Z0f11U8",
+  apiKey: "AIzaSyCQFn7RvpL3xchZPjAnzgCrDbR1ZOf11U8",
   authDomain: "sansara-history.firebaseapp.com",
   projectId: "sansara-history",
   storageBucket: "sansara-history.appspot.com",
@@ -16,11 +17,13 @@ export const isFirebaseConfigured =
 
 let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
+let auth: Auth | null = null;
 
 if (isFirebaseConfigured) {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   storage = getStorage(app);
+  auth = getAuth(app);
 }
 
-export { db, storage };
+export { db, storage, auth };
