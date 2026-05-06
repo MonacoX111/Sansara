@@ -119,6 +119,7 @@ type Props = {
   homeAnnouncementForm: HomeAnnouncementForm;
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
   saveHomeAnnouncement: () => void | Promise<void>;
+  recalculatePlayerEloFromTournaments: () => void | Promise<void>;
 
   selectedPlayerId: number;
   setSelectedPlayerId: (id: number) => void;
@@ -248,6 +249,7 @@ export default function AdminTab({
   homeAnnouncementForm,
   setHomeAnnouncementForm,
   saveHomeAnnouncement,
+  recalculatePlayerEloFromTournaments,
   selectedPlayerId,
   setSelectedPlayerId,
   selectedTeamId,
@@ -816,6 +818,10 @@ const adminGeneralProps = {
   saveHomeAnnouncement: () =>
     runAdminAction("save-home-announcement", async () => {
       await saveHomeAnnouncement();
+    }),
+  recalculatePlayerEloFromTournaments: () =>
+    runAdminAction("recalculate-player-elo", async () => {
+      await recalculatePlayerEloFromTournaments();
     }),
   isAdminActionLoading,
   handleHomeAnnouncementImageChange,

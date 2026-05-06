@@ -100,9 +100,7 @@ export const recalculateAllPlayersElo = (
   const reset = players.map((player) => {
     const base =
       typeof player.baseElo === "number" ? player.baseElo : BASE_ELO;
-    const adjustment =
-      typeof player.eloAdjustment === "number" ? player.eloAdjustment : 0;
-    return { ...player, elo: base + adjustment };
+    return { ...player, elo: base };
   });
 
   const accumulated = tournaments

@@ -1523,6 +1523,55 @@ tournamentId: safeTournamentId,
       showToast("Failed to save announcement", "danger");
     }
   };
+
+  const recalculatePlayerEloFromTournaments = async () => {
+    const confirmed =
+      typeof window === "undefined"
+        ? true
+        : window.confirm(text.admin.recalculateEloConfirm);
+
+    if (!confirmed) return;
+
+    const processedTournaments = tournaments.filter(
+      (tournament) =>
+        tournament.status === "completed" || tournament.status === "finished"
+    );
+    const previousPlayers = players;
+    const recalculatedPlayers = recalculateAllPlayersElo(players, tournaments);
+    const changedPlayers = recalculatedPlayers.filter((player) => {
+      const previous = players.find((item) => item.id === player.id);
+      return (
+        previous &&
+        (previous.elo !== player.elo || previous.rank !== player.rank)
+      );
+    });
+
+    setPlayers(recalculatedPlayers);
+    writeStorage("tm_players", recalculatedPlayers);
+
+    try {
+      if (isFirebaseConfigured && changedPlayers.length > 0) {
+        await commitBatchOperations(
+          changedPlayers.map((player) => ({
+            type: "set" as const,
+            collectionName: "players",
+            item: player,
+          }))
+        );
+      }
+
+      showToast(
+        `${text.admin.recalculateEloSuccess} ${text.admin.recalculateEloSummary
+          .replace("{tournaments}", String(processedTournaments.length))
+          .replace("{players}", String(changedPlayers.length))}`
+      );
+    } catch (error) {
+      console.error("Failed to recalculate player ELO:", error);
+      setPlayers(previousPlayers);
+      writeStorage("tm_players", previousPlayers);
+      showToast(text.admin.recalculateEloFailed, "danger");
+    }
+  };
   const handleTeamLogoUpload = (_event: ChangeEvent<HTMLInputElement>) => {
     alert(
       text.admin.logoUploadDisabled
@@ -3088,6 +3137,9 @@ const deleteAchievement = async (achievementId: number) => {
             homeAnnouncementForm={homeAnnouncementForm}
             setHomeAnnouncementForm={setHomeAnnouncementForm}
             saveHomeAnnouncement={saveHomeAnnouncement}
+            recalculatePlayerEloFromTournaments={
+              recalculatePlayerEloFromTournaments
+            }
             selectedPlayerId={selectedPlayerId}
             setSelectedPlayerId={setSelectedPlayerId}
             selectedTeamId={selectedTeamId}

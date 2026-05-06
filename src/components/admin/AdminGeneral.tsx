@@ -33,6 +33,7 @@ type Props = {
   homeAnnouncementForm: HomeAnnouncementForm;
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
   saveHomeAnnouncement: () => void | Promise<void>;
+  recalculatePlayerEloFromTournaments: () => void | Promise<void>;
   isAdminActionLoading: (key: string) => boolean;
   handleHomeAnnouncementImageChange: (
     event: ChangeEvent<HTMLInputElement>
@@ -50,9 +51,15 @@ export default function AdminGeneral(props: Props) {
     homeAnnouncementForm,
     setHomeAnnouncementForm,
     saveHomeAnnouncement,
+    recalculatePlayerEloFromTournaments,
     isAdminActionLoading,
     handleHomeAnnouncementImageChange,
   } = props;
+
+  const completedTournamentCount = tournaments.filter(
+    (tournament) =>
+      tournament.status === "completed" || tournament.status === "finished"
+  ).length;
 
   return (
       <div id="admin-section-general" className="two-col reverse">
@@ -274,6 +281,39 @@ export default function AdminGeneral(props: Props) {
                   ? commonText.saving
                   : adminText.saveHomeAnnouncement}
               </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <h2 className="panel-title">{adminText.eloTools}</h2>
+
+          <div className="form-col">
+            <div className="field-block simple-card">
+              <label className="field-label">
+                {adminText.recalculateEloTitle}
+              </label>
+              <div className="muted small">
+                {adminText.recalculateEloDescription}
+              </div>
+              <div className="muted small">
+                {adminText.recalculateEloScope
+                  .replace("{tournaments}", String(completedTournamentCount))
+                  .replace("{players}", String(players.length))}
+              </div>
+
+              <div className="btn-row">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  disabled={isAdminActionLoading("recalculate-player-elo")}
+                  onClick={recalculatePlayerEloFromTournaments}
+                >
+                  {isAdminActionLoading("recalculate-player-elo")
+                    ? commonText.updating
+                    : adminText.recalculateEloButton}
+                </button>
+              </div>
             </div>
           </div>
         </div>

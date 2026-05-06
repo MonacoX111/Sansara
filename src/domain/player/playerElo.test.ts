@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { Player, Tournament } from "../../types";
 import { getPlacementEloBonus } from "./playerEloHistory";
-import { applyTournamentPlacementElo, BASE_ELO } from "./playerElo";
+import {
+  applyTournamentPlacementElo,
+  BASE_ELO,
+  recalculateAllPlayersElo,
+} from "./playerElo";
 
 const makePlayer = (overrides: Partial<Player>): Player => ({
   id: 1,
@@ -134,5 +138,98 @@ describe("applyTournamentPlacementElo", () => {
 
     expect(result.applied).toBe(false);
     expect(result.players.find((p) => p.id === 1)?.elo).toBe(1000);
+  });
+});
+
+describe("recalculateAllPlayersElo", () => {
+  it("resets current ELO before rebuilding from completed tournament placements", () => {
+    const players = [
+      makePlayer({ id: 1, nickname: "alpha", elo: 2222 }),
+      makePlayer({ id: 2, nickname: "beta", elo: 900 }),
+      makePlayer({ id: 3, nickname: "gamma", elo: 1300 }),
+      makePlayer({ id: 4, nickname: "delta", elo: 1700 }),
+    ];
+    const tournaments = [
+      makeTournament({
+        id: 1,
+        status: "completed",
+        placements: [
+          { place: 1, playerId: 1 },
+          { place: 2, playerId: 2 },
+          { place: 3, playerId: 3 },
+          { place: 4, playerId: 4 },
+        ],
+      }),
+      makeTournament({
+        id: 2,
+        status: "draft",
+        placements: [{ place: 1, playerId: 4 }],
+      }),
+    ];
+
+    const result = recalculateAllPlayersElo(players, tournaments);
+
+    expect(result.find((p) => p.id === 1)?.elo).toBe(BASE_ELO + 200);
+    expect(result.find((p) => p.id === 2)?.elo).toBe(BASE_ELO + 100);
+    expect(result.find((p) => p.id === 3)?.elo).toBe(BASE_ELO + 50);
+    expect(result.find((p) => p.id === 4)?.elo).toBe(BASE_ELO);
+  });
+
+  it("uses team roster snapshots when present", () => {
+    const players = [
+      makePlayer({ id: 1, nickname: "alpha", teamId: 10 }),
+      makePlayer({ id: 2, nickname: "beta", teamId: 20 }),
+      makePlayer({ id: 3, nickname: "gamma", teamId: 10 }),
+    ];
+    const tournament = makeTournament({
+      participantType: "team",
+      participantIds: [10],
+      placements: [{ place: 1, teamId: 10 }],
+      teamRosters: [{ teamId: 10, playerIds: [2] }],
+    });
+
+    const result = recalculateAllPlayersElo(players, [tournament]);
+
+    expect(result.find((p) => p.id === 1)?.elo).toBe(BASE_ELO);
+    expect(result.find((p) => p.id === 2)?.elo).toBe(BASE_ELO + 200);
+    expect(result.find((p) => p.id === 3)?.elo).toBe(BASE_ELO);
+  });
+
+  it("falls back to current team players only when teamRosters are absent", () => {
+    const players = [
+      makePlayer({ id: 1, nickname: "alpha", teamId: 10 }),
+      makePlayer({ id: 2, nickname: "beta", teamId: 10 }),
+      makePlayer({ id: 3, nickname: "gamma", teamId: 20 }),
+    ];
+    const tournament = makeTournament({
+      participantType: "team",
+      participantIds: [10],
+      placements: [{ place: 1, teamId: 10 }],
+      teamRosters: undefined,
+    });
+
+    const result = recalculateAllPlayersElo(players, [tournament]);
+
+    expect(result.find((p) => p.id === 1)?.elo).toBe(BASE_ELO + 200);
+    expect(result.find((p) => p.id === 2)?.elo).toBe(BASE_ELO + 200);
+    expect(result.find((p) => p.id === 3)?.elo).toBe(BASE_ELO);
+  });
+
+  it("does not fall back when a roster snapshot exists but is empty", () => {
+    const players = [
+      makePlayer({ id: 1, nickname: "alpha", teamId: 10 }),
+      makePlayer({ id: 2, nickname: "beta", teamId: 10 }),
+    ];
+    const tournament = makeTournament({
+      participantType: "team",
+      participantIds: [10],
+      placements: [{ place: 1, teamId: 10 }],
+      teamRosters: [{ teamId: 10, playerIds: [] }],
+    });
+
+    const result = recalculateAllPlayersElo(players, [tournament]);
+
+    expect(result.find((p) => p.id === 1)?.elo).toBe(BASE_ELO);
+    expect(result.find((p) => p.id === 2)?.elo).toBe(BASE_ELO);
   });
 });

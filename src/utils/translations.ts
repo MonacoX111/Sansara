@@ -132,6 +132,19 @@ admin: {
   noLinkedTournament: "No linked tournament",
   bannerImageUrl: "Banner image URL",
   participantsCount: "Participants count",
+  eloTools: "ELO tools",
+  recalculateEloTitle: "Recalculate player ELO",
+  recalculateEloDescription:
+    "Resets player ELO to the base value, then rebuilds tournament ELO from completed tournament placements only.",
+  recalculateEloScope:
+    "Scope: {tournaments} completed tournaments, {players} players.",
+  recalculateEloButton: "Recalculate all ELO",
+  recalculateEloConfirm:
+    "This will recalculate ELO for all players from completed tournaments. Continue?",
+  recalculateEloSuccess: "ELO recalculated successfully.",
+  recalculateEloSummary:
+    "Processed {tournaments} tournaments. Updated {players} players.",
+  recalculateEloFailed: "Failed to recalculate ELO",
 
   transfers: "Transfers",
   addTransfer: "+ Add transfer",
@@ -737,6 +750,19 @@ nav: {
   noLinkedTournament: "Без прив’язаного турніру",
   bannerImageUrl: "URL банера",
   participantsCount: "Кількість учасників",
+  eloTools: "Інструменти ELO",
+  recalculateEloTitle: "Перерахувати ELO гравців",
+  recalculateEloDescription:
+    "Скидає ELO гравців до базового значення, а потім перебудовує турнірний ELO лише з місць у завершених турнірах.",
+  recalculateEloScope:
+    "Обсяг: {tournaments} завершених турнірів, {players} гравців.",
+  recalculateEloButton: "Перерахувати весь ELO",
+  recalculateEloConfirm:
+    "Це перерахує ELO всіх гравців із завершених турнірів. Продовжити?",
+  recalculateEloSuccess: "ELO успішно перераховано.",
+  recalculateEloSummary:
+    "Оброблено турнірів: {tournaments}. Оновлено гравців: {players}.",
+  recalculateEloFailed: "Не вдалося перерахувати ELO",
 
   transfers: "Трансфери",
   addTransfer: "+ Додати трансфер",
