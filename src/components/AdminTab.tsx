@@ -86,6 +86,7 @@ type MatchForm = {
   team2: number;
 
   score: string;
+  maps: string[];
 
   winnerId: number;
   winnerTeamId: number;

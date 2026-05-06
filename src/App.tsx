@@ -134,6 +134,7 @@ type MatchForm = {
   team1: number;
   team2: number;
   score: string;
+  maps: string[];
   winnerId: number;
   winnerTeamId: number;
   tournamentId: number;
@@ -254,6 +255,7 @@ const createEmptyMatchForm = (): MatchForm => ({
   team1: 0,
   team2: 0,
   score: "",
+  maps: [],
   winnerId: 0,
   winnerTeamId: 0,
   tournamentId: 0,
@@ -1240,6 +1242,12 @@ if (isBindPressed) {
       team1: Number(selectedMatch.team1 || 0),
       team2: Number(selectedMatch.team2 || 0),
       score: selectedMatch.score,
+      maps:
+        Array.isArray(selectedMatch.maps) && selectedMatch.maps.length > 0
+          ? selectedMatch.maps
+          : selectedMatch.map
+          ? [selectedMatch.map]
+          : [],
       winnerId: Number(selectedMatch.winnerId || 0),
       winnerTeamId: Number(selectedMatch.winnerTeamId || 0),
       tournamentId: Number(selectedMatch.tournamentId || 0),
@@ -2435,6 +2443,7 @@ const saveMatch = async () => {
       team1: 0,
       team2: 0,
       score: "",
+      maps: [],
       winnerId: 0,
       winnerTeamId: 0,
       order: nextOrder,
@@ -2466,6 +2475,7 @@ bestOf: 1,
       team1: 0,
       team2: 0,
       score: "",
+      maps: [],
       winnerId: 0,
       winnerTeamId: 0,
       tournamentId: selectedTournamentId,

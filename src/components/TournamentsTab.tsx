@@ -13,6 +13,7 @@ import {
   calculateGroupStandings,
   groupMatchesByGroupName,
 } from "../domain/tournament/groupStandings";
+import { getMatchMaps } from "../utils";
 
 type Props = {
   tournaments: Tournament[];
@@ -603,6 +604,8 @@ const renderBracketMatch = (match: Match) => {
     leftImage,
     rightImage,
   } = getMatchPreviewData(match);
+  const matchMaps =
+    selectedTournament?.game === "CS 2" ? getMatchMaps(match) : [];
 
 
   
@@ -633,6 +636,14 @@ return (
       </div>
 
       <div className="bracket-score">{match.score || tournamentText.vs}</div>
+
+      {matchMaps.length > 0 ? (
+        <div className="bracket-map-list">
+          {matchMaps.map((map) => (
+            <span key={`${match.id}-${map}`}>{map}</span>
+          ))}
+        </div>
+      ) : null}
 
       <div className={`bracket-side ${winnerRight ? "winner" : ""}`}>
         <div className="bracket-player">
@@ -717,6 +728,8 @@ className={`bracket-match-card bracket-series-card ${
     match.matchType === "team"
       ? Number(match.team2 || 0)
       : Number(match.player2 || 0);
+  const matchMaps =
+    selectedTournament?.game === "CS 2" ? getMatchMaps(match) : [];
 
   return (
           <div key={match.id} className="bracket-series-game">
@@ -752,6 +765,14 @@ activeParticipantId === leftParticipantId
             <div className="bracket-score">
               {match.score || tournamentText.vs}
             </div>
+
+            {matchMaps.length > 0 ? (
+              <div className="bracket-map-list">
+                {matchMaps.map((map) => (
+                  <span key={`${match.id}-${map}`}>{map}</span>
+                ))}
+              </div>
+            ) : null}
 
 <div
 onMouseEnter={() => {

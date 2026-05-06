@@ -16,6 +16,7 @@ type MatchForm = {
   team1: number;
   team2: number;
   score: string;
+  maps: string[];
   winnerId: number;
   winnerTeamId: number;
   tournamentId: number;
@@ -60,6 +61,14 @@ const getMatchValidationMessage = (
   return messages[issue.code] || issue.message;
 };
 
+const getBestOfMapCount = (bestOf: number) => {
+  const safeBestOf = Number(bestOf || 1);
+  if (safeBestOf >= 7) return 7;
+  if (safeBestOf >= 5) return 5;
+  if (safeBestOf >= 3) return 3;
+  return 1;
+};
+
 type SaveMatchMutationParams = {
   matchForm: MatchForm;
   selectedMatch: Match | null;
@@ -95,6 +104,7 @@ export const saveMatchMutation = async ({
       team1: 0,
       team2: 0,
       score: "",
+      maps: [],
       winnerId: 0,
       winnerTeamId: 0,
       tournamentId: Number(matchForm.tournamentId || 0),
@@ -109,7 +119,7 @@ export const saveMatchMutation = async ({
       roundLabel: "",
     };
 
-  const updatedMatch: Match = {
+  let updatedMatch: Match = {
     ...baseMatch,
     order:
       typeof baseMatch.order === "number"
@@ -124,6 +134,10 @@ export const saveMatchMutation = async ({
     team1: Number(matchForm.team1),
     team2: Number(matchForm.team2),
     score: matchForm.score,
+    maps: (matchForm.maps || [])
+      .slice(0, getBestOfMapCount(matchForm.bestOf))
+      .map((map) => map.trim())
+      .filter((map, index, items) => map && items.indexOf(map) === index),
     winnerId: Number(matchForm.winnerId),
     winnerTeamId: Number(matchForm.winnerTeamId),
     tournamentId: Number(matchForm.tournamentId),
@@ -142,6 +156,10 @@ export const saveMatchMutation = async ({
     tournaments.find(
       (tournament) => tournament.id === Number(updatedMatch.tournamentId || 0)
     ) || null;
+  if (matchTournament?.game !== "CS 2") {
+    updatedMatch = { ...updatedMatch, maps: [] };
+  }
+
   const validation = validateMatchConsistency({
     match: updatedMatch,
     tournament: matchTournament,

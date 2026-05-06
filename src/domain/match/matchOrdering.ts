@@ -1,5 +1,17 @@
 import { Match } from "../../types";
 
+const normalizeMatchMaps = (match: Match): string[] => {
+  const maps = Array.isArray(match.maps)
+    ? match.maps
+    : typeof match.map === "string" && match.map.trim()
+    ? [match.map]
+    : [];
+
+  return maps
+    .map((map) => String(map || "").trim())
+    .filter((map, index, items) => map && items.indexOf(map) === index);
+};
+
 export type MatchReorderDirection = "up" | "down";
 
 export const normalizeMatches = (items: Match[]): Match[] =>
@@ -7,6 +19,7 @@ export const normalizeMatches = (items: Match[]): Match[] =>
     ...match,
     order: typeof match.order === "number" ? match.order : index,
     score: match.score || "",
+    maps: normalizeMatchMaps(match),
     winnerId: Number(match.winnerId || 0),
     tournamentId: Number(match.tournamentId || 0),
     status: match.status || "scheduled",

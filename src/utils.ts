@@ -1,4 +1,4 @@
-import { Team, Player } from "./types";
+import { Match, Team, Player } from "./types";
 
 export const makeIcon = (
   label: string,
@@ -17,6 +17,18 @@ export const parseList = (value: string): string[] =>
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+
+export const getMatchMaps = (match: Match): string[] => {
+  const maps = Array.isArray(match.maps)
+    ? match.maps
+    : typeof match.map === "string" && match.map.trim()
+    ? [match.map]
+    : [];
+
+  return maps
+    .map((map) => String(map || "").trim())
+    .filter((map, index, items) => map && items.indexOf(map) === index);
+};
 
 export const getNextId = (items: { id: number }[]): number =>
   items.length ? Math.max(...items.map((item) => item.id)) + 1 : 1;

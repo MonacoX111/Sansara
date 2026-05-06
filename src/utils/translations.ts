@@ -222,6 +222,9 @@ admin: {
   seriesId: "Series ID",
   nextSeries: "Next series",
   bestOf: "Best of",
+  cs2Maps: "CS 2 maps",
+  cs2Map: "Map {number}",
+  cs2MapPlaceholder: "Select map",
   eloApplied: "ELO applied",
   notes: "Notes",
 
@@ -888,6 +891,9 @@ nav: {
   seriesId: "ID серії",
   nextSeries: "Наступна серія",
   bestOf: "Best of",
+  cs2Maps: "Карти CS 2",
+  cs2Map: "Карта {number}",
+  cs2MapPlaceholder: "Оберіть карту",
   eloApplied: "ELO застосовано",
   notes: "Нотатки",
 

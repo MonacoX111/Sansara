@@ -149,6 +149,8 @@ export type Match = {
   winnerTeamId?: number;
 
   score: string;
+  map?: string;
+  maps?: string[];
 
   // прив’язка
   tournamentId?: number;

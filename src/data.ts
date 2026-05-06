@@ -12,6 +12,21 @@ export const GAME_OPTIONS = ["CS 2", "Dota 2", "FC 26", "Clash Royale"] as const
 
 export type GameTitle = (typeof GAME_OPTIONS)[number];
 
+export const CS2_MAP_POOL = [
+  "Ancient",
+  "Anubis",
+  "Cache",
+  "Dust2",
+  "Inferno",
+  "Mirage",
+  "Nuke",
+  "Overpass",
+  "Train",
+  "Vertigo",
+] as const;
+
+export type Cs2MapName = (typeof CS2_MAP_POOL)[number];
+
 export const gamesList: GameItem[] = [
   { id: "cs2", name: "CS 2", icon: makeIcon("CS2") },
   { id: "dota2", name: "Dota 2", icon: makeIcon("D2") },

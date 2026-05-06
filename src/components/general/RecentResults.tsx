@@ -1,6 +1,7 @@
 import type { MouseEvent } from "react";
 import { Match, Player, Team, Tournament } from "../../types";
 import { Lang, t } from "../../utils/translations";
+import { getMatchMaps } from "../../utils";
 
 type Props = {
   matches: Match[];
@@ -88,6 +89,8 @@ export default function RecentResults({
               const winnerRight = isTeamMatch
                 ? match.winnerTeamId === match.team2
                 : match.winnerId === match.player2;
+              const matchMaps =
+                tournament?.game === "CS 2" ? getMatchMaps(match) : [];
 
               return (
                 <div
@@ -163,6 +166,14 @@ export default function RecentResults({
                       {match.date || commonText.tbd}
                     </span>
                   </div>
+
+                  {matchMaps.length > 0 ? (
+                    <div className="match-map-list">
+                      {matchMaps.map((map) => (
+                        <span key={`${match.id}-${map}`}>{map}</span>
+                      ))}
+                    </div>
+                  ) : null}
 
                   <div className="result-tournament">
                     {tournament?.title || generalText.noTournament}

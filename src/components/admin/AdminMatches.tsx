@@ -12,7 +12,7 @@ import {
   Lang,
   formatTournamentLabel as formatStoredTournamentLabel,
 } from "../../utils/translations";
-import { GAME_OPTIONS } from "../../data";
+import { CS2_MAP_POOL, GAME_OPTIONS } from "../../data";
 
 const matchStatusOptions: MatchStatus[] = [
   "scheduled",
@@ -34,6 +34,14 @@ const getGameOptions = (currentGame: string) => {
   return options;
 };
 
+const getBestOfMapCount = (bestOf: number) => {
+  const safeBestOf = Number(bestOf || 1);
+  if (safeBestOf >= 7) return 7;
+  if (safeBestOf >= 5) return 5;
+  if (safeBestOf >= 3) return 3;
+  return 1;
+};
+
 type MatchForm = {
   game: string;
   matchType: Extract<ParticipantType, "player" | "team">;
@@ -42,6 +50,7 @@ type MatchForm = {
   team1: number;
   team2: number;
   score: string;
+  maps: string[];
   winnerId: number;
   winnerTeamId: number;
   tournamentId: number;
@@ -145,6 +154,11 @@ export default function AdminMatches(props: Props) {
     getTeamName,
     getTournamentName,
   } = props;
+  const matchTournament =
+    tournaments.find((tournament) => tournament.id === matchForm.tournamentId) ||
+    selectedMatchTournament;
+  const isCs2Tournament = matchTournament?.game === "CS 2";
+  const mapFieldCount = getBestOfMapCount(matchForm.bestOf);
 
   return (
       <div id="admin-section-matches" className="two-col">
@@ -182,6 +196,7 @@ setMatchForm({
   seriesId: "",
   nextSeriesId: "",
 game: nextTournament?.game || "",
+maps: [],
                   matchType:
                     nextTournament?.participantType === "team"
                       ? "team"
@@ -665,6 +680,58 @@ game: nextTournament?.game || "",
                 }
               />
             </div>
+
+            {isCs2Tournament ? (
+              <div className="field-block">
+                <label className="field-label">{adminText.cs2Maps || "CS 2 maps"}</label>
+                <div className="form-grid two">
+                  {Array.from({ length: mapFieldCount }, (_, index) => {
+                    const currentMap = matchForm.maps[index] || "";
+                    const mapOptions = [
+                      ...(currentMap &&
+                      !(CS2_MAP_POOL as readonly string[]).includes(currentMap)
+                        ? [{ value: currentMap, label: currentMap }]
+                        : []),
+                      ...CS2_MAP_POOL.map((map) => ({
+                        value: map,
+                        label: map,
+                      })),
+                    ];
+
+                    return (
+                      <div className="field-block" key={`cs2-map-${index}`}>
+                        <label className="field-label">
+                          {(adminText.cs2Map || "Map").replace(
+                            "{number}",
+                            String(index + 1)
+                          )}
+                        </label>
+                        <PremiumSelect
+                          value={currentMap}
+                          placeholder={adminText.cs2MapPlaceholder || "Select map"}
+                          options={mapOptions}
+                          onChange={(value) =>
+                            setMatchForm((prev: MatchForm) => {
+                              const nextMaps = [...(prev.maps || [])];
+                              nextMaps[index] =
+                                String(value) === "0" ? "" : String(value);
+
+                              return {
+                                ...prev,
+                                maps: nextMaps
+                                  .slice(0, mapFieldCount)
+                                  .map((map) => map.trim())
+                                  .filter(Boolean),
+                              };
+                            })
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
 
             <div className="field-block">
               <label className="field-label">{adminText.notes}</label>
