@@ -9,6 +9,10 @@ import {
 } from "react";
 import { toPng } from "html-to-image";
 import { Match, Player, Team, Tournament } from "../../types";
+import {
+  calculateGroupStandings,
+  groupMatchesByGroupName,
+} from "../../domain/tournament/groupStandings";
 
 type SelectValue = number | string;
 
@@ -393,12 +397,6 @@ function initials(value: string) {
     .toUpperCase();
 }
 
-function parseScore(score: string) {
-  const numbers = score.match(/\d+/g)?.map(Number) || [];
-  if (numbers.length < 2) return null;
-  return { a: numbers[0], b: numbers[1] };
-}
-
 function formatDateLabel(value: string, fallback: string) {
   if (!value) return fallback;
   const date = new Date(value);
@@ -489,6 +487,82 @@ export default function AdminMediaCenter({
 
   const sideA = entityMode === "team" ? selectedTeam1 : selectedPlayer1;
   const sideB = entityMode === "team" ? selectedTeam2 : selectedPlayer2;
+
+  // === AUTOFILL DERIVATIONS ===
+  // Real match/tournament data is the source of truth. Every field below is a
+  // fallback that kicks in only when the admin has not typed a manual override.
+  const tournamentFinalMatch = useMemo(
+    () =>
+      selectedTournament
+        ? matches.find(
+            (match) =>
+              Number(match.tournamentId) === selectedTournament.id &&
+              match.stage === "final"
+          ) || null
+        : null,
+    [matches, selectedTournament]
+  );
+
+  // MVP resolution: draft.mvpId > tournament.mvpId when tournament has one.
+  // This lets a completed tournament's MVP flow into Match Result / MVP Card /
+  // Champion Poster templates automatically.
+  const resolvedMvpPlayer = useMemo(() => {
+    if (selectedMvp) return selectedMvp;
+    const tournamentMvpId = selectedTournament?.mvpId;
+    if (tournamentMvpId) {
+      return players.find((player) => player.id === tournamentMvpId) || null;
+    }
+    return null;
+  }, [players, selectedMvp, selectedTournament]);
+
+  // MVP card: if the admin has not picked a player but the tournament has an
+  // MVP, surface that player.
+  const mvpCardPlayer = selectedPlayer || resolvedMvpPlayer;
+
+  // When rendering MVP card, derive the player's current team if a team has
+  // not been manually chosen.
+  const mvpCardTeam =
+    selectedTeam ||
+    (mvpCardPlayer?.teamId
+      ? teams.find((team) => team.id === mvpCardPlayer.teamId) || null
+      : null);
+
+  // Match winner side (used to highlight winner on Match Result).
+  const matchWinnerId =
+    selectedMatch?.winnerTeamId || selectedMatch?.winnerId || 0;
+  const sideAWinner =
+    !!matchWinnerId &&
+    (matchWinnerId === selectedMatch?.team1 ||
+      matchWinnerId === selectedMatch?.player1);
+  const sideBWinner =
+    !!matchWinnerId &&
+    (matchWinnerId === selectedMatch?.team2 ||
+      matchWinnerId === selectedMatch?.player2);
+
+  // Auto BO{n} from match.bestOf, then tournament.format, then "BO3".
+  const autoFormat =
+    (selectedMatch?.bestOf ? `BO${selectedMatch.bestOf}` : "") ||
+    selectedTournament?.format ||
+    "BO3";
+
+  // Match Result map: join Match.maps when multiple, fall back to Match.map.
+  const autoMap =
+    selectedMatch?.maps && selectedMatch.maps.length > 0
+      ? selectedMatch.maps.join(" \u2022 ")
+      : selectedMatch?.map || "";
+
+  const autoScore = selectedMatch?.score || "";
+  const autoDate = selectedMatch?.date || selectedTournament?.date || "";
+  const autoStage =
+    selectedMatch?.roundLabel ||
+    selectedMatch?.groupName ||
+    selectedMatch?.round ||
+    "";
+  const autoFinalScore = tournamentFinalMatch?.score || "";
+  const autoPrize = selectedTournament?.prize || "";
+  // Is the selected match already completed? (used to decide whether to show
+  // TBD placeholders on Match Result.)
+  const isMatchCompleted = selectedMatch?.status === "completed";
 
   const themeTeamSource =
     selectedTeam || selectedTeam1 || selectedTeam2 || null;
@@ -599,9 +673,9 @@ export default function AdminMediaCenter({
     selectedMatch?.groupName ||
     selectedMatch?.round ||
     adminText.mediaStagePlaceholder;
-  const format = draft.format || selectedTournament?.format || "BO3";
-  const score = draft.score || selectedMatch?.score || "2:1";
-  const dateTime = draft.dateTime || selectedMatch?.date || selectedTournament?.date || "";
+  const format = draft.format || autoFormat;
+  const score = draft.score || autoScore || (isMatchCompleted ? "" : "TBD");
+  const dateTime = draft.dateTime || autoDate;
   const dateLabel = formatDateLabel(dateTime, adminText.mediaDatePlaceholder);
   const groupName =
     draft.groupName ||
@@ -625,55 +699,43 @@ export default function AdminMediaCenter({
       label: group.name,
     })) || [];
 
+  // Group standings: reuse the public-tournament helper so the studio mirrors
+  // the live standings table pixel-for-pixel (points, MP, wins, round diff).
   const standingsRows = useMemo(() => {
     const tournament = selectedTournament;
     if (!tournament) return [];
 
-    const group = tournament.groups?.find((item) => item.name === groupName);
-    const participantIds =
-      group?.participantIds?.length ? group.participantIds : tournament.participantIds || [];
-    const rows = participantIds.map((participantId) => {
-      const participant =
-        tournament.participantType === "team"
-          ? teams.find((team) => team.id === participantId)
-          : players.find((player) => player.id === participantId);
-      const participantMatches = matches.filter((match) => {
-        if (match.tournamentId !== tournament.id || match.status !== "completed") return false;
-        if (tournament.participantType === "team") {
-          return match.team1 === participantId || match.team2 === participantId;
-        }
-        return match.player1 === participantId || match.player2 === participantId;
-      });
+    const groupStageMatches = matches.filter(
+      (match) =>
+        Number(match.tournamentId) === tournament.id &&
+        (match.stage === "group" || !match.stage)
+    );
 
-      let wins = 0;
-      let roundDiff = 0;
-      participantMatches.forEach((match) => {
-        if (
-          match.winnerId === participantId ||
-          match.winnerTeamId === participantId
-        ) {
-          wins += 1;
-        }
+    const grouped = groupMatchesByGroupName(
+      groupStageMatches,
+      tournament.groups
+    );
 
-        const parsed = parseScore(match.score);
-        if (!parsed) return;
-        const isFirstSide = match.team1 === participantId || match.player1 === participantId;
-        roundDiff += isFirstSide ? parsed.a - parsed.b : parsed.b - parsed.a;
-      });
-
-      return {
-        id: participantId,
-        name: participant?.name || participant?.nickname || adminText.unknown,
-        points: wins * 3,
-        played: participantMatches.length,
-        wins,
-        roundDiff,
-      };
+    const standings = calculateGroupStandings({
+      groupedMatches: grouped,
+      tournament,
+      players,
+      teams,
     });
 
-    return rows
-      .sort((a, b) => b.points - a.points || b.roundDiff - a.roundDiff)
-      .slice(0, 6);
+    const activeGroup =
+      (groupName && standings[groupName]) ||
+      standings[Object.keys(standings)[0] || ""] ||
+      [];
+
+    return activeGroup.slice(0, 6).map((row) => ({
+      id: row.id,
+      name: row.name || adminText.unknown,
+      points: row.points,
+      played: row.played,
+      wins: row.wins,
+      roundDiff: row.scoreFor - row.scoreAgainst,
+    }));
   }, [adminText.unknown, groupName, matches, players, selectedTournament, teams]);
 
   const updateDraft = (updates: Partial<DraftState>) =>
@@ -891,7 +953,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.dateTime}
-              placeholder={adminText.mediaDatePlaceholder}
+              placeholder={autoDate || adminText.mediaDatePlaceholder}
               onChange={handleTextChange("dateTime")}
             />
           </div>
@@ -900,7 +962,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.format}
-              placeholder="BO3"
+              placeholder={autoFormat}
               onChange={handleTextChange("format")}
             />
           </div>
@@ -914,7 +976,7 @@ export default function AdminMediaCenter({
           <input
             className="input"
             value={draft.stage}
-            placeholder={adminText.mediaStagePlaceholder}
+            placeholder={autoStage || adminText.mediaStagePlaceholder}
             onChange={handleTextChange("stage")}
           />
         </div>
@@ -927,7 +989,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.score}
-              placeholder="2:1"
+              placeholder={autoScore || "2:1"}
               onChange={handleTextChange("score")}
             />
           </div>
@@ -936,7 +998,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.map}
-              placeholder="Mirage"
+              placeholder={autoMap || "Mirage"}
               onChange={handleTextChange("map")}
             />
           </div>
@@ -985,7 +1047,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.prizePool}
-              placeholder="$1,000"
+              placeholder={autoPrize || "$1,000"}
               onChange={handleTextChange("prizePool")}
             />
           </div>
@@ -994,7 +1056,7 @@ export default function AdminMediaCenter({
             <input
               className="input"
               value={draft.finalScore}
-              placeholder="3:2"
+              placeholder={autoFinalScore || "3:2"}
               onChange={handleTextChange("finalScore")}
             />
           </div>
@@ -1195,10 +1257,10 @@ export default function AdminMediaCenter({
     if (selectedTemplate === "mvpCard") {
       return (
         <div className="media-preview-section media-preview-mvp">
-          {renderLogo(selectedPlayer, "media-mvp-avatar", adminText.unknownPlayer)}
+          {renderLogo(mvpCardPlayer, "media-mvp-avatar", adminText.unknownPlayer)}
           <span className="media-kicker">MVP</span>
-          <h3>{selectedPlayer?.nickname || adminText.mediaPlayerPlaceholder}</h3>
-          <p>{selectedTeam?.name || selectedTournament?.title || title}</p>
+          <h3>{mvpCardPlayer?.nickname || adminText.mediaPlayerPlaceholder}</h3>
+          <p>{mvpCardTeam?.name || selectedTournament?.title || title}</p>
           <strong>
             {draft.highlight || adminText.mediaHighlightPlaceholder}
           </strong>
@@ -1207,57 +1269,100 @@ export default function AdminMediaCenter({
     }
 
     if (selectedTemplate === "championPoster") {
-      const champion =
+      // Auto-detect champion entity from the tournament's winner IDs.
+      const autoChampionTeam =
+        selectedTeam ||
+        (selectedTournament?.winnerTeamId
+          ? teams.find(
+              (team) => team.id === selectedTournament.winnerTeamId
+            ) || null
+          : null);
+      const autoChampionPlayer =
+        selectedPlayer ||
+        (selectedTournament?.winnerId
+          ? players.find(
+              (player) => player.id === selectedTournament.winnerId
+            ) || null
+          : null);
+      const championEntity =
+        entityMode === "team" ? autoChampionTeam : autoChampionPlayer;
+      const championLabel =
         entityMode === "team"
-          ? selectedTeam?.name || selectedTournament?.winnerTeamId
-          : selectedPlayer?.nickname || selectedTournament?.winnerId;
+          ? autoChampionTeam?.name
+          : autoChampionPlayer?.nickname;
 
       return (
         <div className="media-preview-section media-preview-champion">
           <span className="media-kicker">CHAMPIONS</span>
-          <h3>{champion || adminText.mediaChampionPlaceholder}</h3>
+          <h3>{championLabel || adminText.mediaChampionPlaceholder}</h3>
           <p>{title}</p>
           <div className="media-champion-crown">
             {renderLogo(
-              entityMode === "team" ? selectedTeam : selectedPlayer,
+              championEntity,
               "media-champion-logo",
               adminText.mediaChampionPlaceholder
             )}
           </div>
           <div className="media-stat-strip">
-            <span>{draft.prizePool || selectedTournament?.prize || "$1,000"}</span>
-            <span>{draft.finalScore || "3:2"}</span>
-            <span>{selectedMvp?.nickname || "MVP"}</span>
+            <span>{draft.prizePool || autoPrize || "$1,000"}</span>
+            <span>{draft.finalScore || autoFinalScore || "3:2"}</span>
+            <span>{resolvedMvpPlayer?.nickname || "MVP"}</span>
           </div>
         </div>
       );
     }
+
+    // Match Announcement & Match Result share this layout. Winner side is
+    // highlighted only on Match Result (and only if we can detect the winner).
+    const isResult = selectedTemplate === "matchResult";
+    const markWinnerA = isResult && sideAWinner;
+    const markWinnerB = isResult && sideBWinner;
+    const resultMap = draft.map || autoMap;
+    const resultMapLabel = resultMap || (isMatchCompleted ? "" : "Map TBD");
+    const metaMvp =
+      resolvedMvpPlayer?.nickname || (isResult ? "" : "MVP");
 
     return (
       <div className="media-preview-section media-preview-match">
         <span className="media-kicker">{stage}</span>
         <h3>{title}</h3>
         <div className="media-versus">
-          <div className="media-side">
+          <div
+            className={`media-side ${
+              markWinnerA ? "media-side-winner" : ""
+            }`}
+          >
             {renderLogo(sideA, "media-side-logo", adminText.mediaSideOne)}
             <strong>
               {sideA?.name || sideA?.nickname || adminText.mediaSideOne}
             </strong>
+            {markWinnerA ? (
+              <span className="media-side-winner-badge">
+                {adminText.winner || "WIN"}
+              </span>
+            ) : null}
           </div>
-          <div className="media-vs">
-            {selectedTemplate === "matchResult" ? score : "VS"}
-          </div>
-          <div className="media-side">
+          <div className="media-vs">{isResult ? score : "VS"}</div>
+          <div
+            className={`media-side ${
+              markWinnerB ? "media-side-winner" : ""
+            }`}
+          >
             {renderLogo(sideB, "media-side-logo", adminText.mediaSideTwo)}
             <strong>
               {sideB?.name || sideB?.nickname || adminText.mediaSideTwo}
             </strong>
+            {markWinnerB ? (
+              <span className="media-side-winner-badge">
+                {adminText.winner || "WIN"}
+              </span>
+            ) : null}
           </div>
         </div>
         <div className="media-match-meta">
-          <span>{selectedTemplate === "matchResult" ? draft.map || "Map TBD" : dateLabel}</span>
+          <span>{isResult ? resultMapLabel : dateLabel}</span>
           <span>{format}</span>
-          <span>{selectedMvp?.nickname || "MVP"}</span>
+          {metaMvp ? <span>{metaMvp}</span> : null}
         </div>
       </div>
     );

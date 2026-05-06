@@ -1249,6 +1249,7 @@
   justify-items: center;
   gap: 12px;
   min-width: 0;
+  position: relative;
 }
 
 .media-side strong {
@@ -1257,6 +1258,37 @@
   text-align: center;
   text-transform: uppercase;
   overflow-wrap: break-word;
+}
+
+/* Match Result winner highlight — autofilled from match.winnerId/winnerTeamId */
+.media-side-winner strong {
+  color: #fff;
+}
+
+.media-side-winner .media-side-logo {
+  border-color: rgba(var(--studio-primary-rgb), 0.75);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 0 2px rgba(var(--studio-primary-rgb), 0.45),
+    0 0 30px rgba(var(--studio-primary-rgb), 0.45);
+}
+
+.media-side-winner-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--studio-primary-rgb), 0.95),
+      rgba(var(--studio-accent-rgb), 0.85)
+    );
+  box-shadow: 0 0 14px rgba(var(--studio-primary-rgb), 0.55);
+  text-transform: uppercase;
 }
 
 .media-side-logo,
