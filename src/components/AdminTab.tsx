@@ -122,6 +122,10 @@ type Props = {
   setHomeAnnouncementForm: Dispatch<SetStateAction<HomeAnnouncementForm>>;
   saveHomeAnnouncement: () => void | Promise<void>;
   recalculatePlayerEloFromTournaments: () => void | Promise<void>;
+  showToast?: (
+    message: string,
+    type?: "success" | "danger" | "warning"
+  ) => void;
 
   selectedPlayerId: number;
   setSelectedPlayerId: (id: number) => void;
@@ -264,6 +268,7 @@ export default function AdminTab({
   setHomeAnnouncementForm,
   saveHomeAnnouncement,
   recalculatePlayerEloFromTournaments,
+  showToast,
   selectedPlayerId,
   setSelectedPlayerId,
   selectedTeamId,
@@ -949,6 +954,7 @@ const adminAchievementsProps = {
             teams={teams}
             tournaments={tournaments}
             matches={matches}
+            showToast={showToast}
           />
         </div>
       </div>

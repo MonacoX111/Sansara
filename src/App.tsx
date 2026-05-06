@@ -3167,6 +3167,7 @@ const deleteAchievement = async (achievementId: number) => {
             recalculatePlayerEloFromTournaments={
               recalculatePlayerEloFromTournaments
             }
+            showToast={showToast}
             selectedPlayerId={selectedPlayerId}
             setSelectedPlayerId={setSelectedPlayerId}
             selectedTeamId={selectedTeamId}

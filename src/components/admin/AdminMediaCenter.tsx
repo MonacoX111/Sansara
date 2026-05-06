@@ -1,4 +1,5 @@
-import { ChangeEvent, ReactElement, useMemo, useState } from "react";
+import { ChangeEvent, ReactElement, useMemo, useRef, useState } from "react";
+import { toPng } from "html-to-image";
 import { Match, Player, Team, Tournament } from "../../types";
 
 type SelectValue = number | string;
@@ -55,6 +56,7 @@ type Props = {
   teams: Team[];
   tournaments: Tournament[];
   matches: Match[];
+  showToast?: (message: string, type?: "success" | "danger" | "warning") => void;
 };
 
 const templates: { id: MediaTemplate; labelKey: string; descriptionKey: string }[] = [
@@ -113,6 +115,15 @@ const initialDraft: DraftState = {
   tournamentTitle: "",
 };
 
+const templateFileNames: Record<MediaTemplate, string> = {
+  matchAnnouncement: "sansara-match-announcement.png",
+  matchResult: "sansara-match-result.png",
+  groupStandings: "sansara-group-standings.png",
+  playoffBracket: "sansara-playoff-bracket.png",
+  mvpCard: "sansara-mvp-card.png",
+  championPoster: "sansara-champion-poster.png",
+};
+
 function initials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "S";
@@ -149,10 +160,14 @@ export default function AdminMediaCenter({
   teams,
   tournaments,
   matches,
+  showToast,
 }: Props) {
   const [selectedTemplate, setSelectedTemplate] =
     useState<MediaTemplate>("matchAnnouncement");
   const [draft, setDraft] = useState<DraftState>(initialDraft);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const previewRef = useRef<HTMLDivElement | null>(null);
 
   const tournamentOptions = tournaments
     .slice()
@@ -328,6 +343,42 @@ export default function AdminMediaCenter({
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       updateDraft({ [key]: event.target.value });
     };
+
+  const handleExport = async () => {
+    const previewNode = previewRef.current;
+    if (!previewNode || isExporting) return;
+
+    setIsExporting(true);
+    setExportError("");
+
+    try {
+      const rect = previewNode.getBoundingClientRect();
+      const pixelRatio = rect.width > 0 ? 1080 / rect.width : 3;
+      const dataUrl = await toPng(previewNode, {
+        cacheBust: true,
+        backgroundColor: "#080a11",
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        pixelRatio,
+      });
+
+      const link = document.createElement("a");
+      link.download = templateFileNames[selectedTemplate];
+      link.href = dataUrl;
+      link.click();
+
+      showToast?.(adminText.mediaExportSuccess || "PNG exported");
+    } catch (error) {
+      console.error("Media export failed:", error);
+      const message =
+        adminText.mediaExportFailed ||
+        "Export failed. Check image URLs and try again.";
+      setExportError(message);
+      showToast?.(message, "danger");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const renderTemplateFields = () => (
     <div className="media-form-grid">
@@ -751,8 +802,15 @@ export default function AdminMediaCenter({
           <h2 className="panel-title">{adminText.mediaCenterTitle}</h2>
           <p className="media-center-subtitle">{adminText.mediaCenterSubtitle}</p>
         </div>
-        <button type="button" className="secondary-btn media-export-btn" disabled>
-          {adminText.mediaExportComingSoon}
+        <button
+          type="button"
+          className="secondary-btn media-export-btn"
+          disabled={isExporting}
+          onClick={handleExport}
+        >
+          {isExporting
+            ? adminText.mediaExporting || commonText.generating
+            : adminText.mediaExportPng || "Export PNG"}
         </button>
       </div>
 
@@ -775,7 +833,10 @@ export default function AdminMediaCenter({
         </aside>
 
         <div className="media-preview-shell">
-          <div className={`media-story-preview media-story-preview-${selectedTemplate}`}>
+          <div
+            ref={previewRef}
+            className={`media-story-preview media-story-preview-${selectedTemplate}`}
+          >
             <div className="media-poster-grid" />
             <div className="media-poster-glow" />
             <div className="media-poster-topline">
@@ -793,7 +854,11 @@ export default function AdminMediaCenter({
         <div className="media-settings-panel">
           <h3>{adminText.mediaSettings}</h3>
           {renderTemplateFields()}
-          <p className="media-settings-note">{commonText.save} / export disabled for v1.</p>
+          <p className="media-settings-note">
+            {adminText.mediaExportLocalOnly ||
+              "Export downloads a local PNG only. Nothing is uploaded."}
+          </p>
+          {exportError ? <div className="admin-error">{exportError}</div> : null}
         </div>
       </div>
     </section>

@@ -309,6 +309,11 @@ admin: {
   mediaCenterSubtitle:
     "Preview premium esports story layouts for matches, standings, brackets, MVPs and champions.",
   mediaExportComingSoon: "Export coming soon",
+  mediaExportPng: "Export PNG",
+  mediaExporting: "Exporting...",
+  mediaExportSuccess: "PNG exported",
+  mediaExportFailed: "Export failed. Check image URLs and try again.",
+  mediaExportLocalOnly: "Export downloads a local PNG only. Nothing is uploaded.",
   mediaTemplates: "Media templates",
   mediaSettings: "Studio settings",
   mediaTemplateMatchAnnouncement: "Match Announcement",
@@ -978,6 +983,11 @@ nav: {
   mediaCenterSubtitle:
     "Preview premium esports story layouts for matches, standings, brackets, MVPs and champions.",
   mediaExportComingSoon: "Export coming soon",
+  mediaExportPng: "Export PNG",
+  mediaExporting: "Exporting...",
+  mediaExportSuccess: "PNG exported",
+  mediaExportFailed: "Export failed. Check image URLs and try again.",
+  mediaExportLocalOnly: "Export downloads a local PNG only. Nothing is uploaded.",
   mediaTemplates: "Media templates",
   mediaSettings: "Studio settings",
   mediaTemplateMatchAnnouncement: "Match Announcement",
