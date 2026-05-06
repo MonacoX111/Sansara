@@ -75,8 +75,7 @@ service cloud.firestore {
     }
 
     match /playerClaims/{docId} {
-      allow read: if false;
-      allow create, update, delete: if isAdmin();
+      allow read, create, update, delete: if isAdmin();
     }
 
     match /{document=**} {
