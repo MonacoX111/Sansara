@@ -24,6 +24,7 @@ import AdminMatches from "./admin/AdminMatches";
 import AdminAchievements from "./admin/AdminAchievements";
 import AdminGeneral from "./admin/AdminGeneral";
 import AdminTransfers from "./admin/AdminTransfers";
+import AdminMediaCenter from "./admin/AdminMediaCenter";
 import PremiumSelect from "./ui/PremiumSelect";
 
 type PlayerForm = {
@@ -311,6 +312,7 @@ reorderMatch,
       matches: adminText.quickMatches,
       achievements: adminText.quickAchievements,
       transfers: adminText.transfers,
+      media: adminText.mediaCenterNav,
     };
 
   const safeAchievementPlayerIds = (achievement: Achievement) =>
@@ -903,6 +905,7 @@ const adminAchievementsProps = {
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-matches")}>{quickNavText.matches}</button>
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-achievements")}>{quickNavText.achievements}</button>
             <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-transfers")}>{quickNavText.transfers}</button>
+            <button type="button" className="admin-quick-nav-btn" onClick={() => scrollToAdminSection("admin-section-media")}>{quickNavText.media}</button>
           </div>
         </nav>
 
@@ -924,6 +927,15 @@ const adminAchievementsProps = {
             isAdminActionLoading={isAdminActionLoading}
             runAdminAction={runAdminAction}
             setConfirmDelete={setConfirmDelete}
+          />
+          <AdminMediaCenter
+            adminText={adminText}
+            commonText={commonText}
+            PremiumSelect={PremiumSelect}
+            players={players}
+            teams={teams}
+            tournaments={tournaments}
+            matches={matches}
           />
         </div>
       </div>
