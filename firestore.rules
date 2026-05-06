@@ -69,6 +69,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /mediaAssets/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     match /playerClaims/{docId} {
       allow read: if false;
       allow create, update, delete: if isAdmin();

@@ -1,6 +1,7 @@
 import {
   CSSProperties,
   ChangeEvent,
+  DragEvent,
   ReactElement,
   useEffect,
   useMemo,
@@ -8,11 +9,19 @@ import {
   useState,
 } from "react";
 import { toPng } from "html-to-image";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
+} from "firebase/storage";
 import { Match, Player, Team, Tournament } from "../../types";
 import {
   calculateGroupStandings,
   groupMatchesByGroupName,
 } from "../../domain/tournament/groupStandings";
+import { storage } from "../../firebase";
+import { deleteItem, saveItem, subscribeCollection } from "../../firebaseDb";
 
 type SelectValue = number | string;
 
@@ -36,6 +45,27 @@ type MediaTemplate =
   | "playoffBracket"
   | "mvpCard"
   | "championPoster";
+
+type AssetCategory = "backgrounds" | "overlays" | "textures" | "sponsors";
+
+type SponsorPosition = "topLeft" | "topRight" | "bottomCenter" | "compact";
+
+type MediaAsset = {
+  id: string;
+  name: string;
+  type: AssetCategory;
+  url: string;
+  storagePath: string;
+  mimeType: string;
+  createdAt: string;
+};
+
+type PendingAsset = {
+  file: File;
+  name: string;
+  type: AssetCategory;
+  previewUrl: string;
+};
 
 type DraftState = {
   tournamentId: number;
@@ -387,6 +417,32 @@ const templateFileNames: Record<MediaTemplate, string> = {
   championPoster: "sansara-champion-poster.png",
 };
 
+const assetCategories: { id: AssetCategory; label: string; storageFolder: string }[] = [
+  { id: "backgrounds", label: "Backgrounds", storageFolder: "backgrounds" },
+  { id: "overlays", label: "Overlays", storageFolder: "overlays" },
+  { id: "textures", label: "Textures", storageFolder: "textures" },
+  { id: "sponsors", label: "Sponsor Logos", storageFolder: "sponsors" },
+];
+
+const acceptedAssetTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+
+const assetCollectionName = "mediaAssets";
+
+const sponsorPositions: { id: SponsorPosition; label: string }[] = [
+  { id: "topLeft", label: "Top-left" },
+  { id: "topRight", label: "Top-right" },
+  { id: "bottomCenter", label: "Bottom-center" },
+  { id: "compact", label: "Compact" },
+];
+
+const sanitizeFileName = (value: string) =>
+  value
+    .trim()
+    .replace(/[^\w.\-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
 function initials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "S";
@@ -429,6 +485,21 @@ export default function AdminMediaCenter({
   const [teamPaletteRgb, setTeamPaletteRgb] = useState<[number, number, number] | null>(
     null
   );
+  const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
+  const [activeAssetCategory, setActiveAssetCategory] =
+    useState<AssetCategory>("backgrounds");
+  const [assetSearch, setAssetSearch] = useState("");
+  const [pendingAsset, setPendingAsset] = useState<PendingAsset | null>(null);
+  const [assetDropActive, setAssetDropActive] = useState(false);
+  const [assetUploadError, setAssetUploadError] = useState("");
+  const [isAssetUploading, setIsAssetUploading] = useState(false);
+  const [appliedAssetIds, setAppliedAssetIds] = useState<
+    Partial<Record<AssetCategory, string>>
+  >({});
+  const [sponsorPosition, setSponsorPosition] =
+    useState<SponsorPosition>("topRight");
+  const [overlayOpacity, setOverlayOpacity] = useState(0.72);
+  const [textureOpacity, setTextureOpacity] = useState(0.3);
   const previewRef = useRef<HTMLDivElement | null>(null);
 
   const tournamentOptions = tournaments
@@ -629,6 +700,25 @@ export default function AdminMediaCenter({
     };
   }, [studioTheme, themeTeamLogo]);
 
+  useEffect(() => {
+    return subscribeCollection<MediaAsset>(assetCollectionName, (items) => {
+      setMediaAssets(
+        items
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pendingAsset) URL.revokeObjectURL(pendingAsset.previewUrl);
+    };
+  }, [pendingAsset]);
+
   const presetIntrinsic = STYLE_PRESETS[stylePreset] || STYLE_PRESETS.default;
 
   const resolvedPreset = useMemo<PalettePreset>(() => {
@@ -756,6 +846,135 @@ export default function AdminMediaCenter({
         {initials(name || fallback)}
       </div>
     );
+  };
+
+  const getAssetById = (assetId?: string) =>
+    assetId ? mediaAssets.find((asset) => asset.id === assetId) || null : null;
+
+  const appliedBackground = getAssetById(appliedAssetIds.backgrounds);
+  const appliedOverlay = getAssetById(appliedAssetIds.overlays);
+  const appliedTexture = getAssetById(appliedAssetIds.textures);
+  const appliedSponsor = getAssetById(appliedAssetIds.sponsors);
+
+  const filteredAssets = mediaAssets.filter((asset) => {
+    if (asset.type !== activeAssetCategory) return false;
+    const queryValue = assetSearch.trim().toLowerCase();
+    if (!queryValue) return true;
+    return asset.name.toLowerCase().includes(queryValue);
+  });
+
+  const setPendingFile = (file: File | null) => {
+    if (!file) return;
+    setAssetUploadError("");
+    if (!acceptedAssetTypes.includes(file.type)) {
+      setAssetUploadError("Unsupported file. Use PNG, JPG, WEBP, or SVG.");
+      return;
+    }
+
+    setPendingAsset((previous) => {
+      if (previous) URL.revokeObjectURL(previous.previewUrl);
+      return {
+        file,
+        name: file.name.replace(/\.[^.]+$/, ""),
+        type: activeAssetCategory,
+        previewUrl: URL.createObjectURL(file),
+      };
+    });
+  };
+
+  const handleAssetFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setPendingFile(event.target.files?.[0] || null);
+    event.target.value = "";
+  };
+
+  const handleAssetDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setAssetDropActive(false);
+    setPendingFile(event.dataTransfer.files?.[0] || null);
+  };
+
+  const handleSaveAsset = async () => {
+    if (!pendingAsset || isAssetUploading) return;
+    if (!storage) {
+      setAssetUploadError("Firebase Storage is not configured.");
+      return;
+    }
+
+    setIsAssetUploading(true);
+    setAssetUploadError("");
+
+    try {
+      const id =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.round(Math.random() * 100000)}`;
+      const category = assetCategories.find(
+        (assetCategory) => assetCategory.id === pendingAsset.type
+      );
+      const safeName = sanitizeFileName(pendingAsset.file.name) || `${id}.png`;
+      const path = `media/${category?.storageFolder || pendingAsset.type}/${id}-${safeName}`;
+      const assetRef = storageRef(storage, path);
+      await uploadBytes(assetRef, pendingAsset.file, {
+        contentType: pendingAsset.file.type,
+      });
+      const url = await getDownloadURL(assetRef);
+      const asset: MediaAsset = {
+        id,
+        name: pendingAsset.name || pendingAsset.file.name,
+        type: pendingAsset.type,
+        url,
+        storagePath: path,
+        mimeType: pendingAsset.file.type,
+        createdAt: new Date().toISOString(),
+      };
+
+      await saveItem(assetCollectionName, asset);
+      setAppliedAssetIds((previous) => ({ ...previous, [asset.type]: asset.id }));
+      setPendingAsset(null);
+      showToast?.("Asset uploaded");
+    } catch (error) {
+      console.error("Asset upload failed:", error);
+      const message =
+        error instanceof Error ? error.message : "Asset upload failed.";
+      setAssetUploadError(message);
+      showToast?.(message, "danger");
+    } finally {
+      setIsAssetUploading(false);
+    }
+  };
+
+  const handleDeleteAsset = async (asset: MediaAsset) => {
+    try {
+      if (storage && asset.storagePath) {
+        await deleteObject(storageRef(storage, asset.storagePath));
+      }
+      await deleteItem(assetCollectionName, asset.id);
+      setAppliedAssetIds((previous) => {
+        if (previous[asset.type] !== asset.id) return previous;
+        const next = { ...previous };
+        delete next[asset.type];
+        return next;
+      });
+      showToast?.("Asset deleted");
+    } catch (error) {
+      console.error("Asset delete failed:", error);
+      const message =
+        error instanceof Error ? error.message : "Asset delete failed.";
+      setAssetUploadError(message);
+      showToast?.(message, "danger");
+    }
+  };
+
+  const handleApplyAsset = (asset: MediaAsset) => {
+    setAppliedAssetIds((previous) => ({ ...previous, [asset.type]: asset.id }));
+  };
+
+  const handleClearAsset = (category: AssetCategory) => {
+    setAppliedAssetIds((previous) => {
+      const next = { ...previous };
+      delete next[category];
+      return next;
+    });
   };
 
   const handleSelectChange =
@@ -1440,6 +1659,181 @@ export default function AdminMediaCenter({
     },
   ];
 
+  const renderAssetLibrary = () => (
+    <div className="media-asset-library">
+      <div className="media-asset-header">
+        <div>
+          <span className="media-palette-label">Asset Library</span>
+          <strong>Reusable poster layers</strong>
+        </div>
+      </div>
+
+      <div className="media-asset-tabs">
+        {assetCategories.map((category) => (
+          <button
+            key={category.id}
+            type="button"
+            className={`media-asset-tab ${
+              activeAssetCategory === category.id ? "media-asset-tab-active" : ""
+            }`}
+            onClick={() => setActiveAssetCategory(category.id)}
+          >
+            {category.label}
+          </button>
+        ))}
+      </div>
+
+      <div
+        className={`media-asset-dropzone ${
+          assetDropActive ? "media-asset-dropzone-active" : ""
+        }`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setAssetDropActive(true);
+        }}
+        onDragLeave={() => setAssetDropActive(false)}
+        onDrop={handleAssetDrop}
+      >
+        <input
+          id="media-asset-input"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          onChange={handleAssetFileChange}
+        />
+        <label htmlFor="media-asset-input">
+          Drop an image here or choose file
+          <small>PNG, JPG, WEBP, SVG</small>
+        </label>
+      </div>
+
+      {pendingAsset ? (
+        <div className="media-pending-asset">
+          <img src={pendingAsset.previewUrl} alt={pendingAsset.name} />
+          <div className="media-pending-asset-meta">
+            <input
+              className="input"
+              value={pendingAsset.name}
+              onChange={(event) =>
+                setPendingAsset((previous) =>
+                  previous ? { ...previous, name: event.target.value } : previous
+                )
+              }
+              placeholder="Asset name"
+            />
+            <div className="media-asset-actions">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={handleSaveAsset}
+                disabled={isAssetUploading}
+              >
+                {isAssetUploading ? "Uploading..." : "Save Asset"}
+              </button>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setPendingAsset(null)}
+                disabled={isAssetUploading}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <input
+        className="input media-asset-search"
+        value={assetSearch}
+        onChange={(event) => setAssetSearch(event.target.value)}
+        placeholder="Search assets"
+      />
+
+      <div className="media-applied-assets">
+        {assetCategories.map((category) => {
+          const asset = getAssetById(appliedAssetIds[category.id]);
+          return (
+            <div className="media-applied-pill" key={category.id}>
+              <span>{category.label}</span>
+              <strong>{asset?.name || "None"}</strong>
+              {asset ? (
+                <button type="button" onClick={() => handleClearAsset(category.id)}>
+                  Clear
+                </button>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      {activeAssetCategory === "sponsors" ? (
+        <div className="media-sponsor-position">
+          <span className="media-palette-label">Sponsor placement</span>
+          <div className="media-asset-tabs">
+            {sponsorPositions.map((position) => (
+              <button
+                key={position.id}
+                type="button"
+                className={`media-asset-tab ${
+                  sponsorPosition === position.id ? "media-asset-tab-active" : ""
+                }`}
+                onClick={() => setSponsorPosition(position.id)}
+              >
+                {position.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {(activeAssetCategory === "overlays" || activeAssetCategory === "textures") ? (
+        <div className="media-opacity-control">
+          <label className="field-label">
+            {activeAssetCategory === "overlays" ? "Overlay opacity" : "Texture opacity"}
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={activeAssetCategory === "overlays" ? overlayOpacity : textureOpacity}
+            onChange={(event) =>
+              activeAssetCategory === "overlays"
+                ? setOverlayOpacity(Number(event.target.value))
+                : setTextureOpacity(Number(event.target.value))
+            }
+          />
+        </div>
+      ) : null}
+
+      <div className="media-asset-gallery">
+        {filteredAssets.length ? (
+          filteredAssets.map((asset) => (
+            <article className="media-asset-card" key={asset.id}>
+              <img src={asset.url} alt={asset.name} />
+              <div>
+                <strong>{asset.name}</strong>
+                <small>{asset.type}</small>
+              </div>
+              <div className="media-asset-card-actions">
+                <button type="button" onClick={() => handleApplyAsset(asset)}>
+                  Apply
+                </button>
+                <button type="button" onClick={() => handleDeleteAsset(asset)}>
+                  Delete
+                </button>
+              </div>
+            </article>
+          ))
+        ) : (
+          <p className="media-settings-note">No assets in this category yet.</p>
+        )}
+      </div>
+
+      {assetUploadError ? <div className="admin-error">{assetUploadError}</div> : null}
+    </div>
+  );
+
   return (
     <section
       id="admin-section-media"
@@ -1489,13 +1883,44 @@ export default function AdminMediaCenter({
             ref={previewRef}
             className={`media-story-preview media-story-preview-${selectedTemplate}`}
           >
+            {appliedBackground ? (
+              <div
+                className="media-asset-layer media-asset-background"
+                style={{ backgroundImage: `url("${appliedBackground.url}")` }}
+              />
+            ) : null}
+            {appliedTexture ? (
+              <div
+                className="media-asset-layer media-asset-texture"
+                style={{
+                  backgroundImage: `url("${appliedTexture.url}")`,
+                  opacity: textureOpacity,
+                }}
+              />
+            ) : null}
             <div className="media-poster-grid" />
             <div className="media-poster-glow" />
+            {appliedOverlay ? (
+              <div
+                className="media-asset-layer media-asset-overlay"
+                style={{
+                  backgroundImage: `url("${appliedOverlay.url}")`,
+                  opacity: overlayOpacity,
+                }}
+              />
+            ) : null}
             <div className="media-poster-topline">
               <span>SANSARA</span>
               <span>{activeTemplate ? adminText[activeTemplate.labelKey] : ""}</span>
             </div>
             {renderPreviewContent()}
+            {appliedSponsor ? (
+              <img
+                className={`media-sponsor-logo media-sponsor-logo-${sponsorPosition}`}
+                src={appliedSponsor.url}
+                alt={appliedSponsor.name}
+              />
+            ) : null}
             <div className="media-poster-footer">
               <span>@sansara.esports</span>
               <span>1080 x 1920</span>
@@ -1590,6 +2015,8 @@ export default function AdminMediaCenter({
               </small>
             ) : null}
           </div>
+
+          {renderAssetLibrary()}
 
           {renderTemplateFields()}
           <p className="media-settings-note">
