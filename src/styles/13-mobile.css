@@ -288,6 +288,13 @@
     word-break: break-word;
   }
 
+  .player-full-name,
+  .profile-full-name {
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
+  }
+
   .player-profile-meta,
   .player-profile-line {
     width: 100%;

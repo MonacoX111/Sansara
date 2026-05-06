@@ -2046,6 +2046,16 @@
     min-width: 0;
 }
 
+.profile-full-name {
+    max-width: 100%;
+    color: rgba(255, 255, 255, 0.64);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
 .profile-current-team-chip {
     width: fit-content;
     max-width: 100%;
@@ -2496,6 +2506,10 @@
     min-width: 0;
 }
 
+.player-grid .player-head-info {
+    max-width: 100%;
+}
+
 .player-grid .player-name-row {
     align-items: flex-start;
     justify-content: flex-start;
@@ -2505,6 +2519,18 @@
 .player-grid .player-name {
     font-size: 16px;
     line-height: 1.12;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-full-name {
+    margin-top: 4px;
+    max-width: 100%;
+    color: rgba(255, 255, 255, 0.54);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -596,6 +596,11 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
                           #{player.rank}
                         </span>
                       </div>
+                      {player.fullName?.trim() ? (
+                        <div className="player-full-name">
+                          {player.fullName.trim()}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 

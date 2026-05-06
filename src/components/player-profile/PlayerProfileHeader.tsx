@@ -70,6 +70,11 @@ export default function PlayerProfileHeader({
               <div className="profile-identity-row">
                 <div className="profile-identity-copy">
                   <h3 className="profile-name">{player.nickname}</h3>
+                  {player.fullName?.trim() ? (
+                    <div className="profile-full-name">
+                      {player.fullName.trim()}
+                    </div>
+                  ) : null}
 
                   {currentTeam ? (
                     <div className="profile-current-team-chip">
