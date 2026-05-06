@@ -104,6 +104,145 @@
 }
 
 @media (max-width: 768px) {
+  .simple-card.tournament-section {
+    cursor: default;
+    touch-action: pan-x pan-y;
+  }
+
+  .simple-card.tournament-section:active {
+    transform: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .simple-card.tournament-section:active::after {
+    display: none;
+  }
+
+  .simple-card.tournament-section.tournament-section-full {
+    overflow: visible;
+  }
+
+  .simple-card.tournament-section.tournament-section-full::before {
+    pointer-events: none;
+  }
+
+  .tournament-bracket-layout,
+  .tournament-section-full,
+  .tournament-section-full > *,
+  .bracket-block,
+  .bracket-group-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bracket-block {
+    overflow: visible;
+    padding-right: 14px;
+    contain: layout;
+    touch-action: pan-x pan-y;
+  }
+
+  .bracket-block::before,
+  .bracket-svg-lines,
+  .bracket-svg-lines *,
+  .bracket-series-card::after {
+    pointer-events: none;
+  }
+
+  .bracket-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+  }
+
+  .bracket-inner-scale {
+    display: block;
+    width: max-content;
+    min-width: max-content;
+    max-width: none;
+    transform: none;
+  }
+
+  .bracket-columns {
+    width: max-content;
+    min-width: max-content;
+    max-width: none;
+    flex: 0 0 auto;
+  }
+
+  .bracket-groups-grid {
+    grid-template-columns: 1fr !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .bracket-group-card,
+  .bracket-group-matches {
+    overflow: visible;
+  }
+
+  .group-standings-table {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+
+  .bracket-group-matches {
+    max-width: 100%;
+    overflow-x: visible;
+    overflow-y: visible;
+  }
+
+  .bracket-group-matches .bracket-match-card,
+  .bracket-match-card,
+  .bracket-series-card,
+  .bracket-side,
+  .bracket-player,
+  .bracket-player span,
+  .group-standings-participant,
+  .group-standings-participant span:last-child {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .participant-card-head,
+  .participant-title-row,
+  .participant-stats-grid,
+  .participant-roster-list,
+  .participant-roster-item {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .participant-card-head,
+  .participant-title-row {
+    align-items: flex-start;
+  }
+
+  .participant-title-row {
+    width: 100%;
+  }
+
+  .participant-card .achievement-title,
+  .participant-roster-name,
+  .participant-stat-box {
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .participant-card .achievement-title {
+    white-space: normal;
+  }
+
   .topbar,
   .header,
   .nav,
