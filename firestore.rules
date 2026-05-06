@@ -16,11 +16,13 @@ service cloud.firestore {
         .hasOnly(fields);
     }
 
-    function isOwnAvatarUpdate() {
+    function isOwnPublicProfileUpdate() {
       return isSignedIn() &&
         resource.data.authUid == request.auth.uid &&
         request.resource.data.authUid == resource.data.authUid &&
-        changedOnly(["avatar"]);
+        changedOnly(["avatar", "nickname", "fullName", "bio"]) &&
+        request.resource.data.nickname is string &&
+        request.resource.data.nickname.size() > 0;
     }
 
     function isProfileLinkUpdate() {
@@ -34,7 +36,7 @@ service cloud.firestore {
     match /players/{docId} {
       allow read: if true;
       allow create, delete: if isAdmin();
-      allow update: if isAdmin() || isOwnAvatarUpdate() || isProfileLinkUpdate();
+      allow update: if isAdmin() || isOwnPublicProfileUpdate() || isProfileLinkUpdate();
     }
 
     match /teams/{docId} {

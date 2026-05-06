@@ -55,10 +55,13 @@ type Props = {
   onOpenTeam?: (teamId: number) => void;
   onOpenTournament?: (tournamentId: number) => void;
   profileOnly?: boolean;
-  canChangeAvatar?: boolean;
-  avatarSaveLoading?: boolean;
-  avatarSaveError?: string;
-  onAvatarSave?: (playerId: number, avatarUrl: string) => void;
+  canEditOwnProfile?: boolean;
+  profileSaveLoading?: boolean;
+  profileSaveError?: string;
+  onProfileSave?: (
+    playerId: number,
+    updates: Pick<Player, "nickname" | "fullName" | "bio" | "avatar">,
+  ) => void;
   lang: Lang;
 };
 
@@ -82,10 +85,10 @@ export default function PlayersTab({
   onOpenTeam,
   onOpenTournament,
   profileOnly = false,
-  canChangeAvatar = false,
-  avatarSaveLoading = false,
-  avatarSaveError = "",
-  onAvatarSave,
+  canEditOwnProfile = false,
+  profileSaveLoading = false,
+  profileSaveError = "",
+  onProfileSave,
   lang = "en",
 }: Props) {
   const text = t[lang] || t.en;
@@ -716,16 +719,25 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
                 noMatchesYet: playerText.noMatchesYet,
                 formWinShort: playerText.formWinShort,
                 formLossShort: playerText.formLossShort,
+                nickname: text.admin.nickname,
+                fullName: text.admin.fullName,
+                bio: text.admin.bio,
+                avatar: text.admin.avatar,
+                avatarUrlPlaceholder: text.admin.avatarUrlPlaceholder,
+                editProfile: playerText.editProfile,
+                saveProfile: playerText.saveProfile,
+                savingProfile: playerText.savingProfile,
+                cancel: commonText.cancel,
               }}
               winRate={playerWinRate}
               streakLabel={playerStreak.label}
 formResults={playerVisibleFormResults}
               achievementsCount={playerAchievements.length}
               tournamentsCount={playerTournaments.length}
-              canChangeAvatar={canChangeAvatar}
-              avatarSaveLoading={avatarSaveLoading}
-              avatarSaveError={avatarSaveError}
-              onAvatarSave={onAvatarSave}
+              canEditOwnProfile={canEditOwnProfile}
+              profileSaveLoading={profileSaveLoading}
+              profileSaveError={profileSaveError}
+              onProfileSave={onProfileSave}
             />
 
             <div className="section-block">

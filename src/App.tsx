@@ -741,8 +741,8 @@ const playerLogout = async () => {
   const [claimCodeInput, setClaimCodeInput] = useState("");
   const [claimCodeError, setClaimCodeError] = useState("");
   const [claimCodeLoading, setClaimCodeLoading] = useState(false);
-  const [avatarSaveLoading, setAvatarSaveLoading] = useState(false);
-  const [avatarSaveError, setAvatarSaveError] = useState("");
+  const [profileSaveLoading, setProfileSaveLoading] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState("");
 
   useEffect(() => {
     if (auth) {
@@ -1380,48 +1380,65 @@ const submitClaimCode = async () => {
   }
 };
 
-  const handlePlayerAvatarSave = async (
+  const handlePlayerProfileSave = async (
     playerId: number,
-    avatarUrl: string
+    updates: Pick<Player, "nickname" | "fullName" | "bio" | "avatar">
   ) => {
-    const nextAvatar = avatarUrl.trim();
+    const nextNickname = updates.nickname.trim();
+    const nextFullName = updates.fullName.trim();
+    const nextBio = updates.bio.trim();
+    const nextAvatar = updates.avatar.trim();
 
     if (!playerUser || !linkedPlayer || linkedPlayer.id !== playerId) {
-      setAvatarSaveError("You can only update your own avatar.");
+      setProfileSaveError("You can only update your own profile.");
       return;
     }
 
     if (linkedPlayer.authUid !== playerUser.uid) {
-      setAvatarSaveError("You can only update your own avatar.");
+      setProfileSaveError("You can only update your own profile.");
+      return;
+    }
+
+    if (!nextNickname) {
+      setProfileSaveError("Nickname is required.");
       return;
     }
 
     if (!nextAvatar) {
-      setAvatarSaveError("Avatar image URL is required.");
+      setProfileSaveError("Avatar image URL is required.");
       return;
     }
 
-    const updatedPlayer: Player = { ...linkedPlayer, avatar: nextAvatar };
+    const publicProfileUpdates = {
+      nickname: nextNickname,
+      fullName: nextFullName,
+      bio: nextBio,
+      avatar: nextAvatar,
+    };
+    const updatedPlayer: Player = {
+      ...linkedPlayer,
+      ...publicProfileUpdates,
+    };
     const previousPlayers = players;
+    const nextPlayers = players.map((player) =>
+      player.id === updatedPlayer.id ? updatedPlayer : player
+    );
 
     try {
-      setAvatarSaveLoading(true);
-      setAvatarSaveError("");
+      setProfileSaveLoading(true);
+      setProfileSaveError("");
 
-      setPlayers((currentPlayers) =>
-        currentPlayers.map((player) =>
-          player.id === updatedPlayer.id ? updatedPlayer : player
-        )
-      );
-      await updateItemFields("players", updatedPlayer.id, {
-        avatar: nextAvatar,
-      });
+      setPlayers(nextPlayers);
+      writeStorage("tm_players", nextPlayers);
+      await updateItemFields("players", updatedPlayer.id, publicProfileUpdates);
+      showToast(commonText.playerSaved);
     } catch (error: any) {
-      console.error("Avatar save failed:", error);
+      console.error("Profile save failed:", error);
       setPlayers(previousPlayers);
-      setAvatarSaveError(error.message || "Failed to update avatar.");
+      writeStorage("tm_players", previousPlayers);
+      setProfileSaveError(error.message || "Failed to update profile.");
     } finally {
-      setAvatarSaveLoading(false);
+      setProfileSaveLoading(false);
     }
   };
 
@@ -3078,14 +3095,14 @@ const deleteAchievement = async (achievementId: number) => {
   onOpenTeam={openTeamFromPlayerProfile}
   onOpenTournament={openTournamentFromPlayerProfile}
   profileOnly
-  canChangeAvatar={Boolean(
+  canEditOwnProfile={Boolean(
     playerUser &&
       linkedPlayer.authUid &&
       linkedPlayer.authUid === playerUser.uid
   )}
-  avatarSaveLoading={avatarSaveLoading}
-  avatarSaveError={avatarSaveError}
-  onAvatarSave={handlePlayerAvatarSave}
+  profileSaveLoading={profileSaveLoading}
+  profileSaveError={profileSaveError}
+  onProfileSave={handlePlayerProfileSave}
   lang={lang}
 />
 )}

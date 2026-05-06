@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { Player, Team } from "../../types";
 import { PlayerRecentMatch } from "../../domain/player/playerStats";
 
@@ -15,6 +15,15 @@ type PlayerProfileHeaderLabels = {
   noMatchesYet: string;
   formWinShort: string;
   formLossShort: string;
+  nickname: string;
+  fullName: string;
+  bio: string;
+  avatar: string;
+  avatarUrlPlaceholder: string;
+  editProfile: string;
+  saveProfile: string;
+  savingProfile: string;
+  cancel: string;
 };
 
 type Props = {
@@ -26,10 +35,13 @@ type Props = {
   formResults: PlayerRecentMatch[];
   achievementsCount: number;
   tournamentsCount: number;
-  canChangeAvatar?: boolean;
-  avatarSaveLoading?: boolean;
-  avatarSaveError?: string;
-  onAvatarSave?: (playerId: number, avatarUrl: string) => void;
+  canEditOwnProfile?: boolean;
+  profileSaveLoading?: boolean;
+  profileSaveError?: string;
+  onProfileSave?: (
+    playerId: number,
+    updates: Pick<Player, "nickname" | "fullName" | "bio" | "avatar">
+  ) => void;
 };
 
 export default function PlayerProfileHeader({
@@ -41,18 +53,36 @@ export default function PlayerProfileHeader({
   formResults,
   achievementsCount,
   tournamentsCount,
-  canChangeAvatar = false,
-  avatarSaveLoading = false,
-  avatarSaveError = "",
-  onAvatarSave,
+  canEditOwnProfile = false,
+  profileSaveLoading = false,
+  profileSaveError = "",
+  onProfileSave,
 }: Props) {
-  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(player.avatar || "");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({
+    nickname: player.nickname || "",
+    fullName: player.fullName || "",
+    bio: player.bio || "",
+    avatar: player.avatar || "",
+  });
   const handleMiniStatMove = (e: MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--x", `${e.clientX - rect.left}px`);
     e.currentTarget.style.setProperty("--y", `${e.clientY - rect.top}px`);
   };
+  const resetProfileDraft = () => {
+    setProfileDraft({
+      nickname: player.nickname || "",
+      fullName: player.fullName || "",
+      bio: player.bio || "",
+      avatar: player.avatar || "",
+    });
+  };
+
+  useEffect(() => {
+    resetProfileDraft();
+    setIsEditingProfile(false);
+  }, [player.id, player.nickname, player.fullName, player.bio, player.avatar]);
 
   return (
     <div className="profile-head">
@@ -91,36 +121,78 @@ export default function PlayerProfileHeader({
                 <div className="player-role-badge">{player.bio}</div>
               ) : null}
 
-              {canChangeAvatar ? (
+              {canEditOwnProfile ? (
                 <div className="profile-avatar-actions">
-                  {isEditingAvatar ? (
-                    <div className="profile-avatar-edit-form">
+                  {isEditingProfile ? (
+                    <div className="profile-avatar-edit-form profile-edit-form">
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder={labels.nickname}
+                        value={profileDraft.nickname}
+                        onChange={(event) =>
+                          setProfileDraft((current) => ({
+                            ...current,
+                            nickname: event.target.value,
+                          }))
+                        }
+                      />
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder={labels.fullName}
+                        value={profileDraft.fullName}
+                        onChange={(event) =>
+                          setProfileDraft((current) => ({
+                            ...current,
+                            fullName: event.target.value,
+                          }))
+                        }
+                      />
+                      <textarea
+                        className="input textarea"
+                        placeholder={labels.bio}
+                        value={profileDraft.bio}
+                        onChange={(event) =>
+                          setProfileDraft((current) => ({
+                            ...current,
+                            bio: event.target.value,
+                          }))
+                        }
+                      />
                       <input
                         type="url"
                         className="input"
-                        placeholder="Avatar image URL"
-                        value={avatarUrl}
-                        onChange={(event) => setAvatarUrl(event.target.value)}
+                        placeholder={labels.avatarUrlPlaceholder}
+                        value={profileDraft.avatar}
+                        onChange={(event) =>
+                          setProfileDraft((current) => ({
+                            ...current,
+                            avatar: event.target.value,
+                          }))
+                        }
                       />
                       <div className="btn-row">
                         <button
                           type="button"
                           className="primary-btn"
-                          disabled={avatarSaveLoading}
-                          onClick={() => onAvatarSave?.(player.id, avatarUrl)}
+                          disabled={profileSaveLoading}
+                          onClick={() => onProfileSave?.(player.id, profileDraft)}
                         >
-                          {avatarSaveLoading ? "Saving..." : "Save avatar"}
+                          {profileSaveLoading
+                            ? labels.savingProfile
+                            : labels.saveProfile}
                         </button>
                         <button
                           type="button"
                           className="secondary-btn"
-                          disabled={avatarSaveLoading}
+                          disabled={profileSaveLoading}
                           onClick={() => {
-                            setAvatarUrl(player.avatar || "");
-                            setIsEditingAvatar(false);
+                            resetProfileDraft();
+                            setIsEditingProfile(false);
                           }}
                         >
-                          Cancel
+                          {labels.cancel}
                         </button>
                       </div>
                     </div>
@@ -129,15 +201,15 @@ export default function PlayerProfileHeader({
                       type="button"
                       className="secondary-btn"
                       onClick={() => {
-                        setAvatarUrl(player.avatar || "");
-                        setIsEditingAvatar(true);
+                        resetProfileDraft();
+                        setIsEditingProfile(true);
                       }}
                     >
-                      Change avatar
+                      {labels.editProfile}
                     </button>
                   )}
-                  {avatarSaveError ? (
-                    <div className="admin-error">{avatarSaveError}</div>
+                  {profileSaveError ? (
+                    <div className="admin-error">{profileSaveError}</div>
                   ) : null}
                 </div>
               ) : null}
