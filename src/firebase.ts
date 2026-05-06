@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCQFn7RvpL3xchZPjAnzgCrDbR1ZOf11U8",
   authDomain: "sansara-history.firebaseapp.com",
   projectId: "sansara-history",
-  storageBucket: "sansara-history.appspot.com",
+storageBucket: "sansara-history.firebasestorage.app",
   messagingSenderId: "494545798089",
   appId: "1:494545798089:web:6758168056a37b2575de18",
 };
