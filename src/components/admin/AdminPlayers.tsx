@@ -100,12 +100,6 @@ export default function AdminPlayers(props: Props) {
     : [];
   const currentClaim =
     selectedPlayerClaims.find((claim) => !claim.used) || null;
-  const hasUsedClaim = selectedPlayerClaims.some((claim) => claim.used);
-  const claimStatus = currentClaim
-    ? "Unused"
-    : hasUsedClaim
-    ? "Used"
-    : "No code";
 
   const copyClaimCode = async (code: string) => {
     if (navigator.clipboard) {
@@ -113,13 +107,25 @@ export default function AdminPlayers(props: Props) {
     }
   };
 
-  const getPlayerClaimStatus = (playerId: number) => {
-    const claims = playerClaims.filter((claim) => claim.playerId === playerId);
+  const getPlayerClaimDisplay = (player: Player) => {
+    const hasLinkedAccount = Boolean(player.authUid?.trim());
+    const claims = playerClaims.filter((claim) => claim.playerId === player.id);
     const activeClaim = claims.find((claim) => !claim.used);
-    if (activeClaim) return `Code: ${activeClaim.id}`;
-    if (claims.some((claim) => claim.used)) return "Claim used";
-    return "No claim code";
+
+    if (hasLinkedAccount) {
+      return adminText.linkedAccount || "Linked account";
+    }
+
+    if (activeClaim) {
+      return adminText.claimCodeActive || "Claim code active";
+    }
+
+    return adminText.noClaimCode || "No claim code";
   };
+
+  const selectedPlayerClaimDisplay = selectedPlayer
+    ? getPlayerClaimDisplay(selectedPlayer)
+    : adminText.noClaimCode || "No claim code";
 
   const toggleHistoricalTeam = (teamId: number) => {
     setPlayerForm((prev) => {
@@ -177,7 +183,7 @@ export default function AdminPlayers(props: Props) {
                 >
                   <span>{player.nickname || adminText.playerFallback}</span>
                   <span className="muted small">
-                    {getPlayerClaimStatus(player.id)}
+                    {getPlayerClaimDisplay(player)}
                   </span>
                   {player.isFeatured ? (
                     <span className="admin-featured-badge">{adminText.featured}</span>
@@ -255,14 +261,20 @@ export default function AdminPlayers(props: Props) {
 
             {selectedPlayer ? (
               <div className="field-block simple-card">
-                <label className="field-label">Player claim code</label>
+                <label className="field-label">
+                  {adminText.playerClaimCode || "Player claim code"}
+                </label>
                 <div className="muted small">
-                  Current code: {currentClaim?.id || "None"}
+                  {adminText.currentCode || "Current code"}:{" "}
+                  {currentClaim?.id || adminText.none || "None"}
                 </div>
-                <div className="muted small">Status: {claimStatus}</div>
+                <div className="muted small">
+                  {adminText.status || "Status"}: {selectedPlayerClaimDisplay}
+                </div>
                 {selectedPlayer.authUid ? (
                   <div className="muted small">
-                    Linked UID: {selectedPlayer.authUid}
+                    {adminText.linkedUid || "Linked UID"}:{" "}
+                    {selectedPlayer.authUid}
                   </div>
                 ) : null}
 
@@ -278,7 +290,7 @@ export default function AdminPlayers(props: Props) {
                     }
                     onClick={() => generatePlayerClaimCode(selectedPlayer.id)}
                   >
-                    Generate code
+                    {adminText.generateCode || "Generate code"}
                   </button>
                   <button
                     type="button"
@@ -290,7 +302,7 @@ export default function AdminPlayers(props: Props) {
                       }
                     }}
                   >
-                    Copy code
+                    {adminText.copyCode || "Copy code"}
                   </button>
                   <button
                     type="button"
@@ -300,7 +312,7 @@ export default function AdminPlayers(props: Props) {
                     )}
                     onClick={() => resetPlayerClaimCode(selectedPlayer.id)}
                   >
-                    Reset code
+                    {adminText.resetCode || "Reset code"}
                   </button>
                   {selectedPlayer.authUid ? (
                     <button
@@ -311,7 +323,7 @@ export default function AdminPlayers(props: Props) {
                       )}
                       onClick={() => unlinkPlayerAccount(selectedPlayer.id)}
                     >
-                      Unlink account
+                      {adminText.unlinkAccount || "Unlink account"}
                     </button>
                   ) : null}
                 </div>
