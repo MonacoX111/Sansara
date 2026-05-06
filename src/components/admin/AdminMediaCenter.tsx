@@ -1,4 +1,12 @@
-import { ChangeEvent, ReactElement, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  ChangeEvent,
+  ReactElement,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toPng } from "html-to-image";
 import { Match, Player, Team, Tournament } from "../../types";
 
@@ -115,6 +123,179 @@ const initialDraft: DraftState = {
   tournamentTitle: "",
 };
 
+type StudioTheme =
+  | "crimson"
+  | "neonBlue"
+  | "royalPurple"
+  | "whiteGold"
+  | "emerald"
+  | "team"
+  | "game";
+
+type PalettePreset = {
+  primary: string;
+  accent: string;
+  kicker: string;
+  bg1: string;
+  bg2: string;
+  bg3: string;
+};
+
+const PALETTE_PRESETS: Record<
+  Exclude<StudioTheme, "team" | "game">,
+  PalettePreset
+> = {
+  crimson: {
+    primary: "255, 59, 95",
+    accent: "67, 208, 255",
+    kicker: "#ff4d6d",
+    bg1: "#15070d",
+    bg2: "#080a11",
+    bg3: "#111824",
+  },
+  neonBlue: {
+    primary: "56, 182, 255",
+    accent: "132, 234, 255",
+    kicker: "#84eaff",
+    bg1: "#061320",
+    bg2: "#060c14",
+    bg3: "#0a1426",
+  },
+  royalPurple: {
+    primary: "178, 102, 255",
+    accent: "255, 102, 220",
+    kicker: "#d8a8ff",
+    bg1: "#170728",
+    bg2: "#0b0716",
+    bg3: "#160a26",
+  },
+  whiteGold: {
+    primary: "244, 208, 124",
+    accent: "255, 245, 220",
+    kicker: "#f7d774",
+    bg1: "#1a1408",
+    bg2: "#0c0a06",
+    bg3: "#1f180a",
+  },
+  emerald: {
+    primary: "76, 217, 140",
+    accent: "134, 255, 200",
+    kicker: "#6ee7a8",
+    bg1: "#06140e",
+    bg2: "#060e0a",
+    bg3: "#0a1a13",
+  },
+};
+
+const GAME_PRESETS: Record<string, PalettePreset> = {
+  cs2: {
+    primary: "244, 110, 33",
+    accent: "255, 184, 56",
+    kicker: "#ffb838",
+    bg1: "#1c0a06",
+    bg2: "#0c0805",
+    bg3: "#1d1006",
+  },
+  dota: {
+    primary: "200, 33, 44",
+    accent: "255, 96, 80",
+    kicker: "#ff6a5a",
+    bg1: "#160606",
+    bg2: "#0a0606",
+    bg3: "#1a0a0a",
+  },
+  fc26: {
+    primary: "38, 153, 255",
+    accent: "70, 220, 160",
+    kicker: "#46dca0",
+    bg1: "#04111e",
+    bg2: "#040a14",
+    bg3: "#0a1a26",
+  },
+  clashRoyale: {
+    primary: "56, 138, 255",
+    accent: "244, 200, 92",
+    kicker: "#f4c85c",
+    bg1: "#0a1326",
+    bg2: "#06091a",
+    bg3: "#10172a",
+  },
+};
+
+const matchGamePreset = (game?: string): PalettePreset | null => {
+  const g = (game || "").toLowerCase();
+  if (!g) return null;
+  if (g.includes("cs") || g.includes("counter")) return GAME_PRESETS.cs2;
+  if (g.includes("dota")) return GAME_PRESETS.dota;
+  if (g.includes("fc") || g.includes("fifa")) return GAME_PRESETS.fc26;
+  if (g.includes("clash")) return GAME_PRESETS.clashRoyale;
+  return null;
+};
+
+const toHex = (r: number, g: number, b: number) =>
+  `#${[r, g, b]
+    .map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0"))
+    .join("")}`;
+
+const rgbToHsl = (r: number, g: number, b: number): [number, number, number] => {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0);
+    else if (max === gn) h = (bn - rn) / d + 2;
+    else h = (rn - gn) / d + 4;
+    h /= 6;
+  }
+  return [h, s, l];
+};
+
+const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return [v, v, v];
+  }
+  const hue2rgb = (p: number, q: number, t: number) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [
+    Math.round(hue2rgb(p, q, h + 1 / 3) * 255),
+    Math.round(hue2rgb(p, q, h) * 255),
+    Math.round(hue2rgb(p, q, h - 1 / 3) * 255),
+  ];
+};
+
+const makePresetFromRgb = (r: number, g: number, b: number): PalettePreset => {
+  const [h, s] = rgbToHsl(r, g, b);
+  const accent = hslToRgb((h + 0.55) % 1, Math.min(0.9, s + 0.1), 0.62);
+  const bg1 = hslToRgb(h, Math.min(0.55, s), 0.08);
+  const bg2 = hslToRgb(h, Math.min(0.45, s), 0.04);
+  const bg3 = hslToRgb(h, Math.min(0.5, s), 0.1);
+  return {
+    primary: `${r}, ${g}, ${b}`,
+    accent: `${accent[0]}, ${accent[1]}, ${accent[2]}`,
+    kicker: toHex(r, g, b),
+    bg1: toHex(bg1[0], bg1[1], bg1[2]),
+    bg2: toHex(bg2[0], bg2[1], bg2[2]),
+    bg3: toHex(bg3[0], bg3[1], bg3[2]),
+  };
+};
+
 const templateFileNames: Record<MediaTemplate, string> = {
   matchAnnouncement: "sansara-match-announcement.png",
   matchResult: "sansara-match-result.png",
@@ -167,6 +348,10 @@ export default function AdminMediaCenter({
   const [draft, setDraft] = useState<DraftState>(initialDraft);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
+  const [studioTheme, setStudioTheme] = useState<StudioTheme>("crimson");
+  const [teamPaletteRgb, setTeamPaletteRgb] = useState<[number, number, number] | null>(
+    null
+  );
   const previewRef = useRef<HTMLDivElement | null>(null);
 
   const tournamentOptions = tournaments
@@ -225,6 +410,96 @@ export default function AdminMediaCenter({
 
   const sideA = entityMode === "team" ? selectedTeam1 : selectedPlayer1;
   const sideB = entityMode === "team" ? selectedTeam2 : selectedPlayer2;
+
+  const themeTeamSource =
+    selectedTeam || selectedTeam1 || selectedTeam2 || null;
+  const themeTeamLogo = themeTeamSource?.logo || "";
+
+  useEffect(() => {
+    if (studioTheme !== "team") return;
+    if (!themeTeamLogo) {
+      setTeamPaletteRgb(null);
+      return;
+    }
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const size = 32;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, size, size);
+        const data = ctx.getImageData(0, 0, size, size).data;
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          if (alpha < 128) continue;
+          const rr = data[i];
+          const gg = data[i + 1];
+          const bb = data[i + 2];
+          const max = Math.max(rr, gg, bb);
+          const min = Math.min(rr, gg, bb);
+          if (max - min < 22) continue;
+          if (max < 30 || min > 230) continue;
+          r += rr;
+          g += gg;
+          b += bb;
+          count += 1;
+        }
+        if (count === 0) {
+          setTeamPaletteRgb(null);
+          return;
+        }
+        setTeamPaletteRgb([
+          Math.round(r / count),
+          Math.round(g / count),
+          Math.round(b / count),
+        ]);
+      } catch {
+        setTeamPaletteRgb(null);
+      }
+    };
+    img.onerror = () => {
+      if (!cancelled) setTeamPaletteRgb(null);
+    };
+    img.src = themeTeamLogo;
+    return () => {
+      cancelled = true;
+    };
+  }, [studioTheme, themeTeamLogo]);
+
+  const resolvedPreset = useMemo<PalettePreset>(() => {
+    if (studioTheme === "team") {
+      if (teamPaletteRgb) {
+        const [r, g, b] = teamPaletteRgb;
+        return makePresetFromRgb(r, g, b);
+      }
+      return PALETTE_PRESETS.crimson;
+    }
+    if (studioTheme === "game") {
+      const preset = matchGamePreset(selectedTournament?.game);
+      if (preset) return preset;
+      return PALETTE_PRESETS.crimson;
+    }
+    return PALETTE_PRESETS[studioTheme] || PALETTE_PRESETS.crimson;
+  }, [studioTheme, teamPaletteRgb, selectedTournament]);
+
+  const studioStyle = {
+    "--studio-primary-rgb": resolvedPreset.primary,
+    "--studio-accent-rgb": resolvedPreset.accent,
+    "--studio-kicker": resolvedPreset.kicker,
+    "--studio-bg-1": resolvedPreset.bg1,
+    "--studio-bg-2": resolvedPreset.bg2,
+    "--studio-bg-3": resolvedPreset.bg3,
+  } as CSSProperties;
 
   const title =
     draft.tournamentTitle ||
@@ -356,7 +631,7 @@ export default function AdminMediaCenter({
       const pixelRatio = rect.width > 0 ? 1080 / rect.width : 3;
       const dataUrl = await toPng(previewNode, {
         cacheBust: true,
-        backgroundColor: "#080a11",
+        backgroundColor: resolvedPreset.bg2,
         width: Math.round(rect.width),
         height: Math.round(rect.height),
         pixelRatio,
@@ -902,8 +1177,38 @@ export default function AdminMediaCenter({
 
   const activeTemplate = templates.find((template) => template.id === selectedTemplate);
 
+  const palettesList: { id: StudioTheme; label: string }[] = [
+    { id: "crimson", label: adminText.mediaThemeCrimson || "Crimson Red" },
+    { id: "neonBlue", label: adminText.mediaThemeNeonBlue || "Neon Blue" },
+    { id: "royalPurple", label: adminText.mediaThemeRoyalPurple || "Royal Purple" },
+    { id: "whiteGold", label: adminText.mediaThemeWhiteGold || "White Gold" },
+    { id: "emerald", label: adminText.mediaThemeEmerald || "Emerald Green" },
+    { id: "team", label: adminText.mediaThemeTeam || "Team Adaptive" },
+    { id: "game", label: adminText.mediaThemeGame || "Tournament Game" },
+  ];
+
+  const swatchPreset = (id: StudioTheme): PalettePreset => {
+    if (id === "team") {
+      if (teamPaletteRgb) {
+        const [r, g, b] = teamPaletteRgb;
+        return makePresetFromRgb(r, g, b);
+      }
+      return PALETTE_PRESETS.crimson;
+    }
+    if (id === "game") {
+      const preset = matchGamePreset(selectedTournament?.game);
+      return preset || PALETTE_PRESETS.crimson;
+    }
+    return PALETTE_PRESETS[id];
+  };
+
   return (
-    <section id="admin-section-media" className="panel admin-media-center">
+    <section
+      id="admin-section-media"
+      className="panel admin-media-center"
+      data-studio-theme={studioTheme}
+      style={studioStyle}
+    >
       <div className="media-center-header">
         <div>
           <span className="media-eyebrow">{adminText.mediaStudioEyebrow}</span>
@@ -961,6 +1266,50 @@ export default function AdminMediaCenter({
 
         <div className="media-settings-panel">
           <h3>{adminText.mediaSettings}</h3>
+
+          <div className="media-palette-block">
+            <span className="media-palette-label">
+              {adminText.mediaThemePalette || "Theme palette"}
+            </span>
+            <div className="media-palette-grid">
+              {palettesList.map((palette) => {
+                const preset = swatchPreset(palette.id);
+                const isActive = studioTheme === palette.id;
+                const swatchStyle: CSSProperties = {
+                  background: `linear-gradient(135deg, rgb(${preset.primary}) 0%, rgb(${preset.primary}) 50%, rgb(${preset.accent}) 50%, rgb(${preset.accent}) 100%)`,
+                };
+                return (
+                  <button
+                    key={palette.id}
+                    type="button"
+                    className={`media-palette-btn ${
+                      isActive ? "media-palette-btn-active" : ""
+                    }`}
+                    onClick={() => setStudioTheme(palette.id)}
+                    aria-pressed={isActive}
+                    aria-label={palette.label}
+                    title={palette.label}
+                  >
+                    <span className="media-palette-swatch" style={swatchStyle} />
+                    <small>{palette.label}</small>
+                  </button>
+                );
+              })}
+            </div>
+            {studioTheme === "team" && !teamPaletteRgb ? (
+              <small className="media-palette-hint">
+                {adminText.mediaThemeTeamHint ||
+                  "Select a team in the form to extract its colors."}
+              </small>
+            ) : null}
+            {studioTheme === "game" && !matchGamePreset(selectedTournament?.game) ? (
+              <small className="media-palette-hint">
+                {adminText.mediaThemeGameHint ||
+                  "Select a tournament with a known game (CS 2, Dota 2, FC 26, Clash Royale)."}
+              </small>
+            ) : null}
+          </div>
+
           {renderTemplateFields()}
           <p className="media-settings-note">
             {adminText.mediaExportLocalOnly ||
