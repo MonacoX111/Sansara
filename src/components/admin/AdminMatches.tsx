@@ -12,6 +12,7 @@ import {
   Lang,
   formatTournamentLabel as formatStoredTournamentLabel,
 } from "../../utils/translations";
+import { GAME_OPTIONS } from "../../data";
 
 const matchStatusOptions: MatchStatus[] = [
   "scheduled",
@@ -19,6 +20,19 @@ const matchStatusOptions: MatchStatus[] = [
   "completed",
   "cancelled",
 ];
+
+const getGameOptions = (currentGame: string) => {
+  const options = GAME_OPTIONS.map((game) => ({
+    value: game,
+    label: game,
+  }));
+
+  if (currentGame && !(GAME_OPTIONS as readonly string[]).includes(currentGame)) {
+    return [{ value: currentGame, label: currentGame }, ...options];
+  }
+
+  return options;
+};
 
 type MatchForm = {
   game: string;
@@ -318,14 +332,14 @@ game: nextTournament?.game || "",
             <div className="form-grid two">
               <div className="field-block">
                 <label className="field-label">{adminText.game}</label>
-                <input
-                  className="input"
-                  placeholder={adminText.game}
+                <PremiumSelect
                   value={matchForm.game}
-                  onChange={(e) =>
+                  placeholder={adminText.game}
+                  options={getGameOptions(matchForm.game)}
+                  onChange={(value) =>
                     setMatchForm((prev: MatchForm) => ({
                       ...prev,
-                      game: e.target.value,
+                      game: String(value) === "0" ? "" : String(value),
                     }))
                   }
                 />

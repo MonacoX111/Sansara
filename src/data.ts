@@ -8,12 +8,15 @@ import {
 } from "./types";
 import { makeIcon } from "./utils";
 
+export const GAME_OPTIONS = ["CS 2", "Dota 2", "FC 26", "Clash Royale"] as const;
+
+export type GameTitle = (typeof GAME_OPTIONS)[number];
+
 export const gamesList: GameItem[] = [
   { id: "cs2", name: "CS 2", icon: makeIcon("CS2") },
   { id: "dota2", name: "Dota 2", icon: makeIcon("D2") },
   { id: "fc26", name: "FC 26", icon: makeIcon("FC") },
   { id: "clash", name: "Clash Royale", icon: makeIcon("CR") },
-  { id: "fortnite", name: "Fortnite", icon: makeIcon("FN") },
 ];
 
 export const achievementPlaceholder = (label: string) =>

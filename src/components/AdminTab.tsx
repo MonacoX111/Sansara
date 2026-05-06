@@ -14,8 +14,8 @@ import {
   TournamentTeamRoster,
   Transfer,
 } from "../types";
-import { gamesList } from "../data";
-import { parseList } from "../utils";
+import { GAME_OPTIONS, gamesList } from "../data";
+import { makeIcon, parseList } from "../utils";
 import { t } from "../utils/translations";
 import AdminPlayers from "./admin/AdminPlayers";
 import AdminTeams from "./admin/AdminTeams";
@@ -210,10 +210,22 @@ function MultiGamePicker({
   onChange: (value: string) => void;
 }) {
   const selectedGames = value ? parseList(value) : [];
+  const allowedGameSet = new Set<string>(GAME_OPTIONS);
+  const legacySelectedGames = selectedGames.filter(
+    (game) => !allowedGameSet.has(game)
+  );
+  const gameItems = [
+    ...gamesList.filter((game) => allowedGameSet.has(game.name)),
+    ...legacySelectedGames.map((game) => ({
+      id: `legacy-${game}`,
+      name: game,
+      icon: makeIcon(game.slice(0, 2).toUpperCase()),
+    })),
+  ];
 
   return (
     <div className="picker-grid">
-      {gamesList.map((game) => {
+      {gameItems.map((game) => {
         const isSelected = selectedGames.includes(game.name);
 
         return (

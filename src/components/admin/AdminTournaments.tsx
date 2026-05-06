@@ -5,6 +5,7 @@ import {
   SetStateAction,
 } from "react";
 import { getPlayersForHistoricalTeam } from "../../domain/player/playerTeams";
+import { GAME_OPTIONS } from "../../data";
 
 import {
   Placement,
@@ -66,6 +67,19 @@ const tournamentStatusOptions: TournamentStatus[] = [
   "completed",
   "finished",
 ];
+
+const getGameOptions = (currentGame: string) => {
+  const options = GAME_OPTIONS.map((game) => ({
+    value: game,
+    label: game,
+  }));
+
+  if (currentGame && !(GAME_OPTIONS as readonly string[]).includes(currentGame)) {
+    return [{ value: currentGame, label: currentGame }, ...options];
+  }
+
+  return options;
+};
 
 type Props = {
   adminText: Record<string, string>;
@@ -236,14 +250,14 @@ export default function AdminTournaments(props: Props) {
             <div className="form-grid two">
               <div className="field-block">
                 <label className="field-label">{adminText.game}</label>
-                <input
-                  className="input"
-                  placeholder={adminText.game}
+                <PremiumSelect
                   value={tournamentForm.game}
-                  onChange={(e) =>
+                  placeholder={adminText.game}
+                  options={getGameOptions(tournamentForm.game)}
+                  onChange={(value) =>
                     setTournamentForm((prev) => ({
                       ...prev,
-                      game: e.target.value,
+                      game: String(value) === "0" ? "" : String(value),
                     }))
                   }
                 />
