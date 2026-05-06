@@ -681,20 +681,130 @@ export default function AdminMediaCenter({
     }
 
     if (selectedTemplate === "playoffBracket") {
-      const semiTeams = [
-        sideA?.name || sideA?.nickname || adminText.mediaSemiFinalOne,
-        sideB?.name || sideB?.nickname || adminText.mediaSemiFinalTwo,
-        selectedTournament?.participantIds?.[2]
-          ? teams.find((team) => team.id === selectedTournament.participantIds[2])?.name ||
-            players.find((player) => player.id === selectedTournament.participantIds[2])
-              ?.nickname
-          : adminText.mediaSemiFinalThree,
-        selectedTournament?.participantIds?.[3]
-          ? teams.find((team) => team.id === selectedTournament.participantIds[3])?.name ||
-            players.find((player) => player.id === selectedTournament.participantIds[3])
-              ?.nickname
-          : adminText.mediaSemiFinalFour,
+      const placeholderLabels = [
+        adminText.mediaSemiFinalOne,
+        adminText.mediaSemiFinalTwo,
+        adminText.mediaSemiFinalThree,
+        adminText.mediaSemiFinalFour,
       ];
+
+      const tournamentPlayoffMatches = selectedTournament
+        ? matches.filter(
+            (match) =>
+              Number(match.tournamentId) === selectedTournament.id &&
+              (match.stage === "playoff" || match.stage === "final")
+          )
+        : [];
+
+      const isSemiFinalMatch = (match: Match) => {
+        const sid = (match.seriesId || "").trim().toUpperCase();
+        if (sid.startsWith("SF")) return true;
+        const label = `${match.roundLabel || ""} ${match.round || ""}`.toLowerCase();
+        return (
+          /1\s*\/\s*2/.test(label) ||
+          label.includes("semi") ||
+          label.includes("півфінал") ||
+          label.includes("полуфинал")
+        );
+      };
+
+      const isFinalMatch = (match: Match) => {
+        const sid = (match.seriesId || "").trim().toUpperCase();
+        if (sid === "F1") return true;
+        if (match.stage === "final") return true;
+        const label = `${match.roundLabel || ""} ${match.round || ""}`.toLowerCase().trim();
+        return label === "final" || label === "фінал" || label === "финал";
+      };
+
+      const semiMatches = tournamentPlayoffMatches
+        .filter(isSemiFinalMatch)
+        .sort((a, b) => {
+          const sa = (a.seriesId || "").toUpperCase();
+          const sb = (b.seriesId || "").toUpperCase();
+          if (sa && sb && sa !== sb) return sa.localeCompare(sb);
+          return (a.order ?? a.id) - (b.order ?? b.id);
+        })
+        .slice(0, 2);
+
+      const finalMatch =
+        tournamentPlayoffMatches.find(isFinalMatch) || null;
+
+      const resolveParticipantName = (
+        match: Match | null,
+        side: 1 | 2
+      ): string | null => {
+        if (!match) return null;
+        const isTeam = match.matchType === "team";
+        const id = isTeam
+          ? side === 1
+            ? match.team1
+            : match.team2
+          : side === 1
+          ? match.player1
+          : match.player2;
+        if (!id) return null;
+        if (isTeam) return teams.find((team) => team.id === id)?.name || null;
+        return players.find((player) => player.id === id)?.nickname || null;
+      };
+
+      const semiSlots: { name: string; isPlaceholder: boolean }[] = [];
+      for (let i = 0; i < 2; i += 1) {
+        const semi = semiMatches[i] || null;
+        const nameA = resolveParticipantName(semi, 1);
+        const nameB = resolveParticipantName(semi, 2);
+        semiSlots.push({
+          name: nameA || placeholderLabels[i * 2],
+          isPlaceholder: !nameA,
+        });
+        semiSlots.push({
+          name: nameB || placeholderLabels[i * 2 + 1],
+          isPlaceholder: !nameB,
+        });
+      }
+
+      // Legacy fallback: if there are no playoff matches yet, fall back to
+      // the manually selected match + tournament.participantIds order.
+      if (semiMatches.length === 0) {
+        const fallbackA = sideA?.name || sideA?.nickname;
+        const fallbackB = sideB?.name || sideB?.nickname;
+        if (fallbackA) semiSlots[0] = { name: fallbackA, isPlaceholder: false };
+        if (fallbackB) semiSlots[1] = { name: fallbackB, isPlaceholder: false };
+        const id3 = selectedTournament?.participantIds?.[2];
+        const id4 = selectedTournament?.participantIds?.[3];
+        const name3 = id3
+          ? teams.find((team) => team.id === id3)?.name ||
+            players.find((player) => player.id === id3)?.nickname ||
+            null
+          : null;
+        const name4 = id4
+          ? teams.find((team) => team.id === id4)?.name ||
+            players.find((player) => player.id === id4)?.nickname ||
+            null
+          : null;
+        if (name3) semiSlots[2] = { name: name3, isPlaceholder: false };
+        if (name4) semiSlots[3] = { name: name4, isPlaceholder: false };
+      }
+
+      const finalParticipantA = resolveParticipantName(finalMatch, 1);
+      const finalParticipantB = resolveParticipantName(finalMatch, 2);
+      const finalWinnerId =
+        finalMatch?.winnerTeamId || finalMatch?.winnerId || 0;
+      const finalWinnerName =
+        finalWinnerId && finalMatch
+          ? finalMatch.matchType === "team"
+            ? teams.find((team) => team.id === finalWinnerId)?.name || null
+            : players.find((player) => player.id === finalWinnerId)?.nickname ||
+              null
+          : null;
+
+      const finalSlotText =
+        draft.finalPlaceholder ||
+        (finalParticipantA && finalParticipantB
+          ? `${finalParticipantA} vs ${finalParticipantB}`
+          : finalParticipantA ||
+            finalParticipantB ||
+            adminText.mediaFinalPlaceholderText);
+      const winnerSlotText = finalWinnerName || adminText.winner;
 
       return (
         <div className="media-preview-section media-preview-bracket">
@@ -702,18 +812,16 @@ export default function AdminMediaCenter({
           <h3>{title}</h3>
           <div className="media-bracket-mini">
             <div className="media-bracket-round">
-              {semiTeams.map((teamName) => (
-                <div className="media-bracket-slot" key={teamName}>
-                  {teamName}
+              {semiSlots.map((slot, index) => (
+                <div className="media-bracket-slot" key={`semi-${index}`}>
+                  {slot.name}
                 </div>
               ))}
             </div>
             <div className="media-bracket-round media-bracket-final">
-              <div className="media-bracket-slot">
-                {draft.finalPlaceholder || adminText.mediaFinalPlaceholderText}
-              </div>
+              <div className="media-bracket-slot">{finalSlotText}</div>
               <div className="media-bracket-slot media-bracket-winner">
-                {adminText.winner}
+                {winnerSlotText}
               </div>
             </div>
           </div>
