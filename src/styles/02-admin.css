@@ -1548,6 +1548,471 @@
   }
 }
 
+/* === STUDIO STYLE PRESETS === */
+/* Each preset is applied as `.studio-style-<id>` on .admin-media-center.
+   It defines its own --studio-* color variables (overridden by inline style
+   only when the user picks a non-auto palette) and may add atmosphere via
+   the existing .media-poster-grid / .media-poster-glow layers and a preview
+   ::after layer for textures, scanlines, vignettes, etc. */
+
+.admin-media-center .media-story-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+/* --- Default (existing crimson red dark esports) --- */
+.admin-media-center.studio-style-default {
+  --studio-primary-rgb: 255, 59, 95;
+  --studio-accent-rgb: 67, 208, 255;
+  --studio-kicker: #ff4d6d;
+  --studio-bg-1: #15070d;
+  --studio-bg-2: #080a11;
+  --studio-bg-3: #111824;
+}
+
+/* --- Cyberpunk: neon cyan/magenta + dense holographic grid + scanlines --- */
+.admin-media-center.studio-style-cyberpunk {
+  --studio-primary-rgb: 0, 234, 255;
+  --studio-accent-rgb: 255, 46, 213;
+  --studio-kicker: #ff2ed5;
+  --studio-bg-1: #04141c;
+  --studio-bg-2: #0a0418;
+  --studio-bg-3: #160d2c;
+}
+
+.studio-style-cyberpunk .media-poster-grid {
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(0, 234, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 46, 213, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.studio-style-cyberpunk .media-poster-glow {
+  background:
+    linear-gradient(115deg, rgba(0, 234, 255, 0.34), transparent 38%),
+    radial-gradient(circle at 80% 78%, rgba(255, 46, 213, 0.32), transparent 36%),
+    radial-gradient(circle at 18% 92%, rgba(0, 234, 255, 0.18), transparent 40%);
+}
+
+.studio-style-cyberpunk .media-story-preview::after {
+  opacity: 1;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0 1px,
+      transparent 1px 3px
+    );
+  mix-blend-mode: overlay;
+}
+
+.studio-style-cyberpunk .media-kicker,
+.studio-style-cyberpunk .media-eyebrow {
+  letter-spacing: 0.32em;
+}
+
+/* --- Minimal: clean dark, typography-focused, low glow --- */
+.admin-media-center.studio-style-minimal {
+  --studio-primary-rgb: 230, 232, 238;
+  --studio-accent-rgb: 150, 160, 180;
+  --studio-kicker: #e6e8ee;
+  --studio-bg-1: #0d1016;
+  --studio-bg-2: #0a0c11;
+  --studio-bg-3: #11141b;
+}
+
+.studio-style-minimal .media-poster-grid {
+  opacity: 0;
+}
+
+.studio-style-minimal .media-poster-glow {
+  background: radial-gradient(
+    circle at 50% 12%,
+    rgba(255, 255, 255, 0.06),
+    transparent 55%
+  );
+}
+
+.studio-style-minimal .media-story-preview {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 22px 60px rgba(0, 0, 0, 0.5);
+}
+
+.studio-style-minimal .media-kicker,
+.studio-style-minimal .media-eyebrow {
+  letter-spacing: 0.24em;
+  font-weight: 700;
+}
+
+.studio-style-minimal .media-vs {
+  text-shadow: none;
+}
+
+/* --- Horror: dark red/black + smoky vignette + noise distress --- */
+.admin-media-center.studio-style-horror {
+  --studio-primary-rgb: 204, 18, 32;
+  --studio-accent-rgb: 120, 12, 18;
+  --studio-kicker: #cc1220;
+  --studio-bg-1: #0d0303;
+  --studio-bg-2: #060101;
+  --studio-bg-3: #140404;
+}
+
+.studio-style-horror .media-poster-grid {
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.6  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 220px 220px;
+  mix-blend-mode: screen;
+}
+
+.studio-style-horror .media-poster-glow {
+  background:
+    radial-gradient(circle at 50% 16%, rgba(204, 18, 32, 0.42), transparent 38%),
+    radial-gradient(circle at 50% 110%, rgba(40, 0, 4, 0.92), transparent 60%),
+    linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.55));
+}
+
+.studio-style-horror .media-story-preview::after {
+  opacity: 1;
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 40%,
+      rgba(0, 0, 0, 0.65) 95%
+    );
+}
+
+.studio-style-horror .media-vs {
+  text-shadow:
+    0 0 18px rgba(204, 18, 32, 0.85),
+    0 0 32px rgba(204, 18, 32, 0.55);
+}
+
+.studio-style-horror .media-kicker,
+.studio-style-horror .media-eyebrow {
+  letter-spacing: 0.28em;
+  font-style: italic;
+}
+
+/* --- Premium Gold: black + warm gold sheen, soft luxe --- */
+.admin-media-center.studio-style-premiumGold {
+  --studio-primary-rgb: 230, 194, 98;
+  --studio-accent-rgb: 255, 232, 160;
+  --studio-kicker: #e6c262;
+  --studio-bg-1: #0a0804;
+  --studio-bg-2: #050402;
+  --studio-bg-3: #100c06;
+}
+
+.studio-style-premiumGold .media-poster-grid {
+  opacity: 0.18;
+  background-image:
+    linear-gradient(
+      135deg,
+      transparent 40%,
+      rgba(230, 194, 98, 0.16) 50%,
+      transparent 60%
+    );
+  background-size: 100% 100%;
+}
+
+.studio-style-premiumGold .media-poster-glow {
+  background:
+    radial-gradient(circle at 30% 14%, rgba(255, 232, 160, 0.28), transparent 40%),
+    radial-gradient(circle at 78% 84%, rgba(230, 194, 98, 0.22), transparent 42%);
+}
+
+.studio-style-premiumGold .media-story-preview {
+  border-color: rgba(230, 194, 98, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(255, 232, 160, 0.14) inset,
+    0 0 36px rgba(230, 194, 98, 0.22),
+    0 28px 70px rgba(0, 0, 0, 0.55);
+}
+
+.studio-style-premiumGold .media-kicker,
+.studio-style-premiumGold .media-eyebrow {
+  letter-spacing: 0.34em;
+  font-weight: 800;
+}
+
+.studio-style-premiumGold .media-bracket-winner {
+  border-color: rgba(255, 232, 160, 0.7);
+  box-shadow: 0 0 22px rgba(230, 194, 98, 0.32);
+}
+
+/* --- VCT: cinematic red/black with sharp diagonal cuts --- */
+.admin-media-center.studio-style-vct {
+  --studio-primary-rgb: 255, 70, 85;
+  --studio-accent-rgb: 24, 30, 42;
+  --studio-kicker: #ff4655;
+  --studio-bg-1: #0e0608;
+  --studio-bg-2: #060406;
+  --studio-bg-3: #16080c;
+}
+
+.studio-style-vct .media-poster-grid {
+  opacity: 0.22;
+  background-image: repeating-linear-gradient(
+    -28deg,
+    transparent 0 28px,
+    rgba(255, 70, 85, 0.1) 28px 30px
+  );
+  background-size: auto;
+}
+
+.studio-style-vct .media-poster-glow {
+  background:
+    linear-gradient(
+      180deg,
+      transparent 30%,
+      rgba(255, 70, 85, 0.28) 78%,
+      rgba(0, 0, 0, 0.7) 100%
+    ),
+    radial-gradient(circle at 50% 8%, rgba(255, 70, 85, 0.26), transparent 40%);
+}
+
+.studio-style-vct .media-story-preview {
+  border-radius: 14px;
+}
+
+.studio-style-vct .media-kicker,
+.studio-style-vct .media-eyebrow {
+  letter-spacing: 0.3em;
+  font-weight: 950;
+}
+
+/* --- FACEIT: aggressive orange stripes on near-black --- */
+.admin-media-center.studio-style-faceit {
+  --studio-primary-rgb: 255, 86, 28;
+  --studio-accent-rgb: 24, 24, 28;
+  --studio-kicker: #ff561c;
+  --studio-bg-1: #15080a;
+  --studio-bg-2: #080606;
+  --studio-bg-3: #180a08;
+}
+
+.studio-style-faceit .media-poster-grid {
+  opacity: 0.28;
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0 22px,
+    rgba(255, 86, 28, 0.16) 22px 24px
+  );
+  background-size: auto;
+}
+
+.studio-style-faceit .media-poster-glow {
+  background:
+    radial-gradient(circle at 12% 88%, rgba(255, 86, 28, 0.5), transparent 42%),
+    linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.45));
+}
+
+.studio-style-faceit .media-story-preview {
+  border-radius: 16px;
+  border-color: rgba(255, 86, 28, 0.55);
+}
+
+.studio-style-faceit .media-kicker,
+.studio-style-faceit .media-eyebrow {
+  letter-spacing: 0.26em;
+  font-weight: 950;
+}
+
+/* --- Anime: vibrant gradient bloom, big halo, energetic --- */
+.admin-media-center.studio-style-anime {
+  --studio-primary-rgb: 255, 99, 168;
+  --studio-accent-rgb: 98, 212, 255;
+  --studio-kicker: #ff63a8;
+  --studio-bg-1: #1a0820;
+  --studio-bg-2: #0a0518;
+  --studio-bg-3: #150a28;
+}
+
+.studio-style-anime .media-poster-grid {
+  opacity: 0.3;
+  background-image: repeating-conic-gradient(
+    from 0deg at 50% 18%,
+    rgba(255, 255, 255, 0.06) 0deg 6deg,
+    transparent 6deg 12deg
+  );
+  background-size: auto;
+}
+
+.studio-style-anime .media-poster-glow {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 99, 168, 0.42), transparent 48%),
+    radial-gradient(circle at 80% 86%, rgba(98, 212, 255, 0.32), transparent 42%),
+    linear-gradient(180deg, transparent 60%, rgba(255, 99, 168, 0.18));
+}
+
+.studio-style-anime .media-story-preview {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 50px rgba(255, 99, 168, 0.42),
+    0 28px 70px rgba(0, 0, 0, 0.45);
+}
+
+.studio-style-anime .media-vs {
+  text-shadow:
+    0 0 22px rgba(255, 99, 168, 0.85),
+    0 0 36px rgba(98, 212, 255, 0.55);
+}
+
+.studio-style-anime .media-kicker,
+.studio-style-anime .media-eyebrow {
+  letter-spacing: 0.22em;
+  font-weight: 950;
+}
+
+/* === STYLE PRESET SELECTOR (cards in Studio Settings) === */
+
+.media-preset-block {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--studio-primary-rgb), 0.05),
+      rgba(var(--studio-accent-rgb), 0.02)
+    ),
+    rgba(255, 255, 255, 0.018);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.media-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.media-preset-card {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.media-preset-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--studio-primary-rgb), 0.5);
+  background: rgba(var(--studio-primary-rgb), 0.07);
+}
+
+.media-preset-card-active {
+  border-color: rgba(var(--studio-primary-rgb), 0.7);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--studio-primary-rgb), 0.18),
+      rgba(var(--studio-accent-rgb), 0.08)
+    ),
+    rgba(18, 22, 32, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(var(--studio-primary-rgb), 0.22) inset,
+    0 0 18px rgba(var(--studio-primary-rgb), 0.28);
+}
+
+.media-preset-thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.media-preset-thumb-dot {
+  position: absolute;
+  inset: -8px -8px auto auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.media-preset-thumb-bar {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  height: 4px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.media-preset-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.media-preset-meta strong {
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-preset-meta small {
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+@media (max-width: 720px) {
+  .media-preset-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .media-preset-card {
+    grid-template-columns: 38px 1fr;
+    padding: 8px;
+  }
+
+  .media-preset-thumb {
+    width: 38px;
+    height: 38px;
+  }
+
+  .media-preset-meta strong {
+    font-size: 12px;
+  }
+
+  .media-preset-meta small {
+    font-size: 10px;
+  }
+}
+
 /* === PLAYER / PROFILE INFO BOX === */
 
 .player-head-info,

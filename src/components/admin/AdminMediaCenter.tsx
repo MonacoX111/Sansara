@@ -124,6 +124,7 @@ const initialDraft: DraftState = {
 };
 
 type StudioTheme =
+  | "auto"
   | "crimson"
   | "neonBlue"
   | "royalPurple"
@@ -131,6 +132,16 @@ type StudioTheme =
   | "emerald"
   | "team"
   | "game";
+
+type StylePreset =
+  | "default"
+  | "cyberpunk"
+  | "minimal"
+  | "horror"
+  | "premiumGold"
+  | "vct"
+  | "faceit"
+  | "anime";
 
 type PalettePreset = {
   primary: string;
@@ -141,8 +152,75 @@ type PalettePreset = {
   bg3: string;
 };
 
+const STYLE_PRESETS: Record<StylePreset, PalettePreset> = {
+  default: {
+    primary: "255, 59, 95",
+    accent: "67, 208, 255",
+    kicker: "#ff4d6d",
+    bg1: "#15070d",
+    bg2: "#080a11",
+    bg3: "#111824",
+  },
+  cyberpunk: {
+    primary: "0, 234, 255",
+    accent: "255, 46, 213",
+    kicker: "#ff2ed5",
+    bg1: "#04141c",
+    bg2: "#0a0418",
+    bg3: "#160d2c",
+  },
+  minimal: {
+    primary: "230, 232, 238",
+    accent: "150, 160, 180",
+    kicker: "#e6e8ee",
+    bg1: "#0d1016",
+    bg2: "#0a0c11",
+    bg3: "#11141b",
+  },
+  horror: {
+    primary: "204, 18, 32",
+    accent: "120, 12, 18",
+    kicker: "#cc1220",
+    bg1: "#0d0303",
+    bg2: "#060101",
+    bg3: "#140404",
+  },
+  premiumGold: {
+    primary: "230, 194, 98",
+    accent: "255, 232, 160",
+    kicker: "#e6c262",
+    bg1: "#0a0804",
+    bg2: "#050402",
+    bg3: "#100c06",
+  },
+  vct: {
+    primary: "255, 70, 85",
+    accent: "24, 30, 42",
+    kicker: "#ff4655",
+    bg1: "#0e0608",
+    bg2: "#060406",
+    bg3: "#16080c",
+  },
+  faceit: {
+    primary: "255, 86, 28",
+    accent: "24, 24, 28",
+    kicker: "#ff561c",
+    bg1: "#15080a",
+    bg2: "#080606",
+    bg3: "#180a08",
+  },
+  anime: {
+    primary: "255, 99, 168",
+    accent: "98, 212, 255",
+    kicker: "#ff63a8",
+    bg1: "#1a0820",
+    bg2: "#0a0518",
+    bg3: "#150a28",
+  },
+};
+
 const PALETTE_PRESETS: Record<
-  Exclude<StudioTheme, "team" | "game">,
+  Exclude<StudioTheme, "auto" | "team" | "game">,
   PalettePreset
 > = {
   crimson: {
@@ -348,7 +426,8 @@ export default function AdminMediaCenter({
   const [draft, setDraft] = useState<DraftState>(initialDraft);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
-  const [studioTheme, setStudioTheme] = useState<StudioTheme>("crimson");
+  const [studioTheme, setStudioTheme] = useState<StudioTheme>("auto");
+  const [stylePreset, setStylePreset] = useState<StylePreset>("default");
   const [teamPaletteRgb, setTeamPaletteRgb] = useState<[number, number, number] | null>(
     null
   );
@@ -476,30 +555,39 @@ export default function AdminMediaCenter({
     };
   }, [studioTheme, themeTeamLogo]);
 
+  const presetIntrinsic = STYLE_PRESETS[stylePreset] || STYLE_PRESETS.default;
+
   const resolvedPreset = useMemo<PalettePreset>(() => {
+    if (studioTheme === "auto") return presetIntrinsic;
     if (studioTheme === "team") {
       if (teamPaletteRgb) {
         const [r, g, b] = teamPaletteRgb;
         return makePresetFromRgb(r, g, b);
       }
-      return PALETTE_PRESETS.crimson;
+      return presetIntrinsic;
     }
     if (studioTheme === "game") {
       const preset = matchGamePreset(selectedTournament?.game);
       if (preset) return preset;
-      return PALETTE_PRESETS.crimson;
+      return presetIntrinsic;
     }
-    return PALETTE_PRESETS[studioTheme] || PALETTE_PRESETS.crimson;
-  }, [studioTheme, teamPaletteRgb, selectedTournament]);
+    return PALETTE_PRESETS[studioTheme] || presetIntrinsic;
+  }, [studioTheme, teamPaletteRgb, selectedTournament, presetIntrinsic]);
 
-  const studioStyle = {
-    "--studio-primary-rgb": resolvedPreset.primary,
-    "--studio-accent-rgb": resolvedPreset.accent,
-    "--studio-kicker": resolvedPreset.kicker,
-    "--studio-bg-1": resolvedPreset.bg1,
-    "--studio-bg-2": resolvedPreset.bg2,
-    "--studio-bg-3": resolvedPreset.bg3,
-  } as CSSProperties;
+  // Inline CSS variables override the preset class only when the user has
+  // explicitly chosen a palette other than "auto". This lets each preset's
+  // intrinsic colors win by default while still allowing palette refinement.
+  const studioStyle: CSSProperties =
+    studioTheme === "auto"
+      ? {}
+      : ({
+          "--studio-primary-rgb": resolvedPreset.primary,
+          "--studio-accent-rgb": resolvedPreset.accent,
+          "--studio-kicker": resolvedPreset.kicker,
+          "--studio-bg-1": resolvedPreset.bg1,
+          "--studio-bg-2": resolvedPreset.bg2,
+          "--studio-bg-3": resolvedPreset.bg3,
+        } as CSSProperties);
 
   const title =
     draft.tournamentTitle ||
@@ -1178,6 +1266,7 @@ export default function AdminMediaCenter({
   const activeTemplate = templates.find((template) => template.id === selectedTemplate);
 
   const palettesList: { id: StudioTheme; label: string }[] = [
+    { id: "auto", label: adminText.mediaThemeAuto || "Auto (preset)" },
     { id: "crimson", label: adminText.mediaThemeCrimson || "Crimson Red" },
     { id: "neonBlue", label: adminText.mediaThemeNeonBlue || "Neon Blue" },
     { id: "royalPurple", label: adminText.mediaThemeRoyalPurple || "Royal Purple" },
@@ -1188,25 +1277,70 @@ export default function AdminMediaCenter({
   ];
 
   const swatchPreset = (id: StudioTheme): PalettePreset => {
+    if (id === "auto") return presetIntrinsic;
     if (id === "team") {
       if (teamPaletteRgb) {
         const [r, g, b] = teamPaletteRgb;
         return makePresetFromRgb(r, g, b);
       }
-      return PALETTE_PRESETS.crimson;
+      return presetIntrinsic;
     }
     if (id === "game") {
       const preset = matchGamePreset(selectedTournament?.game);
-      return preset || PALETTE_PRESETS.crimson;
+      return preset || presetIntrinsic;
     }
     return PALETTE_PRESETS[id];
   };
 
+  const presetsList: { id: StylePreset; label: string; description: string }[] = [
+    {
+      id: "default",
+      label: adminText.mediaPresetDefault || "Default Esports",
+      description: adminText.mediaPresetDefaultDesc || "Classic red & dark glow",
+    },
+    {
+      id: "cyberpunk",
+      label: adminText.mediaPresetCyberpunk || "Cyberpunk",
+      description: adminText.mediaPresetCyberpunkDesc || "Neon cyan & magenta grid",
+    },
+    {
+      id: "minimal",
+      label: adminText.mediaPresetMinimal || "Minimal",
+      description: adminText.mediaPresetMinimalDesc || "Clean dark, soft glow",
+    },
+    {
+      id: "horror",
+      label: adminText.mediaPresetHorror || "Horror",
+      description: adminText.mediaPresetHorrorDesc || "Dark red, smoky atmosphere",
+    },
+    {
+      id: "premiumGold",
+      label: adminText.mediaPresetPremium || "Premium Gold",
+      description: adminText.mediaPresetPremiumDesc || "Black & gold luxury",
+    },
+    {
+      id: "vct",
+      label: adminText.mediaPresetVct || "VCT Style",
+      description: adminText.mediaPresetVctDesc || "Cinematic red & black",
+    },
+    {
+      id: "faceit",
+      label: adminText.mediaPresetFaceit || "FACEIT Style",
+      description: adminText.mediaPresetFaceitDesc || "Aggressive orange & dark",
+    },
+    {
+      id: "anime",
+      label: adminText.mediaPresetAnime || "Anime",
+      description: adminText.mediaPresetAnimeDesc || "Vibrant bloom & gradient",
+    },
+  ];
+
   return (
     <section
       id="admin-section-media"
-      className="panel admin-media-center"
+      className={`panel admin-media-center studio-style-${stylePreset}`}
       data-studio-theme={studioTheme}
+      data-studio-style={stylePreset}
       style={studioStyle}
     >
       <div className="media-center-header">
@@ -1266,6 +1400,48 @@ export default function AdminMediaCenter({
 
         <div className="media-settings-panel">
           <h3>{adminText.mediaSettings}</h3>
+
+          <div className="media-preset-block">
+            <span className="media-palette-label">
+              {adminText.mediaStylePreset || "Style preset"}
+            </span>
+            <div className="media-preset-grid">
+              {presetsList.map((preset) => {
+                const colors = STYLE_PRESETS[preset.id];
+                const isActive = stylePreset === preset.id;
+                const thumbStyle: CSSProperties = {
+                  background: `linear-gradient(160deg, ${colors.bg1} 0%, ${colors.bg2} 50%, ${colors.bg3} 100%)`,
+                };
+                const accentDotStyle: CSSProperties = {
+                  background: `radial-gradient(circle, rgba(${colors.primary}, 0.95), rgba(${colors.primary}, 0) 70%)`,
+                };
+                const accentBarStyle: CSSProperties = {
+                  background: `linear-gradient(90deg, rgb(${colors.primary}), rgb(${colors.accent}))`,
+                };
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className={`media-preset-card studio-style-${preset.id} ${
+                      isActive ? "media-preset-card-active" : ""
+                    }`}
+                    onClick={() => setStylePreset(preset.id)}
+                    aria-pressed={isActive}
+                    title={preset.description}
+                  >
+                    <span className="media-preset-thumb" style={thumbStyle}>
+                      <span className="media-preset-thumb-dot" style={accentDotStyle} />
+                      <span className="media-preset-thumb-bar" style={accentBarStyle} />
+                    </span>
+                    <span className="media-preset-meta">
+                      <strong>{preset.label}</strong>
+                      <small>{preset.description}</small>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="media-palette-block">
             <span className="media-palette-label">
