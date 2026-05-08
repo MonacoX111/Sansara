@@ -631,6 +631,19 @@ export default function AdminMediaCenter({
     "";
   const autoFinalScore = tournamentFinalMatch?.score || "";
   const autoPrize = selectedTournament?.prize || "";
+  // Map (e.g. "Mirage") is a CS2-only concept. Detect CS2 by tournament.game
+  // or by keywords in tournament.title so we never hardcode an ID.
+  const cs2HaystackRaw = `${selectedTournament?.game || ""} ${
+    selectedTournament?.title || ""
+  }`.toLowerCase();
+  const isCs2Tournament =
+    cs2HaystackRaw.includes("cs2") ||
+    cs2HaystackRaw.includes("cs:go") ||
+    cs2HaystackRaw.includes("csgo") ||
+    cs2HaystackRaw.includes("counter-strike") ||
+    cs2HaystackRaw.includes("counter strike") ||
+    cs2HaystackRaw.includes("counter") ||
+    /\bcs\b/.test(cs2HaystackRaw);
   // Is the selected match already completed? (used to decide whether to show
   // TBD placeholders on Match Result.)
   const isMatchCompleted = selectedMatch?.status === "completed";
@@ -1212,15 +1225,17 @@ export default function AdminMediaCenter({
               onChange={handleTextChange("score")}
             />
           </div>
-          <div className="field-block">
-            <label className="field-label">{adminText.mediaMap}</label>
-            <input
-              className="input"
-              value={draft.map}
-              placeholder={autoMap || "Mirage"}
-              onChange={handleTextChange("map")}
-            />
-          </div>
+          {isCs2Tournament ? (
+            <div className="field-block">
+              <label className="field-label">{adminText.mediaMap}</label>
+              <input
+                className="input"
+                value={draft.map}
+                placeholder={autoMap || "Mirage"}
+                onChange={handleTextChange("map")}
+              />
+            </div>
+          ) : null}
         </>
       ) : null}
 
@@ -1536,10 +1551,14 @@ export default function AdminMediaCenter({
     const isResult = selectedTemplate === "matchResult";
     const markWinnerA = isResult && sideAWinner;
     const markWinnerB = isResult && sideBWinner;
-    const resultMap = draft.map || autoMap;
-    const resultMapLabel = resultMap || (isMatchCompleted ? "" : "Map TBD");
-    const metaMvp =
-      resolvedMvpPlayer?.nickname || (isResult ? "" : "MVP");
+    // Map is CS2-only: for any other game show the date in its place.
+    const resultMap = isCs2Tournament ? draft.map || autoMap : "";
+    const resultMapLabel = isCs2Tournament
+      ? resultMap || (isMatchCompleted ? "" : "Map TBD")
+      : dateLabel;
+    const metaMvp = isResult
+      ? resolvedMvpPlayer?.nickname || ""
+      : "";
 
     return (
       <div className="media-preview-section media-preview-match">
