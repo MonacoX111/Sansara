@@ -83,6 +83,7 @@ type DraftState = {
   dateTime: string;
   score: string;
   map: string;
+  seriesLabel: string;
   highlight: string;
   prizePool: string;
   finalScore: string;
@@ -150,6 +151,7 @@ const initialDraft: DraftState = {
   dateTime: "",
   score: "",
   map: "",
+  seriesLabel: "",
   highlight: "",
   prizePool: "",
   finalScore: "",
@@ -1262,6 +1264,17 @@ export default function AdminMediaCenter({
               />
             </div>
           ) : null}
+          <div className="field-block">
+            <label className="field-label">
+              {adminText.mediaSeriesLabel || "Series / Map label"}
+            </label>
+            <input
+              className="input"
+              value={draft.seriesLabel}
+              placeholder={autoFormat}
+              onChange={handleTextChange("seriesLabel")}
+            />
+          </div>
         </>
       ) : null}
 
@@ -1625,7 +1638,7 @@ export default function AdminMediaCenter({
         </div>
         <div className="media-match-meta">
           <span>{isResult ? resultMapLabel : dateLabel}</span>
-          <span>{format}</span>
+          <span>{isResult ? draft.seriesLabel || autoFormat : format}</span>
           {metaMvp ? <span>{metaMvp}</span> : null}
         </div>
       </div>
