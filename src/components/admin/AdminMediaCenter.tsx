@@ -569,20 +569,48 @@ export default function AdminMediaCenter({
   const selectedPlayer = players.find((player) => player.id === draft.playerId) || null;
   const selectedMvp = players.find((player) => player.id === draft.mvpId) || null;
   const selectedTeam = teams.find((team) => team.id === draft.teamId) || null;
-  const selectedTeam1 =
-    teams.find((team) => team.id === draft.team1Id || team.id === selectedMatch?.team1) ||
-    null;
-  const selectedTeam2 =
-    teams.find((team) => team.id === draft.team2Id || team.id === selectedMatch?.team2) ||
-    null;
-  const selectedPlayer1 =
-    players.find(
-      (player) => player.id === draft.player1Id || player.id === selectedMatch?.player1
-    ) || null;
-  const selectedPlayer2 =
-    players.find(
-      (player) => player.id === draft.player2Id || player.id === selectedMatch?.player2
-    ) || null;
+
+  // Deterministic precedence: manual override > selected match > null.
+  // (Previously a single `find` with `||` inside the predicate, which returned
+  // whichever ID happened to come first in the underlying array.)
+  const resolveTeamSide = (
+    overrideId: number,
+    matchSideId: number | undefined
+  ): Team | null => {
+    if (overrideId) {
+      const manual = teams.find((team) => team.id === overrideId);
+      if (manual) return manual;
+    }
+    if (matchSideId) {
+      return teams.find((team) => team.id === matchSideId) || null;
+    }
+    return null;
+  };
+
+  const resolvePlayerSide = (
+    overrideId: number,
+    matchSideId: number | undefined
+  ): Player | null => {
+    if (overrideId) {
+      const manual = players.find((player) => player.id === overrideId);
+      if (manual) return manual;
+    }
+    if (matchSideId) {
+      return players.find((player) => player.id === matchSideId) || null;
+    }
+    return null;
+  };
+
+  const selectedTeam1 = resolveTeamSide(draft.team1Id, selectedMatch?.team1);
+  const selectedTeam2 = resolveTeamSide(draft.team2Id, selectedMatch?.team2);
+  const selectedPlayer1 = resolvePlayerSide(
+    draft.player1Id,
+    selectedMatch?.player1
+  );
+  const selectedPlayer2 = resolvePlayerSide(
+    draft.player2Id,
+    selectedMatch?.player2
+  );
 
   const sideA = entityMode === "team" ? selectedTeam1 : selectedPlayer1;
   const sideB = entityMode === "team" ? selectedTeam2 : selectedPlayer2;
@@ -590,17 +618,24 @@ export default function AdminMediaCenter({
   // === AUTOFILL DERIVATIONS ===
   // Real match/tournament data is the source of truth. Every field below is a
   // fallback that kicks in only when the admin has not typed a manual override.
-  const tournamentFinalMatch = useMemo(
-    () =>
-      selectedTournament
-        ? matches.find(
-            (match) =>
-              Number(match.tournamentId) === selectedTournament.id &&
-              match.stage === "final"
-          ) || null
-        : null,
-    [matches, selectedTournament]
-  );
+  // Prefer the canonical Grand Final (seriesId === "F1"); otherwise pick the
+  // newest "final" match by id descending. (Previously `.find(stage==="final")`
+  // returned the first match in array order, which could pick the wrong final
+  // when an upper/lower bracket split or a 3rd-place match was mistagged.)
+  const tournamentFinalMatch = useMemo(() => {
+    if (!selectedTournament) return null;
+    const finals = matches.filter(
+      (match) =>
+        Number(match.tournamentId) === selectedTournament.id &&
+        match.stage === "final"
+    );
+    if (finals.length === 0) return null;
+    const grand = finals.find(
+      (match) => (match.seriesId || "").trim().toUpperCase() === "F1"
+    );
+    if (grand) return grand;
+    return finals.slice().sort((a, b) => b.id - a.id)[0] || null;
+  }, [matches, selectedTournament]);
 
   // MVP resolution: draft.mvpId > tournament.mvpId when tournament has one.
   // This lets a completed tournament's MVP flow into Match Result / MVP Card /
@@ -652,11 +687,19 @@ export default function AdminMediaCenter({
 
   const autoScore = selectedMatch?.score || "";
   const autoDate = selectedMatch?.date || selectedTournament?.date || "";
-  const autoStage =
-    selectedMatch?.roundLabel ||
-    selectedMatch?.groupName ||
-    selectedMatch?.round ||
-    "";
+  // Stage label: group-stage matches should show the group first; playoff /
+  // final / showmatch matches should show their round label first.
+  const autoStage = selectedMatch
+    ? selectedMatch.stage === "group"
+      ? selectedMatch.groupName ||
+        selectedMatch.roundLabel ||
+        selectedMatch.round ||
+        ""
+      : selectedMatch.roundLabel ||
+        selectedMatch.groupName ||
+        selectedMatch.round ||
+        ""
+    : "";
   const autoFinalScore = tournamentFinalMatch?.score || "";
   const autoPrize = selectedTournament?.prize || "";
   // Map (e.g. "Mirage") is a CS2-only concept. Detect CS2 by tournament.game
@@ -741,6 +784,29 @@ export default function AdminMediaCenter({
     };
   }, [studioTheme, themeTeamLogo]);
 
+  // Reset stale child state when the tournament changes. Keeps cross-tournament
+  // leakage (matchId, side IDs, per-match draft fields) from surfacing on the
+  // new tournament. Tracks the previous tournamentId in a ref so the effect is
+  // a no-op on the initial mount.
+  const previousTournamentIdRef = useRef(draft.tournamentId);
+  useEffect(() => {
+    if (previousTournamentIdRef.current === draft.tournamentId) return;
+    previousTournamentIdRef.current = draft.tournamentId;
+    setDraft((prev) => ({
+      ...prev,
+      matchId: 0,
+      team1Id: 0,
+      team2Id: 0,
+      player1Id: 0,
+      player2Id: 0,
+      map: "",
+      score: "",
+      seriesLabel: "",
+      dateTime: "",
+      groupName: "",
+    }));
+  }, [draft.tournamentId]);
+
   useEffect(() => {
     return subscribeCollection<MediaAsset>(assetCollectionName, (items) => {
       setMediaAssets(
@@ -798,20 +864,19 @@ export default function AdminMediaCenter({
     draft.tournamentTitle ||
     selectedTournament?.title ||
     adminText.mediaTournamentPlaceholder;
-  const stage =
-    draft.stage ||
-    selectedMatch?.roundLabel ||
-    selectedMatch?.groupName ||
-    selectedMatch?.round ||
-    adminText.mediaStagePlaceholder;
+  // Single source of truth for stage: manual override > autoStage > placeholder.
+  const stage = draft.stage || autoStage || adminText.mediaStagePlaceholder;
   const format = draft.format || autoFormat;
   const score = draft.score || autoScore || (isMatchCompleted ? "" : "TBD");
   const dateTime = draft.dateTime || autoDate;
   const dateLabel = formatDateLabel(dateTime, adminText.mediaDatePlaceholder);
+  // Precedence: manual override > selected match's group > tournament's first
+  // group > placeholder. (Previously the tournament's first group beat the
+  // selected match, so picking a Group B match still showed "Group A".)
   const groupName =
     draft.groupName ||
-    selectedTournament?.groups?.[0]?.name ||
     selectedMatch?.groupName ||
+    selectedTournament?.groups?.[0]?.name ||
     adminText.mediaGroupPlaceholder;
 
   const playerOptions = players.map((player) => ({
@@ -1065,6 +1130,27 @@ export default function AdminMediaCenter({
     }
   };
 
+  // Tournament title override is a *shared* draft field consumed by every
+  // template's preview (Match Announcement / Match Result / Group Standings /
+  // MVP Card / Playoff Bracket / Champion Poster). Render the input once at
+  // the top of every template's settings panel so the override is fully
+  // transparent and admins can never silently carry a value across templates
+  // without seeing it. Autofill chain (`draft.tournamentTitle || tournament.title
+  // || placeholder`) is unchanged.
+  const renderTitleOverrideField = () => (
+    <div className="field-block">
+      <label className="field-label">{adminText.mediaTournamentTitle}</label>
+      <input
+        className="input"
+        value={draft.tournamentTitle}
+        placeholder={
+          selectedTournament?.title || adminText.mediaTournamentPlaceholder
+        }
+        onChange={handleTextChange("tournamentTitle")}
+      />
+    </div>
+  );
+
   const renderTemplateFields = () => (
     <div className="media-form-grid">
       <div className="field-block">
@@ -1076,6 +1162,8 @@ export default function AdminMediaCenter({
           onChange={handleSelectChange("tournamentId")}
         />
       </div>
+
+      {renderTitleOverrideField()}
 
       {selectedTemplate !== "groupStandings" &&
       selectedTemplate !== "playoffBracket" &&
@@ -1279,26 +1367,15 @@ export default function AdminMediaCenter({
       ) : null}
 
       {selectedTemplate === "playoffBracket" ? (
-        <>
-          <div className="field-block">
-            <label className="field-label">{adminText.mediaTournamentTitle}</label>
-            <input
-              className="input"
-              value={draft.tournamentTitle}
-              placeholder={adminText.mediaTournamentPlaceholder}
-              onChange={handleTextChange("tournamentTitle")}
-            />
-          </div>
-          <div className="field-block">
-            <label className="field-label">{adminText.mediaFinalPlaceholder}</label>
-            <input
-              className="input"
-              value={draft.finalPlaceholder}
-              placeholder={adminText.mediaFinalPlaceholderText}
-              onChange={handleTextChange("finalPlaceholder")}
-            />
-          </div>
-        </>
+        <div className="field-block">
+          <label className="field-label">{adminText.mediaFinalPlaceholder}</label>
+          <input
+            className="input"
+            value={draft.finalPlaceholder}
+            placeholder={adminText.mediaFinalPlaceholderText}
+            onChange={handleTextChange("finalPlaceholder")}
+          />
+        </div>
       ) : null}
 
       {selectedTemplate === "mvpCard" ? (
