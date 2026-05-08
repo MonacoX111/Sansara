@@ -498,6 +498,15 @@ export default function AdminMediaCenter({
   const [appliedAssetIds, setAppliedAssetIds] = useState<
     Partial<Record<AssetCategory, string>>
   >({});
+  // D21: id of the asset whose delete button has been *armed* (i.e. clicked
+  // once). A second click on the same row commits the delete. Clicking any
+  // other asset's delete button re-arms only that one. Null = nothing armed.
+  const [pendingDeleteAssetId, setPendingDeleteAssetId] = useState<
+    string | null
+  >(null);
+  // Guard against rapid double-commit clicks while the network call is in
+  // flight. Holds the id of the asset currently being deleted.
+  const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
   const [sponsorPosition, setSponsorPosition] =
     useState<SponsorPosition>("topRight");
   const [overlayOpacity, setOverlayOpacity] = useState(0.72);
@@ -548,12 +557,34 @@ export default function AdminMediaCenter({
       const teamB = teams.find((team) => team.id === match.team2)?.name;
       const playerA = players.find((player) => player.id === match.player1)?.nickname;
       const playerB = players.find((player) => player.id === match.player2)?.nickname;
-      return {
-        value: match.id,
-        label: `${teamA || playerA || adminText.unknown} vs ${
-          teamB || playerB || adminText.unknown
-        }`,
-      };
+      const base = `${teamA || playerA || adminText.unknown} vs ${
+        teamB || playerB || adminText.unknown
+      }`;
+      // D24: enrich label with date / score so admins can distinguish
+      // rematches and completed-vs-scheduled matches at a glance. Falls back
+      // to the bare "A vs B" form when no usable date or score exists.
+      const completedAtRaw = (match as unknown as { completedAt?: string })
+        .completedAt;
+      const dateSource = match.date || completedAtRaw || "";
+      const parsedDate = dateSource ? new Date(dateSource) : null;
+      const shortDate =
+        parsedDate && !Number.isNaN(parsedDate.getTime())
+          ? parsedDate.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })
+          : "";
+      const isCompleted = match.status === "completed";
+      const trimmedScore = (match.score || "").trim();
+      let label = base;
+      if (isCompleted && trimmedScore) {
+        label = shortDate
+          ? `${base} \u2014 ${trimmedScore} (${shortDate})`
+          : `${base} \u2014 ${trimmedScore}`;
+      } else if (shortDate) {
+        label = `${base} \u2014 ${shortDate}`;
+      }
+      return { value: match.id, label };
     });
 
   const selectedTournament =
@@ -707,13 +738,16 @@ export default function AdminMediaCenter({
   const cs2HaystackRaw = `${selectedTournament?.game || ""} ${
     selectedTournament?.title || ""
   }`.toLowerCase();
+  // Strict: only the canonical Counter-Strike spellings count. The bare word
+  // "counter" is intentionally excluded so titles like "Counter Picks Cup" or
+  // "Counter Draft League" do NOT trigger CS2-only UI (D9).
   const isCs2Tournament =
     cs2HaystackRaw.includes("cs2") ||
+    /\bcs\s*2\b/.test(cs2HaystackRaw) ||
     cs2HaystackRaw.includes("cs:go") ||
     cs2HaystackRaw.includes("csgo") ||
     cs2HaystackRaw.includes("counter-strike") ||
     cs2HaystackRaw.includes("counter strike") ||
-    cs2HaystackRaw.includes("counter") ||
     /\bcs\b/.test(cs2HaystackRaw);
   // Is the selected match already completed? (used to decide whether to show
   // TBD placeholders on Match Result.)
@@ -1050,6 +1084,11 @@ export default function AdminMediaCenter({
   };
 
   const handleDeleteAsset = async (asset: MediaAsset) => {
+    // Already mid-delete for this asset: ignore. Prevents double-commit from
+    // rapid keyboard / mouse clicks while the Firestore + Storage round-trip
+    // is in flight.
+    if (deletingAssetId === asset.id) return;
+    setDeletingAssetId(asset.id);
     try {
       if (storage && asset.storagePath) {
         await deleteObject(storageRef(storage, asset.storagePath));
@@ -1068,7 +1107,23 @@ export default function AdminMediaCenter({
         error instanceof Error ? error.message : "Asset delete failed.";
       setAssetUploadError(message);
       showToast?.(message, "danger");
+    } finally {
+      setDeletingAssetId(null);
+      setPendingDeleteAssetId(null);
     }
+  };
+
+  // D21: click handler that arms-then-commits. First click on a row arms it;
+  // second click on the *same* row triggers the real delete. Clicking a
+  // different row's delete button moves the armed state there instead of
+  // leaving multiple rows armed.
+  const handleRequestDeleteAsset = (asset: MediaAsset) => {
+    if (deletingAssetId) return;
+    if (pendingDeleteAssetId === asset.id) {
+      void handleDeleteAsset(asset);
+      return;
+    }
+    setPendingDeleteAssetId(asset.id);
   };
 
   const handleApplyAsset = (asset: MediaAsset) => {
@@ -1954,9 +2009,35 @@ export default function AdminMediaCenter({
                 <button type="button" onClick={() => handleApplyAsset(asset)}>
                   Apply
                 </button>
-                <button type="button" onClick={() => handleDeleteAsset(asset)}>
-                  Delete
-                </button>
+                {pendingDeleteAssetId === asset.id ? (
+                  <>
+                    <button
+                      type="button"
+                      className="danger-btn"
+                      onClick={() => handleRequestDeleteAsset(asset)}
+                      disabled={deletingAssetId === asset.id}
+                    >
+                      {deletingAssetId === asset.id
+                        ? "Deleting..."
+                        : "Confirm delete"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteAssetId(null)}
+                      disabled={deletingAssetId === asset.id}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleRequestDeleteAsset(asset)}
+                    disabled={deletingAssetId !== null}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </article>
           ))
