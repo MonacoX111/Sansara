@@ -668,17 +668,27 @@ export default function AdminMediaCenter({
     return finals.slice().sort((a, b) => b.id - a.id)[0] || null;
   }, [matches, selectedTournament]);
 
-  // MVP resolution: draft.mvpId > tournament.mvpId when tournament has one.
-  // This lets a completed tournament's MVP flow into Match Result / MVP Card /
-  // Champion Poster templates automatically.
+  // D4: MVP sentinel.
+  //   draft.mvpId === 0  -> autofill (use tournament.mvpId if present).
+  //   draft.mvpId === -1 -> intentionally hidden; never autofill.
+  //   draft.mvpId  >  0  -> manual override (a specific player picked).
+  // Backward compatible: legacy drafts default to 0 (autofill), unchanged.
+  const MVP_HIDDEN = -1;
+  const tournamentMvpId = selectedTournament?.mvpId || 0;
+  const isMvpHidden = draft.mvpId === MVP_HIDDEN;
+  const isMvpManual = draft.mvpId > 0;
+  // D22: "auto" indicator condition. True only when autofill is actually
+  // sourcing the value from the tournament -- not when the user picked
+  // manually and not when they intentionally hid the MVP.
+  const isMvpAuto = !isMvpManual && !isMvpHidden && tournamentMvpId > 0;
   const resolvedMvpPlayer = useMemo(() => {
+    if (isMvpHidden) return null;
     if (selectedMvp) return selectedMvp;
-    const tournamentMvpId = selectedTournament?.mvpId;
     if (tournamentMvpId) {
       return players.find((player) => player.id === tournamentMvpId) || null;
     }
     return null;
-  }, [players, selectedMvp, selectedTournament]);
+  }, [players, selectedMvp, tournamentMvpId, isMvpHidden]);
 
   // MVP card: if the admin has not picked a player but the tournament has an
   // MVP, surface that player.
@@ -846,10 +856,20 @@ export default function AdminMediaCenter({
       setMediaAssets(
         items
           .slice()
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
+          .sort((a, b) => {
+            // D15: defensive parse mirroring matchSortKey. Missing,
+            // undefined, or malformed createdAt -> getTime() returns NaN,
+            // which makes the comparator non-transitive and produces
+            // engine-dependent ordering. Fall back to 0 so invalid assets
+            // sink to the bottom deterministically; tie-break on id so
+            // equal/invalid timestamps still yield a stable order.
+            const aRaw = a.createdAt ? new Date(a.createdAt).getTime() : NaN;
+            const bRaw = b.createdAt ? new Date(b.createdAt).getTime() : NaN;
+            const aMs = Number.isFinite(aRaw) ? aRaw : 0;
+            const bMs = Number.isFinite(bRaw) ? bRaw : 0;
+            if (bMs !== aMs) return bMs - aMs;
+            return (b.id || "").localeCompare(a.id || "");
+          })
       );
     });
   }, []);
@@ -900,7 +920,10 @@ export default function AdminMediaCenter({
     adminText.mediaTournamentPlaceholder;
   // Single source of truth for stage: manual override > autoStage > placeholder.
   const stage = draft.stage || autoStage || adminText.mediaStagePlaceholder;
-  const format = draft.format || autoFormat;
+  // D17: single unified derivation for Match Announcement & Match Result
+  // meta. Backward-compat fallback chain: new field (seriesLabel) wins,
+  // legacy field (format) reads through, autoFormat fills the gap.
+  const seriesValue = draft.seriesLabel || draft.format || autoFormat;
   const score = draft.score || autoScore || (isMatchCompleted ? "" : "TBD");
   const dateTime = draft.dateTime || autoDate;
   const dateLabel = formatDateLabel(dateTime, adminText.mediaDatePlaceholder);
@@ -1203,8 +1226,48 @@ export default function AdminMediaCenter({
         }
         onChange={handleTextChange("tournamentTitle")}
       />
+      {renderRestoreAuto("tournamentTitle", draft.tournamentTitle)}
     </div>
   );
+
+  // D8: lightweight "Restore auto" inline link for any string-valued draft
+  // override. Visible only when the current value is non-empty (i.e. an
+  // override is actually present and could be restored). Clicking clears the
+  // field, which immediately re-engages the autofill chain because every
+  // derivation uses `draft.X || autoX || placeholder`. No CSS rewrites: the
+  // button reuses the existing field-block flex layout and a small inline
+  // style so we don't introduce new global classes.
+  const restoreAutoLabel = adminText.mediaRestoreAuto || "Restore auto";
+  const restoreAutoStyle: CSSProperties = {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    padding: "2px 8px",
+    fontSize: "0.72rem",
+    background: "transparent",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    borderRadius: 4,
+    color: "inherit",
+    cursor: "pointer",
+    opacity: 0.75,
+  };
+  const renderRestoreAuto = (
+    key: keyof DraftState,
+    currentValue: string
+  ) => {
+    if (!currentValue || !currentValue.trim()) return null;
+    return (
+      <button
+        type="button"
+        className="media-restore-auto"
+        style={restoreAutoStyle}
+        onClick={() =>
+          updateDraft({ [key]: "" } as unknown as Partial<DraftState>)
+        }
+      >
+        {restoreAutoLabel}
+      </button>
+    );
+  };
 
   const renderTemplateFields = () => (
     <div className="media-form-grid">
@@ -1323,13 +1386,78 @@ export default function AdminMediaCenter({
         selectedTemplate === "mvpCard" ||
         selectedTemplate === "championPoster") ? (
         <div className="field-block">
-          <label className="field-label">MVP</label>
+          <label className="field-label">
+            MVP
+            {/* D22: subtle badge that only appears when the MVP is being
+                pulled from tournament.mvpId (autofill), not when manually
+                picked or intentionally hidden. */}
+            {isMvpAuto ? (
+              <span
+                className="media-auto-badge"
+                style={{
+                  marginLeft: 8,
+                  padding: "1px 6px",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  borderRadius: 3,
+                  background: "rgba(255, 184, 56, 0.18)",
+                  color: "rgb(255, 184, 56)",
+                  border: "1px solid rgba(255, 184, 56, 0.45)",
+                }}
+              >
+                {adminText.mediaAutoBadge || "Auto"}
+              </span>
+            ) : null}
+            {isMvpHidden ? (
+              <span
+                style={{
+                  marginLeft: 8,
+                  padding: "1px 6px",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  borderRadius: 3,
+                  background: "rgba(255, 255, 255, 0.08)",
+                  color: "inherit",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  opacity: 0.75,
+                }}
+              >
+                {adminText.mediaHiddenBadge || "Hidden"}
+              </span>
+            ) : null}
+          </label>
           <PremiumSelect
-            value={draft.mvpId}
-            placeholder="MVP"
+            value={isMvpHidden ? 0 : draft.mvpId}
+            placeholder={isMvpHidden ? "MVP hidden" : "MVP"}
             options={playerOptions}
             onChange={handleSelectChange("mvpId")}
           />
+          {/* D4: explicit Hide / Restore controls. Hiding is a deliberate
+              negative selection (sentinel -1); Restore re-engages autofill
+              by setting the id back to 0. Without these, clearing the
+              picker would silently fall back to tournament.mvpId. */}
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            {!isMvpHidden ? (
+              <button
+                type="button"
+                style={restoreAutoStyle}
+                onClick={() => updateDraft({ mvpId: MVP_HIDDEN })}
+              >
+                {adminText.mediaHideMvp || "Hide MVP"}
+              </button>
+            ) : null}
+            {draft.mvpId !== 0 ? (
+              <button
+                type="button"
+                style={restoreAutoStyle}
+                onClick={() => updateDraft({ mvpId: 0 })}
+              >
+                {adminText.mediaRestoreAutoMvp || "Restore auto MVP"}
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -1350,39 +1478,61 @@ export default function AdminMediaCenter({
       ) : null}
 
       {selectedTemplate === "matchAnnouncement" ? (
-        <>
-          <div className="field-block">
-            <label className="field-label">{adminText.date}</label>
-            <input
-              className="input"
-              value={draft.dateTime}
-              placeholder={autoDate || adminText.mediaDatePlaceholder}
-              onChange={handleTextChange("dateTime")}
-            />
-          </div>
-          <div className="field-block">
-            <label className="field-label">{adminText.format}</label>
-            <input
-              className="input"
-              value={draft.format}
-              placeholder={autoFormat}
-              onChange={handleTextChange("format")}
-            />
-          </div>
-        </>
+        <div className="field-block">
+          <label className="field-label">{adminText.date}</label>
+          <input
+            className="input"
+            value={draft.dateTime}
+            placeholder={autoDate || adminText.mediaDatePlaceholder}
+            onChange={handleTextChange("dateTime")}
+          />
+          {renderRestoreAuto("dateTime", draft.dateTime)}
+        </div>
       ) : null}
 
       {(selectedTemplate === "matchAnnouncement" ||
         selectedTemplate === "matchResult") ? (
-        <div className="field-block">
-          <label className="field-label">{adminText.mediaStageGroup}</label>
-          <input
-            className="input"
-            value={draft.stage}
-            placeholder={autoStage || adminText.mediaStagePlaceholder}
-            onChange={handleTextChange("stage")}
-          />
-        </div>
+        <>
+          <div className="field-block">
+            <label className="field-label">{adminText.mediaStageGroup}</label>
+            <input
+              className="input"
+              value={draft.stage}
+              placeholder={autoStage || adminText.mediaStagePlaceholder}
+              onChange={handleTextChange("stage")}
+            />
+            {renderRestoreAuto("stage", draft.stage)}
+          </div>
+          {/* D17: unified Series / Format field shown for BOTH templates.
+              Writes go to seriesLabel; the legacy `format` value still
+              reads through via the `seriesValue` derivation, so existing
+              saved drafts keep working without migration. */}
+          <div className="field-block">
+            <label className="field-label">
+              {adminText.mediaSeriesLabel || "Series / Format"}
+            </label>
+            <input
+              className="input"
+              value={draft.seriesLabel}
+              placeholder={draft.format || autoFormat}
+              onChange={handleTextChange("seriesLabel")}
+            />
+            {renderRestoreAuto("seriesLabel", draft.seriesLabel)}
+          </div>
+          {/* D18: optional sub-headline reused on Match Announcement &
+              Match Result. Empty by default, never disrupts existing
+              layouts. */}
+          <div className="field-block media-form-wide">
+            <label className="field-label">{adminText.mediaHighlight}</label>
+            <input
+              className="input"
+              value={draft.highlight}
+              placeholder={adminText.mediaHighlightPlaceholder}
+              onChange={handleTextChange("highlight")}
+            />
+            {renderRestoreAuto("highlight", draft.highlight)}
+          </div>
+        </>
       ) : null}
 
       {selectedTemplate === "matchResult" ? (
@@ -1395,6 +1545,7 @@ export default function AdminMediaCenter({
               placeholder={autoScore || "2:1"}
               onChange={handleTextChange("score")}
             />
+            {renderRestoreAuto("score", draft.score)}
           </div>
           {isCs2Tournament ? (
             <div className="field-block">
@@ -1405,19 +1556,9 @@ export default function AdminMediaCenter({
                 placeholder={autoMap || "Mirage"}
                 onChange={handleTextChange("map")}
               />
+              {renderRestoreAuto("map", draft.map)}
             </div>
           ) : null}
-          <div className="field-block">
-            <label className="field-label">
-              {adminText.mediaSeriesLabel || "Series / Map label"}
-            </label>
-            <input
-              className="input"
-              value={draft.seriesLabel}
-              placeholder={autoFormat}
-              onChange={handleTextChange("seriesLabel")}
-            />
-          </div>
         </>
       ) : null}
 
@@ -1442,6 +1583,7 @@ export default function AdminMediaCenter({
             placeholder={adminText.mediaHighlightPlaceholder}
             onChange={handleTextChange("highlight")}
           />
+          {renderRestoreAuto("highlight", draft.highlight)}
         </div>
       ) : null}
 
@@ -1455,6 +1597,7 @@ export default function AdminMediaCenter({
               placeholder={autoPrize || "$1,000"}
               onChange={handleTextChange("prizePool")}
             />
+            {renderRestoreAuto("prizePool", draft.prizePool)}
           </div>
           <div className="field-block">
             <label className="field-label">{adminText.mediaFinalScore}</label>
@@ -1464,6 +1607,18 @@ export default function AdminMediaCenter({
               placeholder={autoFinalScore || "3:2"}
               onChange={handleTextChange("finalScore")}
             />
+            {renderRestoreAuto("finalScore", draft.finalScore)}
+          </div>
+          {/* D18: highlight reused as champion subheadline. */}
+          <div className="field-block media-form-wide">
+            <label className="field-label">{adminText.mediaHighlight}</label>
+            <input
+              className="input"
+              value={draft.highlight}
+              placeholder={adminText.mediaHighlightPlaceholder}
+              onChange={handleTextChange("highlight")}
+            />
+            {renderRestoreAuto("highlight", draft.highlight)}
           </div>
         </>
       ) : null}
@@ -1674,6 +1829,8 @@ export default function AdminMediaCenter({
     }
 
     if (selectedTemplate === "championPoster") {
+      // D18: optional headline reused from the highlight field.
+      const championHighlight = draft.highlight.trim();
       // Auto-detect champion entity from the tournament's winner IDs.
       const autoChampionTeam =
         selectedTeam ||
@@ -1701,6 +1858,9 @@ export default function AdminMediaCenter({
           <span className="media-kicker">CHAMPIONS</span>
           <h3>{championLabel || adminText.mediaChampionPlaceholder}</h3>
           <p>{title}</p>
+          {championHighlight ? (
+            <p className="media-subheadline">{championHighlight}</p>
+          ) : null}
           <div className="media-champion-crown">
             {renderLogo(
               championEntity,
@@ -1711,7 +1871,9 @@ export default function AdminMediaCenter({
           <div className="media-stat-strip">
             <span>{draft.prizePool || autoPrize || "$1,000"}</span>
             <span>{draft.finalScore || autoFinalScore || "3:2"}</span>
-            <span>{resolvedMvpPlayer?.nickname || "MVP"}</span>
+            {isMvpHidden ? null : (
+              <span>{resolvedMvpPlayer?.nickname || "MVP"}</span>
+            )}
           </div>
         </div>
       );
@@ -1727,14 +1889,23 @@ export default function AdminMediaCenter({
     const resultMapLabel = isCs2Tournament
       ? resultMap || (isMatchCompleted ? "" : "Map TBD")
       : dateLabel;
+    // D4: when MVP is intentionally hidden, drop the meta cell entirely
+    // (resolvedMvpPlayer is already null in that case, so the existing
+    // truthy-check below handles it without further branching).
     const metaMvp = isResult
       ? resolvedMvpPlayer?.nickname || ""
       : "";
+    // D18: optional sub-headline shown above the versus block on both
+    // Match Announcement and Match Result if the admin set one.
+    const matchHighlight = draft.highlight.trim();
 
     return (
       <div className="media-preview-section media-preview-match">
         <span className="media-kicker">{stage}</span>
         <h3>{title}</h3>
+        {matchHighlight ? (
+          <p className="media-subheadline">{matchHighlight}</p>
+        ) : null}
         <div className="media-versus">
           <div
             className={`media-side ${
@@ -1770,7 +1941,7 @@ export default function AdminMediaCenter({
         </div>
         <div className="media-match-meta">
           <span>{isResult ? resultMapLabel : dateLabel}</span>
-          <span>{isResult ? draft.seriesLabel || autoFormat : format}</span>
+          <span>{seriesValue}</span>
           {metaMvp ? <span>{metaMvp}</span> : null}
         </div>
       </div>
