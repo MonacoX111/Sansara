@@ -510,11 +510,37 @@ export default function AdminMediaCenter({
       label: tournament.title || adminText.tournamentFallback,
     }));
 
+  // Newest matches first. Priority: completedAt DESC → date DESC → id DESC.
+  // Missing/unparseable timestamps sink to the bottom (-Infinity) so any match
+  // with real data wins. Tie-breakers are checked in order, keeping the sort
+  // stable when only partial data is present.
+  const matchSortKey = (match: Match): [number, number, number] => {
+    const completedAtRaw = (match as unknown as { completedAt?: string })
+      .completedAt;
+    const completedMs = completedAtRaw
+      ? new Date(completedAtRaw).getTime()
+      : NaN;
+    const dateMs = match.date ? new Date(match.date).getTime() : NaN;
+    return [
+      Number.isFinite(completedMs) ? completedMs : -Infinity,
+      Number.isFinite(dateMs) ? dateMs : -Infinity,
+      Number(match.id) || 0,
+    ];
+  };
+
   const matchOptions = matches
     .filter(
       (match) =>
         draft.tournamentId === 0 || Number(match.tournamentId) === draft.tournamentId
     )
+    .slice()
+    .sort((a, b) => {
+      const ka = matchSortKey(a);
+      const kb = matchSortKey(b);
+      if (ka[0] !== kb[0]) return kb[0] - ka[0];
+      if (ka[1] !== kb[1]) return kb[1] - ka[1];
+      return kb[2] - ka[2];
+    })
     .map((match) => {
       const teamA = teams.find((team) => team.id === match.team1)?.name;
       const teamB = teams.find((team) => team.id === match.team2)?.name;
