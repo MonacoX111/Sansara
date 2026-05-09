@@ -1,0 +1,359 @@
+/* =====================================================================
+   18-redesign-motion.css
+   ---------------------------------------------------------------------
+   Motion + interaction polish — Turn 5.
+   Refinement only. No new visual elements, no layout changes. All
+   selectors target classes that are already in the markup; no
+   class-name additions required. Keyframes and transitions stick to
+   `opacity` + `transform` so the GPU does the work. Removing the
+   @import in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Motion sub-tokens — derived from the existing system.
+   Slightly slower curve for "settle" transitions so press states
+   release with weight, plus a "trough" pacing variable used by the
+   live-pulse keyframe for broadcast-style breathing.
+   ------------------------------------------------------------------ */
+:root {
+  --rd-press-scale:    0.985;
+  --rd-press-bright:   0.94;
+  --rd-press-bright-2: 0.88;
+  --rd-settle:         420ms;
+  --rd-quick:          120ms;
+  --rd-ease-settle:    cubic-bezier(0.16, 1, 0.3, 1);
+  --rd-ease-press:     cubic-bezier(0.4, 0, 0.2, 1);
+  --rd-ease-broadcast: cubic-bezier(0.55, 0, 0.45, 1);
+}
+
+/* ---------------------------------------------------------------------
+   2. Global focus-visible polish
+   The base 14-redesign-tokens.css already supplies a static crimson
+   ring. Here we add a faint crimson halo that fades in instead of
+   popping, and disappears on blur. Pure transform+opacity so it costs
+   nothing on hover-heavy surfaces.
+   ------------------------------------------------------------------ */
+:where(button, a, [tabindex], input, select, textarea):focus-visible {
+  outline-offset: 3px;
+  transition:
+    outline-offset var(--dur-fast) var(--ease-cinema),
+    outline-color  var(--dur-fast) var(--ease-cinema);
+}
+
+/* ---------------------------------------------------------------------
+   3. Hero — slow the cinematic ambient layers
+   Atmospheric drift becomes ~50% slower so it reads as ambient light
+   rather than animated decoration. The light streak gains a longer
+   off-screen phase so it appears even less frequently.
+   ------------------------------------------------------------------ */
+.welcome-hero.rd-hero .rd-hero__atmos-bloom {
+  animation-duration: 28s;
+}
+.welcome-hero.rd-hero .rd-hero__atmos-streak {
+  animation-duration: 34s;
+}
+
+/* Make the headline entrance ease feel less bouncy; the redesign
+   default already uses --ease-cinema, but we extend the duration
+   slightly so it lands smoother on slower devices. */
+.welcome-hero.rd-hero .welcome-title {
+  animation-duration: 1.05s;
+  animation-timing-function: var(--rd-ease-settle);
+}
+.welcome-hero.rd-hero .welcome-subtitle,
+.welcome-hero.rd-hero .welcome-actions,
+.welcome-hero.rd-hero .welcome-right {
+  animation-timing-function: var(--rd-ease-settle);
+}
+
+/* ---------------------------------------------------------------------
+   4. Navbar — refined active indicator + press depth
+   Asymmetric timing: indicator fades in fast (180 ms), out slow
+   (320 ms). Active label gradient transitions on its own track so it
+   does not visually fight the indicator.
+   ------------------------------------------------------------------ */
+.rd-nav__tab {
+  /* Replace the symmetric transition declared in 15-redesign-nav.css
+     with an asymmetric pair. Higher specificity needed because the
+     base file uses the same selector. */
+  transition:
+    color           var(--dur-base) var(--rd-ease-settle),
+    background      var(--dur-base) var(--rd-ease-settle),
+    transform       var(--rd-quick) var(--rd-ease-press);
+}
+
+.rd-nav__tab:active {
+  transform: translateY(1px) scale(var(--rd-press-scale));
+  filter: brightness(var(--rd-press-bright));
+  transition-duration: var(--rd-quick);
+}
+
+.rd-nav__indicator {
+  /* Fade in fast, scale up softly. */
+  transition:
+    opacity   180ms var(--rd-ease-press),
+    transform 320ms var(--rd-ease-settle);
+}
+.rd-nav__tab.is-active .rd-nav__indicator {
+  /* Tiny will-change hint while active so the GPU keeps a layer
+     handy for the press / blur transitions. Released automatically
+     when .is-active is removed. */
+  will-change: transform, opacity;
+}
+
+.rd-nav__dot {
+  transition:
+    background var(--dur-base) var(--rd-ease-settle),
+    box-shadow var(--dur-base) var(--rd-ease-settle),
+    transform  var(--dur-fast) var(--rd-ease-press);
+}
+
+/* ---------------------------------------------------------------------
+   5. Buttons — press depth + refined hover interpolation
+   Applies to the redesign's .rd-btn AND legacy .primary-btn / .secondary-btn
+   ANYWHERE on the page (not just hero), so the press language is
+   consistent globally.
+   ------------------------------------------------------------------ */
+.rd-btn,
+.welcome-page .primary-btn,
+.welcome-page .secondary-btn {
+  transition:
+    transform   var(--rd-quick) var(--rd-ease-press),
+    box-shadow  var(--rd-settle) var(--rd-ease-settle),
+    filter      var(--dur-base) var(--rd-ease-settle),
+    border-color var(--dur-base) var(--rd-ease-settle),
+    background  var(--dur-base) var(--rd-ease-settle);
+}
+
+.rd-btn:hover,
+.welcome-page .primary-btn:hover,
+.welcome-page .secondary-btn:hover {
+  /* Hover settle uses the slower ease so the glow blooms instead of
+     snapping. Translate stays tiny (1 px). */
+  transition-timing-function: var(--rd-ease-settle);
+}
+
+.rd-btn:active,
+.welcome-page .primary-btn:active,
+.welcome-page .secondary-btn:active {
+  transform: translateY(0) scale(var(--rd-press-scale));
+  filter: brightness(var(--rd-press-bright));
+  transition-duration: var(--rd-quick);
+}
+
+/* ---------------------------------------------------------------------
+   6. Cards — unified hover/press language
+   Every redesigned homepage card (nav, smart highlight, fixture row,
+   transfer, feature) shares the same physics: fast press in, slow
+   release out, edge ignition timed to match.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-nav-card,
+.welcome-page .welcome-smart-highlight-card,
+.welcome-page .welcome-activity-row.recent-match-card,
+.welcome-page .welcome-feature-card,
+.welcome-page .transfer-card,
+.welcome-page .welcome-preview-card,
+.welcome-page .welcome-mini-card {
+  transition:
+    transform    var(--dur-base) var(--rd-ease-settle),
+    box-shadow   var(--rd-settle) var(--rd-ease-settle),
+    border-color var(--dur-base) var(--rd-ease-settle);
+}
+
+/* Edge ignition (::after mask) uses a separate timing track so the
+   crimson outline appears slightly AFTER the lift starts. ~80 ms
+   delay is enough to feel cinematic without delaying click feedback. */
+.welcome-page .welcome-nav-card::after,
+.welcome-page .welcome-smart-highlight-card::after,
+.welcome-page .welcome-activity-row.recent-match-card::after,
+.welcome-page .welcome-feature-card::after,
+.welcome-page .transfer-card::after,
+.welcome-page .welcome-preview-card::after,
+.welcome-page .welcome-mini-card::after {
+  transition: opacity var(--rd-settle) var(--rd-ease-settle) 80ms;
+}
+
+/* Press: tiny scale-down + landing on translateY(0). */
+.welcome-page .welcome-nav-card:active,
+.welcome-page .welcome-feature-card:active,
+.welcome-page .transfer-card:active,
+.welcome-page .welcome-preview-card:active,
+.welcome-page .welcome-mini-card:active,
+.welcome-page .welcome-smart-highlight-card:active,
+.welcome-page .welcome-activity-row.recent-match-card:active {
+  transform: translateY(0) scale(var(--rd-press-scale));
+  transition-duration: var(--rd-quick);
+}
+
+/* Arrow glyph in quick-nav cards picks up the same easing for
+   consistent character. */
+.welcome-page .welcome-nav-card .welcome-nav-card-main i {
+  transition:
+    transform var(--dur-base) var(--rd-ease-settle),
+    color     var(--dur-base) var(--rd-ease-settle);
+}
+
+/* will-change is applied at hover time (and immediately released on
+   blur) so we never leak GPU layers across idle elements. */
+.welcome-page .welcome-nav-card:hover,
+.welcome-page .welcome-smart-highlight-card:hover,
+.welcome-page .welcome-activity-row.recent-match-card:hover,
+.welcome-page .welcome-feature-card:hover,
+.welcome-page .transfer-card:hover {
+  will-change: transform;
+}
+
+/* ---------------------------------------------------------------------
+   7. Recent matches — broadcast-quality live pulse
+   Refined keyframe with three steps and a longer trough so the dot
+   reads as breathing rather than blinking. Glow intensity varies via
+   transform:scale on a ::before child rather than box-shadow on the
+   parent — purely GPU compositing, no repaints.
+   ------------------------------------------------------------------ */
+@keyframes rdLivePulse {
+  0%   { transform: scale(1);    opacity: 1;   }
+  35%  { transform: scale(1.35); opacity: 0.95; }
+  60%  { transform: scale(1);    opacity: 1;   }
+  100% { transform: scale(1);    opacity: 1;   }
+}
+.welcome-page .welcome-activity-status-live::before {
+  animation:
+    rdLivePulse 1.8s var(--rd-ease-broadcast) infinite;
+}
+
+/* Score badge — tighten hover light response. */
+.welcome-page .welcome-score-badge {
+  transition:
+    transform   var(--dur-base) var(--rd-ease-settle),
+    box-shadow  var(--rd-settle) var(--rd-ease-settle),
+    border-color var(--dur-base) var(--rd-ease-settle);
+}
+.welcome-page .welcome-activity-row:hover .welcome-score-badge {
+  transform: translateY(-1px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.5);
+}
+
+/* ---------------------------------------------------------------------
+   8. Smart highlight numerics — soft surface response
+   The diff/streak/match-count chip lifts slightly when its parent
+   card is hovered. Pure transform; no shadow flicker.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-upset-diff {
+  transition: transform var(--dur-base) var(--rd-ease-settle);
+}
+.welcome-page .welcome-smart-highlight-card:hover .welcome-upset-diff {
+  transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------------------
+   9. Featured-match scoreboard — refine entrance + hover
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-featured-score {
+  transition: transform var(--dur-base) var(--rd-ease-settle);
+}
+.welcome-page .smart-highlight-card--featured:hover .welcome-featured-score {
+  transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------------------
+   10. Lighting follow — static, no JS
+   Each card already gets a subtle radial highlight via Turn 4's
+   --grad-glass overlay. We add a one-time entry transition so the
+   highlight builds in instead of appearing instantly when sections
+   first paint. Implemented as a fade-up using opacity only, scoped
+   per-section so it only fires once on initial render of the page.
+   The animation has a 1-shot flag (animation-iteration-count: 1) so
+   it costs zero on subsequent paints.
+   ------------------------------------------------------------------ */
+@keyframes rdSectionIn {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+.welcome-page .welcome-section,
+.welcome-page .welcome-feature-grid {
+  animation: rdSectionIn var(--rd-settle) var(--rd-ease-settle) both;
+  animation-delay: 60ms;
+}
+
+/* ---------------------------------------------------------------------
+   11. Mobile — attenuate motion + GPU cost
+   Hover lifts become 1 px or zero, atmospheric loops pause, backdrop
+   blur is reduced, animation work is reduced where it does not add
+   value at small viewports.
+   ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom,
+  .welcome-hero.rd-hero .rd-hero__atmos-streak {
+    animation-play-state: paused;
+  }
+
+  .welcome-page .welcome-nav-card:hover,
+  .welcome-page .welcome-smart-highlight-card:hover,
+  .welcome-page .welcome-activity-row.recent-match-card:hover,
+  .welcome-page .welcome-feature-card:hover,
+  .welcome-page .transfer-card:hover,
+  .welcome-page .welcome-preview-card:hover,
+  .welcome-page .welcome-mini-card:hover {
+    transform: translateY(-1px);
+  }
+
+  .welcome-page .welcome-section,
+  .welcome-page .welcome-feature-grid {
+    /* Section-in animation costs more than it gives on mobile. */
+    animation: none;
+  }
+}
+
+/* Hover-incapable pointers (touch primarily) — disable hover
+   transforms entirely so the OS tap-highlight is the only feedback. */
+@media (hover: none) {
+  .welcome-page .welcome-nav-card:hover,
+  .welcome-page .welcome-smart-highlight-card:hover,
+  .welcome-page .welcome-activity-row.recent-match-card:hover,
+  .welcome-page .welcome-feature-card:hover,
+  .welcome-page .transfer-card:hover,
+  .welcome-page .welcome-preview-card:hover,
+  .welcome-page .welcome-mini-card:hover,
+  .rd-nav__tab:hover {
+    transform: none;
+    will-change: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   12. Reduced motion — single authoritative block.
+   Earlier turns each defined their own block; this one is the global
+   fallback that wins by load order. Stops every continuous loop and
+   collapses transitions to 1 ms.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+
+  /* Hero atmospherics: freeze entirely. */
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom,
+  .welcome-hero.rd-hero .rd-hero__atmos-streak,
+  .welcome-page .welcome-activity-status-live::before {
+    animation: none !important;
+  }
+
+  /* Hover transforms: keep pure colour feedback only. */
+  .welcome-page .welcome-nav-card:hover,
+  .welcome-page .welcome-smart-highlight-card:hover,
+  .welcome-page .welcome-activity-row.recent-match-card:hover,
+  .welcome-page .welcome-feature-card:hover,
+  .welcome-page .transfer-card:hover,
+  .welcome-page .welcome-preview-card:hover,
+  .welcome-page .welcome-mini-card:hover,
+  .rd-btn:hover,
+  .welcome-page .primary-btn:hover,
+  .welcome-page .secondary-btn:hover,
+  .rd-nav__tab:hover {
+    transform: none !important;
+  }
+}

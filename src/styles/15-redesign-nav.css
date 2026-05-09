@@ -1,0 +1,343 @@
+/* =====================================================================
+   15-redesign-nav.css
+   ---------------------------------------------------------------------
+   Premium cinematic navigation bar — Turn 2.
+   Pairs with components/Tabs.tsx. All styling consumes tokens defined
+   in 14-redesign-tokens.css. No selectors here touch other components.
+   Removing the @import in styles.css plus reverting Tabs.tsx fully
+   rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Outer shell
+   The nav floats inside the existing .topbar-actions wrapper. Glass
+   surface, hairline border, soft crimson under-glow. Sticks to the
+   existing layout — no position/z-index changes that could collide
+   with the rest of the app.
+   ------------------------------------------------------------------ */
+.rd-nav {
+  --rd-nav-h: 56px;
+
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: var(--rd-nav-h);
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(14, 16, 22, 0.78), rgba(8, 9, 13, 0.88));
+  border: 1px solid var(--rd-line);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge),
+    var(--glow-red-soft);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* Crimson hairline that wraps the nav. Subtle on idle, brighter as
+   the user moves the cursor near the bar. */
+.rd-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg,
+    rgba(var(--rd-crimson-rgb), 0.55) 0%,
+    rgba(var(--rd-crimson-rgb), 0)   30%,
+    rgba(var(--rd-crimson-rgb), 0)   70%,
+    rgba(var(--rd-crimson-rgb), 0.45) 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-cinema);
+  z-index: 0;
+}
+.rd-nav:hover::before { opacity: 0.9; }
+
+/* Soft volumetric bloom that sits under the bar — adds depth without
+   adding noise to the page background. */
+.rd-nav::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -18px;
+  height: 32px;
+  background: radial-gradient(ellipse at center,
+    rgba(var(--rd-crimson-rgb), 0.45) 0%,
+    rgba(var(--rd-crimson-rgb), 0)   65%);
+  filter: blur(20px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ---------------------------------------------------------------------
+   2. Inner row — handles overflow on narrower screens
+   ------------------------------------------------------------------ */
+.rd-nav__inner {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------------
+   3. Individual tab
+   ------------------------------------------------------------------ */
+.rd-nav__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0 1.1rem;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--rd-text-muted);
+  font-family: var(--font-display);
+  font-size: var(--type-1);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color           var(--dur-base) var(--ease-cinema),
+    background      var(--dur-base) var(--ease-cinema),
+    transform       var(--dur-base) var(--ease-cinema);
+  isolation: isolate;
+}
+
+.rd-nav__tab:hover {
+  color: var(--rd-text);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.rd-nav__tab:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* Reset any focus-ring leakage from base layer; redesign tokens already
+   supply the global focus-visible treatment. */
+.rd-nav__tab:focus { outline: none; }
+.rd-nav__tab:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------
+   4. Per-tab dot glyph
+   Tiny pulse-ready indicator that lives to the left of the label. On
+   idle it is a faint dim disk; on active it lights crimson with a
+   gentle glow. This is the "powered" tell on top of the underline.
+   ------------------------------------------------------------------ */
+.rd-nav__dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transition:
+    background var(--dur-base) var(--ease-cinema),
+    box-shadow var(--dur-base) var(--ease-cinema),
+    transform  var(--dur-base) var(--ease-cinema);
+}
+
+.rd-nav__tab:hover .rd-nav__dot {
+  background: rgba(var(--rd-crimson-rgb), 0.55);
+  box-shadow: 0 0 8px rgba(var(--rd-crimson-rgb), 0.4);
+}
+
+.rd-nav__tab.is-active .rd-nav__dot {
+  background: var(--rd-crimson);
+  box-shadow:
+    0 0 0 2px rgba(var(--rd-crimson-rgb), 0.18),
+    0 0 12px rgba(var(--rd-crimson-rgb), 0.65);
+  transform: scale(1.15);
+}
+
+/* ---------------------------------------------------------------------
+   5. Label
+   ------------------------------------------------------------------ */
+.rd-nav__label {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  padding-top: 1px; /* optical alignment with the dot */
+}
+
+.rd-nav__tab.is-active .rd-nav__label {
+  color: transparent;
+  background: var(--grad-headline);
+  -webkit-background-clip: text;
+          background-clip: text;
+}
+
+/* ---------------------------------------------------------------------
+   6. Active-tab indicator
+   A crimson capsule that lights underneath the tab. Implemented per
+   tab (rather than a single sliding bar) so we keep the contract
+   stateless — no measurement / refs / requestAnimationFrame work.
+   The fade-in motion gives the impression of "powering up".
+   ------------------------------------------------------------------ */
+.rd-nav__indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity   var(--dur-base) var(--ease-cinema),
+    transform var(--dur-base) var(--ease-cinema);
+  z-index: -1;
+  background:
+    /* faint top hairline */
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0)    18%),
+    /* crimson body */
+    linear-gradient(180deg,
+      rgba(var(--rd-crimson-rgb), 0.22) 0%,
+      rgba(var(--rd-crimson-rgb), 0.10) 70%,
+      rgba(var(--rd-crimson-rgb), 0)   100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--rd-crimson-rgb), 0.45),
+    inset 0 -1px 0 rgba(var(--rd-crimson-rgb), 0.6),
+    0 0 22px rgba(var(--rd-crimson-rgb), 0.28);
+}
+
+.rd-nav__tab.is-active .rd-nav__indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Active-tab text colour bias — pure white instead of muted to tighten
+   contrast above the crimson glow. */
+.rd-nav__tab.is-active {
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------
+   7. Subtle separators between groups
+   The last two tabs (myProfile + admin) feel like a different group;
+   add a hairline divider before whichever is rendered first of those.
+   Implemented with [data-tab=...] so it is automatic when those tabs
+   exist and harmless when they don't.
+   ------------------------------------------------------------------ */
+.rd-nav__tab[data-tab="myProfile"]::before,
+.rd-nav__tab[data-tab="admin"]:first-of-type::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  background: linear-gradient(180deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent);
+}
+/* Don't draw the separator if both myProfile and admin exist and admin
+   is sandwiched -- only the first of the trailing group gets it. */
+.rd-nav__tab[data-tab="myProfile"] + .rd-nav__tab[data-tab="admin"]::before {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------
+   8. Mobile / narrow-viewport adaptation
+   The bar becomes a horizontally scrolling track with snap-to-tab
+   alignment and edge fade masks so the active tab is always visible.
+   Touch targets stay 44px tall.
+   ------------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .rd-nav {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    padding: 6px;
+    /* Edge fade so labels don't hard-clip at the rim. */
+    -webkit-mask-image:
+      linear-gradient(90deg,
+        transparent 0,
+        #000 18px,
+        #000 calc(100% - 18px),
+        transparent 100%);
+            mask-image:
+      linear-gradient(90deg,
+        transparent 0,
+        #000 18px,
+        #000 calc(100% - 18px),
+        transparent 100%);
+  }
+
+  .rd-nav__inner {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .rd-nav__inner::-webkit-scrollbar { display: none; }
+
+  .rd-nav__tab {
+    scroll-snap-align: center;
+    flex: 0 0 auto;
+    height: 44px;
+    padding: 0 0.95rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Drop the trailing-group separator on mobile to keep the strip
+     visually clean; the dot + active indicator do enough work. */
+  .rd-nav__tab[data-tab="myProfile"]::before,
+  .rd-nav__tab[data-tab="admin"]:first-of-type::before {
+    display: none;
+  }
+}
+
+/* Very small phones — slightly tighter padding and label size. */
+@media (max-width: 420px) {
+  .rd-nav__tab {
+    padding: 0 0.8rem;
+    font-size: 0.74rem;
+  }
+  .rd-nav__dot { width: 5px; height: 5px; }
+}
+
+/* ---------------------------------------------------------------------
+   9. Reduced motion
+   Drop the indicator scale animation; keep colour transitions.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .rd-nav__indicator,
+  .rd-nav__dot,
+  .rd-nav__tab {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   10. Print — hide the nav cleanly when users print a page
+   ------------------------------------------------------------------ */
+@media print {
+  .rd-nav { display: none !important; }
+}

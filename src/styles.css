@@ -11,3 +11,9 @@
 @import "./styles/11-searchable-select.css";
 @import "./styles/12-transfer-card.css";
 @import "./styles/13-mobile.css";
+/* Premium cinematic redesign — loaded last so palette / ambient overrides win. */
+@import "./styles/14-redesign-tokens.css";
+@import "./styles/15-redesign-nav.css";
+@import "./styles/16-redesign-hero.css";
+@import "./styles/17-redesign-cards.css";
+@import "./styles/18-redesign-motion.css";

@@ -351,7 +351,17 @@ export default function HomeTab({
 
   return (
     <section className="welcome-page">
-      <div className="welcome-hero" onMouseMove={handleGlow}>
+      <div className="welcome-hero rd-hero" onMouseMove={handleGlow}>
+        {/* Cinematic ambient layer — pure decoration, no logic. The element
+            hosts multiple stacked backdrop effects (crimson volumetrics,
+            horizon glow, light streak, fine grid) defined in
+            16-redesign-hero.css. */}
+        <div className="rd-hero__atmos" aria-hidden="true">
+          <span className="rd-hero__atmos-bloom" />
+          <span className="rd-hero__atmos-horizon" />
+          <span className="rd-hero__atmos-streak" />
+          <span className="rd-hero__atmos-grid" />
+        </div>
         <div className="welcome-noise" />
 
         <div className="welcome-left">

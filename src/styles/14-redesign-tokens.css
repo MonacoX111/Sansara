@@ -1,0 +1,508 @@
+/* =====================================================================
+   14-redesign-tokens.css
+   ---------------------------------------------------------------------
+   Premium cinematic design system — Turn 1 foundation.
+   Loaded LAST in styles.css so this file wins the cascade for shared
+   surfaces. Keep purely additive: no selector here removes existing
+   rules — overrides are by specificity / load order only. Removing the
+   single @import line in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Palette + token overrides
+   The original 01-base.css ships a pink-leaning red plus cyan / gold
+   ambient accents. The new direction is pure crimson + black, so we
+   redefine the existing custom properties (every consumer keeps
+   working — values just get richer) and add a fresh layer of
+   redesign-only tokens prefixed --rd-* to avoid any collision.
+   ------------------------------------------------------------------ */
+:root {
+  /* Base canvas */
+  --rd-void:           #050608;     /* deepest background */
+  --rd-black:          #08090d;     /* canvas */
+  --rd-onyx:           #0c0e14;     /* card base */
+  --rd-charcoal:       #14161e;     /* raised surface */
+  --rd-graphite:       #1c1f29;     /* hovered surface */
+  --rd-line:           rgba(255, 255, 255, 0.06);
+  --rd-line-strong:    rgba(255, 255, 255, 0.12);
+
+  /* Crimson family */
+  --rd-crimson:        #e11d2e;     /* primary accent */
+  --rd-crimson-rgb:    225, 29, 46;
+  --rd-crimson-deep:   #8a0e1c;     /* shadow / depth */
+  --rd-crimson-bright: #ff2940;     /* hover */
+  --rd-crimson-glow:   #ff4d63;     /* light bloom */
+
+  /* Typography */
+  --rd-text:           #f4f5f8;
+  --rd-text-soft:      #c9cdd6;
+  --rd-text-muted:     #7e828e;
+  --rd-text-faint:     #4d5060;
+
+  /* Re-skin the legacy tokens consumed by every existing component
+     so the upgrade lands everywhere without touching 01-base.css. */
+  --bg:                var(--rd-black);
+  --bg-2:              var(--rd-onyx);
+  --panel:             rgba(14, 16, 22, 0.78);
+  --panel-2:           rgba(20, 22, 30, 0.92);
+  --line:              var(--rd-line);
+  --text:              var(--rd-text);
+  --muted:             var(--rd-text-muted);
+  --color-brand-red:        var(--rd-crimson);
+  --color-brand-red-strong: var(--rd-crimson-bright);
+  --color-brand-red-rgb:    var(--rd-crimson-rgb);
+  --red:               var(--rd-crimson);
+  --red-2:             var(--rd-crimson-bright);
+  --focus-ring:        rgba(var(--rd-crimson-rgb), 0.6);
+
+  /* ----- Gradients ----- */
+  --grad-crimson:
+    linear-gradient(135deg,
+      var(--rd-crimson-bright) 0%,
+      var(--rd-crimson) 45%,
+      var(--rd-crimson-deep) 100%);
+  --grad-crimson-fade:
+    linear-gradient(180deg,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      rgba(var(--rd-crimson-rgb), 0) 100%);
+  --grad-glass:
+    linear-gradient(155deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0.012) 40%,
+      rgba(255, 255, 255, 0) 100%);
+  --grad-headline:
+    linear-gradient(180deg,
+      #ffffff 0%,
+      #d6d8df 55%,
+      #8c8f99 100%);
+  --grad-headline-crimson:
+    linear-gradient(180deg,
+      #ffffff 0%,
+      #fce4e7 30%,
+      var(--rd-crimson) 100%);
+  --grad-vignette:
+    radial-gradient(ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.55) 100%);
+
+  /* ----- Glows ----- */
+  --glow-red-soft:
+    0 0 24px rgba(var(--rd-crimson-rgb), 0.18);
+  --glow-red-strong:
+    0 0 36px rgba(var(--rd-crimson-rgb), 0.42),
+    0 0 72px rgba(var(--rd-crimson-rgb), 0.18);
+  --glow-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+
+  /* ----- Depth (cinematic stack) ----- */
+  --shadow-elev-1:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-elev-2:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 18px 48px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-elev-3:
+    0 4px 8px rgba(0, 0, 0, 0.55),
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-cinema:
+    0 30px 90px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Re-skin legacy --shadow-red so old buttons inherit the new bloom. */
+  --shadow-red:
+    inset 0 0 22px rgba(var(--rd-crimson-rgb), 0.14),
+    0 0 28px rgba(var(--rd-crimson-rgb), 0.28);
+
+  /* ----- Type scale (clamp = mobile + desktop in one) ----- */
+  --font-display:
+    "Inter", "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-body:
+    "Inter", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --type-7: clamp(2.75rem, 6vw + 1rem, 5.75rem);   /* hero display */
+  --type-6: clamp(2.25rem, 4vw + 0.75rem, 4rem);   /* section eyebrow display */
+  --type-5: clamp(1.75rem, 2.5vw + 0.75rem, 2.75rem);
+  --type-4: clamp(1.375rem, 1.5vw + 0.75rem, 2rem);
+  --type-3: 1.25rem;
+  --type-2: 1rem;
+  --type-1: 0.875rem;
+  --type-0: 0.75rem;     /* eyebrow / kicker */
+
+  --tracking-display: -0.025em;
+  --tracking-eyebrow: 0.32em;
+  --tracking-button:  0.06em;
+
+  /* ----- Motion ----- */
+  --ease-cinema: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft:   cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:    150ms;
+  --dur-base:    280ms;
+  --dur-slow:    520ms;
+
+  /* ----- Layout rhythm ----- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+}
+
+/* ---------------------------------------------------------------------
+   2. Global background + ambient lighting
+   The previous body background blends red, cyan, and gold radials. The
+   new system is strictly black + crimson with a subtle vignette. We
+   re-declare the body / .page ambient layers so the cinematic feel
+   reaches every existing screen without per-component edits.
+   ------------------------------------------------------------------ */
+body {
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv11";
+  color: var(--rd-text);
+  background:
+    /* upper-left crimson bloom */
+    radial-gradient(ellipse 80% 60% at 12% 8%,
+      rgba(var(--rd-crimson-rgb), 0.14) 0%,
+      transparent 55%),
+    /* lower-right deep crimson smolder */
+    radial-gradient(ellipse 70% 50% at 92% 95%,
+      rgba(var(--rd-crimson-rgb), 0.08) 0%,
+      transparent 60%),
+    /* base gradient — onyx */
+    linear-gradient(180deg, var(--rd-void) 0%, var(--rd-black) 60%, var(--rd-void) 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Override the existing .page ambient — same selectors, last cascade wins.
+   Keep the original animations referenced by name so nothing breaks if a
+   component still references pageGradientFlow / pageAmbientShift. */
+.page {
+  background:
+    /* faint engineering grid */
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 32px 32px,
+    /* base canvas */
+    linear-gradient(135deg, var(--rd-onyx) 0%, var(--rd-black) 50%, var(--rd-void) 100%);
+}
+
+.page::before {
+  /* Cinematic ambient — slow drifting crimson volumetrics. */
+  background:
+    radial-gradient(circle at 18% 22%,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 32%),
+    radial-gradient(circle at 82% 78%,
+      rgba(var(--rd-crimson-rgb), 0.10) 0%,
+      transparent 30%),
+    radial-gradient(circle at 50% 50%,
+      rgba(var(--rd-crimson-rgb), 0.04) 0%,
+      transparent 50%);
+  filter: blur(40px);
+  opacity: 0.95;
+}
+
+.page::after {
+  /* Glass-like specular streak — kept extremely subtle. */
+  background: linear-gradient(120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.012) 38%,
+    transparent 62%);
+  opacity: 0.55;
+}
+
+/* Edge vignette for any full-bleed screen. Opt-in via class so we don't
+   double up with backgrounds that already have one. */
+.rd-vignette {
+  position: relative;
+  isolation: isolate;
+}
+.rd-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--grad-vignette);
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------------
+   3. Typography polish
+   Soft global tightening of headings — no layout breakage because
+   we only touch tracking and font-feature-settings, not sizes. Plus
+   reusable display + eyebrow + body classes for the upcoming
+   Navbar / Hero / Card redesigns.
+   ------------------------------------------------------------------ */
+h1, h2, h3, h4, h5, h6,
+.panel-title {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Reusable display headline — uppercase, ultra-tight, heavy.
+   Ideal for hero titles and section dividers. */
+.rd-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-7);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  background: var(--grad-headline);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  text-wrap: balance;
+}
+
+.rd-display--crimson {
+  background: var(--grad-headline-crimson);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+.rd-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--type-5);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--rd-text);
+  text-wrap: balance;
+}
+
+.rd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+}
+
+.rd-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rd-crimson));
+}
+
+.rd-body {
+  font-family: var(--font-body);
+  font-size: var(--type-2);
+  line-height: 1.6;
+  color: var(--rd-text-soft);
+  text-wrap: pretty;
+}
+
+.rd-meta {
+  font-family: var(--font-body);
+  font-size: var(--type-1);
+  color: var(--rd-text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* ---------------------------------------------------------------------
+   4. Surface utility classes
+   Used by Navbar / Cards / Hero in subsequent turns. Drop-in: add the
+   class to any container to receive premium glass + border + shadow.
+   ------------------------------------------------------------------ */
+.rd-surface {
+  position: relative;
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg, var(--rd-onyx), var(--rd-charcoal));
+  border: 1px solid var(--rd-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elev-2), var(--glow-edge);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.rd-surface--glass {
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(20, 22, 30, 0.55), rgba(8, 9, 13, 0.7));
+}
+
+.rd-surface--glow {
+  box-shadow: var(--shadow-elev-2), var(--glow-edge), var(--glow-red-soft);
+}
+
+.rd-surface--bordered::before {
+  /* Hairline crimson edge that becomes visible on hover via .rd-hover-glow. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(var(--rd-crimson-rgb), 0.55),
+    rgba(var(--rd-crimson-rgb), 0) 40%,
+    rgba(var(--rd-crimson-rgb), 0) 60%,
+    rgba(var(--rd-crimson-rgb), 0.35));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-cinema);
+  z-index: 0;
+}
+
+/* Cinematic divider line. Use as <hr class="rd-divider"> or .rd-divider element. */
+.rd-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--rd-crimson-rgb), 0.55) 30%,
+    rgba(var(--rd-crimson-rgb), 0.55) 70%,
+    transparent 100%);
+  opacity: 0.4;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------
+   5. Premium interaction primitives
+   Used by buttons, links, and cards across upcoming turns.
+   ------------------------------------------------------------------ */
+.rd-hover-lift {
+  transition:
+    transform var(--dur-base) var(--ease-cinema),
+    box-shadow var(--dur-base) var(--ease-cinema);
+  will-change: transform;
+}
+.rd-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-elev-3), var(--glow-red-soft);
+}
+
+.rd-hover-glow {
+  transition: box-shadow var(--dur-base) var(--ease-cinema);
+}
+.rd-hover-glow:hover {
+  box-shadow: var(--shadow-elev-2), var(--glow-red-strong);
+}
+
+.rd-hover-glow:hover .rd-surface--bordered::before,
+.rd-surface--bordered:hover::before {
+  opacity: 1;
+}
+
+/* Reusable pill button. Drop-in for upcoming Navbar CTA + Hero. */
+.rd-btn {
+  --_btn-bg: var(--grad-crimson);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--_btn-bg);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--type-1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform var(--dur-base) var(--ease-cinema),
+    box-shadow var(--dur-base) var(--ease-cinema),
+    filter   var(--dur-base) var(--ease-cinema);
+  box-shadow:
+    var(--shadow-elev-1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    var(--glow-red-soft);
+}
+.rd-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    var(--shadow-elev-2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    var(--glow-red-strong);
+}
+.rd-btn:active { transform: translateY(0); filter: brightness(0.96); }
+
+.rd-btn--ghost {
+  --_btn-bg: transparent;
+  color: var(--rd-text);
+  background: transparent;
+  border: 1px solid var(--rd-line-strong);
+  box-shadow: var(--glow-edge);
+}
+.rd-btn--ghost:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.6);
+  background: rgba(var(--rd-crimson-rgb), 0.06);
+  filter: none;
+}
+
+/* ---------------------------------------------------------------------
+   6. Focus ring (accessibility, premium look)
+   ------------------------------------------------------------------ */
+:where(button, a, [tabindex], input, select, textarea):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------
+   7. Reduced motion respect
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   8. Scrollbar polish (WebKit)
+   ------------------------------------------------------------------ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--rd-void); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--rd-graphite), var(--rd-charcoal));
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--rd-void);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--rd-crimson-deep), var(--rd-charcoal));
+}
+
+/* ---------------------------------------------------------------------
+   9. Selection color — small detail, big premium tell
+   ------------------------------------------------------------------ */
+::selection {
+  background: rgba(var(--rd-crimson-rgb), 0.55);
+  color: #fff;
+}

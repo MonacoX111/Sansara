@@ -1,0 +1,1031 @@
+/* =====================================================================
+   17-redesign-cards.css
+   ---------------------------------------------------------------------
+   Homepage card + section redesign — Turn 4.
+   Strictly scoped under `.welcome-page` so no rule here can leak into
+   the Tournaments tab, Admin panel, Media Center, brackets, profiles,
+   leaderboards, or other shared surfaces. The hero (Turn 3) remains
+   untouched -- we only style the sections BELOW it.
+   Removing the @import line in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Page rhythm + section system
+   Generous vertical breathing room, premium section headers with a
+   crimson hairline divider and an upgraded title hierarchy.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-section {
+  position: relative;
+  margin-top: clamp(56px, 7vw, 96px);
+  padding-top: clamp(28px, 3vw, 44px);
+}
+
+/* Crimson hairline + soft horizon glow above each section, used as a
+   cinematic divider between major surfaces. */
+.welcome-page .welcome-section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--rd-crimson-rgb), 0.45) 22%,
+    rgba(var(--rd-crimson-rgb), 0.45) 78%,
+    transparent 100%);
+  opacity: 0.4;
+}
+.welcome-page .welcome-section::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: -22px;
+  height: 44px;
+  background: radial-gradient(ellipse at center,
+    rgba(var(--rd-crimson-rgb), 0.18) 0%,
+    transparent 70%);
+  filter: blur(18px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Section header — eyebrow rule + display title + subtitle. */
+.welcome-page .welcome-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: clamp(22px, 2.4vw, 36px);
+  padding: 0;
+}
+.welcome-page .welcome-section-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--rd-text);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  text-transform: none;
+  text-shadow: none;
+}
+/* Hairline accent before the title — quick "broadcast lower-third" tell. */
+.welcome-page .welcome-section-head > span::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rd-crimson), transparent);
+  opacity: 0.95;
+}
+.welcome-page .welcome-section-head .welcome-info-label {
+  margin: 0;
+  padding-left: 36px; /* align with title text after the rule */
+  color: var(--rd-text-muted);
+  font-family: var(--font-body);
+  font-size: clamp(13px, 1vw, 14px);
+  letter-spacing: 0.01em;
+}
+
+/* Mobile collapse: reduce padding + drop the rule alignment. */
+@media (max-width: 640px) {
+  .welcome-page .welcome-section-head .welcome-info-label {
+    padding-left: 0;
+  }
+  .welcome-page .welcome-section-head > span::before {
+    width: 18px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   2. Shared card surface
+   A single visual language for every card type. Each kind tunes a
+   handful of variables (--rd-card-pad, --rd-card-min-h, etc.) but
+   inherits the same glass + hairline edge + hover behaviour.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-nav-card,
+.welcome-page .welcome-smart-highlight-card,
+.welcome-page .welcome-activity-row.recent-match-card,
+.welcome-page .welcome-feature-card,
+.welcome-page .transfer-card {
+  --rd-card-pad: clamp(20px, 1.6vw, 26px);
+  --rd-card-radius: var(--radius-lg);
+  position: relative;
+  border-radius: var(--rd-card-radius);
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg,
+      rgba(20, 22, 30, 0.78) 0%,
+      rgba(10, 12, 17, 0.92) 100%);
+  border: 1px solid var(--rd-line);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform var(--dur-base) var(--ease-cinema),
+    box-shadow var(--dur-base) var(--ease-cinema),
+    border-color var(--dur-base) var(--ease-cinema);
+}
+
+/* Hairline crimson edge that ignites on hover. Reuses the
+   --rd-surface--bordered pattern but inlined per element so we don't
+   have to add classes via JSX. */
+.welcome-page .welcome-nav-card::after,
+.welcome-page .welcome-smart-highlight-card::after,
+.welcome-page .welcome-activity-row.recent-match-card::after,
+.welcome-page .welcome-feature-card::after,
+.welcome-page .transfer-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(var(--rd-crimson-rgb), 0.5),
+    rgba(var(--rd-crimson-rgb), 0) 38%,
+    rgba(var(--rd-crimson-rgb), 0) 62%,
+    rgba(var(--rd-crimson-rgb), 0.32));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.28;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-cinema);
+  z-index: 1;
+}
+
+/* Restrained hover: subtle lift + edge ignition + soft glow. */
+.welcome-page .welcome-nav-card:hover,
+.welcome-page .welcome-smart-highlight-card:hover,
+.welcome-page .welcome-activity-row.recent-match-card:hover,
+.welcome-page .welcome-feature-card:hover,
+.welcome-page .transfer-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.42);
+  box-shadow:
+    var(--shadow-elev-3),
+    var(--glow-red-soft);
+}
+.welcome-page .welcome-nav-card:hover::after,
+.welcome-page .welcome-smart-highlight-card:hover::after,
+.welcome-page .welcome-activity-row.recent-match-card:hover::after,
+.welcome-page .welcome-feature-card:hover::after,
+.welcome-page .transfer-card:hover::after {
+  opacity: 1;
+}
+
+/* Make sure inner content sits above the ::after edge mask. The legacy
+   ::before gradient from 08-welcome.css still draws beneath, but at a
+   lower z-index than our ::after so the new edge wins visually. */
+.welcome-page .welcome-nav-card > *,
+.welcome-page .welcome-smart-highlight-card > *,
+.welcome-page .welcome-activity-row.recent-match-card > *,
+.welcome-page .welcome-feature-card > *,
+.welcome-page .transfer-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------------------------------------------------------------------
+   3. Quick-navigation cards
+   Cinematic feature panel. Accent number floats top-right, count
+   becomes a broadcast-weight numeral, arrow glyph slides on hover,
+   tournaments primary variant gets a crimson backlit glow.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.welcome-page .welcome-nav-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(22px, 1.8vw, 28px);
+  min-height: 168px;
+  border: 1px solid var(--rd-line);
+  cursor: pointer;
+  text-align: left;
+}
+
+.welcome-page .welcome-nav-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.welcome-page .welcome-nav-card-top span {
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+}
+.welcome-page .welcome-nav-card-top small {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--rd-text-faint);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--rd-line);
+}
+
+.welcome-page .welcome-nav-card-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 6px;
+}
+.welcome-page .welcome-nav-card-main strong {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 3.6vw, 54px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, #ffffff 0%, #c9cdd6 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+.welcome-page .welcome-nav-card-main i {
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--rd-text-muted);
+  transform: translateX(0);
+  transition:
+    transform var(--dur-base) var(--ease-cinema),
+    color var(--dur-base) var(--ease-cinema);
+}
+.welcome-page .welcome-nav-card:hover .welcome-nav-card-main i {
+  transform: translateX(4px);
+  color: var(--rd-crimson-bright);
+}
+
+.welcome-page .welcome-nav-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--rd-text-soft);
+  line-height: 1.55;
+}
+
+/* Tournaments primary card — crimson backlit. */
+.welcome-page .welcome-nav-card.welcome-nav-card-primary {
+  background:
+    radial-gradient(circle at 80% -10%,
+      rgba(var(--rd-crimson-rgb), 0.32) 0%,
+      transparent 45%),
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(28, 18, 22, 0.85), rgba(10, 8, 10, 0.95));
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge),
+    var(--glow-red-soft);
+}
+.welcome-page .welcome-nav-card.welcome-nav-card-primary::after {
+  opacity: 0.7;
+}
+.welcome-page .welcome-nav-card.welcome-nav-card-primary .welcome-nav-card-main strong {
+  background: linear-gradient(180deg, #ffffff 0%, #f3d6da 50%, var(--rd-crimson-bright) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+/* ---------------------------------------------------------------------
+   4. Smart highlights — broadcast cards
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-smart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.welcome-page .welcome-smart-highlight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(22px, 1.8vw, 28px);
+  min-height: 200px;
+}
+
+.welcome-page .welcome-smart-highlight-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.welcome-page .welcome-smart-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  padding: 5px 10px 5px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(var(--rd-crimson-rgb), 0.07);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.22);
+  color: var(--rd-text-soft);
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+}
+.welcome-page .welcome-smart-kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rd-crimson);
+  box-shadow: 0 0 8px rgba(var(--rd-crimson-rgb), 0.55);
+}
+
+.welcome-page .welcome-smart-highlight-main strong {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 1.8vw, 26px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--rd-text);
+}
+.welcome-page .welcome-smart-highlight-main p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--rd-text-soft);
+  line-height: 1.55;
+}
+
+/* Meta row — score / diff / details. */
+.welcome-page .welcome-smart-highlight-meta {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rd-line);
+  margin-top: auto;
+}
+
+.welcome-page .welcome-upset-diff {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 30% 0%,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 70%),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.22);
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  background-clip: padding-box;
+}
+.welcome-page .welcome-upset-diff > span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+  -webkit-text-fill-color: var(--rd-text-muted);
+}
+.welcome-page .welcome-upset-diff.muted-state {
+  border-color: var(--rd-line);
+  color: var(--rd-text-muted);
+}
+.welcome-page .welcome-upset-diff.welcome-fire-streak {
+  background:
+    radial-gradient(circle at 30% 0%,
+      rgba(255, 140, 60, 0.22) 0%,
+      transparent 70%),
+    rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 140, 60, 0.32);
+}
+
+.welcome-page .welcome-upset-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+}
+.welcome-page .welcome-upset-details > span {
+  color: var(--rd-text);
+  font-weight: 500;
+}
+.welcome-page .welcome-upset-details > small {
+  color: var(--rd-text-muted);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+/* Featured-match smart card — wider, asymmetric, broadcast scoreboard. */
+.welcome-page .smart-highlight-card--featured {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(20px, 2vw, 32px);
+  background:
+    radial-gradient(ellipse 80% 60% at 12% 10%,
+      rgba(var(--rd-crimson-rgb), 0.22) 0%,
+      transparent 55%),
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(20, 22, 30, 0.82), rgba(10, 12, 17, 0.95));
+  border-color: rgba(var(--rd-crimson-rgb), 0.28);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge),
+    var(--glow-red-soft);
+  grid-column: 1 / -1;
+  min-height: 240px;
+}
+.welcome-page .smart-highlight-card--featured::after { opacity: 0.7; }
+
+.welcome-page .smart-highlight-card--featured .featured-left {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.welcome-page .smart-highlight-card--featured .featured-vs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+}
+.welcome-page .smart-highlight-card--featured .featured-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.welcome-page .smart-highlight-card--featured .featured-player img,
+.welcome-page .smart-highlight-card--featured .featured-player-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rd-charcoal);
+  border: 1px solid var(--rd-line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--rd-text-soft);
+  box-shadow: var(--shadow-elev-1);
+}
+.welcome-page .smart-highlight-card--featured .featured-player span {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--rd-text);
+  font-size: 13.5px;
+}
+.welcome-page .smart-highlight-card--featured .featured-vs-text {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(var(--rd-crimson-rgb), 0.16);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.32);
+  color: var(--rd-text);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.welcome-page .smart-highlight-card--featured .featured-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: clamp(16px, 1.4vw, 22px);
+  border-left: 1px solid var(--rd-line);
+}
+.welcome-page .smart-highlight-card--featured .featured-right-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.welcome-page .smart-highlight-card--featured .featured-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(var(--rd-crimson-rgb), 0.5),
+    transparent);
+  opacity: 0.55;
+}
+.welcome-page .welcome-featured-score {
+  font-size: clamp(36px, 3.6vw, 52px) !important;
+  background:
+    radial-gradient(circle at 30% 0%,
+      rgba(var(--rd-crimson-rgb), 0.28) 0%,
+      transparent 70%),
+    rgba(255, 255, 255, 0.02);
+  border-color: rgba(var(--rd-crimson-rgb), 0.36);
+}
+.welcome-page .welcome-featured-match-subinfo {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--rd-text-muted);
+  text-transform: none;
+}
+.welcome-page .welcome-featured-details small {
+  color: var(--rd-text-muted);
+}
+
+/* Mobile: featured card stacks vertically. */
+@media (max-width: 760px) {
+  .welcome-page .smart-highlight-card--featured {
+    grid-template-columns: 1fr;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-right {
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid var(--rd-line);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   5. Recent matches — broadcast fixtures
+   ------------------------------------------------------------------ */
+.welcome-page .recent-activity-wrapper {
+  position: relative;
+}
+/* Hide the legacy vertical timeline rail; the new cards stand on their own. */
+.welcome-page .recent-activity-wrapper > .recent-activity-line {
+  display: none;
+}
+
+.welcome-page .welcome-activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.welcome-page .welcome-activity-row.recent-match-card {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 22px);
+  padding: clamp(16px, 1.4vw, 22px) clamp(20px, 1.8vw, 26px);
+  min-height: 96px;
+}
+
+/* The leftmost dot becomes a vertical "channel" tick — stronger on
+   primary, dim on subsequent rows. */
+.welcome-page .welcome-activity-row.recent-match-card .recent-dot {
+  width: 4px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--rd-line-strong);
+  box-shadow: none;
+  position: relative;
+  align-self: center;
+}
+.welcome-page .welcome-activity-row.recent-match-card.recent-match-card--primary .recent-dot {
+  background: linear-gradient(180deg, var(--rd-crimson-bright), var(--rd-crimson-deep));
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.55);
+}
+.welcome-page .welcome-activity-row.recent-match-card.recent-match-card--primary {
+  background:
+    radial-gradient(ellipse 60% 100% at 0% 50%,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 55%),
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(22, 18, 24, 0.85), rgba(10, 8, 10, 0.95));
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+}
+
+/* Main column — status + context + names + winner. */
+.welcome-page .welcome-activity-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.welcome-page .welcome-activity-topline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.welcome-page .welcome-activity-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--rd-line-strong);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-soft);
+}
+.welcome-page .welcome-activity-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rd-text-muted);
+}
+
+/* Tone-specific status colours (live / finished / upcoming). */
+.welcome-page .welcome-activity-status-live {
+  color: #ff8a96;
+  border-color: rgba(var(--rd-crimson-rgb), 0.45);
+  background: rgba(var(--rd-crimson-rgb), 0.1);
+}
+.welcome-page .welcome-activity-status-live::before {
+  background: var(--rd-crimson-bright);
+  box-shadow: 0 0 10px rgba(var(--rd-crimson-rgb), 0.7);
+  animation: rdLivePulse 1.4s ease-in-out infinite;
+}
+@keyframes rdLivePulse {
+  0%,100% { transform: scale(1);    box-shadow: 0 0 10px rgba(var(--rd-crimson-rgb), 0.7); }
+  50%     { transform: scale(1.25); box-shadow: 0 0 16px rgba(var(--rd-crimson-rgb), 0.95); }
+}
+.welcome-page .welcome-activity-status-finished {
+  color: var(--rd-text-soft);
+}
+.welcome-page .welcome-activity-status-finished::before {
+  background: var(--rd-text-muted);
+}
+.welcome-page .welcome-activity-status-upcoming {
+  color: var(--rd-text-soft);
+  background: rgba(255, 255, 255, 0.03);
+}
+.welcome-page .welcome-activity-status-upcoming::before {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.welcome-page .welcome-activity-context {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12.5px;
+  color: var(--rd-text-soft);
+  font-family: var(--font-body);
+}
+.welcome-page .welcome-activity-context small {
+  font-size: 11px;
+  color: var(--rd-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.welcome-page .welcome-activity-main strong {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--rd-text);
+}
+.welcome-page .welcome-activity-winner {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--rd-text-muted);
+}
+.welcome-page .welcome-activity-winner .winner {
+  color: var(--rd-text);
+  font-weight: 600;
+}
+
+/* Right column — score badge. Strong broadcast emphasis. */
+.welcome-page .welcome-activity-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 96px;
+}
+.welcome-page .welcome-score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 30% 0%,
+      rgba(var(--rd-crimson-rgb), 0.2) 0%,
+      transparent 75%),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+.welcome-page .welcome-score-badge span {
+  background: linear-gradient(180deg, #ffffff, #f3d6da);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+.welcome-page .welcome-activity-meta small {
+  font-size: 10.5px;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+}
+
+/* Mobile fixture stacking. */
+@media (max-width: 640px) {
+  .welcome-page .welcome-activity-row.recent-match-card {
+    grid-template-columns: 6px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+  .welcome-page .welcome-activity-row.recent-match-card .welcome-activity-meta {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    border-top: 1px solid var(--rd-line);
+    padding-top: 10px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   6. Transfer cards
+   Compact information-dense glass tiles.
+   ------------------------------------------------------------------ */
+.welcome-page .transfer-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(12px, 1.2vw, 18px);
+}
+
+.welcome-page .transfer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(18px, 1.4vw, 22px);
+  min-height: 150px;
+}
+
+.welcome-page .transfer-main-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-page .transfer-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.welcome-page .transfer-team-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: var(--rd-charcoal);
+  border: 1px solid var(--rd-line);
+  padding: 4px;
+  box-shadow: var(--shadow-elev-1);
+}
+.welcome-page .transfer-team-logo-empty {
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255, 255, 255, 0.04) 0px,
+      rgba(255, 255, 255, 0.04) 2px,
+      transparent 2px,
+      transparent 6px),
+    var(--rd-charcoal);
+}
+
+.welcome-page .transfer-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.welcome-page .transfer-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.welcome-page .transfer-player-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rd-charcoal);
+  border: 1px solid var(--rd-line-strong);
+  box-shadow: var(--shadow-elev-1);
+}
+.welcome-page .transfer-player-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--rd-text);
+  text-align: center;
+}
+.welcome-page .transfer-type-badge {
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(var(--rd-crimson-rgb), 0.12);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.32);
+  color: #ffd6da;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.welcome-page .transfer-arrow {
+  font-size: 18px;
+  color: var(--rd-crimson-bright);
+  text-shadow: 0 0 12px rgba(var(--rd-crimson-rgb), 0.55);
+}
+
+/* Meta row */
+.welcome-page .transfer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding-top: 12px;
+  margin-top: auto;
+  border-top: 1px solid var(--rd-line);
+  font-size: 12px;
+}
+.welcome-page .transfer-meta-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--rd-text-soft);
+}
+.welcome-page .transfer-meta-arrow {
+  color: var(--rd-text-faint);
+}
+.welcome-page .transfer-meta-action {
+  color: var(--rd-text-muted);
+  letter-spacing: 0.02em;
+}
+.welcome-page .transfer-meta-date {
+  margin-left: auto;
+  color: var(--rd-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+
+/* ---------------------------------------------------------------------
+   7. Feature grid (numbered cinematic cards at the bottom)
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(14px, 1.4vw, 22px);
+  margin-top: clamp(56px, 7vw, 96px);
+  padding-top: clamp(28px, 3vw, 44px);
+  position: relative;
+}
+.welcome-page .welcome-feature-grid::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--rd-crimson-rgb), 0.45) 22%,
+    rgba(var(--rd-crimson-rgb), 0.45) 78%,
+    transparent 100%);
+  opacity: 0.4;
+}
+
+.welcome-page .welcome-feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(22px, 1.8vw, 28px);
+  min-height: 168px;
+}
+.welcome-page .welcome-feature-card span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--rd-text-faint);
+  align-self: flex-start;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--rd-line);
+}
+.welcome-page .welcome-feature-card strong {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--rd-text);
+}
+.welcome-page .welcome-feature-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--rd-text-soft);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------------
+   8. Empty states
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-empty {
+  padding: 28px;
+  border: 1px dashed var(--rd-line-strong);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--rd-text-muted);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------
+   9. Mobile — reduce blur and tighten hover lift
+   ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-activity-row.recent-match-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card {
+    backdrop-filter: blur(8px) saturate(1.05);
+    -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  }
+  .welcome-page .welcome-nav-card:hover,
+  .welcome-page .welcome-smart-highlight-card:hover,
+  .welcome-page .welcome-activity-row.recent-match-card:hover,
+  .welcome-page .welcome-feature-card:hover,
+  .welcome-page .transfer-card:hover {
+    transform: translateY(-1px);
+  }
+  .welcome-page .welcome-score-badge {
+    min-width: 72px;
+    height: 42px;
+    font-size: 19px;
+  }
+  .welcome-page .welcome-upset-diff {
+    font-size: 24px;
+    padding: 8px 12px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   10. Reduced motion
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-page .welcome-activity-status-live::before {
+    animation: none !important;
+  }
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-activity-row.recent-match-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card,
+  .welcome-page .welcome-nav-card-main i {
+    transition-duration: 0.001ms !important;
+  }
+}

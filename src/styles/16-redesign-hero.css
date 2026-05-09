@@ -1,0 +1,523 @@
+/* =====================================================================
+   16-redesign-hero.css
+   ---------------------------------------------------------------------
+   Premium cinematic hero — Turn 3.
+   Layered on top of the existing 08-welcome.css. All selectors scope
+   under `.welcome-hero.rd-hero` so nothing leaks to other welcome
+   components (quick navigation, smart highlights, transfers, etc.).
+   Removing the @import in styles.css plus reverting the two-line JSX
+   change in HomeTab.tsx fully rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Composition
+   Tighter cinematic proportions, taller above-the-fold presence,
+   asymmetric grid that leans content left so the right column feels
+   like a focal data card rather than a balanced sidebar.
+   ------------------------------------------------------------------ */
+.welcome-hero.rd-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+  padding: clamp(36px, 5vw, 72px);
+  min-height: clamp(520px, 62vh, 680px);
+  border-radius: clamp(22px, 2vw, 32px);
+  background:
+    /* deep onyx canvas */
+    linear-gradient(165deg, rgba(20, 22, 30, 0.92) 0%, rgba(8, 9, 13, 0.96) 60%, rgba(5, 6, 8, 1) 100%);
+  border: 1px solid var(--rd-line);
+  box-shadow:
+    var(--shadow-cinema),
+    0 0 0 1px rgba(var(--rd-crimson-rgb), 0.06);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Soft ambient bloom that sits BEHIND the hero block — adds depth on
+   the page without bleeding into surrounding sections. */
+.welcome-hero.rd-hero::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 18%,
+      rgba(var(--rd-crimson-rgb), 0.32) 0%,
+      transparent 38%),
+    radial-gradient(circle at 84% 78%,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 36%);
+  filter: blur(60px);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* Top + bottom edge vignette that frames the hero like a film still. */
+.welcome-hero.rd-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      transparent 18%,
+      transparent 78%,
+      rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------
+   2. Atmospheric layer (decorative DOM element)
+   Four stacked layers, each pure CSS, each on its own span so we can
+   blend them independently without fighting the existing
+   welcome-hero::before / ::after rules.
+   ------------------------------------------------------------------ */
+.rd-hero__atmos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.rd-hero__atmos > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Layer A — large crimson volumetric bloom behind the headline. */
+.rd-hero__atmos-bloom {
+  background: radial-gradient(ellipse 60% 70% at 22% 38%,
+    rgba(var(--rd-crimson-rgb), 0.42) 0%,
+    rgba(var(--rd-crimson-rgb), 0.10) 35%,
+    transparent 65%);
+  filter: blur(2px);
+  opacity: 0.85;
+  animation: rdHeroBloomDrift 18s var(--ease-cinema) infinite alternate;
+}
+
+/* Layer B — wide low horizon glow at the bottom edge. */
+.rd-hero__atmos-horizon {
+  background: linear-gradient(180deg,
+    transparent 60%,
+    rgba(var(--rd-crimson-rgb), 0.18) 80%,
+    rgba(var(--rd-crimson-rgb), 0.45) 100%);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+/* Layer C — subtle diagonal light streak that drifts very slowly. */
+.rd-hero__atmos-streak {
+  background: linear-gradient(115deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.06) 48%,
+    rgba(255, 255, 255, 0.10) 50%,
+    rgba(255, 255, 255, 0.06) 52%,
+    transparent 65%,
+    transparent 100%);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  animation: rdHeroStreakSweep 22s linear infinite;
+}
+
+/* Layer D — fine engineering grid for technical depth. Masked from
+   the centre so it never competes with the headline. */
+.rd-hero__atmos-grid {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px) 0 0 / 36px 36px;
+  -webkit-mask: radial-gradient(circle at 50% 55%, transparent 0%, transparent 38%, #000 78%);
+          mask: radial-gradient(circle at 50% 55%, transparent 0%, transparent 38%, #000 78%);
+  opacity: 0.55;
+}
+
+@keyframes rdHeroBloomDrift {
+  0%   { transform: translate3d(0, 0, 0)       scale(1);    opacity: 0.8;  }
+  50%  { transform: translate3d(2%, -1%, 0)    scale(1.06); opacity: 0.95; }
+  100% { transform: translate3d(-1.5%, 1.5%, 0) scale(1.02); opacity: 0.75; }
+}
+@keyframes rdHeroStreakSweep {
+  0%   { transform: translateX(-30%); }
+  100% { transform: translateX(30%);  }
+}
+
+/* Make sure foreground content sits above the atmos layer. The
+   existing 08-welcome.css already gives .welcome-left / .welcome-right
+   z-index: 2, but we re-assert here so we are not order-dependent. */
+.welcome-hero.rd-hero .welcome-left,
+.welcome-hero.rd-hero .welcome-right {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------------------------------------------------------------------
+   3. Typography — kicker / headline / subtitle
+   Uses tokens from 14-redesign-tokens.css so this stays consistent
+   with future Hero variants and other cinematic sections.
+   ------------------------------------------------------------------ */
+.welcome-hero.rd-hero .welcome-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 26px;
+  padding: 7px 14px 7px 12px;
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-soft);
+  background: rgba(var(--rd-crimson-rgb), 0.08);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.28);
+  border-radius: var(--radius-pill);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 22px rgba(var(--rd-crimson-rgb), 0.18);
+}
+.welcome-hero.rd-hero .welcome-kicker::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rd-crimson));
+  opacity: 0.85;
+}
+
+.welcome-hero.rd-hero .welcome-title {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(48px, 6.4vw, 96px);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #f3e7e9 38%,
+    var(--rd-crimson) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  text-wrap: balance;
+  text-shadow: none;
+  /* Subtle entrance — single play, no loop. */
+  animation: rdHeroTitleIn 0.9s var(--ease-cinema) both;
+}
+.welcome-hero.rd-hero .welcome-title::first-line {
+  /* Override the legacy white-only first-line rule so the gradient
+     reads cleanly across multi-line headlines. */
+  color: inherit;
+}
+
+@keyframes rdHeroTitleIn {
+  0%   { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+}
+
+.welcome-hero.rd-hero .welcome-subtitle {
+  margin: 22px 0 0;
+  max-width: 60ch;
+  color: var(--rd-text-soft);
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.7;
+  text-wrap: pretty;
+  animation: rdHeroSubIn 1s var(--ease-cinema) 0.12s both;
+}
+@keyframes rdHeroSubIn {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+
+/* ---------------------------------------------------------------------
+   4. CTA buttons
+   Re-skin the existing primary-btn / secondary-btn within the hero so
+   we do not break their look elsewhere on the page.
+   ------------------------------------------------------------------ */
+.welcome-hero.rd-hero .welcome-actions {
+  margin-top: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  animation: rdHeroSubIn 1s var(--ease-cinema) 0.22s both;
+}
+
+.welcome-hero.rd-hero .welcome-actions .primary-btn,
+.welcome-hero.rd-hero .welcome-actions .secondary-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 54px;
+  padding: 0 26px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform var(--dur-base) var(--ease-cinema),
+    box-shadow var(--dur-base) var(--ease-cinema),
+    filter var(--dur-base) var(--ease-cinema),
+    border-color var(--dur-base) var(--ease-cinema),
+    background var(--dur-base) var(--ease-cinema);
+}
+
+/* Primary CTA — crimson cinematic gradient + bloom. */
+.welcome-hero.rd-hero .welcome-actions .primary-btn {
+  border: 0;
+  color: #fff;
+  background: var(--grad-crimson);
+  box-shadow:
+    var(--shadow-elev-1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 0 28px rgba(var(--rd-crimson-rgb), 0.32);
+}
+.welcome-hero.rd-hero .welcome-actions .primary-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow:
+    var(--shadow-elev-2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.42),
+    0 0 44px rgba(var(--rd-crimson-rgb), 0.55);
+}
+.welcome-hero.rd-hero .welcome-actions .primary-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+/* Secondary CTA — glass ghost that lights crimson on hover. */
+.welcome-hero.rd-hero .welcome-actions .secondary-btn {
+  color: var(--rd-text);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--rd-line-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.welcome-hero.rd-hero .welcome-actions .secondary-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  background: rgba(var(--rd-crimson-rgb), 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 0 22px rgba(var(--rd-crimson-rgb), 0.22);
+}
+.welcome-hero.rd-hero .welcome-actions .secondary-btn:active {
+  transform: translateY(0);
+}
+
+/* ---------------------------------------------------------------------
+   5. Right-column preview cards (focal data composition)
+   Keep their click semantics; recast surfaces as glass cinematic
+   panels with a hairline crimson edge. The "main" card gets a
+   distinct top-corner crimson scan glow so it reads as the focal
+   metric.
+   ------------------------------------------------------------------ */
+.welcome-hero.rd-hero .welcome-right {
+  gap: 16px;
+  align-self: stretch;
+  align-content: center;
+  animation: rdHeroSubIn 1s var(--ease-cinema) 0.32s both;
+}
+
+.welcome-hero.rd-hero .welcome-preview-card,
+.welcome-hero.rd-hero .welcome-mini-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(20, 22, 30, 0.78), rgba(8, 9, 13, 0.92));
+  border: 1px solid var(--rd-line);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform   var(--dur-base) var(--ease-cinema),
+    box-shadow  var(--dur-base) var(--ease-cinema),
+    border-color var(--dur-base) var(--ease-cinema);
+}
+
+/* Hairline crimson edge that ignites on hover. */
+.welcome-hero.rd-hero .welcome-preview-card::after,
+.welcome-hero.rd-hero .welcome-mini-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(var(--rd-crimson-rgb), 0.55),
+    rgba(var(--rd-crimson-rgb), 0) 40%,
+    rgba(var(--rd-crimson-rgb), 0) 60%,
+    rgba(var(--rd-crimson-rgb), 0.35));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-cinema);
+  z-index: 1;
+}
+
+.welcome-hero.rd-hero .welcome-preview-card:hover,
+.welcome-hero.rd-hero .welcome-mini-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.42);
+  box-shadow:
+    var(--shadow-elev-3),
+    var(--glow-red-soft);
+}
+.welcome-hero.rd-hero .welcome-preview-card:hover::after,
+.welcome-hero.rd-hero .welcome-mini-card:hover::after {
+  opacity: 1;
+}
+
+/* The focal main card — top-corner crimson scan glow + larger numeric. */
+.welcome-hero.rd-hero .welcome-preview-card.main {
+  padding: clamp(22px, 2vw, 30px);
+  min-height: 220px;
+  background:
+    radial-gradient(circle at 22% 18%,
+      rgba(var(--rd-crimson-rgb), 0.38) 0%,
+      transparent 38%),
+    var(--grad-glass),
+    linear-gradient(180deg, rgba(20, 22, 30, 0.88), rgba(8, 9, 13, 0.96));
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge),
+    var(--glow-red-soft);
+}
+.welcome-hero.rd-hero .welcome-preview-card.main strong {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 3.6vw, 52px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #fff;
+  background: linear-gradient(180deg, #ffffff, #d6d8df);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+.welcome-hero.rd-hero .welcome-preview-card.main span {
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+}
+.welcome-hero.rd-hero .welcome-preview-card.main p {
+  margin-top: 14px;
+  color: var(--rd-text-soft);
+}
+
+/* Mini cards — lighter, more compact, identical surface treatment. */
+.welcome-hero.rd-hero .welcome-mini-card {
+  padding: clamp(16px, 1.4vw, 22px);
+  min-height: 132px;
+}
+.welcome-hero.rd-hero .welcome-mini-card span {
+  font-family: var(--font-display);
+  font-size: var(--type-0);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rd-text-muted);
+}
+.welcome-hero.rd-hero .welcome-mini-card strong {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.2vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.welcome-hero.rd-hero .welcome-preview-grid {
+  gap: 16px;
+}
+
+/* ---------------------------------------------------------------------
+   6. Mobile composition
+   Vertical stack, attenuated atmospherics so the headline still wins,
+   compact CTA spacing, full-width buttons (already enforced by the
+   legacy welcome stylesheet — we simply do not override that here).
+   ------------------------------------------------------------------ */
+@media (max-width: 980px) {
+  .welcome-hero.rd-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: clamp(28px, 5vw, 44px);
+  }
+  .welcome-hero.rd-hero .welcome-title {
+    font-size: clamp(40px, 8.5vw, 64px);
+  }
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom {
+    opacity: 0.55;
+    filter: blur(4px);
+  }
+  .welcome-hero.rd-hero .rd-hero__atmos-grid {
+    opacity: 0.32;
+  }
+  .welcome-hero.rd-hero .welcome-preview-card.main {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-hero.rd-hero {
+    padding: 22px;
+    border-radius: 22px;
+  }
+  .welcome-hero.rd-hero .welcome-title {
+    font-size: clamp(34px, 9.5vw, 48px);
+    max-width: 18ch;
+  }
+  .welcome-hero.rd-hero .welcome-subtitle {
+    font-size: 14.5px;
+  }
+  .welcome-hero.rd-hero .welcome-actions {
+    margin-top: 24px;
+  }
+  .welcome-hero.rd-hero .welcome-actions .primary-btn,
+  .welcome-hero.rd-hero .welcome-actions .secondary-btn {
+    height: 48px;
+    width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   7. Reduced motion — drop entrance + atmospheric drift animations.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-hero.rd-hero .welcome-title,
+  .welcome-hero.rd-hero .welcome-subtitle,
+  .welcome-hero.rd-hero .welcome-actions,
+  .welcome-hero.rd-hero .welcome-right,
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom,
+  .welcome-hero.rd-hero .rd-hero__atmos-streak {
+    animation: none !important;
+  }
+}
