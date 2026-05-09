@@ -89,6 +89,22 @@ type DraftState = {
   finalScore: string;
   finalPlaceholder: string;
   tournamentTitle: string;
+  // D28: standings Top-N override. Stored as a string so the empty value
+  // can mean "use the default of 6" and the input stays uncontrolled-friendly.
+  // Parsed and clamped at read-time; never persisted to Firebase.
+  standingsLimit: string;
+  // D14: optional sponsor caption rendered next to the sponsor logo. Empty
+  // string means "no caption". Only displayed when a sponsor asset is also
+  // applied -- otherwise the caption is suppressed visually.
+  sponsorCaption: string;
+  // D26: per-template MVP override fields so a manual pick on one template
+  // can no longer silently override another. Each defaults to 0 (= autofill /
+  // fall back to legacy draft.mvpId for backward compatibility). Sentinel
+  // semantics are identical to draft.mvpId: 0 = autofill, -1 = hidden,
+  // > 0 = manual override.
+  matchResultMvpId: number;
+  mvpCardMvpId: number;
+  championPosterMvpId: number;
 };
 
 type Props = {
@@ -157,6 +173,11 @@ const initialDraft: DraftState = {
   finalScore: "",
   finalPlaceholder: "",
   tournamentTitle: "",
+  standingsLimit: "",
+  sponsorCaption: "",
+  matchResultMvpId: 0,
+  mvpCardMvpId: 0,
+  championPosterMvpId: 0,
 };
 
 type StudioTheme =
@@ -455,15 +476,21 @@ function initials(value: string) {
     .toUpperCase();
 }
 
+// D27: pin formatting to a single stable locale (en-US) and 24-hour time so
+// previews and exported PNGs render the same date string regardless of the
+// admin's browser/OS locale. Timezone is intentionally still local because
+// match.date is stored as a local-clock ISO string elsewhere in the app.
+const MEDIA_DATE_LOCALE = "en-US";
 function formatDateLabel(value: string, fallback: string) {
   if (!value) return fallback;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(MEDIA_DATE_LOCALE, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 }
 
@@ -557,9 +584,21 @@ export default function AdminMediaCenter({
       const teamB = teams.find((team) => team.id === match.team2)?.name;
       const playerA = players.find((player) => player.id === match.player1)?.nickname;
       const playerB = players.find((player) => player.id === match.player2)?.nickname;
-      const base = `${teamA || playerA || adminText.unknown} vs ${
+      const versus = `${teamA || playerA || adminText.unknown} vs ${
         teamB || playerB || adminText.unknown
       }`;
+      // D25: when no tournament is selected the global match dropdown becomes
+      // a flat firehose. Prefix labels with [tournament title] so admins can
+      // visually group the list. When a tournament IS selected the prefix is
+      // redundant and intentionally suppressed for a cleaner local view.
+      const matchTournamentTitle =
+        draft.tournamentId === 0
+          ? tournaments.find((t) => t.id === Number(match.tournamentId))?.title ||
+            ""
+          : "";
+      const base = matchTournamentTitle
+        ? `[${matchTournamentTitle}] ${versus}`
+        : versus;
       // D24: enrich label with date / score so admins can distinguish
       // rematches and completed-vs-scheduled matches at a glance. Falls back
       // to the bare "A vs B" form when no usable date or score exists.
@@ -569,7 +608,7 @@ export default function AdminMediaCenter({
       const parsedDate = dateSource ? new Date(dateSource) : null;
       const shortDate =
         parsedDate && !Number.isNaN(parsedDate.getTime())
-          ? parsedDate.toLocaleDateString(undefined, {
+          ? parsedDate.toLocaleDateString(MEDIA_DATE_LOCALE, {
               month: "short",
               day: "numeric",
             })
@@ -598,8 +637,31 @@ export default function AdminMediaCenter({
       : "player";
 
   const selectedPlayer = players.find((player) => player.id === draft.playerId) || null;
-  const selectedMvp = players.find((player) => player.id === draft.mvpId) || null;
   const selectedTeam = teams.find((team) => team.id === draft.teamId) || null;
+  // D26: pick the right per-template MVP field. Templates that don't render
+  // an MVP at all (matchAnnouncement, groupStandings, playoffBracket) get
+  // null and inherit nothing -- they never read the value anyway.
+  const mvpFieldKey: keyof DraftState | null =
+    selectedTemplate === "matchResult"
+      ? "matchResultMvpId"
+      : selectedTemplate === "mvpCard"
+        ? "mvpCardMvpId"
+        : selectedTemplate === "championPoster"
+          ? "championPosterMvpId"
+          : null;
+  const templateMvpRaw = mvpFieldKey
+    ? ((draft[mvpFieldKey] as unknown) as number)
+    : 0;
+  // Effective MVP id with backward-compatibility fallback: a template that
+  // has not been explicitly touched (templateMvpRaw === 0) inherits the
+  // legacy shared draft.mvpId. Once the admin acts on a specific template,
+  // its dedicated field takes over and other templates remain untouched.
+  const effectiveMvpId =
+    mvpFieldKey && templateMvpRaw !== 0 ? templateMvpRaw : draft.mvpId;
+  const selectedMvp =
+    effectiveMvpId > 0
+      ? players.find((player) => player.id === effectiveMvpId) || null
+      : null;
 
   // Deterministic precedence: manual override > selected match > null.
   // (Previously a single `find` with `||` inside the predicate, which returned
@@ -668,15 +730,16 @@ export default function AdminMediaCenter({
     return finals.slice().sort((a, b) => b.id - a.id)[0] || null;
   }, [matches, selectedTournament]);
 
-  // D4: MVP sentinel.
-  //   draft.mvpId === 0  -> autofill (use tournament.mvpId if present).
-  //   draft.mvpId === -1 -> intentionally hidden; never autofill.
-  //   draft.mvpId  >  0  -> manual override (a specific player picked).
-  // Backward compatible: legacy drafts default to 0 (autofill), unchanged.
+  // D4 + D26: MVP sentinel evaluated against the effective (per-template)
+  // id rather than the shared legacy field, so cross-template bleed cannot
+  // sneak in through the sentinel checks.
+  //   effectiveMvpId === 0  -> autofill (use tournament.mvpId if present).
+  //   effectiveMvpId === -1 -> intentionally hidden; never autofill.
+  //   effectiveMvpId  >  0  -> manual override.
   const MVP_HIDDEN = -1;
   const tournamentMvpId = selectedTournament?.mvpId || 0;
-  const isMvpHidden = draft.mvpId === MVP_HIDDEN;
-  const isMvpManual = draft.mvpId > 0;
+  const isMvpHidden = effectiveMvpId === MVP_HIDDEN;
+  const isMvpManual = effectiveMvpId > 0;
   // D22: "auto" indicator condition. True only when autofill is actually
   // sourcing the value from the tournament -- not when the user picked
   // manually and not when they intentionally hid the MVP.
@@ -874,9 +937,27 @@ export default function AdminMediaCenter({
     });
   }, []);
 
+  // D20: idempotent revoke helper. Revoking an already-revoked Object URL is
+  // a silent no-op in browsers, but tracking the set guarantees we never
+  // attempt to revoke the same URL twice -- which keeps logs clean and makes
+  // the cleanup contract obvious. Used by every path that destroys a
+  // pendingAsset (replace / save success / explicit cancel / unmount).
+  const revokedPreviewUrlsRef = useRef<Set<string>>(new Set());
+  const revokePendingPreview = (asset: PendingAsset | null | undefined) => {
+    const url = asset?.previewUrl;
+    if (!url) return;
+    if (revokedPreviewUrlsRef.current.has(url)) return;
+    revokedPreviewUrlsRef.current.add(url);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
+    // Cleanup runs both when `pendingAsset` changes (state replacement /
+    // explicit cancel / save success) and on component unmount, so this
+    // single effect already covers all five paths the audit calls out --
+    // the explicit calls below are belt-and-braces for clarity.
     return () => {
-      if (pendingAsset) URL.revokeObjectURL(pendingAsset.previewUrl);
+      revokePendingPreview(pendingAsset);
     };
   }, [pendingAsset]);
 
@@ -952,6 +1033,21 @@ export default function AdminMediaCenter({
       label: group.name,
     })) || [];
 
+  // D28: parse and clamp the Top-N override. Empty / non-numeric / out-of-range
+  // values fall back to the historical default of 6.
+  const STANDINGS_DEFAULT_LIMIT = 6;
+  const STANDINGS_MIN = 1;
+  const STANDINGS_MAX = 32;
+  const standingsLimit = (() => {
+    const parsed = parseInt(draft.standingsLimit, 10);
+    if (!Number.isFinite(parsed)) return STANDINGS_DEFAULT_LIMIT;
+    return Math.max(STANDINGS_MIN, Math.min(STANDINGS_MAX, parsed));
+  })();
+
+  // D23: surface a clear admin hint when the selected tournament has no
+  // configured group structure, instead of silently rendering placeholder rows.
+  const tournamentHasGroups = (selectedTournament?.groups?.length || 0) > 0;
+
   // Group standings: reuse the public-tournament helper so the studio mirrors
   // the live standings table pixel-for-pixel (points, MP, wins, round diff).
   const standingsRows = useMemo(() => {
@@ -981,7 +1077,7 @@ export default function AdminMediaCenter({
       standings[Object.keys(standings)[0] || ""] ||
       [];
 
-    return activeGroup.slice(0, 6).map((row) => ({
+    return activeGroup.slice(0, standingsLimit).map((row) => ({
       id: row.id,
       name: row.name || adminText.unknown,
       points: row.points,
@@ -989,7 +1085,15 @@ export default function AdminMediaCenter({
       wins: row.wins,
       roundDiff: row.scoreFor - row.scoreAgainst,
     }));
-  }, [adminText.unknown, groupName, matches, players, selectedTournament, teams]);
+  }, [
+    adminText.unknown,
+    groupName,
+    matches,
+    players,
+    selectedTournament,
+    teams,
+    standingsLimit,
+  ]);
 
   const updateDraft = (updates: Partial<DraftState>) =>
     setDraft((prev) => ({ ...prev, ...updates }));
@@ -1035,7 +1139,8 @@ export default function AdminMediaCenter({
     }
 
     setPendingAsset((previous) => {
-      if (previous) URL.revokeObjectURL(previous.previewUrl);
+      // D20: explicitly revoke the previous preview when replacing.
+      revokePendingPreview(previous);
       return {
         file,
         name: file.name.replace(/\.[^.]+$/, ""),
@@ -1093,6 +1198,8 @@ export default function AdminMediaCenter({
 
       await saveItem(assetCollectionName, asset);
       setAppliedAssetIds((previous) => ({ ...previous, [asset.type]: asset.id }));
+      // D20: explicitly revoke before clearing state on success.
+      revokePendingPreview(pendingAsset);
       setPendingAsset(null);
       showToast?.("Asset uploaded");
     } catch (error) {
@@ -1348,15 +1455,35 @@ export default function AdminMediaCenter({
       ) : null}
 
       {selectedTemplate === "groupStandings" ? (
-        <div className="field-block">
-          <label className="field-label">{adminText.mediaGroup}</label>
-          <PremiumSelect
-            value={groupName}
-            placeholder={adminText.mediaGroupPlaceholder}
-            options={groupOptions}
-            onChange={(value) => updateDraft({ groupName: String(value) })}
-          />
-        </div>
+        <>
+          <div className="field-block">
+            <label className="field-label">{adminText.mediaGroup}</label>
+            <PremiumSelect
+              value={groupName}
+              placeholder={adminText.mediaGroupPlaceholder}
+              options={groupOptions}
+              onChange={(value) => updateDraft({ groupName: String(value) })}
+            />
+          </div>
+          {/* D28: optional Top-N override. Empty -> default 6. Clamped to
+              [1, 32] at read-time; the input itself uses min/max for
+              keyboard arrow-step convenience. */}
+          <div className="field-block">
+            <label className="field-label">
+              {adminText.mediaStandingsLimit || "Top N rows"}
+            </label>
+            <input
+              className="input"
+              type="number"
+              min={STANDINGS_MIN}
+              max={STANDINGS_MAX}
+              value={draft.standingsLimit}
+              placeholder={String(STANDINGS_DEFAULT_LIMIT)}
+              onChange={handleTextChange("standingsLimit")}
+            />
+            {renderRestoreAuto("standingsLimit", draft.standingsLimit)}
+          </div>
+        </>
       ) : null}
 
       {selectedTemplate === "mvpCard" ? (
@@ -1384,7 +1511,8 @@ export default function AdminMediaCenter({
 
       {(selectedTemplate === "matchResult" ||
         selectedTemplate === "mvpCard" ||
-        selectedTemplate === "championPoster") ? (
+        selectedTemplate === "championPoster") &&
+      mvpFieldKey ? (
         <div className="field-block">
           <label className="field-label">
             MVP
@@ -1429,30 +1557,45 @@ export default function AdminMediaCenter({
             ) : null}
           </label>
           <PremiumSelect
-            value={isMvpHidden ? 0 : draft.mvpId}
+            value={isMvpHidden ? 0 : effectiveMvpId}
             placeholder={isMvpHidden ? "MVP hidden" : "MVP"}
             options={playerOptions}
-            onChange={handleSelectChange("mvpId")}
+            onChange={(value) => {
+              // D26: writes target the per-template field only. The legacy
+              // draft.mvpId is left untouched so other templates keep their
+              // current rendering unless their own per-template field is
+              // also touched.
+              const next =
+                typeof value === "number" ? value : Number(value) || 0;
+              updateDraft({ [mvpFieldKey]: next } as unknown as Partial<DraftState>);
+            }}
           />
           {/* D4: explicit Hide / Restore controls. Hiding is a deliberate
               negative selection (sentinel -1); Restore re-engages autofill
-              by setting the id back to 0. Without these, clearing the
-              picker would silently fall back to tournament.mvpId. */}
+              by setting the per-template field back to 0. */}
           <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
             {!isMvpHidden ? (
               <button
                 type="button"
                 style={restoreAutoStyle}
-                onClick={() => updateDraft({ mvpId: MVP_HIDDEN })}
+                onClick={() =>
+                  updateDraft({
+                    [mvpFieldKey]: MVP_HIDDEN,
+                  } as unknown as Partial<DraftState>)
+                }
               >
                 {adminText.mediaHideMvp || "Hide MVP"}
               </button>
             ) : null}
-            {draft.mvpId !== 0 ? (
+            {templateMvpRaw !== 0 ? (
               <button
                 type="button"
                 style={restoreAutoStyle}
-                onClick={() => updateDraft({ mvpId: 0 })}
+                onClick={() =>
+                  updateDraft({
+                    [mvpFieldKey]: 0,
+                  } as unknown as Partial<DraftState>)
+                }
               >
                 {adminText.mediaRestoreAutoMvp || "Restore auto MVP"}
               </button>
@@ -1627,10 +1770,42 @@ export default function AdminMediaCenter({
 
   const renderPreviewContent = () => {
     if (selectedTemplate === "groupStandings") {
+      // D23: when the tournament has no groups configured, show a subtle hint
+      // and DON'T fall back to the synthetic placeholder rows -- those used to
+      // silently mislead admins into thinking standings were live. When the
+      // tournament has groups but no match data yet, keep the placeholder
+      // rows so the layout still previews correctly.
+      const showNoGroupsHint =
+        !!selectedTournament && !tournamentHasGroups;
+      const previewRows = standingsRows.length
+        ? standingsRows
+        : showNoGroupsHint
+          ? []
+          : Array.from({ length: 4 }, (_, index) => ({
+              id: index,
+              name: `${adminText.mediaParticipantPlaceholder} ${index + 1}`,
+              points: Math.max(0, 9 - index * 3),
+              played: 3,
+              wins: Math.max(0, 3 - index),
+              roundDiff: 4 - index,
+            }));
       return (
         <div className="media-preview-section media-preview-standings">
           <span className="media-kicker">{groupName}</span>
           <h3>{title}</h3>
+          {showNoGroupsHint ? (
+            <p
+              className="media-empty-hint"
+              style={{
+                opacity: 0.7,
+                fontSize: "0.85rem",
+                margin: "4px 0 8px",
+              }}
+            >
+              {adminText.mediaNoGroupsHint ||
+                "No groups configured for this tournament."}
+            </p>
+          ) : null}
           <div className="media-standings-table">
             <div className="media-standings-row media-standings-head">
               <span>#</span>
@@ -1640,17 +1815,7 @@ export default function AdminMediaCenter({
               <span>W</span>
               <span>RD</span>
             </div>
-            {(standingsRows.length
-              ? standingsRows
-              : Array.from({ length: 4 }, (_, index) => ({
-                  id: index,
-                  name: `${adminText.mediaParticipantPlaceholder} ${index + 1}`,
-                  points: Math.max(0, 9 - index * 3),
-                  played: 3,
-                  wins: Math.max(0, 3 - index),
-                  roundDiff: 4 - index,
-                }))
-            ).map((row, index) => (
+            {previewRows.map((row, index) => (
               <div className="media-standings-row" key={row.id}>
                 <span>{index + 1}</span>
                 <strong>{row.name}</strong>
@@ -1943,6 +2108,14 @@ export default function AdminMediaCenter({
           <span>{isResult ? resultMapLabel : dateLabel}</span>
           <span>{seriesValue}</span>
           {metaMvp ? <span>{metaMvp}</span> : null}
+          {/* D12: surface the derived score on Match Announcement too when
+              one actually exists (override or completed match). "TBD" is
+              treated as absence so unscheduled matches don't render the
+              cell. Match Result already shows the score as the central VS
+              cell, so we skip duplication there. */}
+          {!isResult && score && score !== "TBD" ? (
+            <span>{score}</span>
+          ) : null}
         </div>
       </div>
     );
@@ -2093,7 +2266,11 @@ export default function AdminMediaCenter({
               <button
                 type="button"
                 className="secondary-btn"
-                onClick={() => setPendingAsset(null)}
+                onClick={() => {
+                  // D20: explicitly revoke before clearing on cancel.
+                  revokePendingPreview(pendingAsset);
+                  setPendingAsset(null);
+                }}
                 disabled={isAssetUploading}
               >
                 Cancel
@@ -2143,6 +2320,25 @@ export default function AdminMediaCenter({
                 {position.label}
               </button>
             ))}
+          </div>
+          {/* D14: optional sponsor caption. Rendered in the preview only when
+              a sponsor asset is also applied; gracefully disappears when
+              empty. The field is always available here so admins can author
+              the caption before / after picking a sponsor logo. */}
+          <div className="field-block" style={{ marginTop: 8 }}>
+            <label className="field-label">
+              {adminText.mediaSponsorCaption || "Sponsor caption"}
+            </label>
+            <input
+              className="input"
+              value={draft.sponsorCaption}
+              placeholder={
+                adminText.mediaSponsorCaptionPlaceholder ||
+                "e.g. Powered by Acme"
+              }
+              onChange={handleTextChange("sponsorCaption")}
+            />
+            {renderRestoreAuto("sponsorCaption", draft.sponsorCaption)}
           </div>
         </div>
       ) : null}
@@ -2307,6 +2503,45 @@ export default function AdminMediaCenter({
                 src={appliedSponsor.url}
                 alt={appliedSponsor.name}
               />
+            ) : null}
+            {/* D14: caption sits near the sponsor logo, anchored to the same
+                corner via inline offsets. Only rendered when both a sponsor
+                asset is applied and the caption is non-empty so it never
+                competes with critical content. Inline-styled to avoid a
+                CSS rewrite. */}
+            {appliedSponsor && draft.sponsorCaption.trim() ? (
+              <span
+                className="media-sponsor-caption"
+                style={(() => {
+                  const base: CSSProperties = {
+                    position: "absolute",
+                    fontSize: "0.62rem",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    opacity: 0.75,
+                    pointerEvents: "none",
+                    whiteSpace: "nowrap",
+                  };
+                  switch (sponsorPosition) {
+                    case "topLeft":
+                      return { ...base, top: 88, left: 24 };
+                    case "topRight":
+                      return { ...base, top: 88, right: 24 };
+                    case "bottomCenter":
+                      return {
+                        ...base,
+                        bottom: 28,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                      };
+                    case "compact":
+                    default:
+                      return { ...base, top: 88, right: 24 };
+                  }
+                })()}
+              >
+                {draft.sponsorCaption.trim()}
+              </span>
             ) : null}
             <div className="media-poster-footer">
               <span>@sansara.esports</span>
