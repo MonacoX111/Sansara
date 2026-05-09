@@ -105,6 +105,13 @@ type DraftState = {
   matchResultMvpId: number;
   mvpCardMvpId: number;
   championPosterMvpId: number;
+  // D16: optional manual overrides for the four Playoff Bracket semi-final
+  // slots. Empty string means "keep auto-detection result"; any non-empty
+  // string wins. Order: [SF1 side A, SF1 side B, SF2 side A, SF2 side B].
+  semiFinal1TeamA: string;
+  semiFinal1TeamB: string;
+  semiFinal2TeamA: string;
+  semiFinal2TeamB: string;
 };
 
 type Props = {
@@ -178,6 +185,10 @@ const initialDraft: DraftState = {
   matchResultMvpId: 0,
   mvpCardMvpId: 0,
   championPosterMvpId: 0,
+  semiFinal1TeamA: "",
+  semiFinal1TeamB: "",
+  semiFinal2TeamA: "",
+  semiFinal2TeamB: "",
 };
 
 type StudioTheme =
@@ -522,8 +533,14 @@ export default function AdminMediaCenter({
   const [assetDropActive, setAssetDropActive] = useState(false);
   const [assetUploadError, setAssetUploadError] = useState("");
   const [isAssetUploading, setIsAssetUploading] = useState(false);
+  // D19: appliedAssetIds value type is widened to string | string[] so that
+  // overlay and sponsor categories can stack multiple assets while singletons
+  // (backgrounds, textures) keep their scalar shape. Old saved drafts that
+  // wrote a bare string remain valid: every read goes through `getAppliedIds`
+  // which normalizes the value to an array, so backward compatibility is
+  // automatic with no migration step.
   const [appliedAssetIds, setAppliedAssetIds] = useState<
-    Partial<Record<AssetCategory, string>>
+    Partial<Record<AssetCategory, string | string[]>>
   >({});
   // D21: id of the asset whose delete button has been *armed* (i.e. clicked
   // once). A second click on the same row commits the delete. Clicking any
@@ -729,6 +746,62 @@ export default function AdminMediaCenter({
     if (grand) return grand;
     return finals.slice().sort((a, b) => b.id - a.id)[0] || null;
   }, [matches, selectedTournament]);
+
+  // D16: read-only parallel detection of the four semi-final participant
+  // names so the manual-override inputs in the settings panel can show
+  // "current auto-detected value" hints. Mirrors the detection inside
+  // renderPreviewContent's bracket branch but never touches it -- per the
+  // audit's "no refactor" constraint, both paths run independently.
+  // Slot order: [SF1A, SF1B, SF2A, SF2B]. Null = nothing detected.
+  const autoSemiNames = useMemo<(string | null)[]>(() => {
+    const result: (string | null)[] = [null, null, null, null];
+    if (!selectedTournament) return result;
+    const playoff = matches.filter(
+      (m) =>
+        Number(m.tournamentId) === selectedTournament.id &&
+        (m.stage === "playoff" || m.stage === "final")
+    );
+    const isSemi = (m: Match) => {
+      const sid = (m.seriesId || "").trim().toUpperCase();
+      if (sid.startsWith("SF")) return true;
+      const label = `${m.roundLabel || ""} ${m.round || ""}`.toLowerCase();
+      return (
+        /1\s*\/\s*2/.test(label) ||
+        label.includes("semi") ||
+        label.includes("\u043f\u0456\u0432\u0444\u0456\u043d\u0430\u043b") ||
+        label.includes("\u043f\u043e\u043b\u0443\u0444\u0438\u043d\u0430\u043b")
+      );
+    };
+    const semis = playoff
+      .filter(isSemi)
+      .sort((a, b) => {
+        const sa = (a.seriesId || "").toUpperCase();
+        const sb = (b.seriesId || "").toUpperCase();
+        if (sa && sb && sa !== sb) return sa.localeCompare(sb);
+        return (a.order ?? a.id) - (b.order ?? b.id);
+      })
+      .slice(0, 2);
+    const resolve = (m: Match | null, side: 1 | 2): string | null => {
+      if (!m) return null;
+      const isTeam = m.matchType === "team";
+      const id = isTeam
+        ? side === 1
+          ? m.team1
+          : m.team2
+        : side === 1
+          ? m.player1
+          : m.player2;
+      if (!id) return null;
+      if (isTeam) return teams.find((t) => t.id === id)?.name || null;
+      return players.find((p) => p.id === id)?.nickname || null;
+    };
+    for (let i = 0; i < 2; i += 1) {
+      const m = semis[i] || null;
+      result[i * 2] = resolve(m, 1);
+      result[i * 2 + 1] = resolve(m, 2);
+    }
+    return result;
+  }, [matches, players, teams, selectedTournament]);
 
   // D4 + D26: MVP sentinel evaluated against the effective (per-template)
   // id rather than the shared legacy field, so cross-template bleed cannot
@@ -1118,10 +1191,37 @@ export default function AdminMediaCenter({
   const getAssetById = (assetId?: string) =>
     assetId ? mediaAssets.find((asset) => asset.id === assetId) || null : null;
 
-  const appliedBackground = getAssetById(appliedAssetIds.backgrounds);
-  const appliedOverlay = getAssetById(appliedAssetIds.overlays);
-  const appliedTexture = getAssetById(appliedAssetIds.textures);
-  const appliedSponsor = getAssetById(appliedAssetIds.sponsors);
+  // D19: only overlay + sponsor stack. Backgrounds and textures stay
+  // single-slot. Centralised here so future categories can opt in by name
+  // without re-editing every consumer.
+  const isCategoryMulti = (category: AssetCategory) =>
+    category === "overlays" || category === "sponsors";
+
+  // Read-side normalizer: returns the applied id list for a category as a
+  // plain array regardless of whether the underlying state is scalar (legacy)
+  // or array (new). Empty / missing -> [].
+  const getAppliedIds = (category: AssetCategory): string[] => {
+    const value = appliedAssetIds[category];
+    if (!value) return [];
+    return Array.isArray(value) ? value : [value];
+  };
+
+  // Single-slot helper for legacy single-asset consumers (background, texture).
+  // Picks the first id when the state happens to hold an array (defensive).
+  const getFirstAppliedId = (category: AssetCategory): string | undefined =>
+    getAppliedIds(category)[0];
+
+  const appliedBackground = getAssetById(getFirstAppliedId("backgrounds"));
+  const appliedTexture = getAssetById(getFirstAppliedId("textures"));
+  const appliedOverlays = getAppliedIds("overlays")
+    .map((id) => getAssetById(id))
+    .filter((asset): asset is MediaAsset => asset !== null);
+  const appliedSponsors = getAppliedIds("sponsors")
+    .map((id) => getAssetById(id))
+    .filter((asset): asset is MediaAsset => asset !== null);
+  // Convenience first-sponsor reference for the existing single-asset CSS
+  // rendering path and for the D14 caption anchor.
+  const appliedSponsor = appliedSponsors[0] || null;
 
   const filteredAssets = mediaAssets.filter((asset) => {
     if (asset.type !== activeAssetCategory) return false;
@@ -1197,7 +1297,9 @@ export default function AdminMediaCenter({
       };
 
       await saveItem(assetCollectionName, asset);
-      setAppliedAssetIds((previous) => ({ ...previous, [asset.type]: asset.id }));
+      // D19: applying a freshly-saved asset goes through the same multi /
+      // single dispatch as the manual Apply button below.
+      setAppliedAssetIds((previous) => applyAssetIdToState(previous, asset));
       // D20: explicitly revoke before clearing state on success.
       revokePendingPreview(pendingAsset);
       setPendingAsset(null);
@@ -1224,12 +1326,13 @@ export default function AdminMediaCenter({
         await deleteObject(storageRef(storage, asset.storagePath));
       }
       await deleteItem(assetCollectionName, asset.id);
-      setAppliedAssetIds((previous) => {
-        if (previous[asset.type] !== asset.id) return previous;
-        const next = { ...previous };
-        delete next[asset.type];
-        return next;
-      });
+      // D19: when the underlying asset is deleted from Firestore, evict it
+      // from the applied list whether it was scalar (legacy) or arrayed
+      // (new). Multi categories may shrink to a non-empty array; in that
+      // case keep the rest. Single categories drop the key entirely.
+      setAppliedAssetIds((previous) =>
+        removeAppliedIdFromState(previous, asset.type, asset.id)
+      );
       showToast?.("Asset deleted");
     } catch (error) {
       console.error("Asset delete failed:", error);
@@ -1256,11 +1359,69 @@ export default function AdminMediaCenter({
     setPendingDeleteAssetId(asset.id);
   };
 
+  // D19: pure helpers that operate on a state snapshot. Kept as named
+  // functions (not closures over `appliedAssetIds`) so they can be reused
+  // safely inside `setAppliedAssetIds` updaters where the latest snapshot
+  // is `previous`, not the rendered value.
+  const readListFromState = (
+    state: Partial<Record<AssetCategory, string | string[]>>,
+    category: AssetCategory
+  ): string[] => {
+    const value = state[category];
+    if (!value) return [];
+    return Array.isArray(value) ? value : [value];
+  };
+
+  const applyAssetIdToState = (
+    state: Partial<Record<AssetCategory, string | string[]>>,
+    asset: MediaAsset
+  ): Partial<Record<AssetCategory, string | string[]>> => {
+    if (!isCategoryMulti(asset.type)) {
+      // Singletons keep their replace-on-apply behaviour exactly as before.
+      return { ...state, [asset.type]: asset.id };
+    }
+    const list = readListFromState(state, asset.type);
+    if (list.includes(asset.id)) return state; // dedupe; preserve order
+    // Append: oldest first, newest last. Render order matches DOM stacking,
+    // so the most recently applied overlay/sponsor naturally renders on top.
+    return { ...state, [asset.type]: [...list, asset.id] };
+  };
+
+  const removeAppliedIdFromState = (
+    state: Partial<Record<AssetCategory, string | string[]>>,
+    category: AssetCategory,
+    assetId: string
+  ): Partial<Record<AssetCategory, string | string[]>> => {
+    const list = readListFromState(state, category);
+    if (!list.includes(assetId)) return state;
+    const filtered = list.filter((id) => id !== assetId);
+    if (filtered.length === 0) {
+      const next = { ...state };
+      delete next[category];
+      return next;
+    }
+    if (!isCategoryMulti(category)) {
+      // Singleton sanity: removing the only id always clears the key.
+      const next = { ...state };
+      delete next[category];
+      return next;
+    }
+    return { ...state, [category]: filtered };
+  };
+
   const handleApplyAsset = (asset: MediaAsset) => {
-    setAppliedAssetIds((previous) => ({ ...previous, [asset.type]: asset.id }));
+    setAppliedAssetIds((previous) => applyAssetIdToState(previous, asset));
+  };
+
+  const handleUnapplyAsset = (category: AssetCategory, assetId: string) => {
+    setAppliedAssetIds((previous) =>
+      removeAppliedIdFromState(previous, category, assetId)
+    );
   };
 
   const handleClearAsset = (category: AssetCategory) => {
+    // Existing semantics preserved: clear the entire category in one click.
+    // Per-asset removal lives on each pill via handleUnapplyAsset.
     setAppliedAssetIds((previous) => {
       const next = { ...previous };
       delete next[category];
@@ -1706,15 +1867,65 @@ export default function AdminMediaCenter({
       ) : null}
 
       {selectedTemplate === "playoffBracket" ? (
-        <div className="field-block">
-          <label className="field-label">{adminText.mediaFinalPlaceholder}</label>
-          <input
-            className="input"
-            value={draft.finalPlaceholder}
-            placeholder={adminText.mediaFinalPlaceholderText}
-            onChange={handleTextChange("finalPlaceholder")}
-          />
-        </div>
+        <>
+          <div className="field-block">
+            <label className="field-label">{adminText.mediaFinalPlaceholder}</label>
+            <input
+              className="input"
+              value={draft.finalPlaceholder}
+              placeholder={adminText.mediaFinalPlaceholderText}
+              onChange={handleTextChange("finalPlaceholder")}
+            />
+            {renderRestoreAuto("finalPlaceholder", draft.finalPlaceholder)}
+          </div>
+          {/* D16: manual overrides for the four semi-final slots. Empty
+              keeps auto-detection. Placeholders surface the currently
+              detected name when available so admins can see what would
+              render before they type. */}
+          {(
+            [
+              {
+                key: "semiFinal1TeamA" as const,
+                label:
+                  adminText.mediaSemiFinalOne || "Semi-final 1 \u2014 Team A",
+                index: 0,
+              },
+              {
+                key: "semiFinal1TeamB" as const,
+                label:
+                  adminText.mediaSemiFinalTwo || "Semi-final 1 \u2014 Team B",
+                index: 1,
+              },
+              {
+                key: "semiFinal2TeamA" as const,
+                label:
+                  adminText.mediaSemiFinalThree || "Semi-final 2 \u2014 Team A",
+                index: 2,
+              },
+              {
+                key: "semiFinal2TeamB" as const,
+                label:
+                  adminText.mediaSemiFinalFour || "Semi-final 2 \u2014 Team B",
+                index: 3,
+              },
+            ] as const
+          ).map(({ key, label, index }) => (
+            <div className="field-block" key={key}>
+              <label className="field-label">{label}</label>
+              <input
+                className="input"
+                value={draft[key]}
+                placeholder={
+                  autoSemiNames[index] ||
+                  adminText.mediaParticipantPlaceholder ||
+                  ""
+                }
+                onChange={handleTextChange(key)}
+              />
+              {renderRestoreAuto(key, draft[key])}
+            </div>
+          ))}
+        </>
       ) : null}
 
       {selectedTemplate === "mvpCard" ? (
@@ -1933,6 +2144,25 @@ export default function AdminMediaCenter({
           : null;
         if (name3) semiSlots[2] = { name: name3, isPlaceholder: false };
         if (name4) semiSlots[3] = { name: name4, isPlaceholder: false };
+      }
+
+      // D16: apply manual overrides as a final pass so admin-typed values
+      // win over both the heuristic detection and the participantIds
+      // fallback. Empty (trimmed) overrides leave the auto-detected slot
+      // untouched. The override slot is no longer treated as a placeholder.
+      const semiOverrideValues = [
+        draft.semiFinal1TeamA.trim(),
+        draft.semiFinal1TeamB.trim(),
+        draft.semiFinal2TeamA.trim(),
+        draft.semiFinal2TeamB.trim(),
+      ];
+      for (let i = 0; i < 4; i += 1) {
+        if (semiOverrideValues[i]) {
+          semiSlots[i] = {
+            name: semiOverrideValues[i],
+            isPlaceholder: false,
+          };
+        }
       }
 
       const finalParticipantA = resolveParticipantName(finalMatch, 1);
@@ -2288,19 +2518,59 @@ export default function AdminMediaCenter({
       />
 
       <div className="media-applied-assets">
-        {assetCategories.map((category) => {
-          const asset = getAssetById(appliedAssetIds[category.id]);
-          return (
-            <div className="media-applied-pill" key={category.id}>
-              <span>{category.label}</span>
-              <strong>{asset?.name || "None"}</strong>
-              {asset ? (
-                <button type="button" onClick={() => handleClearAsset(category.id)}>
+        {/* D19: singletons keep one pill per category. Multi categories
+            (overlays, sponsors) render one pill per applied asset, each
+            with its own Clear button so admins can remove individual
+            stacked items. The empty state still shows a single "None"
+            pill so the panel layout stays predictable. */}
+        {assetCategories.flatMap((category) => {
+          const ids = getAppliedIds(category.id);
+          if (!isCategoryMulti(category.id)) {
+            const asset = getAssetById(ids[0]);
+            return [
+              <div className="media-applied-pill" key={category.id}>
+                <span>{category.label}</span>
+                <strong>{asset?.name || "None"}</strong>
+                {asset ? (
+                  <button
+                    type="button"
+                    onClick={() => handleClearAsset(category.id)}
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>,
+            ];
+          }
+          if (ids.length === 0) {
+            return [
+              <div
+                className="media-applied-pill"
+                key={`${category.id}-empty`}
+              >
+                <span>{category.label}</span>
+                <strong>None</strong>
+              </div>,
+            ];
+          }
+          return ids.map((id) => {
+            const asset = getAssetById(id);
+            return (
+              <div
+                className="media-applied-pill"
+                key={`${category.id}-${id}`}
+              >
+                <span>{category.label}</span>
+                <strong>{asset?.name || "Unknown"}</strong>
+                <button
+                  type="button"
+                  onClick={() => handleUnapplyAsset(category.id, id)}
+                >
                   Clear
                 </button>
-              ) : null}
-            </div>
-          );
+              </div>
+            );
+          });
         })}
       </div>
 
@@ -2483,26 +2753,76 @@ export default function AdminMediaCenter({
             ) : null}
             <div className="media-poster-grid" />
             <div className="media-poster-glow" />
-            {appliedOverlay ? (
+            {/* D19: render every applied overlay in application order. The
+                last sibling in the DOM stacks visually on top, so the
+                most-recently-applied overlay sits topmost without any
+                z-index gymnastics. Each overlay reuses the existing
+                .media-asset-overlay CSS rule -- no new classes. */}
+            {appliedOverlays.map((overlay) => (
               <div
+                key={overlay.id}
                 className="media-asset-layer media-asset-overlay"
                 style={{
-                  backgroundImage: `url("${appliedOverlay.url}")`,
+                  backgroundImage: `url("${overlay.url}")`,
                   opacity: overlayOpacity,
                 }}
               />
-            ) : null}
+            ))}
             <div className="media-poster-topline">
               <span>SANSARA</span>
               <span>{activeTemplate ? adminText[activeTemplate.labelKey] : ""}</span>
             </div>
             {renderPreviewContent()}
-            {appliedSponsor ? (
+            {/* D19: when only one sponsor is applied, keep the legacy
+                .media-sponsor-logo + corner CSS path so visuals match
+                exactly what the audit promised never to redesign. With
+                two-or-more sponsors fall back to a lightweight inline
+                flex row anchored to the same corner so logos stack
+                cleanly without overlapping. */}
+            {appliedSponsors.length === 1 ? (
               <img
                 className={`media-sponsor-logo media-sponsor-logo-${sponsorPosition}`}
-                src={appliedSponsor.url}
-                alt={appliedSponsor.name}
+                src={appliedSponsors[0].url}
+                alt={appliedSponsors[0].name}
               />
+            ) : appliedSponsors.length > 1 ? (
+              <div
+                className="media-sponsor-row"
+                style={(() => {
+                  const base: CSSProperties = {
+                    position: "absolute",
+                    display: "flex",
+                    gap: 12,
+                    alignItems: "center",
+                    pointerEvents: "none",
+                  };
+                  switch (sponsorPosition) {
+                    case "topLeft":
+                      return { ...base, top: 24, left: 24 };
+                    case "topRight":
+                      return { ...base, top: 24, right: 24 };
+                    case "bottomCenter":
+                      return {
+                        ...base,
+                        bottom: 24,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                      };
+                    case "compact":
+                    default:
+                      return { ...base, top: 24, right: 24 };
+                  }
+                })()}
+              >
+                {appliedSponsors.map((sponsor) => (
+                  <img
+                    key={sponsor.id}
+                    src={sponsor.url}
+                    alt={sponsor.name}
+                    style={{ height: 40, width: "auto", objectFit: "contain" }}
+                  />
+                ))}
+              </div>
             ) : null}
             {/* D14: caption sits near the sponsor logo, anchored to the same
                 corner via inline offsets. Only rendered when both a sponsor
