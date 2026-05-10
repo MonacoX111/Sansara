@@ -1,0 +1,544 @@
+/* =====================================================================
+   23-redesign-teams.css
+   ---------------------------------------------------------------------
+   Teams list + Team profile cinematic pass — Turn 10.
+   100% CSS — no JSX changes. All selectors target team-namespaced
+   classes (`.simple-card.button-card`, `.featured-team-card`,
+   `.team-featured-badge`, `.team-profile-head`, `.team-roster-*`) or
+   team-scoped descendants. The only shared classes augmented here are
+   `.team-history-card` (already styled in T9 — TeamsTab reuses it) and
+   `.empty-block` (scoped via team-containing ancestors so unrelated
+   tabs are not affected).
+   Removing the @import in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* =====================================================================
+   1. TEAM LIST CARD — broadcast organization tile
+   ===================================================================== */
+
+.simple-card.button-card {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform    220ms var(--rd-ease-settle, ease),
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   420ms var(--rd-ease-settle, ease);
+}
+.simple-card.button-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 0%),
+    rgba(var(--rd-crimson-rgb), 0.16) 0%,
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 320ms var(--rd-ease-settle, ease);
+}
+.simple-card.button-card:hover::before {
+  opacity: 1;
+}
+.simple-card.button-card > * {
+  position: relative;
+  z-index: 2;
+}
+.simple-card.button-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Selected team — crimson cue rail + tinted fill */
+.simple-card.button-card.player-card-active {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  background:
+    linear-gradient(180deg, rgba(var(--rd-crimson-rgb), 0.08), rgba(255, 255, 255, 0)),
+    rgba(11, 13, 18, 0.85);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(var(--rd-crimson-rgb), 0.25);
+}
+.simple-card.button-card.player-card-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14%;
+  bottom: 14%;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--rd-crimson-rgb), 0.95),
+    rgba(var(--rd-crimson-rgb), 0.35)
+  );
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.55);
+  z-index: 2;
+}
+
+/* Featured team — gold hairline accent */
+.simple-card.button-card.featured-team-card {
+  border-color: rgba(216, 181, 106, 0.32);
+  background:
+    linear-gradient(180deg, rgba(216, 181, 106, 0.06), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.82);
+}
+.simple-card.button-card.featured-team-card:not(.player-card-active)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(216, 181, 106, 0.85),
+    transparent
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Head row inside team list card */
+.simple-card.button-card .player-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.simple-card.button-card .player-head .logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  flex: 0 0 auto;
+  object-fit: cover;
+  padding: 4px;
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   320ms var(--rd-ease-settle, ease);
+}
+.simple-card.button-card:hover .player-head .logo,
+.simple-card.button-card.player-card-active .player-head .logo {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  box-shadow: 0 0 16px rgba(var(--rd-crimson-rgb), 0.3);
+}
+.simple-card.button-card.featured-team-card:not(.player-card-active):not(:hover)
+  .player-head .logo {
+  border-color: rgba(216, 181, 106, 0.5);
+  box-shadow: 0 0 14px rgba(216, 181, 106, 0.25);
+}
+.simple-card.button-card .player-head .achievement-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.simple-card.button-card.featured-team-card .player-head .achievement-title {
+  color: #ffe39b;
+  text-shadow: 0 0 10px rgba(216, 181, 106, 0.35);
+}
+.simple-card.button-card .player-head .muted.small {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+          line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-featured-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(216, 181, 106, 0.16);
+  border: 1px solid rgba(216, 181, 106, 0.5);
+  color: #ffe39b;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   2. TEAM PROFILE HEAD — cinematic organization banner
+   ===================================================================== */
+.team-profile-head {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 26px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(
+      ellipse at 18% 0%,
+      rgba(var(--rd-crimson-rgb), 0.16) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 92% 100%,
+      rgba(var(--rd-crimson-rgb), 0.07) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0)),
+    rgba(7, 9, 13, 0.85);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.team-profile-head::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--rd-crimson-rgb), 0.7),
+    transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+.team-profile-head > * {
+  position: relative;
+  z-index: 2;
+}
+.team-profile-head .logo.big {
+  width: 112px;
+  height: 112px;
+  border-radius: 18px;
+  padding: 8px;
+  border: 2px solid rgba(var(--rd-crimson-rgb), 0.55);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 0 24px rgba(var(--rd-crimson-rgb), 0.3),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+.team-profile-head .profile-name {
+  margin: 0;
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+}
+.team-profile-head .muted {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+  max-width: 64ch;
+}
+.team-profile-head .tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.team-profile-head .tag-row .pill {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* =====================================================================
+   3. TEAM ROSTER CARDS — premium roster row
+   ===================================================================== */
+.team-roster-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+.team-roster-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  transition:
+    transform    220ms var(--rd-ease-settle, ease),
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease);
+}
+.team-roster-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%),
+      rgba(var(--rd-crimson-rgb), 0.06) 0%,
+      transparent 60%
+    ),
+    rgba(11, 13, 18, 0.82);
+}
+.team-roster-avatar,
+.team-roster-avatar-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+  object-fit: cover;
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   320ms var(--rd-ease-settle, ease);
+}
+.team-roster-card:hover .team-roster-avatar,
+.team-roster-card:hover .team-roster-avatar-placeholder {
+  border-color: rgba(var(--rd-crimson-rgb), 0.5);
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.3);
+}
+.team-roster-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-family: var(--rd-font-display, inherit);
+}
+.team-roster-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.team-roster-name {
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-roster-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   4. TEAM HISTORY — augment for tournament/match rows
+   (base .team-history-card glass styling already lives in T9 / 22-redesign-players.css)
+   ===================================================================== */
+
+/* In the player profile (T9), .team-history-card uses team-history-main + logo.
+   In TeamsTab, the structure is .team-history-top > .team-history-title + .pill.
+   Both work with T9 base styles; the augmentations below give the
+   team-context pills proper team palette. */
+.team-history-card .team-history-top {
+  align-items: center;
+}
+.team-history-card .team-history-title {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Winner / outcome pill */
+.team-history-card .pill.gold {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 181, 106, 0.5);
+  background: rgba(216, 181, 106, 0.14);
+  color: #ffe39b;
+  text-shadow: 0 0 8px rgba(216, 181, 106, 0.35);
+  flex: 0 0 auto;
+}
+.team-history-card .pill.green {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(64, 196, 132, 0.45);
+  background: rgba(64, 196, 132, 0.14);
+  color: #5fe2a3;
+  flex: 0 0 auto;
+}
+/* Loss / non-green outcome pill (no `.green` modifier in match rows). */
+.team-history-card
+  .team-history-top
+  > .pill:not(.gold):not(.green) {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.5);
+  background: rgba(var(--rd-crimson-rgb), 0.12);
+  color: #ff6a78;
+  flex: 0 0 auto;
+}
+
+/* Meta line — broadcast lower-third spans */
+.team-history-card .team-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+.team-history-card .team-history-meta > span:first-child {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+/* =====================================================================
+   5. EMPTY STATES — scoped to team contexts only
+   ===================================================================== */
+.team-roster-list + .empty-block,
+.team-history-list + .empty-block {
+  display: none; /* defensive — never used, list-then-empty is mutually exclusive */
+}
+/* Real selector: empty block as a sibling of nothing, inside section-block
+   that follows team-profile-head (i.e. all team-tab section-blocks). */
+.team-profile-head ~ .section-block .empty-block {
+  display: block;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(11, 13, 18, 0.5);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* =====================================================================
+   6. REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .simple-card.button-card:hover,
+  .team-roster-card:hover {
+    transform: none !important;
+  }
+}
+
+/* =====================================================================
+   7. MOBILE
+   ===================================================================== */
+@media (max-width: 768px) {
+  .team-profile-head {
+    padding: 22px 18px;
+    gap: 16px;
+  }
+  .team-profile-head .logo.big {
+    width: 88px;
+    height: 88px;
+    border-radius: 14px;
+    padding: 6px;
+  }
+  .team-profile-head .profile-name {
+    font-size: clamp(1.4rem, 6vw, 1.8rem);
+  }
+}
+@media (max-width: 640px) {
+  .team-profile-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .team-roster-list {
+    grid-template-columns: 1fr;
+  }
+  .simple-card.button-card,
+  .team-roster-card,
+  .team-profile-head {
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+  }
+  .team-history-card .team-history-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .team-history-card .team-history-title {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+}
+
+/* =====================================================================
+   8. TOUCH — neutralise hover transforms
+   ===================================================================== */
+@media (hover: none) {
+  .simple-card.button-card:hover,
+  .team-roster-card:hover {
+    transform: none;
+  }
+}

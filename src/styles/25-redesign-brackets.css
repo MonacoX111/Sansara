@@ -1,0 +1,513 @@
+/* =====================================================================
+   25-redesign-brackets.css
+   ---------------------------------------------------------------------
+   Tournament bracket cinematic polish — Turn 12.
+   100% CSS — no JSX changes. Layered on top of legacy 07-bracket.css.
+   Every selector is prefixed with `.tournament-public-view` so only
+   the public tournament detail view receives this pass — admin
+   bracket surfaces (out of scope) keep their existing styling.
+   Removing the @import in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* =====================================================================
+   1. BLOCK SHELL — replace magenta/cyan blooms with crimson-only
+   ===================================================================== */
+.tournament-public-view .bracket-block {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(7, 9, 13, 0.72);
+  padding: 0;
+  padding-right: 0;
+  overflow: hidden;
+}
+/* Neutralise legacy grid + cyan/magenta dot blooms */
+.tournament-public-view .bracket-block::before {
+  background: none !important;
+  background-size: auto !important;
+}
+
+.tournament-public-view .bracket-block-head {
+  margin-bottom: 0;
+}
+.tournament-public-view .bracket-block-head span {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.tournament-public-view .bracket-block-head small {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* =====================================================================
+   2. ROUND HEADERS — broadcast hairline label
+   ===================================================================== */
+.tournament-public-view .bracket-column-title,
+.tournament-public-view .bracket-group-title {
+  /* Drop the legacy pill chrome */
+  padding: 0 0 8px 0 !important;
+  margin-bottom: 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+  position: relative;
+  font-family: var(--rd-font-display, inherit);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.tournament-public-view .bracket-column-title::after,
+.tournament-public-view .bracket-group-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 28px;
+  height: 1px;
+  background: rgba(var(--rd-crimson-rgb), 0.75);
+}
+
+/* Grand Final round header — gold accent */
+.tournament-public-view .bracket-column-final .bracket-column-title {
+  color: #ffe39b !important;
+  text-shadow: 0 0 10px rgba(216, 181, 106, 0.3);
+}
+.tournament-public-view .bracket-column-final .bracket-column-title::after {
+  background: linear-gradient(
+    90deg,
+    rgba(216, 181, 106, 0.95),
+    rgba(var(--rd-crimson-rgb), 0.7)
+  );
+  width: 56px;
+}
+.tournament-public-view .bracket-column-final .bracket-column-title::before {
+  content: "★";
+  display: inline-block;
+  margin-right: 8px;
+  color: #d8b56a;
+  font-size: 0.78rem;
+}
+
+/* =====================================================================
+   3. MATCH CARD — refined glass
+   ===================================================================== */
+.tournament-public-view .bracket-match-card {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.82);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.tournament-public-view .bracket-match-card:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(var(--rd-crimson-rgb), 0.08);
+}
+
+.tournament-public-view .bracket-match-top {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.tournament-public-view .bracket-match-top span:last-child {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+}
+
+/* Series card refinement (the tappable wrapper in playoff brackets) */
+.tournament-public-view .bracket-series-card {
+  border: 1px solid rgba(255, 255, 255, 0.085) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.88) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 6px 18px rgba(0, 0, 0, 0.35) !important;
+}
+/* Soften the existing white top-radial halo on hover */
+.tournament-public-view .bracket-series-card::after {
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(var(--rd-crimson-rgb), 0.14),
+    transparent 40%
+  ) !important;
+}
+
+/* =====================================================================
+   4. PLAYER SIDE — refined hierarchy + winner state
+   ===================================================================== */
+.tournament-public-view .bracket-side {
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tournament-public-view .bracket-side.winner {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 2px 0 0 0 rgba(64, 196, 132, 0.7);
+}
+.tournament-public-view .bracket-series-completed .bracket-side.winner {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 2px 0 0 0 rgba(64, 196, 132, 0.85),
+    0 0 12px rgba(64, 196, 132, 0.1);
+}
+
+.tournament-public-view .bracket-player img,
+.tournament-public-view .bracket-avatar-placeholder {
+  border-radius: 8px;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.tournament-public-view .bracket-player span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =====================================================================
+   5. SCORE + MAP PILLS + WINNER BADGE
+   ===================================================================== */
+.tournament-public-view .bracket-score {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0;
+  line-height: 1;
+}
+.tournament-public-view .bracket-series-completed .bracket-score {
+  color: #ffe39b;
+  text-shadow: 0 0 12px rgba(216, 181, 106, 0.28);
+}
+
+/* Map pills — neutral glass capsules (was cyan) */
+.tournament-public-view .bracket-map-list span {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Winner badge — refined broadcast pill (was bright green chip) */
+.tournament-public-view .bracket-winner {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(64, 196, 132, 0.32);
+  background: rgba(64, 196, 132, 0.08);
+  color: #5fe2a3;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Series-game inner card (per-game wrapper) */
+.tournament-public-view .bracket-series-game {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 10px;
+}
+
+/* =====================================================================
+   6. GROUP MATCH CARDS (compact mode)
+   ===================================================================== */
+.tournament-public-view .bracket-group-matches .bracket-match-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.7);
+  box-shadow: none;
+}
+.tournament-public-view .bracket-group-matches .bracket-match-card:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.tournament-public-view .bracket-group-matches .bracket-match-top span:last-child {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+.tournament-public-view .bracket-group-matches .bracket-score {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1rem;
+}
+
+/* =====================================================================
+   7. PATH / SELECTION STATES — refined surfaces
+   ===================================================================== */
+.tournament-public-view .bracket-series-path-win {
+  border-color: rgba(216, 181, 106, 0.5) !important;
+  background:
+    linear-gradient(135deg, rgba(216, 181, 106, 0.12), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.95) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(216, 181, 106, 0.18),
+    0 0 18px rgba(216, 181, 106, 0.16),
+    0 12px 28px rgba(0, 0, 0, 0.4) !important;
+}
+.tournament-public-view .bracket-series-path-loss {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55) !important;
+  background:
+    linear-gradient(135deg, rgba(var(--rd-crimson-rgb), 0.16), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.95) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--rd-crimson-rgb), 0.18),
+    0 0 18px rgba(var(--rd-crimson-rgb), 0.18),
+    0 12px 28px rgba(0, 0, 0, 0.4) !important;
+}
+.tournament-public-view .bracket-series-path-draw {
+  border-color: rgba(170, 200, 255, 0.45) !important;
+  background:
+    linear-gradient(135deg, rgba(170, 200, 255, 0.1), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.95) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 200, 255, 0.14),
+    0 0 16px rgba(170, 200, 255, 0.14),
+    0 12px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Trim the active lift from translateY(-2px) scale(1.012) → translateY(-1px) */
+.tournament-public-view .bracket-columns:has(.bracket-series-active) .bracket-series-active,
+.tournament-public-view .bracket-columns:has(.bracket-series-path-loss) .bracket-series-path-loss,
+.tournament-public-view .bracket-columns:has(.bracket-series-path-draw) .bracket-series-path-draw {
+  transform: translateY(-1px) !important;
+}
+/* Slightly less harsh dim on the rest */
+.tournament-public-view .bracket-columns:has(.bracket-series-active) .bracket-series-card,
+.tournament-public-view .bracket-columns:has(.bracket-series-path-loss) .bracket-series-card,
+.tournament-public-view .bracket-columns:has(.bracket-series-path-draw) .bracket-series-card {
+  opacity: 0.45;
+  filter: saturate(0.85);
+}
+
+/* Champion route series card — refined gold prestige */
+.tournament-public-view .bracket-series-champion-route {
+  border-color: rgba(216, 181, 106, 0.55) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(216, 181, 106, 0.18),
+    0 12px 28px rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(216, 181, 106, 0.18) !important;
+}
+
+/* =====================================================================
+   8. SIDE HOVER STATES — refined
+   ===================================================================== */
+.tournament-public-view .bracket-side-hover-win {
+  border-color: rgba(64, 196, 132, 0.55) !important;
+  background: rgba(64, 196, 132, 0.1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(64, 196, 132, 0.12),
+    0 4px 14px rgba(64, 196, 132, 0.16) !important;
+  transform: translateX(2px);
+}
+.tournament-public-view .bracket-side-hover-loss {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55) !important;
+  background: rgba(var(--rd-crimson-rgb), 0.1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--rd-crimson-rgb), 0.12),
+    0 4px 14px rgba(var(--rd-crimson-rgb), 0.18) !important;
+  transform: translateX(2px);
+}
+.tournament-public-view .bracket-side-hover-draw {
+  border-color: rgba(170, 200, 255, 0.5) !important;
+  background: rgba(170, 200, 255, 0.08) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 200, 255, 0.12),
+    0 4px 14px rgba(170, 200, 255, 0.14) !important;
+  transform: translateX(2px);
+}
+
+/* =====================================================================
+   9. SVG CONNECTOR LINES — refined palette + softer glows
+   ===================================================================== */
+.tournament-public-view .bracket-svg-lines path {
+  stroke: rgba(255, 255, 255, 0.18) !important;
+  stroke-width: 1.4 !important;
+  filter: none !important;
+}
+
+.tournament-public-view .bracket-svg-lines path.bracket-line-active {
+  stroke: rgba(255, 255, 255, 0.85) !important;
+  stroke-width: 2.1 !important;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.32)) !important;
+}
+.tournament-public-view .bracket-svg-lines path.bracket-line-loss {
+  stroke: rgba(var(--rd-crimson-rgb), 0.85) !important;
+  stroke-width: 2.1 !important;
+  filter: drop-shadow(0 0 4px rgba(var(--rd-crimson-rgb), 0.4)) !important;
+}
+.tournament-public-view .bracket-svg-lines path.bracket-line-draw {
+  stroke: rgba(170, 200, 255, 0.78) !important;
+  stroke-width: 2 !important;
+  filter: drop-shadow(0 0 4px rgba(170, 200, 255, 0.28)) !important;
+}
+
+.tournament-public-view .bracket-svg-lines path.bracket-line-champion-route {
+  stroke: url(#championGradient) !important;
+  stroke-width: 2.4 !important;
+  filter: drop-shadow(0 0 6px rgba(216, 181, 106, 0.45)) !important;
+}
+.tournament-public-view .bracket-svg-lines path.bracket-line-champion-flow {
+  stroke: rgba(255, 240, 190, 0.92) !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 30 240;
+  filter: drop-shadow(0 0 7px rgba(216, 181, 106, 0.55)) !important;
+  /* Slowed from 1.8s → 3s for less repaint pressure */
+  animation: bracketChampionFlow 3s linear infinite !important;
+}
+.tournament-public-view .bracket-column-final .bracket-line-champion-flow {
+  /* Was 1.2s — slow this too. */
+  animation-duration: 2.2s !important;
+}
+
+/* When user hovers a series, dim non-champion lines a little less harshly. */
+.tournament-public-view
+  .bracket-columns:has(.bracket-series-active)
+  .bracket-svg-lines path:not(.bracket-line-champion-route) {
+  opacity: 0.32;
+}
+
+/* =====================================================================
+   10. GRAND FINAL — prestige treatment
+   ===================================================================== */
+.tournament-public-view .bracket-column-final .bracket-series-card {
+  border-color: rgba(216, 181, 106, 0.45) !important;
+  background:
+    linear-gradient(135deg, rgba(216, 181, 106, 0.1), rgba(var(--rd-crimson-rgb), 0.05)) ,
+    rgba(9, 12, 18, 0.92) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(216, 181, 106, 0.16),
+    0 14px 32px rgba(0, 0, 0, 0.45),
+    0 0 22px rgba(216, 181, 106, 0.16) !important;
+}
+.tournament-public-view .bracket-column-final .bracket-series-card::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(216, 181, 106, 0.85),
+    transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   11. SCROLL CONTAINER — crimson scrollbar tuned to redesign tokens
+   ===================================================================== */
+.tournament-public-view .bracket-scroll {
+  scrollbar-color: rgba(var(--rd-crimson-rgb), 0.6) rgba(255, 255, 255, 0.04);
+}
+.tournament-public-view .bracket-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--rd-crimson-rgb), 0.85),
+    rgba(var(--rd-crimson-rgb), 0.45)
+  );
+}
+
+/* =====================================================================
+   12. REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .tournament-public-view .bracket-svg-lines path.bracket-line-champion-flow {
+    animation: none !important;
+    /* Show as a steady glowing trace rather than a moving dash */
+    stroke-dasharray: none !important;
+  }
+  .tournament-public-view .bracket-series-card,
+  .tournament-public-view .bracket-match-card,
+  .tournament-public-view .bracket-side {
+    transition: none !important;
+  }
+  .tournament-public-view .bracket-side-hover-win,
+  .tournament-public-view .bracket-side-hover-loss,
+  .tournament-public-view .bracket-side-hover-draw,
+  .tournament-public-view .bracket-columns:has(.bracket-series-active) .bracket-series-active,
+  .tournament-public-view .bracket-columns:has(.bracket-series-path-loss) .bracket-series-path-loss,
+  .tournament-public-view .bracket-columns:has(.bracket-series-path-draw) .bracket-series-path-draw {
+    transform: none !important;
+  }
+}
+
+/* =====================================================================
+   13. MOBILE
+   ===================================================================== */
+@media (max-width: 768px) {
+  .tournament-public-view .bracket-block-head span {
+    font-size: 0.7rem;
+  }
+  .tournament-public-view .bracket-column-title,
+  .tournament-public-view .bracket-group-title {
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+  }
+  /* Make the round-header rule reach further on narrow viewports */
+  .tournament-public-view .bracket-column-title::after,
+  .tournament-public-view .bracket-group-title::after {
+    width: 22px;
+  }
+}
+@media (max-width: 480px) {
+  .tournament-public-view .bracket-side {
+    padding: 6px 8px;
+  }
+  .tournament-public-view .bracket-player span {
+    font-size: 0.78rem;
+  }
+  .tournament-public-view .bracket-score {
+    font-size: 1.05rem;
+  }
+}
+
+/* =====================================================================
+   14. TOUCH — neutralise transforms
+   ===================================================================== */
+@media (hover: none) {
+  .tournament-public-view .bracket-side-hover-win,
+  .tournament-public-view .bracket-side-hover-loss,
+  .tournament-public-view .bracket-side-hover-draw {
+    transform: none !important;
+  }
+}

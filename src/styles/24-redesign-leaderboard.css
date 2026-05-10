@@ -1,0 +1,785 @@
+/* =====================================================================
+   24-redesign-leaderboard.css
+   ---------------------------------------------------------------------
+   Leaderboard cinematic pass — Turn 11.
+   100% CSS — no JSX changes. All selectors target the
+   `.premium-leaderboard-*` / `.premium-leader-*` namespace already on
+   every node, plus the `.leader-row.skeleton-row` loader. Nothing else
+   in the codebase uses these classes (verified). Safe to remove via
+   the @import in styles.css to fully roll back this turn.
+   ===================================================================== */
+
+/* =====================================================================
+   1. PANEL + HEAD
+   ===================================================================== */
+.panel.premium-leaderboard-panel {
+  position: relative;
+  isolation: isolate;
+}
+
+.premium-leaderboard-head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.premium-leaderboard-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 84px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--rd-crimson-rgb), 1),
+    rgba(var(--rd-crimson-rgb), 0)
+  );
+  box-shadow: 0 0 8px rgba(var(--rd-crimson-rgb), 0.5);
+}
+.premium-leaderboard-kicker {
+  margin: 0 0 4px;
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.premium-leaderboard-kicker::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--rd-crimson-rgb), 0.95),
+    rgba(var(--rd-crimson-rgb), 0)
+  );
+}
+.panel-title.premium-leaderboard-title {
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+  letter-spacing: -0.012em;
+  color: #fff;
+  margin: 0;
+  line-height: 1.05;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+}
+.premium-leaderboard-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* =====================================================================
+   2. CHAMPION (#1)
+   ===================================================================== */
+.premium-leader-champion {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  padding: 22px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(216, 181, 106, 0.4);
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(216, 181, 106, 0.12) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 90% 100%,
+      rgba(var(--rd-crimson-rgb), 0.08) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0)),
+    rgba(7, 9, 13, 0.9);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(216, 181, 106, 0.32);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition:
+    transform    260ms var(--rd-ease-settle, ease),
+    border-color 260ms var(--rd-ease-settle, ease),
+    box-shadow   420ms var(--rd-ease-settle, ease);
+  animation: rdSectionIn 460ms var(--rd-ease-settle, ease) both;
+}
+.premium-leader-champion::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(216, 181, 106, 0.85),
+    transparent
+  );
+  z-index: 1;
+}
+.premium-leader-champion::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(216, 181, 106, 0.08) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 320ms var(--rd-ease-settle, ease);
+}
+.premium-leader-champion:hover {
+  transform: translateY(-2px);
+  border-color: rgba(216, 181, 106, 0.65);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(216, 181, 106, 0.4);
+}
+.premium-leader-champion:hover::after {
+  opacity: 1;
+}
+.premium-leader-champion > * {
+  position: relative;
+  z-index: 2;
+}
+
+.premium-leader-champion-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.premium-crown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 56px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(216, 181, 106, 0.6);
+  background:
+    linear-gradient(135deg, rgba(216, 181, 106, 0.22), rgba(216, 181, 106, 0.05)),
+    rgba(11, 13, 18, 0.7);
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffe39b;
+  text-shadow: 0 0 10px rgba(216, 181, 106, 0.45);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.premium-leader-champion-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 3px solid rgba(216, 181, 106, 0.6);
+  box-shadow:
+    0 0 22px rgba(216, 181, 106, 0.32),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+
+.premium-leader-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #d8b56a;
+  margin-bottom: 4px;
+}
+.premium-leader-champion-name {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  letter-spacing: -0.012em;
+  color: #fff;
+  line-height: 1.1;
+  text-shadow: 0 0 18px rgba(216, 181, 106, 0.25);
+}
+.premium-leader-free-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+.premium-leader-champion-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.premium-leader-champion-meta > span {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.premium-leader-team-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.32);
+  background: rgba(var(--rd-crimson-rgb), 0.06);
+}
+.premium-leader-team-inline .premium-leader-team-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+.premium-leader-team-inline .premium-leader-team-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+}
+.premium-leader-team-inline .premium-leader-team-sub {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.premium-leader-champion-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 12px;
+}
+.premium-leader-champion-achievement {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 181, 106, 0.45);
+  background: rgba(216, 181, 106, 0.05);
+  object-fit: cover;
+  box-shadow: 0 0 10px rgba(216, 181, 106, 0.2);
+}
+.premium-leader-muted {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+}
+
+.premium-leader-champion-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+.premium-leader-big-elo {
+  font-family: var(--rd-font-display, inherit);
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #fff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 22px rgba(216, 181, 106, 0.3);
+}
+.premium-leader-big-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(216, 181, 106, 0.95);
+  margin-top: 6px;
+}
+
+/* =====================================================================
+   3. REST LIST — broadcast ranking rows
+   ===================================================================== */
+.premium-leader-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.premium-leader-row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1.2fr;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(11, 13, 18, 0.7);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform    180ms var(--rd-ease-settle, ease),
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease);
+  /* Staggered entry derived from inline --i; cap delay at 14 rows. */
+  animation: rdRowIn 420ms var(--rd-ease-settle, ease) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 28ms);
+}
+@keyframes rdRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.premium-leader-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgba(var(--rd-crimson-rgb), 0.08) 0%,
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 240ms var(--rd-ease-settle, ease);
+}
+.premium-leader-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  background: rgba(11, 13, 18, 0.82);
+}
+.premium-leader-row:hover::before {
+  opacity: 1;
+}
+.premium-leader-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* TOP 10 — slightly stronger surface for ranks 2–10 */
+.premium-leader-list > .premium-leader-row:nth-child(-n+9) {
+  background: rgba(11, 13, 18, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.premium-leader-list > .premium-leader-row:nth-child(-n+9)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--rd-crimson-rgb), 0.55),
+    rgba(var(--rd-crimson-rgb), 0.0)
+  );
+  z-index: 1;
+}
+
+/* RANK 2 — silver tier */
+.premium-leader-row.premium-leader-rank-2 {
+  border-color: rgba(192, 192, 192, 0.32);
+  background:
+    linear-gradient(135deg, rgba(192, 192, 192, 0.08), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.85);
+}
+.premium-leader-row.premium-leader-rank-2 .premium-leader-rank {
+  color: #e8e8e8;
+  text-shadow: 0 0 10px rgba(192, 192, 192, 0.35);
+}
+
+/* RANK 3 — bronze tier */
+.premium-leader-row.premium-leader-rank-3 {
+  border-color: rgba(195, 122, 71, 0.4);
+  background:
+    linear-gradient(135deg, rgba(195, 122, 71, 0.08), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.85);
+}
+.premium-leader-row.premium-leader-rank-3 .premium-leader-rank {
+  color: #f1a877;
+  text-shadow: 0 0 10px rgba(195, 122, 71, 0.4);
+}
+
+/* PLAYER COLUMN */
+.premium-leader-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.premium-leader-rank {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+  flex: 0 0 auto;
+}
+
+.premium-leader-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+  object-fit: cover;
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   320ms var(--rd-ease-settle, ease);
+}
+.premium-leader-row:hover .premium-leader-avatar {
+  border-color: rgba(var(--rd-crimson-rgb), 0.5);
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.3);
+}
+.premium-leader-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.premium-leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.premium-leader-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premium-leader-achievements {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.premium-leader-achievement {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid rgba(216, 181, 106, 0.35);
+  background: rgba(216, 181, 106, 0.05);
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.premium-leader-more {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(216, 181, 106, 0.3);
+  background: rgba(216, 181, 106, 0.06);
+  color: #d8b56a;
+}
+
+/* TEAM COLUMN */
+.premium-leader-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.premium-leader-team .premium-leader-team-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  object-fit: cover;
+  padding: 2px;
+  flex: 0 0 auto;
+}
+.premium-leader-team .premium-leader-team-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.premium-leader-team .premium-leader-team-sub {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+  font-weight: 700;
+  margin-top: 2px;
+}
+.premium-leader-team-placeholder-logo {
+  border: 1px dashed rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+.premium-leader-team-placeholder-title {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+.premium-leader-team-placeholder-sub {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* STATS COLUMN — broadcast lower-third */
+.premium-leader-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 0;
+}
+.premium-leader-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(7, 9, 13, 0.85);
+  align-items: flex-start;
+}
+.premium-leader-stats > div > span {
+  font-size: 0.56rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.premium-leader-stats > div > strong {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+/* First stat cell = ELO — crimson tint */
+.premium-leader-stats > div:first-child {
+  background:
+    linear-gradient(135deg, rgba(var(--rd-crimson-rgb), 0.08), rgba(0, 0, 0, 0)),
+    rgba(7, 9, 13, 0.9);
+}
+.premium-leader-stats > div:first-child > span {
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+}
+.premium-leader-stats > div:first-child > strong {
+  text-shadow: 0 0 12px rgba(var(--rd-crimson-rgb), 0.32);
+}
+
+/* =====================================================================
+   4. SKELETON LOADER
+   ===================================================================== */
+.leader-row.skeleton-row {
+  height: 64px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
+  background-size: 220% 100%;
+  animation: rdLeaderShimmer 1400ms linear infinite;
+}
+@keyframes rdLeaderShimmer {
+  from { background-position: 220% 0%; }
+  to   { background-position: -120% 0%; }
+}
+
+/* =====================================================================
+   5. EMPTY STATE — scoped to leaderboard panel only
+   ===================================================================== */
+.panel.premium-leaderboard-panel > .empty-block {
+  padding: 28px 18px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(11, 13, 18, 0.6);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.92rem;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* =====================================================================
+   6. REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .premium-leader-champion,
+  .premium-leader-row {
+    animation: none !important;
+  }
+  .premium-leader-champion:hover,
+  .premium-leader-row:hover {
+    transform: none !important;
+  }
+  .leader-row.skeleton-row {
+    animation: none !important;
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* =====================================================================
+   7. MOBILE
+   ===================================================================== */
+@media (max-width: 1024px) {
+  .premium-leader-row {
+    grid-template-columns: 1.6fr 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 10px;
+  }
+  .premium-leader-stats {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 768px) {
+  .premium-leader-champion {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 22px 18px;
+  }
+  .premium-leader-champion-right {
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .premium-leader-big-elo {
+    font-size: clamp(2.2rem, 9vw, 3rem);
+  }
+  .premium-leader-row {
+    grid-template-columns: 1fr;
+    padding: 12px 14px;
+  }
+  .premium-leader-team {
+    grid-row: 2;
+  }
+  .premium-leader-stats {
+    grid-row: 3;
+  }
+  /* Lighter blur on phones */
+  .premium-leader-row,
+  .premium-leader-champion {
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+  }
+}
+@media (max-width: 480px) {
+  .premium-leader-champion-left {
+    flex-wrap: wrap;
+  }
+  .premium-leader-champion-avatar {
+    width: 72px;
+    height: 72px;
+  }
+  .premium-crown {
+    min-width: 48px;
+    height: 48px;
+    font-size: 1.05rem;
+  }
+  .premium-leader-rank {
+    min-width: 36px;
+    font-size: 1.1rem;
+  }
+  .premium-leader-stats > div > strong {
+    font-size: 0.88rem;
+  }
+}
+
+/* =====================================================================
+   8. TOUCH — neutralise hover transforms
+   ===================================================================== */
+@media (hover: none) {
+  .premium-leader-champion:hover,
+  .premium-leader-row:hover {
+    transform: none;
+  }
+}
