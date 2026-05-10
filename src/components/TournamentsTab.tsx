@@ -816,7 +816,7 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
 };
 
   return (
-    <div className="panel">
+    <div className="panel rd-tournaments-panel">
       <div className="row-between">
         <h2 className="panel-title">{tournamentText.title}</h2>
 
@@ -832,14 +832,15 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
       </div>
 
       {!selectedTournament ? (
-        <div className="tour-grid">
+        <div className="tour-grid rd-tour-grid">
           {[...tournaments]
             .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
             .map((tournament) => (
               <button
                 key={tournament.id}
                 type="button"
-                className="simple-card tournament-card-button tournament-history-card"
+                className={`simple-card tournament-card-button tournament-history-card rd-tournament-card rd-tournament-card--${tournament.status || "unknown"}`}
+                data-status={tournament.status || ""}
                 onMouseMove={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   e.currentTarget.style.setProperty(
@@ -866,6 +867,14 @@ className={`bracket-side ${winnerRight ? "winner" : ""} ${
                 <div className="tournament-history-overlay">
                   <div className="tournament-history-top">
                     <div className="tournament-history-head">
+                      {tournament.status ? (
+                        <span
+                          className={`rd-tournament-status rd-tournament-status--${tournament.status}`}
+                        >
+                          <span className="rd-tournament-status__dot" aria-hidden="true" />
+                          {getTournamentStatusLabel(tournament.status, lang)}
+                        </span>
+                      ) : null}
                       <div className="tournament-history-title">
                         {tournament.title}
                       </div>

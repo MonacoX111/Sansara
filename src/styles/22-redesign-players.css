@@ -1,0 +1,1292 @@
+/* =====================================================================
+   22-redesign-players.css
+   ---------------------------------------------------------------------
+   Players list + Player profile cinematic pass — Turn 9.
+   100% CSS — no JSX changes. All selectors target player-namespaced
+   classes already present in the markup, so styling cannot leak to
+   other tabs. Reuses tokens from Turns 1–6.
+   Removing the @import in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* =====================================================================
+   1. PLAYER LIST CARD — broadcast athlete card
+   ===================================================================== */
+
+.player-card.player-selector-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 18px 0;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)),
+    rgba(11, 13, 18, 0.78);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform    220ms var(--rd-ease-settle, ease),
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   420ms var(--rd-ease-settle, ease);
+}
+
+/* Cursor-glow overlay (uses --x/--y written by JS handler). */
+.player-card.player-selector-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 0%),
+    rgba(var(--rd-crimson-rgb), 0.16) 0%,
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 320ms var(--rd-ease-settle, ease);
+}
+.player-card.player-selector-card:hover::before {
+  opacity: 1;
+}
+
+.player-card.player-selector-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.player-card.player-selector-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Active selection — broadcast cue light. */
+.player-card.player-selector-card.player-card-active {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  background:
+    linear-gradient(180deg, rgba(var(--rd-crimson-rgb), 0.08), rgba(255, 255, 255, 0)),
+    rgba(11, 13, 18, 0.85);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(var(--rd-crimson-rgb), 0.25);
+}
+.player-card.player-selector-card.player-card-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14%;
+  bottom: 14%;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--rd-crimson-rgb), 0.95),
+    rgba(var(--rd-crimson-rgb), 0.35)
+  );
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.55);
+  z-index: 2;
+}
+
+/* Head row */
+.player-card.player-selector-card .player-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.player-card.player-selector-card .player-head .avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
+  object-fit: cover;
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    box-shadow   320ms var(--rd-ease-settle, ease);
+}
+.player-card.player-selector-card:hover .player-head .avatar,
+.player-card.player-selector-card.player-card-active .player-head .avatar {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  box-shadow: 0 0 16px rgba(var(--rd-crimson-rgb), 0.3);
+}
+.player-card.player-selector-card .player-head-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.player-card.player-selector-card .player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.player-card.player-selector-card .player-name {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-card.player-selector-card .featured-pill.player-selected-badge {
+  font-size: 0.56rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(var(--rd-crimson-rgb), 0.15);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.45);
+  color: #fff;
+  flex: 0 0 auto;
+}
+.player-card.player-selector-card .player-rank-badge {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.player-card.player-selector-card .player-full-name {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Info box */
+.player-card.player-selector-card .player-info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.player-card.player-selector-card .player-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+.player-card.player-selector-card .player-info-row.column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.player-card.player-selector-card .info-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.player-card.player-selector-card .info-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.player-card.player-selector-card .player-games-row .pill {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+}
+.player-card.player-selector-card .player-achievement-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.player-card.player-selector-card .player-achievement-preview .achievement-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(216, 181, 106, 0.35);
+  background: rgba(216, 181, 106, 0.05);
+  object-fit: cover;
+}
+.player-card.player-selector-card .player-achievement-more {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(216, 181, 106, 0.3);
+  background: rgba(216, 181, 106, 0.08);
+  color: #d8b56a;
+}
+.player-card.player-selector-card .player-achievement-empty-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.78rem;
+}
+
+/* Bottom stat band — three broadcast cells */
+.player-card.player-selector-card .mini-stats.player-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  margin: 0 -18px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.player-card.player-selector-card .player-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  background: rgba(7, 9, 13, 0.85);
+  font-size: 0.85rem;
+  border: 0;
+  border-radius: 0;
+  transition: background 220ms var(--rd-ease-settle, ease);
+}
+.player-card.player-selector-card .player-stat-pill > span {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.player-card.player-selector-card .player-stat-pill > strong {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.player-card.player-selector-card .player-stat-pill-elo {
+  background: rgba(var(--rd-crimson-rgb), 0.06);
+}
+.player-card.player-selector-card .player-stat-pill-elo > span {
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+}
+.player-card.player-selector-card .player-stat-pill-elo > strong {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(var(--rd-crimson-rgb), 0.4);
+}
+.player-card.player-selector-card:hover .player-stat-pill {
+  background: rgba(7, 9, 13, 0.92);
+}
+
+/* =====================================================================
+   2. PLAYER LIST GRID
+   ===================================================================== */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+/* =====================================================================
+   3. BACK-TO-LIST BUTTON
+   ===================================================================== */
+.players-back-to-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease),
+    color        220ms var(--rd-ease-settle, ease);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+.players-back-to-list:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.45);
+  background: rgba(var(--rd-crimson-rgb), 0.08);
+  color: #fff;
+}
+.players-back-to-list-arrow {
+  transition: transform 220ms var(--rd-ease-settle, ease);
+}
+.players-back-to-list:hover .players-back-to-list-arrow {
+  transform: translateX(-3px);
+}
+
+/* =====================================================================
+   4. PROFILE HEADER
+   ===================================================================== */
+.profile-head {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.profile-head .profile-banner {
+  position: relative;
+  isolation: isolate;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 9, 13, 0.85);
+  overflow: hidden;
+  padding: 24px 24px 22px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+}
+.profile-head .profile-banner-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 20% 0%,
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 90% 100%,
+      rgba(var(--rd-crimson-rgb), 0.08) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.0));
+}
+.profile-head .profile-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--rd-crimson-rgb), 0.7),
+    transparent
+  );
+  z-index: 1;
+}
+.profile-head .profile-banner-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.profile-head .avatar.large {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid rgba(var(--rd-crimson-rgb), 0.6);
+  box-shadow:
+    0 0 22px rgba(var(--rd-crimson-rgb), 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.profile-head .profile-identity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.profile-head .profile-identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.profile-head .profile-name {
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+}
+.profile-head .profile-full-name {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+}
+.profile-head .profile-current-team-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.35);
+  background: rgba(var(--rd-crimson-rgb), 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.78rem;
+  font-weight: 600;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.profile-head .profile-current-team-chip img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.profile-head .player-role-badge {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 14px 10px 16px;
+  border-left: 2px solid rgba(var(--rd-crimson-rgb), 0.6);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  font-style: italic;
+  border-radius: 0 8px 8px 0;
+  max-width: 64ch;
+}
+
+/* Edit profile form polish */
+.profile-head .profile-avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.profile-head .profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 9, 13, 0.7);
+}
+
+/* Stats bar — broadcast lower-third */
+.profile-head .profile-head-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.profile-head .profile-head-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: rgba(11, 13, 18, 0.8);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+.profile-head .profile-head-stat-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.profile-head .profile-head-stat-value {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.profile-head .profile-head-stat-elo {
+  background:
+    linear-gradient(135deg, rgba(var(--rd-crimson-rgb), 0.1), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.85);
+}
+.profile-head .profile-head-stat-elo .profile-head-stat-label {
+  color: rgba(var(--rd-crimson-rgb), 0.95);
+}
+.profile-head .profile-head-stat-elo .profile-head-stat-value {
+  text-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.4);
+}
+
+/* Form strip */
+.profile-head .profile-form-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(11, 13, 18, 0.7);
+}
+.profile-head .profile-form-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+.profile-head .profile-form-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.profile-head .profile-form-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.profile-head .profile-form-pill-win {
+  background: rgba(64, 196, 132, 0.16);
+  border: 1px solid rgba(64, 196, 132, 0.45);
+  color: #5fe2a3;
+  text-shadow: 0 0 8px rgba(64, 196, 132, 0.4);
+}
+.profile-head .profile-form-pill-loss {
+  background: rgba(var(--rd-crimson-rgb), 0.14);
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.5);
+  color: #ff6a78;
+  text-shadow: 0 0 8px rgba(var(--rd-crimson-rgb), 0.45);
+}
+.profile-head .profile-form-empty {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Profile info box */
+.profile-head .profile-info-box.upgraded {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(11, 13, 18, 0.6);
+}
+.profile-head .profile-info-row.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.profile-head .profile-info-box .info-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.profile-head .profile-games-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* =====================================================================
+   5. TEAM HISTORY
+   ===================================================================== */
+.team-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.team-history-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(11, 13, 18, 0.72);
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease),
+    transform    220ms var(--rd-ease-settle, ease);
+}
+.team-history-click-card {
+  cursor: pointer;
+}
+.team-history-click-card:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  background: rgba(var(--rd-crimson-rgb), 0.05);
+  transform: translateY(-1px);
+}
+.team-history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.team-history-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.team-history-logo,
+.team-history-logo-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+.team-history-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+}
+.team-history-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-history-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.team-history-actions .pill.green {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(64, 196, 132, 0.14);
+  border: 1px solid rgba(64, 196, 132, 0.45);
+  color: #5fe2a3;
+}
+.team-history-card .click-card-arrow {
+  color: rgba(255, 255, 255, 0.45);
+  transition:
+    color     220ms var(--rd-ease-settle, ease),
+    transform 220ms var(--rd-ease-settle, ease);
+}
+.team-history-click-card:hover .click-card-arrow {
+  color: rgba(var(--rd-crimson-rgb), 1);
+  transform: translateX(3px);
+}
+.team-history-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================================
+   6. ACHIEVEMENTS
+   ===================================================================== */
+.player-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.player-achievement-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(216, 181, 106, 0.22);
+  background:
+    linear-gradient(135deg, rgba(216, 181, 106, 0.06), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    transform    220ms var(--rd-ease-settle, ease);
+}
+.player-achievement-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(216, 181, 106, 0.5);
+}
+.player-achievement-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 181, 106, 0.4);
+  background: rgba(216, 181, 106, 0.06);
+  flex: 0 0 auto;
+  object-fit: cover;
+  box-shadow: 0 0 12px rgba(216, 181, 106, 0.2);
+}
+.player-achievement-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.player-achievement-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-achievement-description {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+          line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.player-achievement-empty {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* =====================================================================
+   7. TOURNAMENT HISTORY (player view)
+   ===================================================================== */
+.list-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tournament-history-click-card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  padding: 14px 16px;
+  transition:
+    transform    220ms var(--rd-ease-settle, ease),
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease);
+}
+.tournament-history-click-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+}
+
+/* Placement tier accents */
+.tournament-history-click-card.player-tournament-card--gold {
+  border-color: rgba(216, 181, 106, 0.4);
+  background:
+    linear-gradient(135deg, rgba(216, 181, 106, 0.08), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.85);
+}
+.tournament-history-click-card.player-tournament-card--silver {
+  border-color: rgba(192, 192, 192, 0.32);
+  background:
+    linear-gradient(135deg, rgba(192, 192, 192, 0.06), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.85);
+}
+.tournament-history-click-card.player-tournament-card--bronze {
+  border-color: rgba(195, 122, 71, 0.4);
+  background:
+    linear-gradient(135deg, rgba(195, 122, 71, 0.08), rgba(0, 0, 0, 0) 60%),
+    rgba(11, 13, 18, 0.85);
+}
+
+.player-tournament-card-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+}
+.player-tournament-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.player-tournament-info .player-tournament-title {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-tournament-info .muted.small {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+}
+.player-tournament-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.player-tournament-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+.player-tournament-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.player-tournament-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
+}
+.player-tournament-pill-place {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.player-tournament-pill-place-1 {
+  border-color: rgba(216, 181, 106, 0.55);
+  background: rgba(216, 181, 106, 0.14);
+  color: #ffe39b;
+  text-shadow: 0 0 10px rgba(216, 181, 106, 0.5);
+}
+.player-tournament-pill-place-2 {
+  border-color: rgba(192, 192, 192, 0.45);
+  background: rgba(192, 192, 192, 0.1);
+  color: #e8e8e8;
+}
+.player-tournament-pill-place-3 {
+  border-color: rgba(195, 122, 71, 0.5);
+  background: rgba(195, 122, 71, 0.12);
+  color: #f1a877;
+}
+.player-tournament-pill-info {
+  border-color: rgba(var(--rd-crimson-rgb), 0.35);
+  background: rgba(var(--rd-crimson-rgb), 0.08);
+  color: #fff;
+}
+.player-tournament-pill-team {
+  border-color: rgba(170, 200, 255, 0.32);
+  background: rgba(170, 200, 255, 0.06);
+  color: #cfdfff;
+}
+.player-tournament-pill-action {
+  cursor: pointer;
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.7);
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    color        220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease);
+}
+.player-tournament-pill-action:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.45);
+  color: #fff;
+  background: rgba(var(--rd-crimson-rgb), 0.06);
+}
+.player-tournament-pill-action[aria-expanded="true"] {
+  border-style: solid;
+  border-color: rgba(var(--rd-crimson-rgb), 0.6);
+  background: rgba(var(--rd-crimson-rgb), 0.1);
+  color: #fff;
+}
+.player-tournament-pill-action-indicator {
+  display: inline-block;
+  transition: transform 220ms var(--rd-ease-settle, ease);
+}
+.player-tournament-pill-action[aria-expanded="true"] .player-tournament-pill-action-indicator {
+  transform: rotate(90deg);
+}
+.player-tournament-expand {
+  align-self: center;
+  color: rgba(255, 255, 255, 0.4);
+  transition:
+    color     220ms var(--rd-ease-settle, ease),
+    transform 220ms var(--rd-ease-settle, ease);
+}
+.tournament-history-click-card:hover .player-tournament-expand {
+  color: rgba(var(--rd-crimson-rgb), 1);
+  transform: translateX(3px);
+}
+
+/* ELO details (expanded) */
+.player-tournament-elo-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(7, 9, 13, 0.6);
+}
+.player-tournament-elo-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.player-tournament-elo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+.player-tournament-elo-row > span:first-child {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.player-tournament-elo-value {
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================================
+   8. RECENT MATCHES
+   ===================================================================== */
+.player-recent-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player-match-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0)),
+    rgba(11, 13, 18, 0.78);
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease);
+}
+.player-match-row:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.28);
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%),
+      rgba(var(--rd-crimson-rgb), 0.06) 0%,
+      transparent 60%
+    ),
+    rgba(11, 13, 18, 0.82);
+}
+
+.player-match-result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+}
+.player-match-result-win {
+  border-color: rgba(64, 196, 132, 0.5);
+  background: rgba(64, 196, 132, 0.14);
+  color: #5fe2a3;
+  box-shadow: inset 0 0 12px rgba(64, 196, 132, 0.18);
+}
+.player-match-result-loss {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  background: rgba(var(--rd-crimson-rgb), 0.14);
+  color: #ff6a78;
+  box-shadow: inset 0 0 12px rgba(var(--rd-crimson-rgb), 0.18);
+}
+.player-match-result-draw,
+.player-match-result-pending {
+  border-color: rgba(170, 200, 255, 0.35);
+  background: rgba(170, 200, 255, 0.06);
+  color: #cfdfff;
+}
+
+.player-match-center {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.player-match-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 600;
+  min-width: 0;
+}
+.player-match-title > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-match-vs {
+  flex: 0 0 auto;
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 700;
+}
+.player-match-meta {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.04em;
+}
+
+.player-match-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.player-match-score {
+  font-family: var(--rd-font-display, inherit);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.player-match-tournament {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   9. REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .player-card.player-selector-card:hover,
+  .team-history-click-card:hover,
+  .tournament-history-click-card:hover,
+  .player-achievement-card:hover {
+    transform: none !important;
+  }
+  .players-back-to-list:hover .players-back-to-list-arrow,
+  .team-history-click-card:hover .click-card-arrow,
+  .tournament-history-click-card:hover .player-tournament-expand {
+    transform: none !important;
+  }
+}
+
+/* =====================================================================
+   10. MOBILE
+   ===================================================================== */
+@media (max-width: 768px) {
+  .player-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .profile-head .profile-banner {
+    padding: 20px 18px 18px;
+  }
+  .profile-head .profile-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .profile-head .avatar.large {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-head .profile-name {
+    font-size: clamp(1.4rem, 6vw, 1.85rem);
+  }
+  .profile-head .profile-head-stats-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .player-tournament-pills {
+    align-items: flex-start;
+  }
+  .player-tournament-pills-row {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 640px) {
+  .player-grid {
+    grid-template-columns: 1fr;
+  }
+  .player-card.player-selector-card {
+    padding: 16px 16px 0;
+  }
+  .player-card.player-selector-card .mini-stats.player-card-stats {
+    margin: 0 -16px;
+  }
+  /* Lighter blur on phones. */
+  .player-card.player-selector-card,
+  .profile-head .profile-head-stat,
+  .player-match-row,
+  .tournament-history-click-card {
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+  }
+
+  /* Recent match rows go vertical */
+  .player-match-row {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 6px;
+  }
+  .player-match-result {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+  .player-match-center {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .player-match-right {
+    grid-row: 2;
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+  .player-match-tournament {
+    max-width: none;
+    text-align: right;
+  }
+
+  .player-tournament-card-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .player-tournament-actions {
+    align-items: stretch;
+  }
+  .player-tournament-pills-row {
+    justify-content: flex-start;
+  }
+
+  .profile-head .profile-form-strip {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+@media (max-width: 400px) {
+  .profile-head .profile-head-stats-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================================
+   11. TOUCH — neutralise hover transforms
+   ===================================================================== */
+@media (hover: none) {
+  .player-card.player-selector-card:hover,
+  .team-history-click-card:hover,
+  .tournament-history-click-card:hover,
+  .player-achievement-card:hover {
+    transform: none;
+  }
+}

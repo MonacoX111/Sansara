@@ -1,0 +1,596 @@
+/* =====================================================================
+   20-redesign-tournaments.css
+   ---------------------------------------------------------------------
+   Tournaments tab cinematic pass — Turn 7.
+   Scoped under .rd-tournaments-panel and .rd-tour-grid so nothing
+   leaks to other tabs. Reuses the redesign tokens from Turns 1–6.
+   Removing the @import in styles.css fully rolls back this turn.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Page header — match homepage section header language
+   ------------------------------------------------------------------ */
+.rd-tournaments-panel {
+  position: relative;
+}
+.rd-tournaments-panel > .row-between {
+  position: relative;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+}
+.rd-tournaments-panel > .row-between::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--rd-crimson-rgb), 0.55) 22%,
+    rgba(var(--rd-crimson-rgb), 0.55) 78%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+.rd-tournaments-panel > .row-between > .panel-title {
+  position: relative;
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: clamp(1.5rem, 2.2vw, 1.95rem);
+  line-height: 1.1;
+  padding-left: 14px;
+}
+.rd-tournaments-panel > .row-between > .panel-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--rd-crimson-rgb), 0.95) 0%,
+    rgba(var(--rd-crimson-rgb), 0.35) 100%
+  );
+  box-shadow: 0 0 14px rgba(var(--rd-crimson-rgb), 0.55);
+}
+
+/* Back button — refine to redesign button language. */
+.rd-tournaments-panel .tournament-back-btn {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 9px 16px;
+  letter-spacing: 0.05em;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 10px;
+  transition:
+    border-color var(--dur-base, 220ms) var(--rd-ease-settle, ease),
+    background   var(--dur-base, 220ms) var(--rd-ease-settle, ease),
+    color        var(--dur-base, 220ms) var(--rd-ease-settle, ease),
+    transform    120ms var(--rd-ease-press, ease);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+.rd-tournaments-panel .tournament-back-btn:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.45);
+  background: rgba(var(--rd-crimson-rgb), 0.08);
+  color: #fff;
+}
+.rd-tournaments-panel .tournament-back-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* ---------------------------------------------------------------------
+   2. Grid — refined density, gap rhythm
+   ------------------------------------------------------------------ */
+.rd-tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* ---------------------------------------------------------------------
+   3. Card surface — broadcast-style glass
+   The legacy .tournament-history-card already paints a background
+   image with a dark gradient; we add a richer overlay, refined
+   border, and a stronger frame so it reads as broadcast glass.
+   ------------------------------------------------------------------ */
+.rd-tour-grid .rd-tournament-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #0a0c10;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  transition:
+    transform    var(--dur-base, 220ms) var(--rd-ease-settle, ease),
+    border-color var(--dur-base, 220ms) var(--rd-ease-settle, ease),
+    box-shadow   420ms                  var(--rd-ease-settle, ease);
+  cursor: pointer;
+  text-align: left;
+  min-height: 320px;
+}
+
+/* Soft top-edge gradient — gives every card a tiny "broadcast bar"
+   at the top, colour shifts per status below. */
+.rd-tour-grid .rd-tournament-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 0%),
+      rgba(var(--rd-crimson-rgb), 0.18) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.0) 0%,
+      rgba(0, 0, 0, 0.35) 65%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  opacity: 0.85;
+  transition: opacity 420ms var(--rd-ease-settle, ease);
+}
+
+/* Crimson edge ignition — appears on hover, consistent with homepage cards. */
+.rd-tour-grid .rd-tournament-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--rd-crimson-rgb), 0.65) 0%,
+    rgba(var(--rd-crimson-rgb), 0.0) 35%,
+    rgba(var(--rd-crimson-rgb), 0.0) 65%,
+    rgba(var(--rd-crimson-rgb), 0.45) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 420ms var(--rd-ease-settle, ease) 80ms;
+}
+
+.rd-tour-grid .rd-tournament-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--rd-crimson-rgb), 0.35);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(var(--rd-crimson-rgb), 0.18);
+}
+.rd-tour-grid .rd-tournament-card:hover::after {
+  opacity: 1;
+}
+.rd-tour-grid .rd-tournament-card:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 120ms;
+}
+
+/* Make sure overlay content stays above ambient layers. */
+.rd-tour-grid .rd-tournament-card .tournament-history-overlay {
+  position: relative;
+  z-index: 3;
+}
+
+/* ---------------------------------------------------------------------
+   4. Status eyebrow — broadcast-style, top of card
+   ------------------------------------------------------------------ */
+.rd-tournament-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+  align-self: flex-start;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+}
+.rd-tournament-status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------------------
+   5. Per-status visual treatments
+   ------------------------------------------------------------------ */
+
+/* ONGOING — strongest treatment: crimson eyebrow + LIVE pulse + crimson rim glow */
+.rd-tournament-status--ongoing {
+  color: rgba(var(--rd-crimson-rgb), 1);
+  border-color: rgba(var(--rd-crimson-rgb), 0.5);
+  background: rgba(var(--rd-crimson-rgb), 0.12);
+}
+.rd-tournament-status--ongoing .rd-tournament-status__dot {
+  animation: rdLivePulse 1.8s var(--rd-ease-broadcast, ease-in-out) infinite;
+}
+.rd-tour-grid .rd-tournament-card--ongoing {
+  border-color: rgba(var(--rd-crimson-rgb), 0.32);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(var(--rd-crimson-rgb), 0.14),
+    inset 0 1px 0 rgba(var(--rd-crimson-rgb), 0.18);
+}
+.rd-tour-grid .rd-tournament-card--ongoing::before {
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 0%),
+      rgba(var(--rd-crimson-rgb), 0.28) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--rd-crimson-rgb), 0.16) 0%,
+      rgba(0, 0, 0, 0.0) 30%,
+      rgba(0, 0, 0, 0.35) 65%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+}
+.rd-tour-grid .rd-tournament-card--ongoing:hover {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(var(--rd-crimson-rgb), 0.32);
+}
+
+/* UPCOMING — cool ice tone, sharp edge */
+.rd-tournament-status--upcoming {
+  color: #aac8ff;
+  border-color: rgba(170, 200, 255, 0.35);
+  background: rgba(170, 200, 255, 0.08);
+}
+.rd-tour-grid .rd-tournament-card--upcoming {
+  border-color: rgba(170, 200, 255, 0.16);
+}
+.rd-tour-grid .rd-tournament-card--upcoming::before {
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 0%),
+      rgba(170, 200, 255, 0.14) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(170, 200, 255, 0.08) 0%,
+      rgba(0, 0, 0, 0.0) 30%,
+      rgba(0, 0, 0, 0.4) 65%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+}
+.rd-tour-grid .rd-tournament-card--upcoming:hover {
+  border-color: rgba(170, 200, 255, 0.4);
+}
+
+/* COMPLETED / FINISHED — gold accent for "concluded with a champion" */
+.rd-tournament-status--completed,
+.rd-tournament-status--finished {
+  color: #d8b56a;
+  border-color: rgba(216, 181, 106, 0.35);
+  background: rgba(216, 181, 106, 0.08);
+}
+.rd-tour-grid .rd-tournament-card--completed,
+.rd-tour-grid .rd-tournament-card--finished {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+.rd-tour-grid .rd-tournament-card--completed::before,
+.rd-tour-grid .rd-tournament-card--finished::before {
+  background:
+    radial-gradient(
+      circle at var(--x, 50%) var(--y, 0%),
+      rgba(216, 181, 106, 0.1) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(216, 181, 106, 0.06) 0%,
+      rgba(0, 0, 0, 0.0) 22%,
+      rgba(0, 0, 0, 0.4) 65%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+}
+/* Subtle gold hairline at the top to mark "finished" status. */
+.rd-tour-grid .rd-tournament-card--completed .tournament-history-overlay::before,
+.rd-tour-grid .rd-tournament-card--finished .tournament-history-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(216, 181, 106, 0.6) 50%,
+    transparent 100%
+  );
+  opacity: 0.55;
+}
+
+/* DRAFT — desaturated + dashed outline */
+.rd-tournament-status--draft {
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.18);
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.03);
+}
+.rd-tour-grid .rd-tournament-card--draft {
+  filter: saturate(0.7);
+  opacity: 0.92;
+}
+
+/* ---------------------------------------------------------------------
+   6. Card content typography
+   ------------------------------------------------------------------ */
+.rd-tour-grid .rd-tournament-card .tournament-history-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 20px 18px;
+  height: 100%;
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-title {
+  font-family: var(--rd-font-display, inherit);
+  font-weight: 800;
+  font-size: clamp(1.1rem, 1.4vw, 1.32rem);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.rd-tour-grid .rd-tournament-card .history-meta-pill {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+}
+
+/* Prize pill — broadcast pill, top-right */
+.rd-tour-grid .rd-tournament-card .tournament-history-prize {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(var(--rd-crimson-rgb), 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--rd-crimson-rgb), 0.18),
+    rgba(var(--rd-crimson-rgb), 0.06)
+  );
+  color: #fff;
+  text-shadow: 0 0 12px rgba(var(--rd-crimson-rgb), 0.5);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+/* ---------------------------------------------------------------------
+   7. Info grid — broadcast lower-thirds
+   ------------------------------------------------------------------ */
+.rd-tour-grid .rd-tournament-card .tournament-history-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: auto;
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-info-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgba(7, 9, 13, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  transition: background 220ms var(--rd-ease-settle, ease);
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-info-card:hover {
+  background: rgba(var(--rd-crimson-rgb), 0.06);
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.rd-tour-grid .rd-tournament-card .tournament-history-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------
+   8. Footer / "Open" pill — refined CTA
+   ------------------------------------------------------------------ */
+.rd-tour-grid .rd-tournament-card .tournament-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.rd-tour-grid .rd-tournament-card .tournament-open-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  transition:
+    border-color 220ms var(--rd-ease-settle, ease),
+    color        220ms var(--rd-ease-settle, ease),
+    background   220ms var(--rd-ease-settle, ease),
+    transform    220ms var(--rd-ease-settle, ease);
+}
+.rd-tour-grid .rd-tournament-card .tournament-open-pill::after {
+  content: "→";
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: transform 220ms var(--rd-ease-settle, ease);
+}
+.rd-tour-grid .rd-tournament-card:hover .tournament-open-pill {
+  border-color: rgba(var(--rd-crimson-rgb), 0.55);
+  background: rgba(var(--rd-crimson-rgb), 0.1);
+  color: #fff;
+}
+.rd-tour-grid .rd-tournament-card:hover .tournament-open-pill::after {
+  transform: translateX(3px);
+  color: rgba(var(--rd-crimson-rgb), 1);
+}
+
+/* ---------------------------------------------------------------------
+   9. Reduced motion — keep it static
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .rd-tournament-status--ongoing .rd-tournament-status__dot {
+    animation: none;
+  }
+  .rd-tour-grid .rd-tournament-card,
+  .rd-tour-grid .rd-tournament-card:hover {
+    transform: none !important;
+  }
+  .rd-tour-grid .rd-tournament-card:hover .tournament-open-pill::after {
+    transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   10. Mobile pass — match Turn 6 cinematic mobile pacing
+   ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .rd-tour-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .rd-tour-grid .rd-tournament-card {
+    min-height: 280px;
+  }
+}
+@media (max-width: 640px) {
+  .rd-tournaments-panel > .row-between {
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .rd-tournaments-panel > .row-between > .panel-title {
+    font-size: clamp(1.2rem, 5.5vw, 1.5rem);
+  }
+  .rd-tour-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .rd-tour-grid .rd-tournament-card .tournament-history-overlay {
+    padding: 16px 16px 14px;
+    gap: 14px;
+  }
+  .rd-tour-grid .rd-tournament-card .tournament-history-title {
+    font-size: 1.1rem;
+  }
+  /* Lighter blur on phones for compositor cost. */
+  .rd-tour-grid .rd-tournament-card .tournament-history-info-card,
+  .rd-tour-grid .rd-tournament-card .history-meta-pill,
+  .rd-tournament-status {
+    -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+  }
+  /* Pause continuous LIVE pulse on small phones to save battery. */
+  .rd-tournament-status--ongoing .rd-tournament-status__dot {
+    animation-duration: 2.4s;
+  }
+}
+@media (max-width: 400px) {
+  .rd-tour-grid .rd-tournament-card {
+    min-height: 0;
+  }
+  .rd-tour-grid .rd-tournament-card .tournament-history-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Touch — neutralise hover transforms */
+@media (hover: none) {
+  .rd-tour-grid .rd-tournament-card:hover {
+    transform: none;
+  }
+  .rd-tour-grid .rd-tournament-card:hover .tournament-open-pill::after {
+    transform: none;
+  }
+}

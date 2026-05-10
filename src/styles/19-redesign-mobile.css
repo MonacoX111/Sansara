@@ -1,0 +1,452 @@
+/* =====================================================================
+   19-redesign-mobile.css
+   ---------------------------------------------------------------------
+   Mobile cinematic pass — Turn 6.
+   Every rule sits inside a media query; desktop is untouched. Desktop
+   redesign classes are reused — no new class names, no JSX changes.
+   Layered on top of 13-mobile.css + each Turn 2–5 redesign file so it
+   wins the cascade for the mobile viewport ranges it targets.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Tier 1 — ≤ 768 px (large phones landscape / small tablets)
+   Tighten rhythm, reduce atmospheric intensity a little, prepare the
+   ground for the denser phone tier below.
+   ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  /* Atmospheric layers: soften so copy dominates. */
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom { opacity: 0.55; }
+  .welcome-hero.rd-hero .rd-hero__atmos-streak { opacity: 0.35; }
+
+  /* Section rhythm: restrained gutters between sections so the page
+     reads as a sequence of broadcast panels instead of a long column
+     with voids. */
+  .welcome-page .welcome-section {
+    padding: 28px 0 8px;
+  }
+  .welcome-page .welcome-section-head {
+    margin-bottom: 14px;
+  }
+
+  /* Card system base — equal pad rhythm across every card variant. */
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-activity-row.recent-match-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card {
+    padding: 20px 18px;
+  }
+
+  /* Backdrop-blur is the single heaviest GPU cost at this viewport —
+     step it down globally on cards without losing the glass feel. */
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-activity-row.recent-match-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card {
+    -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Tier 2 — ≤ 640 px (phones, the main target)
+   ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  /* -----------------------------------------------------------------
+     HERO — cinematic but compact
+     ----------------------------------------------------------------- */
+  .welcome-hero.rd-hero {
+    padding: 36px 18px 40px;
+    gap: 18px;
+  }
+  .welcome-hero.rd-hero .welcome-title {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+  .welcome-hero.rd-hero .welcome-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.55;
+    max-width: 38ch;
+  }
+  .welcome-hero.rd-hero .welcome-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+  }
+
+  /* Atmospheric layers further softened; live pulse stays strong. */
+  .welcome-hero.rd-hero .rd-hero__atmos-bloom {
+    opacity: 0.4;
+    filter: blur(48px);
+  }
+  .welcome-hero.rd-hero .rd-hero__atmos-streak {
+    opacity: 0.2;
+  }
+
+  /* CTAs: equal-weight pair on their own row, full tap width. */
+  .welcome-hero.rd-hero .welcome-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+  }
+  .welcome-hero.rd-hero .welcome-actions > * {
+    flex: 1 1 0;
+    min-height: 46px;
+    justify-content: center;
+  }
+
+  /* Preview / mini cards: hidden on phones — they add visual clutter
+     below the CTAs and compete with the headline. Kept in DOM so the
+     JS glow handlers don't break, just not painted. */
+  .welcome-hero.rd-hero .welcome-right {
+    display: none;
+  }
+
+  /* -----------------------------------------------------------------
+     NAVBAR — horizontal scroller with edge fades + snap
+     ----------------------------------------------------------------- */
+  .rd-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 6px 16px;
+    /* Fade the edges so the scroll feels like broadcast content
+       bleeding off the viewport. */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 24px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+            mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 24px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+  }
+  .rd-nav::-webkit-scrollbar { display: none; }
+  .rd-nav__tab {
+    scroll-snap-align: center;
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+  }
+  .rd-nav__tab .rd-nav__label {
+    white-space: nowrap;
+  }
+
+  /* -----------------------------------------------------------------
+     SECTION HEADERS — compressed rhythm
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-section-head h2,
+  .welcome-page .welcome-section-head .welcome-section-title {
+    font-size: clamp(1.25rem, 5.5vw, 1.55rem);
+    letter-spacing: -0.005em;
+  }
+  .welcome-page .welcome-section-head p {
+    font-size: 0.87rem;
+    line-height: 1.5;
+  }
+
+  /* -----------------------------------------------------------------
+     QUICK-NAV GRID — 2 columns (density preserved)
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-nav-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .welcome-page .welcome-nav-card .welcome-nav-card-main {
+    font-size: 1.15rem;
+  }
+  .welcome-page .welcome-nav-card .welcome-nav-card-top {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+  }
+  /* Primary tournaments card spans both columns so it keeps visual
+     dominance without becoming oversized. */
+  .welcome-page .welcome-nav-card.welcome-nav-card-primary {
+    grid-column: 1 / -1;
+  }
+
+  /* -----------------------------------------------------------------
+     SMART HIGHLIGHTS — single column
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-smart-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .welcome-page .welcome-smart-highlight-main {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+  .welcome-page .welcome-smart-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+  }
+  .welcome-page .welcome-smart-highlight-meta {
+    font-size: 0.78rem;
+  }
+  .welcome-page .welcome-upset-diff,
+  .welcome-page .welcome-fire-streak {
+    font-size: 1.3rem;
+  }
+
+  /* -----------------------------------------------------------------
+     FEATURED MATCH — broadcast-stack composition
+     Desktop is a 2-column asymmetric grid (text / scoreboard).
+     Phone layout becomes a 3-row broadcast graphic:
+       row 1 : team-left (avatar + name, horizontally balanced)
+       row 2 : scoreboard (dominant, full width)
+       row 3 : team-right
+     The existing DOM order already supports this by default; we just
+     re-flow the grid and make the scoreboard the hero.
+     ----------------------------------------------------------------- */
+  .welcome-page .smart-highlight-card--featured {
+    grid-column: 1 / -1;
+    padding: 22px 18px 20px;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-composition,
+  .welcome-page .smart-highlight-card--featured .smart-highlight-card--featured-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-left,
+  .welcome-page .smart-highlight-card--featured .featured-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    text-align: left;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-player {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+  /* Scoreboard band — the hero of the card on mobile. */
+  .welcome-page .smart-highlight-card--featured .featured-vs,
+  .welcome-page .smart-highlight-card--featured .welcome-featured-score {
+    justify-self: stretch;
+    width: 100%;
+    padding: 14px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  /* Decorative vertical divider from desktop — hide on phones, the
+     horizontal hairlines above/below the score do the same job. */
+  .welcome-page .smart-highlight-card--featured .featured-divider {
+    display: none;
+  }
+  /* Sub-info row (stage / date / format) compresses to a single line
+     with · separators via flex-wrap. */
+  .welcome-page .smart-highlight-card--featured .welcome-featured-match-subinfo {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  /* -----------------------------------------------------------------
+     RECENT MATCHES — compact fixture rows
+     Keep the row horizontal (strong scan), but re-weight the score
+     badge as visually dominant. Metadata wraps gracefully below.
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-activity-row.recent-match-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: center;
+    padding: 14px 16px;
+  }
+  .welcome-page .recent-match-card .welcome-activity-status {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    align-self: center;
+  }
+  .welcome-page .recent-match-card .welcome-activity-main,
+  .welcome-page .recent-match-card .welcome-activity-topline {
+    grid-row: 1;
+    grid-column: 2;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .welcome-page .recent-match-card .welcome-activity-context,
+  .welcome-page .recent-match-card .welcome-activity-meta {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: 0.76rem;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.55);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .welcome-page .recent-match-card .welcome-score-badge {
+    grid-row: 1 / span 2;
+    grid-column: 3;
+    align-self: center;
+    font-size: 1rem;
+    padding: 6px 10px;
+    letter-spacing: 0.04em;
+  }
+  /* Live status dot stays obvious at small sizes. */
+  .welcome-page .welcome-activity-status-live::before {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* -----------------------------------------------------------------
+     TRANSFERS — single-column, tightened meta
+     ----------------------------------------------------------------- */
+  .welcome-page .transfer-card-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .welcome-page .transfer-card {
+    padding: 16px 16px 14px;
+  }
+  .welcome-page .transfer-main-row {
+    gap: 12px;
+  }
+  .welcome-page .transfer-player-name {
+    font-size: 0.98rem;
+    line-height: 1.2;
+  }
+  .welcome-page .transfer-player-type-badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+  }
+  .welcome-page .transfer-meta {
+    font-size: 0.76rem;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .welcome-page .transfer-meta-route,
+  .welcome-page .transfer-meta-action,
+  .welcome-page .transfer-meta-date {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* -----------------------------------------------------------------
+     FEATURE GRID (numbered cards at bottom)
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .welcome-page .welcome-feature-card {
+    padding: 20px 18px;
+  }
+
+  /* -----------------------------------------------------------------
+     Touch ergonomics — global minimums
+     ----------------------------------------------------------------- */
+  .welcome-page .primary-btn,
+  .welcome-page .secondary-btn,
+  .rd-btn {
+    min-height: 44px;
+    padding-inline: 18px;
+  }
+
+  /* -----------------------------------------------------------------
+     Performance — shadow simplification
+     Collapse 2-layer shadows defined in earlier turns to a single
+     layer. Invisible aesthetically at phone scale, cheaper to paint.
+     ----------------------------------------------------------------- */
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-activity-row.recent-match-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card {
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  }
+  .welcome-page .welcome-nav-card:hover,
+  .welcome-page .welcome-smart-highlight-card:hover,
+  .welcome-page .welcome-activity-row.recent-match-card:hover,
+  .welcome-page .welcome-feature-card:hover,
+  .welcome-page .transfer-card:hover {
+    box-shadow:
+      0 6px 22px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(var(--rd-crimson-rgb), 0.25);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Tier 3 — ≤ 400 px (small phones, iPhone SE class)
+   Final density pass so copy never clips on narrow screens.
+   ------------------------------------------------------------------ */
+@media (max-width: 400px) {
+  .welcome-hero.rd-hero {
+    padding: 28px 14px 32px;
+  }
+  .welcome-hero.rd-hero .welcome-title {
+    font-size: clamp(1.75rem, 9.5vw, 2.2rem);
+  }
+  .welcome-hero.rd-hero .welcome-subtitle {
+    font-size: 0.92rem;
+  }
+
+  /* Quick-nav collapses to single column when even 2 cols would
+     cramp the content. */
+  .welcome-page .welcome-nav-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Card padding tightened once more. */
+  .welcome-page .welcome-nav-card,
+  .welcome-page .welcome-smart-highlight-card,
+  .welcome-page .welcome-feature-card,
+  .welcome-page .transfer-card {
+    padding: 16px 14px;
+  }
+  .welcome-page .welcome-activity-row.recent-match-card {
+    padding: 12px 14px;
+    column-gap: 10px;
+  }
+
+  /* Featured scoreboard stays impactful but scales down cleanly. */
+  .welcome-page .smart-highlight-card--featured .featured-vs,
+  .welcome-page .smart-highlight-card--featured .welcome-featured-score {
+    font-size: clamp(1.5rem, 10vw, 2rem);
+    gap: 10px;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-player {
+    font-size: 0.98rem;
+  }
+
+  /* Recent-match score badge: fits next to ellipsised title. */
+  .welcome-page .recent-match-card .welcome-score-badge {
+    font-size: 0.92rem;
+    padding: 5px 8px;
+  }
+}
