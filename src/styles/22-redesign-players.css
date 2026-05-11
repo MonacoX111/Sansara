@@ -332,16 +332,6 @@
   line-height: 1.15;
   letter-spacing: -0.01em;
 }
-.player-card.player-selector-card .player-stat-pill-elo {
-  background: rgba(var(--rd-crimson-rgb), 0.06);
-}
-.player-card.player-selector-card .player-stat-pill-elo > span {
-  color: rgba(var(--rd-crimson-rgb), 0.95);
-}
-.player-card.player-selector-card .player-stat-pill-elo > strong {
-  color: #fff;
-  text-shadow: 0 0 12px rgba(var(--rd-crimson-rgb), 0.4);
-}
 .player-card.player-selector-card:hover .player-stat-pill {
   background: rgba(7, 9, 13, 0.92);
 }

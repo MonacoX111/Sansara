@@ -668,10 +668,10 @@ const playerStreak = getPlayerStreakFromVisibleForm(playerFormResults);
 
                   <div className="mini-stats player-card-stats">
                     <span className="player-stat-pill">
-                      <span>{playerText.winsShort}</span>
+                      <span>{playerText.wins}</span>
                       <strong>{player.wins}</strong>
                     </span>
-                    <span className="player-stat-pill player-stat-pill-elo">
+                    <span className="player-stat-pill">
                       <span>{playerText.elo}</span>
                       <strong>{player.elo}</strong>
                     </span>
