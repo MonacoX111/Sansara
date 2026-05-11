@@ -265,7 +265,13 @@
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.04em;
-  background: linear-gradient(180deg, #ffffff 0%, #c9cdd6 100%);
+  /* Shared premium broadcast gradient — applied to every quick-nav
+     card (Players, Teams, Tournaments, Leaderboard, ...) so the
+     stat-number treatment is consistent across the grid. */
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #f3d6da 50%,
+    var(--rd-crimson-bright) 100%);
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
@@ -309,12 +315,10 @@
 .welcome-page .welcome-nav-card.welcome-nav-card-primary::after {
   opacity: 0.7;
 }
-.welcome-page .welcome-nav-card.welcome-nav-card-primary .welcome-nav-card-main strong {
-  background: linear-gradient(180deg, #ffffff 0%, #f3d6da 50%, var(--rd-crimson-bright) 100%);
-  -webkit-background-clip: text;
-          background-clip: text;
-  color: transparent;
-}
+/* Tournaments-specific override is intentionally a no-op now: the
+   shared base rule above already paints every quick-nav stat number
+   with the same premium gradient. Selector kept as a hook in case a
+   future turn wants a tournaments-only hover specialisation. */
 
 /* ---------------------------------------------------------------------
    4. Smart highlights — broadcast cards
@@ -1325,6 +1329,183 @@
   .welcome-page .smart-highlight-card--featured:hover .featured-player img,
   .welcome-page .smart-highlight-card--featured:hover .featured-player-placeholder {
     transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Featured Match — compaction pass.
+   Earlier turns left the featured card oversized: row-spanning over
+   three stacked secondary cards + 100% min-height + bottom-anchored
+   matchup created a "hero panel" feel rather than the editorial
+   broadcast panel we want. This block:
+     - releases the featured row stretch,
+     - tightens featured internal padding + gaps,
+     - vertically centers the right scoreboard column,
+     - compacts the three secondary cards in the right column so the
+       column total matches the new shorter featured height,
+     - trims the featured score so the matchup remains the focal point.
+   No JSX changes. No logic changes.
+   ------------------------------------------------------------------ */
+@media (min-width: 761px) {
+  /* Outer grid — let the column hug its content. */
+  .welcome-page .welcome-smart-grid {
+    align-content: start;
+    grid-auto-rows: max-content;
+  }
+
+  /* Featured wrapper — keep row span (so it visually anchors next to
+     the right column) but release the forced 100% min-height so its
+     intrinsic compact size wins. */
+  .welcome-page .welcome-smart-grid > .smart-highlight-card--featured {
+    min-height: 0;
+    align-self: stretch;
+  }
+
+  /* Featured internal grid — tighter padding + gap. */
+  .welcome-page .smart-highlight-card--featured {
+    padding: clamp(16px, 1.2vw, 20px);
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: clamp(12px, 1vw, 18px);
+  }
+
+  /* Left column — compact rhythm; do NOT push matchup to the bottom. */
+  .welcome-page .smart-highlight-card--featured .featured-left {
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  .welcome-page .smart-highlight-card--featured .welcome-smart-highlight-main {
+    gap: 6px;
+  }
+  .welcome-page .smart-highlight-card--featured .welcome-smart-highlight-main strong {
+    font-size: clamp(1.35rem, 2vw, 1.7rem);
+    line-height: 1.1;
+  }
+  .welcome-page .smart-highlight-card--featured .welcome-smart-highlight-main p {
+    font-size: 0.86rem;
+    line-height: 1.4;
+    margin: 2px 0 0;
+  }
+
+  /* Matchup band — sit close to the headline, not bottom-anchored. */
+  .welcome-page .smart-highlight-card--featured .featured-vs {
+    margin-top: 4px;
+    padding: 10px 4px 6px;
+    gap: clamp(12px, 1.2vw, 18px);
+  }
+  .welcome-page .smart-highlight-card--featured .featured-vs::before {
+    width: 200px;
+    height: 100px;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-player img,
+  .welcome-page .smart-highlight-card--featured .featured-player-placeholder {
+    width: clamp(54px, 4.4vw, 64px);
+    height: clamp(54px, 4.4vw, 64px);
+  }
+  .welcome-page .smart-highlight-card--featured .featured-vs-text {
+    width: clamp(46px, 3.6vw, 52px);
+    height: clamp(46px, 3.6vw, 52px);
+    font-size: clamp(0.88rem, 0.95vw, 1rem);
+  }
+
+  /* Right column — vertically centered, tight stack.
+     IMPORTANT: align-items must be `center`, not `stretch`. Stretch
+     forces .featured-right-inner to fill the full column height, after
+     which its column-flex children (score, divider, meta) top-align
+     and the score appears glued to the top. With `center`, the inner
+     block sizes to its content and the parent vertically centers it. */
+  .welcome-page .smart-highlight-card--featured .featured-right {
+    align-items: center;
+    justify-content: center;
+    padding-left: clamp(12px, 1vw, 18px);
+  }
+  .welcome-page .smart-highlight-card--featured .featured-right-inner {
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: auto 0;
+  }
+  .welcome-page .smart-highlight-card--featured .welcome-featured-score {
+    font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+    line-height: 1;
+    margin: 0;
+  }
+  .welcome-page .smart-highlight-card--featured .welcome-featured-score span {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-divider {
+    margin: 0;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-meta {
+    gap: 2px;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-meta span,
+  .welcome-page .smart-highlight-card--featured .featured-meta small {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  /* Secondary cards (upset / fire / rivalry) — compact tiles so the
+     right-column total matches the new tighter featured height. */
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured) {
+    padding: clamp(14px, 1.1vw, 18px);
+    min-height: 0;
+    gap: 10px;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-smart-highlight-main {
+    gap: 4px;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-smart-highlight-main strong {
+    font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+    line-height: 1.15;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-smart-highlight-main p {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    margin: 0;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-upset-diff {
+    font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+    line-height: 1;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-upset-diff span {
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-smart-highlight-meta {
+    gap: 8px;
+  }
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-upset-details span,
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured)
+    .welcome-upset-details small {
+    font-size: 0.72rem;
+    line-height: 1.35;
   }
 }
 
