@@ -1029,3 +1029,98 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Bug fix — Tournaments quick-nav card permanent-active state.
+   Legacy `.welcome-nav-card-primary` (08-welcome.css) applies a radial
+   crimson bloom + tinted border + inset shadow in the RESTING state,
+   making the tournaments card look pre-selected. Neutralise the resting
+   state to match its siblings; keep the slight size bump for hierarchy;
+   do NOT touch the :hover rule so hover/focus interactions are intact.
+   ------------------------------------------------------------------ */
+.welcome-page .welcome-nav-card.welcome-nav-card-primary {
+  border-color: var(--rd-line);
+  background:
+    var(--grad-glass),
+    linear-gradient(180deg,
+      rgba(20, 22, 30, 0.78) 0%,
+      rgba(10, 12, 17, 0.92) 100%);
+  box-shadow:
+    var(--shadow-elev-2),
+    var(--glow-edge);
+}
+
+/* ---------------------------------------------------------------------
+   Smart Highlights — Option A asymmetric editorial layout.
+   Replaces the previous `auto-fit` + `grid-column: 1 / -1` composition
+   that left the rivalry card isolated with dead cells beside it, and
+   tightens the featured card's internal spacing so headline / teams /
+   score / meta read as one connected scoreboard rather than four
+   disconnected blocks.
+   ------------------------------------------------------------------ */
+@media (min-width: 761px) {
+  .welcome-page .welcome-smart-grid {
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+    grid-auto-rows: minmax(0, auto);
+    align-items: stretch;
+    gap: clamp(12px, 1vw, 18px);
+  }
+  /* Featured: left column, full vertical span. */
+  .welcome-page .welcome-smart-grid > .smart-highlight-card--featured {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    min-height: 100%;
+  }
+  /* Every other highlight card stacks in the right column. */
+  .welcome-page
+    .welcome-smart-grid
+    > .welcome-smart-highlight-card:not(.smart-highlight-card--featured) {
+    grid-column: 2;
+  }
+
+  /* Featured internal — tighter editorial rhythm. */
+  .welcome-page .smart-highlight-card--featured {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: clamp(14px, 1.2vw, 20px);
+    padding: clamp(20px, 1.6vw, 26px);
+    min-height: 0;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-left {
+    gap: 14px;
+    justify-content: flex-start;
+  }
+  /* Pull the teams "VS" band up against the headline instead of pushing
+     it to the bottom of the column. */
+  .welcome-page .smart-highlight-card--featured .featured-vs {
+    margin-top: 4px;
+  }
+  /* Right column — score and meta should read as one stacked unit. */
+  .welcome-page .smart-highlight-card--featured .featured-right {
+    align-items: stretch;
+    justify-content: center;
+    padding-left: clamp(14px, 1vw, 20px);
+  }
+  .welcome-page .smart-highlight-card--featured .featured-right-inner {
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-divider {
+    margin: 2px 0;
+  }
+  .welcome-page .smart-highlight-card--featured .featured-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Wide viewports: cap the featured card's horizontal width so the score
+   doesn't drift away from the teams band on ultra-wide screens. */
+@media (min-width: 1500px) {
+  .welcome-page .welcome-smart-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
+  }
+}
+
+
